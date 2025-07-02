@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -27,9 +28,10 @@ export default function Navbar() {
       <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
         <div className="logo">MySite</div>
         <ul className="nav-links">
-          <li><a href="#home">Home</a></li>
+          <li><Link to="/">Home</Link></li>
           <li><a href="#features">Features</a></li>
-          <li><a href="#contact">Contact Us</a></li>
+          <li><Link to="/contactus" href="#contact">Contact Us</Link></li>
+          <li><Link to="/login" className='button'>Login</Link></li>
         </ul>
         {/* Fixed: Added onClick handler */}
         <div className="hamburger" onClick={() => setSidebarOpen(true)}>
@@ -42,9 +44,10 @@ export default function Navbar() {
         <button className="close-btn" onClick={() => setSidebarOpen(false)}>
           &times;
         </button>
-        <a href="#home" onClick={() => setSidebarOpen(false)}>Home</a>
+        <Link to="/" onClick={() => setSidebarOpen(false)}>Home</Link>
         <a href="#features" onClick={() => setSidebarOpen(false)}>Features</a>
-        <a href="#contact" onClick={() => setSidebarOpen(false)}>Contact</a>
+        <Link to="/contactus" onClick={() => setSidebarOpen(false)}>Contact</Link>
+        <Link to="/login" className='button'>Login</Link>
       </div>
 
       {/* Background overlay */}

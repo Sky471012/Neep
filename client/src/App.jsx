@@ -1,7 +1,12 @@
-import { useState,useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from './pages/Home'
 import Preloader from './components/Preloader'
+import Login from './pages/Login';
+import LoginAdmin from './pages/LoginAdmin';
+import Contactus from './pages/Contactus';
 
 function App() {
 
@@ -21,7 +26,14 @@ function App() {
       {loading ? (
         <Preloader />
       ) : (
-        <Home/>
+        <BrowserRouter>
+          <Routes>
+            <Route exact path='/' element={<Home/>} />
+            <Route exact path='/login' element={<Login/>} />
+            <Route exact path='//loginAdmin' element={<LoginAdmin/>} />
+            <Route exact path='/contactus' element={<Contactus/>} />
+          </Routes>
+        </BrowserRouter>
       )}
     </>
   )

@@ -5,9 +5,9 @@ export default function Footer() {
         <div className="footer" id='footer'>
 
             <div className="footer-container">
+                
                 <div className="social-box">
                     <div className="logo">MySite</div>
-
                     <div className="social-media">
                         <a href="https://www.facebook.com/neep.org" target="_blank" rel="noopener noreferrer">
                             <i className="bi bi-facebook"></i>
@@ -41,7 +41,7 @@ export default function Footer() {
                     <div className="heading">Find Us</div>
                     <a href="">
                         <p>1390 Market Street,
-                            Suite 200 - #2067
+                            Suite 200 #2067
                             San Francisco, CA 94102
                             United States
                         </p>
