@@ -1,13 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeHash, setActiveHash] = useState('');
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+
+      // Handle hash-based active links for sections
+      if (location.pathname === '/') {
+        const sections = ['features', 'about', 'services']; // Add your section IDs here
+        const scrollPosition = window.scrollY + 100; // Offset for navbar height
+
+        for (const sectionId of sections) {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            const { offsetTop, offsetHeight } = element;
+            if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+              setActiveHash(`#${sectionId}`);
+              break;
+            }
+          }
+        }
+
+        // Clear hash if at top of page
+        if (window.scrollY < 100) {
+          setActiveHash('');
+        }
+      }
     };
 
     const handleEscape = (e) => {
@@ -17,23 +43,111 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     document.addEventListener('keydown', handleEscape);
 
+    // Set initial hash if present
+    if (location.hash) {
+      setActiveHash(location.hash);
+    }
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, []);
+  }, [location]);
+
+  // Function to check if a route is active
+  const isRouteActive = (path) => {
+    return location.pathname === path;
+  };
+
+  // Function to check if a hash link is active
+  const isHashActive = (hash) => {
+    return location.pathname === '/' && activeHash === hash;
+  };
+
+  // Handle hash navigation
+  const handleHashClick = (hash, e) => {
+    e.preventDefault();
+
+    // If not on home page, navigate to home first
+    if (location.pathname !== '/') {
+      navigate('/', { replace: true });
+      // Wait for navigation to complete, then scroll
+      setTimeout(() => {
+        const element = document.getElementById(hash.substring(1));
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      // Already on home page, just scroll
+      const element = document.getElementById(hash.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    setActiveHash(hash);
+    setSidebarOpen(false);
+  };
 
   return (
     <>
       <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
         <div className="logo">MySite</div>
         <ul className="nav-links">
-          <li><Link to="/">Home</Link></li>
-          <li><a href="#features">Features</a></li>
-          <li><Link to="/contactus" href="#contact">Contact Us</Link></li>
-          <li><Link to="/login" className='button'>Login</Link></li>
+          <li>
+            <Link
+              to="/"
+              className={isRouteActive('/') && !activeHash ? 'active' : ''}
+              onClick={() => setActiveHash('')}
+            >
+              Home
+            </Link>
+          </li>
+          <li>
+            <a
+              href="#features"
+              className={isHashActive('#features') ? 'active' : ''}
+              onClick={(e) => handleHashClick('#features', e)}
+            >
+              Features
+            </a>
+          </li>
+          <li>
+            <a
+              href="#about"
+              className={isHashActive('#about') ? 'active' : ''}
+              onClick={(e) => handleHashClick('#about', e)}
+            >
+              About
+            </a>
+          </li>
+          <li>
+            <Link
+              to="/downloadapp"
+              className={isRouteActive('/downloadapp') ? 'active' : ''}
+            >
+              Download App
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/contactus"
+              className={isRouteActive('/contactus') ? 'active' : ''}
+            >
+              Contact Us
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/login"
+              className={`button ${isRouteActive('/login') ? 'active' : ''}`}
+            >
+              Login
+            </Link>
+          </li>
         </ul>
-        {/* Fixed: Added onClick handler */}
+
         <div className="hamburger" onClick={() => setSidebarOpen(true)}>
           &#9776;
         </div>
@@ -44,14 +158,66 @@ export default function Navbar() {
         <button className="close-btn" onClick={() => setSidebarOpen(false)}>
           &times;
         </button>
-        <Link to="/" onClick={() => setSidebarOpen(false)}>Home</Link>
-        <a href="#features" onClick={() => setSidebarOpen(false)}>Features</a>
-        <Link to="/contactus" onClick={() => setSidebarOpen(false)}>Contact</Link>
-        <Link to="/login" className='button'>Login</Link>
+
+        <Link
+          to="/"
+          className={isRouteActive('/') && !activeHash ? 'active' : ''}
+          onClick={() => {
+            setActiveHash('');
+            setSidebarOpen(false);
+          }}
+        >
+          <i className="bi bi-house-door-fill"></i>Home
+        </Link>
+
+        <a
+          href="#features"
+          className={isHashActive('#features') ? 'active' : ''}
+          onClick={(e) => handleHashClick('#features', e)}
+        >
+          Features
+        </a>
+
+        <a
+          href="#about"
+          className={isHashActive('#about') ? 'active' : ''}
+          onClick={(e) => handleHashClick('#about', e)}
+        >
+          About
+        </a>
+
+        <Link
+          to="/downloadapp"
+          className={isRouteActive('/downloadapp') ? 'active' : ''}
+          onClick={() => setSidebarOpen(false)}
+        >
+          <i className="bi bi-google-play"></i>Download App
+        </Link>
+
+        <Link
+          to="/contactus"
+          className={isRouteActive('/contactus') ? 'active' : ''}
+          onClick={() => setSidebarOpen(false)}
+        >
+          <i className="bi bi-envelope-fill"></i>Contact Us
+        </Link>
+
+        <Link
+          to="/login"
+          className={`button ${isRouteActive('/login') ? 'active' : ''}`}
+          onClick={() => setSidebarOpen(false)}
+        >
+          <i className="bi bi-box-arrow-in-right"></i>Login
+        </Link>
       </div>
 
       {/* Background overlay */}
-      {sidebarOpen && <div className="overlay" onClick={() => setSidebarOpen(false)}></div>}
+      {sidebarOpen && (
+        <div
+          className={`overlay ${sidebarOpen ? 'active' : ''}`}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </>
   );
 }

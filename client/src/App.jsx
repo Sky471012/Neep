@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import './index.css'
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from './pages/Home'
@@ -7,6 +8,7 @@ import Preloader from './components/Preloader'
 import Login from './pages/Login';
 import LoginAdmin from './pages/LoginAdmin';
 import Contactus from './pages/Contactus';
+import DownloadApp from './pages/DownloadApp';
 
 function App() {
 
@@ -32,6 +34,7 @@ function App() {
             <Route exact path='/login' element={<Login/>} />
             <Route exact path='//loginAdmin' element={<LoginAdmin/>} />
             <Route exact path='/contactus' element={<Contactus/>} />
+            <Route exact path='/downloadapp' element={<DownloadApp/>} />
           </Routes>
         </BrowserRouter>
       )}

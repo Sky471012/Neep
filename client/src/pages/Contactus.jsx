@@ -8,14 +8,12 @@ export default function Contactus() {
     return (<>
         <Navbar />
 
-        <div className="contact-container">
-            <h1>Reach Out to Us</h1>
-            <span>Whether you visit us in person or contact us online, our team is ready to assist you with admissions and more.</span>
+        <div className="contact-container main-content">
 
             <div className="contact-box card">
-                <h3 className="contact-title">Need Help?</h3>
+                <h3 className="contact-title">Reach Out to Us</h3>
                 <span className="contact-subtitle">
-                    We'd love to hear from you! Fill in the form below.
+                    Contact us online and let our team assist you with admissions and more.
                 </span>
 
                 <form className="contact-form">

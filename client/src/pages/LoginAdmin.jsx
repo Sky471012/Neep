@@ -9,10 +9,10 @@ export default function LoginAdmin() {
     return (<>
         <Navbar />
 
-        <div className='login-container'>
+        <div className='login-container main-content'>
             <div className="card login-card">
                 <div className="login-box">
-                    <h4>New Era Education Point</h4>
+                    <h3>New Era Education Point</h3>
 
                     <form className='login-form'>
                         <div className="input-group">
@@ -30,7 +30,7 @@ export default function LoginAdmin() {
                         <hr />
                     </div>
 
-                    <Link to="/login" style={{ padding: "10px", border: "1px solid red", borderRadius: "7px", color: "red" }}><span style={{ display: "flex", gap: "5px" }}><i className="bi bi-person-fill"></i>Login as Student</span></Link>
+                    <Link to="/login" style={{ padding: "10px", border: "1px solid #3498db", borderRadius: "7px", color: "#3498db" }}><span style={{ display: "flex", gap: "5px" }}><i className="bi bi-person-fill"></i>Login as Student</span></Link>
                 </div>
             </div>
         </div>
