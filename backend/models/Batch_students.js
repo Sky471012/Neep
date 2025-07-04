@@ -1,16 +1,15 @@
 const mongoose = require("mongoose");
 
-const { Schema } = mongoose;
+const { Schema, model, Types } = mongoose;
 
 const batch_studentSchema = new Schema({
-  _id: ObjectId,
   batchId: {
-    type: ObjectId,
+    type: Types.ObjectId,
     ref: "batches",
     required: true,
   },
   studentId: {
-    type: ObjectId,
+    type: Types.ObjectId,
     ref: "students",
     required: true,
   },

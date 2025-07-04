@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
 
-const { Schema } = mongoose;
+const { Schema, model, Types } = mongoose;
 
 const studentSchema = new Schema({
-  _id: ObjectId,
   name: {
     type: String,
     required: true,
