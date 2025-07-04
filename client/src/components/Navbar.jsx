@@ -1,28 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeHash, setActiveHash] = useState('');
+  const [activeHash, setActiveHash] = useState("");
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+  }
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
 
       // Handle hash-based active links for sections
-      if (location.pathname === '/') {
-        const sections = ['features', 'about', 'services']; // Add your section IDs here
+      if (location.pathname === "/") {
+        const sections = ["features", "about", "services"]; // Add your section IDs here
         const scrollPosition = window.scrollY + 100; // Offset for navbar height
 
         for (const sectionId of sections) {
           const element = document.getElementById(sectionId);
           if (element) {
             const { offsetTop, offsetHeight } = element;
-            if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            if (
+              scrollPosition >= offsetTop &&
+              scrollPosition < offsetTop + offsetHeight
+            ) {
               setActiveHash(`#${sectionId}`);
               break;
             }
@@ -31,17 +38,17 @@ export default function Navbar() {
 
         // Clear hash if at top of page
         if (window.scrollY < 100) {
-          setActiveHash('');
+          setActiveHash("");
         }
       }
     };
 
     const handleEscape = (e) => {
-      if (e.key === 'Escape') setSidebarOpen(false);
+      if (e.key === "Escape") setSidebarOpen(false);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    document.addEventListener('keydown', handleEscape);
+    window.addEventListener("scroll", handleScroll);
+    document.addEventListener("keydown", handleEscape);
 
     // Set initial hash if present
     if (location.hash) {
@@ -49,8 +56,8 @@ export default function Navbar() {
     }
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      document.removeEventListener('keydown', handleEscape);
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [location]);
 
@@ -61,7 +68,7 @@ export default function Navbar() {
 
   // Function to check if a hash link is active
   const isHashActive = (hash) => {
-    return location.pathname === '/' && activeHash === hash;
+    return location.pathname === "/" && activeHash === hash;
   };
 
   // Handle hash navigation
@@ -69,20 +76,20 @@ export default function Navbar() {
     e.preventDefault();
 
     // If not on home page, navigate to home first
-    if (location.pathname !== '/') {
-      navigate('/', { replace: true });
+    if (location.pathname !== "/") {
+      navigate("/", { replace: true });
       // Wait for navigation to complete, then scroll
       setTimeout(() => {
         const element = document.getElementById(hash.substring(1));
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
+          element.scrollIntoView({ behavior: "smooth" });
         }
       }, 100);
     } else {
       // Already on home page, just scroll
       const element = document.getElementById(hash.substring(1));
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+        element.scrollIntoView({ behavior: "smooth" });
       }
     }
 
@@ -92,14 +99,14 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
+      <nav className={`navbar ${scrolled ? "navbar-scrolled" : ""}`}>
         <div className="logo">MySite</div>
         <ul className="nav-links">
           <li>
             <Link
               to="/"
-              className={isRouteActive('/') && !activeHash ? 'active' : ''}
-              onClick={() => setActiveHash('')}
+              className={isRouteActive("/") && !activeHash ? "active" : ""}
+              onClick={() => setActiveHash("")}
             >
               Home
             </Link>
@@ -107,8 +114,8 @@ export default function Navbar() {
           <li>
             <a
               href="#features"
-              className={isHashActive('#features') ? 'active' : ''}
-              onClick={(e) => handleHashClick('#features', e)}
+              className={isHashActive("#features") ? "active" : ""}
+              onClick={(e) => handleHashClick("#features", e)}
             >
               Features
             </a>
@@ -116,8 +123,8 @@ export default function Navbar() {
           <li>
             <a
               href="#about"
-              className={isHashActive('#about') ? 'active' : ''}
-              onClick={(e) => handleHashClick('#about', e)}
+              className={isHashActive("#about") ? "active" : ""}
+              onClick={(e) => handleHashClick("#about", e)}
             >
               About
             </a>
@@ -125,7 +132,7 @@ export default function Navbar() {
           <li>
             <Link
               to="/downloadapp"
-              className={isRouteActive('/downloadapp') ? 'active' : ''}
+              className={isRouteActive("/downloadapp") ? "active" : ""}
             >
               Download App
             </Link>
@@ -133,37 +140,63 @@ export default function Navbar() {
           <li>
             <Link
               to="/contactus"
-              className={isRouteActive('/contactus') ? 'active' : ''}
+              className={isRouteActive("/contactus") ? "active" : ""}
             >
               Contact Us
             </Link>
           </li>
+
+          {(localStorage.getItem("authToken")) &&
+            <li >
+              <Link
+                to="/student"
+                className={`button ${isRouteActive("/student") ? "active" : ""}`}
+              >
+                User
+              </Link>
+            </li>
+          }
+
           <li>
-            <Link
-              to="/login"
-              className={`button ${isRouteActive('/login') ? 'active' : ''}`}
-            >
-              Login
-            </Link>
+            {(!localStorage.getItem("authToken")) ?
+              <Link
+                to="/login"
+                className={`button ${isRouteActive("/login") ? "active" : ""}`}
+              >
+                Login
+              </Link>
+              :
+              <Link
+                to="/"
+                onClick={handleLogout}
+                className={`button ${isRouteActive("/login") ? "active" : ""}`}
+              >
+                Logout
+              </Link>
+            }
           </li>
         </ul>
 
         <div className="hamburger" onClick={() => setSidebarOpen(true)}>
           &#9776;
         </div>
-      </nav>
+      </nav >
+
+
+
 
       {/* Sidebar */}
-      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+      <div className={`sidebar ${sidebarOpen ? "open" : ""}`
+      }>
         <button className="close-btn" onClick={() => setSidebarOpen(false)}>
           &times;
         </button>
 
         <Link
           to="/"
-          className={isRouteActive('/') && !activeHash ? 'active' : ''}
+          className={isRouteActive("/") && !activeHash ? "active" : ""}
           onClick={() => {
-            setActiveHash('');
+            setActiveHash("");
             setSidebarOpen(false);
           }}
         >
@@ -172,23 +205,23 @@ export default function Navbar() {
 
         <a
           href="#features"
-          className={isHashActive('#features') ? 'active' : ''}
-          onClick={(e) => handleHashClick('#features', e)}
+          className={isHashActive("#features") ? "active" : ""}
+          onClick={(e) => handleHashClick("#features", e)}
         >
           Features
         </a>
 
         <a
           href="#about"
-          className={isHashActive('#about') ? 'active' : ''}
-          onClick={(e) => handleHashClick('#about', e)}
+          className={isHashActive("#about") ? "active" : ""}
+          onClick={(e) => handleHashClick("#about", e)}
         >
           About
         </a>
 
         <Link
           to="/downloadapp"
-          className={isRouteActive('/downloadapp') ? 'active' : ''}
+          className={isRouteActive("/downloadapp") ? "active" : ""}
           onClick={() => setSidebarOpen(false)}
         >
           <i className="bi bi-google-play"></i>Download App
@@ -196,28 +229,53 @@ export default function Navbar() {
 
         <Link
           to="/contactus"
-          className={isRouteActive('/contactus') ? 'active' : ''}
+          className={isRouteActive("/contactus") ? "active" : ""}
           onClick={() => setSidebarOpen(false)}
         >
           <i className="bi bi-envelope-fill"></i>Contact Us
         </Link>
 
-        <Link
-          to="/login"
-          className={`button ${isRouteActive('/login') ? 'active' : ''}`}
-          onClick={() => setSidebarOpen(false)}
-        >
-          <i className="bi bi-box-arrow-in-right"></i>Login
-        </Link>
-      </div>
+        {(localStorage.getItem("authToken")) &&
+              <Link
+                to="/student"
+                onClick={() => setSidebarOpen(false)}
+                className={`button ${isRouteActive("/student") ? "active" : ""}`}
+              >
+                User
+              </Link>
+          }
+
+        {
+          (!localStorage.getItem("authToken")) ?
+            <Link
+              to="/login"
+              className={`button ${isRouteActive("/login") ? "active" : ""}`}
+              onClick={() => setSidebarOpen(false)}
+            >
+              <i className="bi bi-box-arrow-in-right"></i>Login
+            </Link>
+            :
+            <Link
+              to="/"
+              onClick={handleLogout}
+              className={`button ${isRouteActive("/login") ? "active" : ""}`}
+            >
+              <i className="bi bi-box-arrow-left me-1"></i>Logout
+            </Link>
+        }
+
+
+      </div >
 
       {/* Background overlay */}
-      {sidebarOpen && (
-        <div
-          className={`overlay ${sidebarOpen ? 'active' : ''}`}
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {
+        sidebarOpen && (
+          <div
+            className={`overlay ${sidebarOpen ? "active" : ""}`}
+            onClick={() => setSidebarOpen(false)}
+          />
+        )
+      }
     </>
   );
 }

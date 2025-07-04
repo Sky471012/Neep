@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import LoginAdmin from './pages/LoginAdmin';
 import Contactus from './pages/Contactus';
 import DownloadApp from './pages/DownloadApp';
+import Student from './pages/Student';
 
 function App() {
 
@@ -32,9 +33,10 @@ function App() {
           <Routes>
             <Route exact path='/' element={<Home/>} />
             <Route exact path='/login' element={<Login/>} />
-            <Route exact path='//loginAdmin' element={<LoginAdmin/>} />
+            <Route exact path='/loginAdmin' element={<LoginAdmin/>} />
             <Route exact path='/contactus' element={<Contactus/>} />
             <Route exact path='/downloadapp' element={<DownloadApp/>} />
+            <Route exact path='/student' element={<Student/>} />
           </Routes>
         </BrowserRouter>
       )}

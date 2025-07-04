@@ -10,12 +10,14 @@
 
 .main-content {
   flex: 1;
+  min-height: 95vh;
+  padding-top: 100px;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f1f2f6, #ffffff)!important;
   overflow-x: hidden;
   font-weight: 500;
   color: #333333;
@@ -41,6 +43,37 @@ textarea {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   font-size: 16px;
   width: 100%;
+}
+
+.react-datepicker-wrapper {
+  width: 100%!important;
+}
+
+.react-datepicker__header{
+  padding: 20px 10px 10px!important;
+  border-bottom: #a2a2a2 1px solid!important;
+  color: #3498db!important;
+}
+
+.react-datepicker__navigation{
+  margin-top: 10px;
+  color: red!important;
+}
+
+.react-datepicker {
+  border-radius: 10px!important;
+  border: none!important;
+    filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.575));
+}
+
+.react-datepicker__day--selected {
+  background-color: #3498db!important;
+  color: white!important;
+}
+
+.react-datepicker__day--today {
+  border: 1px solid #3498db!important;
+  border-radius: 2px!important;
 }
 
 h1,
@@ -229,6 +262,10 @@ ul {
   width: 300px;
 }
 
+.sidebar .button{
+  color: white;
+}
+
 .sidebar.open {
   right: 0;
 }
@@ -336,7 +373,6 @@ ul {
   margin-top: 100px;
   width: 100%;
   overflow: hidden;
-  background: linear-gradient(135deg, #f1f2f6, #ffffff);
   height: 100vh;
   display: flex;
 }
@@ -368,7 +404,6 @@ ul {
   justify-content: center;
   align-items: center;
   padding: 80px 20px 50px;
-  background: linear-gradient(135deg, #e5eff5, #e4e6fc);
 }
 
 .login-card {
@@ -422,7 +457,6 @@ ul {
   padding: clamp(80px, 15vh, 120px) 20px 40px;
   text-align: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e5eff5, #e4e6fc);
 }
 
 .contact-box {
@@ -481,9 +515,7 @@ ul {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-top: 100px;
   gap: 10px;
-  background: linear-gradient(135deg, #e5eff5, #e4e6fc);
 }
 
 .features {
