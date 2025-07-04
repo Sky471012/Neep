@@ -87,7 +87,7 @@ ul {
   background-color: #3498db;
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: 8px 20px!important;
   cursor: pointer;
   font-size: 16px;
   font-weight: 600;
@@ -111,6 +111,8 @@ ul {
   color: #333333;
   border: 1px solid #e1e8ed;
 }
+
+
 
 /* Navbar */
 .navbar {
@@ -366,6 +368,7 @@ ul {
   justify-content: center;
   align-items: center;
   padding: 80px 20px 50px;
+  background: linear-gradient(135deg, #e5eff5, #e4e6fc);
 }
 
 .login-card {
@@ -419,6 +422,7 @@ ul {
   padding: clamp(80px, 15vh, 120px) 20px 40px;
   text-align: center;
   justify-content: center;
+  background: linear-gradient(135deg, #e5eff5, #e4e6fc);
 }
 
 .contact-box {
@@ -479,6 +483,7 @@ ul {
   justify-content: center;
   padding-top: 100px;
   gap: 10px;
+  background: linear-gradient(135deg, #e5eff5, #e4e6fc);
 }
 
 .features {
@@ -521,6 +526,7 @@ ul {
   height: 400px;
   max-width: 100%;
   object-fit: contain;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.575));
 }
 
 .download-app-container {
@@ -564,6 +570,8 @@ ul {
   margin: 0;
   max-width: 100%;
   object-fit: contain;
+  border-radius: 7px;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.575));
 }
 
 .googleplay:hover {
@@ -581,6 +589,8 @@ ul {
   height: 450px;
   max-width: 100%;
   object-fit: contain;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.575));
+
 }
 
 
