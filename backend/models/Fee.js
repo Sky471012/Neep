@@ -12,13 +12,14 @@ const feeSchema = new Schema({
     type: String, // e.g., "July 2025"
     required: true,
   },
-  isPaid: {
-    type: Boolean,
+  amount: {
+    type: Number,
     required: true,
+    min: 0,
   },
   paidOn: {
     type: Date,
-    default: null,
+    required: true,
   },
 });
 

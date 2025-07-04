@@ -8,6 +8,10 @@ const batch_studentSchema = new Schema({
     ref: "batches",
     required: true,
   },
+  batchName: {
+    type: String,
+    required: true,
+  },
   studentId: {
     type: Types.ObjectId,
     ref: "students",

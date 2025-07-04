@@ -41,6 +41,7 @@ export default function Login() {
             console.log("Logined");
             localStorage.setItem("student", JSON.stringify(json.student));
             localStorage.setItem("authToken", json.authToken);
+            console.log(json.authToken);
             navigate("/student")
         }
     }

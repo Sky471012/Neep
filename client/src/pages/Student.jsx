@@ -5,26 +5,58 @@ import Footer from '../components/Footer'
 export default function Student() {
 
     const [student, setStudent] = useState(null);
+    const [batchesRecords, setBatchesRecords] = useState([]);
+    const [feeRecords, setFeeRecords] = useState([]);
 
-  useEffect(() => {
-    const storedStudent = localStorage.getItem("student");
-    if (storedStudent) {
-      try {
-        const parsed = JSON.parse(storedStudent);
-        if (parsed && parsed.name) {
-          setStudent(parsed);
+    const allMonths = [
+        "April", "May", "June", "July", "August", "September",
+        "October", "November", "December", "January", "February", "March"
+    ];
+
+    const currentYear = new Date().getFullYear();
+
+
+    useEffect(() => {
+        const storedStudent = localStorage.getItem("student");
+        const token = localStorage.getItem("authToken");
+
+        if (storedStudent && token) {
+            setStudent(JSON.parse(storedStudent));
+
+            // fetch batches status
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/student/batches`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    setBatchesRecords(data); // new state
+                    console.log(batchesRecords);
+                })
+                .catch(err => console.error("Batches fetch error:", err));
+
+
+            // fetch fee status
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/student/fee-status`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    setFeeRecords(data); // new state
+                })
+                .catch(err => console.error("Fee status fetch error:", err));
         }
-      } catch (err) {
-        console.error("Failed to parse student:", err);
-      }
-    }
-  }, []);
+    }, []);
 
-  // ✅ Early return to prevent null reference
-  if (!student) {
-    return <p>Loading student data...</p>;
-  }
-  
+
+    // ✅ Early return to prevent null reference
+    if (!student) {
+        return <p>Loading student data...</p>;
+    }
+
 
 
     return (<>
@@ -47,13 +79,20 @@ export default function Student() {
                 <h1>Batches</h1>
                 <div className="container">
                     <div className="row">
-                        <div className='col-12 col-md-6 col-lg-5'>
-                            <div className="card batch-card">
-                                <h4>Class 12 - Morning Batch</h4>
-                            </div>
-                        </div>
+                        {batchesRecords.length > 0 ? (
+                            batchesRecords.map((batch, index) => (
+                                <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                    <div className="card batch-card mb-3">
+                                        <h5 className="card-title">{batch.batchName}</h5>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No batches assigned.</p>
+                        )}
                     </div>
                 </div>
+
             </div>
 
             <div className="fee-details">
@@ -65,21 +104,39 @@ export default function Student() {
                             <th>Month</th>
                             <th>Status</th>
                             <th>Amount</th>
+                            <th>Paid On</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {[
-                            "January", "February", "March", "April", "May", "June",
-                            "July", "August", "September", "October", "November", "December"
-                        ].map((month, index) => (
-                            <tr key={index}>
-                                <td>{month}</td>
-                                <td className="text-success fw-bold">Pending</td>
-                                <td>₹3000</td>
-                            </tr>
-                        ))}
+                        {allMonths.map((month, index) => {
+                            // April–December = current year, Jan–Mar = next year
+                            const year = index < 9 ? currentYear : currentYear + 1;
+                            const fullMonth = `${month} ${year}`;
+
+                            const record = feeRecords.find(r =>
+                                r.month.trim().toLowerCase() === fullMonth.trim().toLowerCase()
+                            );
+
+
+                            return (
+                                <tr key={index}>
+                                    <td>{fullMonth}</td>
+                                    <td className={record ? "text-success fw-bold" : "text-danger fw-bold"}>
+                                        {record ? "Paid" : "Pending"}
+                                    </td>
+                                    <td>{record ? `₹${record.amount}` : "--"}</td>
+                                    <td>
+                                        {record && record.paidOn
+                                            ? new Date(record.paidOn).toLocaleDateString()
+                                            : "--"}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
+
+
 
             </div>
 

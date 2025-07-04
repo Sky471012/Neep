@@ -8,6 +8,10 @@ const batch_teacherSchema = new Schema({
     ref: "batches",
     required: true,
   },
+  batchName: {
+    type: String,
+    required: true,
+  },
   teacherId: {
     type: Types.ObjectId,
     ref: "admins_teachers",
