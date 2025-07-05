@@ -68,14 +68,24 @@ exports.verifyOtp = async (req, res) => {
     if (!log) return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
 
     const user = await AdminTeacher.findOne({ email });
+
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
     );
 
     await OtpLog.deleteOne({ _id: log._id }); // Auto delete OTP after use
-    res.json({ success: true, token });
+    res.json({
+      success: true,
+      authToken: token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
+    });
 
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

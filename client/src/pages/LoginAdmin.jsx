@@ -102,8 +102,8 @@ export default function LoginAdmin() {
             }
 
             console.log("Logined");
-            localStorage.setItem("teacher", JSON.stringify(json.teacher));
-            localStorage.setItem("authToken", json.token);
+            localStorage.setItem("teacher", JSON.stringify(json.user));
+            localStorage.setItem("authToken", json.authToken);
             console.log(json.authToken);
             navigate("/teacher"); // or "/admin" based on json.role
         } catch (err) {

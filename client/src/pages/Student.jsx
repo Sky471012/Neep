@@ -31,19 +31,21 @@ export default function Student() {
         if (storedStudent && token) {
             setStudent(JSON.parse(storedStudent));
 
+            //fetching batches
             fetch(`${import.meta.env.VITE_BACKEND_URL}/student/batches`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
-                .then(res => res.json())
-                .then(setBatchesRecords)
-                .catch(err => console.error("Batches fetch error:", err));
-
+            .then(res => res.json())
+            .then(setBatchesRecords)
+            .catch(err => console.error("Batches fetch error:", err));
+            
+            
+            //fetching attendance
             fetch(`${import.meta.env.VITE_BACKEND_URL}/student/attendance`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
                 .then(data => {
-                    console.log("Attendance data received:", data);
                     setAttendanceRecords(data);
                     const newMap = {};
                     data.forEach((record) => {
@@ -52,10 +54,8 @@ export default function Student() {
                         const formattedDate = date.toISOString().split('T')[0];
                         const key = `${record.batchId}_${formattedDate}`;
                         newMap[key] = record.status;
-                        console.log("Creating attendance map entry:", key, "=>", record.status);
                     });
                     setAttendanceMap(newMap);
-                    console.log("Final attendance map:", newMap);
                 })
                 .catch(err => console.error("Attendance fetch error:", err));
 
