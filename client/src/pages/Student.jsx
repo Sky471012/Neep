@@ -72,159 +72,150 @@ export default function Student() {
     if (!student) return <p>Loading student data...</p>;
 
 
-    return (
-        <>
-            <Navbar />
-            <div className="main-content student-container">
+    return (<>
 
-                {/* Student Details */}
-                <div className="student-details">
-                    <h1>Student details</h1>
-                    <div className="container">
-                        <span>Name : {student.name}</span><br />
-                        <span>Phone : {student.phone}</span><br />
-                        <span>DOB : {student.dob}</span>
-                    </div>
-                </div>
+        <Navbar />
 
-                {/* Batches with Attendance Calendar */}
-                <div className="batches-container">
-                    <h1>Batches</h1>
-                    <div className="container">
-                        <div className="row">
-                            {batchesRecords.length > 0 ? (
-                                batchesRecords.map((batch, index) => (
-                                    <div className="col-12 col-md-6 col-lg-5" key={index}>
-                                        <div className="card batch-card mb-3">
-                                            <h5 className="card-title">{batch.batchName}</h5>
 
-                                            <div id={`carousel-${batch.batchId}`} className="carousel slide">
-                                                <div className="carousel-inner">
-                                                    {allMonths.map((month, idx) => {
-                                                        // Fix: Map academic months to calendar months/years
-                                                        // Academic year: April(0) to March(11)
-                                                        // Calendar mapping: April=3, May=4, ..., Dec=11, Jan=0, Feb=1, Mar=2
-                                                        let calendarMonth, calendarYear;
-                                                        
-                                                        if (idx <= 8) { // April to December
-                                                            calendarMonth = idx + 3; // April=3, May=4, ..., Dec=11
-                                                            calendarYear = academicYearStart;
-                                                        } else { // January to March
-                                                            calendarMonth = idx - 9; // Jan=0, Feb=1, Mar=2
-                                                            calendarYear = academicYearStart + 1;
-                                                        }
-                                                        
-                                                        const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+        <div className="main-content student-container">
 
-                                                        return (
-                                                            <div className={`carousel-item ${idx === activeMonthIndex ? "active" : ""}`} key={month}>
-                                                                <h6>{month} {calendarYear}</h6>
-                                                                <div className="calendar-grid">
-                                                                    {[...Array(daysInMonth)].map((_, dateIdx) => {
-                                                                        // Fix: Use proper calendar month and year for date construction
-                                                                        const date = new Date(calendarYear, calendarMonth, dateIdx + 1);
-                                                                        const fullDate = date.toISOString().split('T')[0];
-                                                                        const key = `${batch.batchId}_${fullDate}`;
-                                                                        const status = attendanceMap[key];
-                                                                        
-                                                                        // Debug logging
-                                                                        if (dateIdx < 30) { // Only log first few days to avoid spam
-                                                                            console.log(`Checking attendance for ${month} ${dateIdx + 1}:`, {
-                                                                                batchId: batch.batchId,
-                                                                                fullDate,
-                                                                                key,
-                                                                                status,
-                                                                                calendarYear,
-                                                                                calendarMonth,
-                                                                                academicMonth: idx
-                                                                            });
-                                                                        }
-
-                                                                        return (
-                                                                            <div
-                                                                                key={dateIdx}
-                                                                                className={`date-box ${
-                                                                                    status === "present"
-                                                                                        ? "present"
-                                                                                        : status === "absent"
-                                                                                            ? "absent"
-                                                                                            : ""
-                                                                                }`}
-                                                                                title={`${month} ${dateIdx + 1}, ${calendarYear} - ${status || 'No record'}`}
-                                                                            >
-                                                                                {dateIdx + 1}
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-
-                                                {/* Custom Carousel Controls */}
-                                                <div className="calendar-controls d-flex justify-content-between mt-2">
-                                                    <button className="btn btn-outline-secondary btn-sm"
-                                                        type="button"
-                                                        data-bs-target={`#carousel-${batch.batchId}`}
-                                                        data-bs-slide="prev">
-                                                        ‹ Previous
-                                                    </button>
-                                                    <button className="btn btn-outline-secondary btn-sm"
-                                                        type="button"
-                                                        data-bs-target={`#carousel-${batch.batchId}`}
-                                                        data-bs-slide="next">
-                                                        Next ›
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <p>No batches assigned.</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Fee Table */}
-                <div className="fee-details">
-                    <h1>Fee Details</h1>
-                    <table className="table table-bordered table-striped text-center">
-                        <thead className="table-dark">
-                            <tr>
-                                <th>Month</th>
-                                <th>Status</th>
-                                <th>Amount</th>
-                                <th>Paid On</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {allMonths.map((month, index) => {
-                                const year = index < 9 ? academicYearStart : academicYearStart + 1;
-                                const fullMonth = `${month} ${year}`;
-                                const record = feeRecords.find(r =>
-                                    r.month.trim().toLowerCase() === fullMonth.trim().toLowerCase()
-                                );
-
-                                return (
-                                    <tr key={index}>
-                                        <td>{fullMonth}</td>
-                                        <td className={record ? "text-success fw-bold" : "text-danger fw-bold"}>
-                                            {record ? "Paid" : "Pending"}
-                                        </td>
-                                        <td>{record ? `₹${record.amount}` : "--"}</td>
-                                        <td>{record?.paidOn ? new Date(record.paidOn).toLocaleDateString() : "--"}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+            {/* Student Details */}
+            <div className="student-details">
+                <h1>Student details</h1>
+                <div className="container">
+                    <span>Name : {student.name}</span><br />
+                    <span>Phone : {student.phone}</span><br />
+                    <span>DOB : {student.dob}</span>
                 </div>
             </div>
-            <Footer />
-        </>
-    );
+
+            {/* Batches with Attendance Calendar */}
+            <div className="batches-container">
+                <h1>Batches</h1>
+                <div className="container">
+                    <div className="row">
+                        {batchesRecords.length > 0 ? (
+                            batchesRecords.map((batch, index) => (
+                                <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                    <div className="card batch-card mb-3">
+                                        <h5 className="card-title">{batch.batchName}</h5>
+
+                                        <div id={`carousel-${batch.batchId}`} className="carousel slide">
+                                            <div className="carousel-inner">
+                                                {allMonths.map((month, idx) => {
+                                                    // Fix: Map academic months to calendar months/years
+                                                    // Academic year: April(0) to March(11)
+                                                    // Calendar mapping: April=3, May=4, ..., Dec=11, Jan=0, Feb=1, Mar=2
+                                                    let calendarMonth, calendarYear;
+
+                                                    if (idx <= 8) { // April to December
+                                                        calendarMonth = idx + 3; // April=3, May=4, ..., Dec=11
+                                                        calendarYear = academicYearStart;
+                                                    } else { // January to March
+                                                        calendarMonth = idx - 9; // Jan=0, Feb=1, Mar=2
+                                                        calendarYear = academicYearStart + 1;
+                                                    }
+
+                                                    const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+                                                    return (
+                                                        <div className={`carousel-item ${idx === activeMonthIndex ? "active" : ""}`} key={month}>
+                                                            <h6>{month} {calendarYear}</h6>
+                                                            <div className="calendar-grid">
+                                                                {[...Array(daysInMonth)].map((_, dateIdx) => {
+                                                                    // Fix: Use proper calendar month and year for date construction
+                                                                    const date = new Date(calendarYear, calendarMonth, dateIdx + 1);
+                                                                    const fullDate = date.toISOString().split('T')[0];
+                                                                    const key = `${batch.batchId}_${fullDate}`;
+                                                                    const status = attendanceMap[key];
+
+                                                                    return (
+                                                                        <div
+                                                                            key={dateIdx}
+                                                                            className={`date-box ${status === "present"
+                                                                                    ? "present"
+                                                                                    : status === "absent"
+                                                                                        ? "absent"
+                                                                                        : ""
+                                                                                }`}
+                                                                            title={`${month} ${dateIdx + 1}, ${calendarYear} - ${status || 'No record'}`}
+                                                                        >
+                                                                            {dateIdx + 1}
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            {/* Custom Carousel Controls */}
+                                            <div className="calendar-controls d-flex justify-content-between mt-2">
+                                                <button className="btn btn-outline-secondary btn-sm"
+                                                    type="button"
+                                                    data-bs-target={`#carousel-${batch.batchId}`}
+                                                    data-bs-slide="prev">
+                                                    ‹ Previous
+                                                </button>
+                                                <button className="btn btn-outline-secondary btn-sm"
+                                                    type="button"
+                                                    data-bs-target={`#carousel-${batch.batchId}`}
+                                                    data-bs-slide="next">
+                                                    Next ›
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No batches assigned.</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Fee Table */}
+            <div className="fee-details">
+                <h1>Fee Details</h1>
+                <table className="table table-bordered table-striped text-center">
+                    <thead className="table-dark">
+                        <tr>
+                            <th>Month</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th>Paid On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {allMonths.map((month, index) => {
+                            const year = index < 9 ? academicYearStart : academicYearStart + 1;
+                            const fullMonth = `${month} ${year}`;
+                            const record = feeRecords.find(r =>
+                                r.month.trim().toLowerCase() === fullMonth.trim().toLowerCase()
+                            );
+
+                            return (
+                                <tr key={index}>
+                                    <td>{fullMonth}</td>
+                                    <td className={record ? "text-success fw-bold" : "text-danger fw-bold"}>
+                                        {record ? "Paid" : "Pending"}
+                                    </td>
+                                    <td>{record ? `₹${record.amount}` : "--"}</td>
+                                    <td>{record?.paidOn ? new Date(record.paidOn).toLocaleDateString() : "--"}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <Footer />
+
+
+    </>);
 }

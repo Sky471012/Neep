@@ -10,6 +10,7 @@ import LoginAdmin from './pages/LoginAdmin';
 import Contactus from './pages/Contactus';
 import DownloadApp from './pages/DownloadApp';
 import Student from './pages/Student';
+import Teacher from './pages/Teacher';
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
             <Route exact path='/contactus' element={<Contactus/>} />
             <Route exact path='/downloadapp' element={<DownloadApp/>} />
             <Route exact path='/student' element={<Student/>} />
+            <Route exact path='/teacher' element={<Teacher/>} />
           </Routes>
         </BrowserRouter>
       )}

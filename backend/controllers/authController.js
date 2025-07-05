@@ -2,7 +2,7 @@ const Student = require("../models/Student");
 const AdminTeacher = require("../models/Admins_teachers");
 const OtpLog = require("../models/Otp");
 const jwt = require("jsonwebtoken");
-// const sendMail = require('../utils/sendMail'); // Custom mailer util
+const sendMail = require("../utils/sendMail"); // Custom mailer util
 
 exports.loginStudent = async (req, res) => {
   const { phone, dob } = req.body;
@@ -40,33 +40,44 @@ exports.sendOtp = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    await OtpLog.create({ email, otp, expiresAt: Date.now() + 5 * 60 * 1000 });
-    await sendMail(email, "Your OTP", `Your OTP is: ${otp}`);
 
-    res.json({ message: "OTP sent to email" });
+    await OtpLog.create({
+      email,
+      otp,
+      expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes
+    });
+
+    await sendMail(email, "Your OTP", `Your OTP is: ${otp}`);
+    res.json({ success: true, message: "OTP sent to email" });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 };
 
+// Verify OTP
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
   try {
     const log = await OtpLog.findOne({
       email,
       otp,
-      expiresAt: { $gt: new Date() },
+      expiresAt: { $gt: new Date() }
     });
-    if (!log)
-      return res.status(400).json({ message: "Invalid or expired OTP" });
+
+    if (!log) return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
 
     const user = await AdminTeacher.findOne({ email });
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
     );
-    res.json({ token });
+
+    await OtpLog.deleteOne({ _id: log._id }); // Auto delete OTP after use
+    res.json({ success: true, token });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 };
