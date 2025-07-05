@@ -28,3 +28,31 @@ td{
     text-align: left;
     padding: 10px 20px!important;
 }
+
+.date-box {
+  width: 30px;
+  height: 30px;
+  margin: 3px;
+  text-align: center;
+  line-height: 30px;
+  border-radius: 5px;
+  display: inline-block;
+  font-weight: bold;
+  background-color: #ccc;
+}
+
+.date-box.present {
+  background-color: #28a745!important;
+  color: white;
+}
+
+.date-box.absent {
+  background-color: #dc3545;
+  color: white;
+}
+
+.calendar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: auto;
+}
