@@ -1,32 +1,32 @@
-.student-container{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 50px;
+.student-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 50px;
 }
 
 .batches-container,
 .fee-details,
-.student-details{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-    margin-bottom: 30px;
+.student-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  margin-bottom: 30px;
 }
 
-.batch-card{
-    padding: 20px;
+.batch-card {
+  padding: 20px;
 }
 
-.table{
-    width: 70%;
+.table {
+  width: 70%;
 }
 
-td{
-    text-align: left;
-    padding: 10px 20px!important;
+td {
+  text-align: left;
+  padding: 10px 20px !important;
 }
 
 .date-box {
@@ -42,7 +42,7 @@ td{
 }
 
 .date-box.present {
-  background-color: #28a745!important;
+  background-color: #28a745 !important;
   color: white;
 }
 
@@ -55,4 +55,46 @@ td{
   display: flex;
   flex-wrap: wrap;
   margin: auto;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  max-width: 500px;
+  width: 100%;
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn {
+  font-weight: bold;
+}
+
+.btn.active {
+  background-color: #3498db;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.575));
+  border-color:  #3498db;
 }
