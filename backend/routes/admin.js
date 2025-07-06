@@ -7,6 +7,12 @@ router.use(verifyToken, isAdmin);
 
 // Batch Management
 router.get('/batches', adminController.getBatches);
+router.get('/batchStudents/:batchId', adminController.getBatchStudents);
+router.get('/attendance/:studentId', adminController.getStudentsAttendance);
+router.get('/findTeacher/:batchId', adminController.getTeacher);
+router.post('/attendance/mark', adminController.markAttendance);
+
+
 router.post('/batch', adminController.createBatch);
 router.delete('/batch/:id', adminController.deleteBatch);
 
