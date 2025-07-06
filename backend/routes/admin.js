@@ -6,6 +6,7 @@ const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 router.use(verifyToken, isAdmin);
 
 // Batch Management
+router.get('/batches', adminController.getBatches);
 router.post('/batch', adminController.createBatch);
 router.delete('/batch/:id', adminController.deleteBatch);
 

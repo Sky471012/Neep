@@ -6,7 +6,10 @@ import Footer from "../components/Footer";
 import StudentList from "../modals/StudentList";
 import AttendanceList from "../modals/AttendanceMarking";
 
-export default function Teacher() {
+
+export default function Admin() {
+    console.log(localStorage.getItem("authToken"));
+
     const [teacher, setTeacher] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
     const [students, setStudents] = useState({});
@@ -28,31 +31,31 @@ export default function Teacher() {
     const currentYear = now.getFullYear();
     const academicYearStart = jsMonth >= 3 ? currentYear : currentYear - 1;
 
-
     useEffect(() => {
-        const storedTeacher = localStorage.getItem("teacher");
+        const storedAdmin = localStorage.getItem("teacher");
         const token = localStorage.getItem("authToken");
 
-        if (storedTeacher && token && storedTeacher !== "undefined") {
+        if (storedAdmin && token && storedAdmin !== "undefined") {
             try {
-                setTeacher(JSON.parse(storedTeacher));
+                setTeacher(JSON.parse(storedAdmin)); // set admin info
             } catch (err) {
-                console.error("Failed to parse teacher JSON:", err);
-                localStorage.removeItem("teacher");
+                console.error("Failed to parse admin JSON:", err);
+                localStorage.removeItem("admin");
                 return;
             }
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/teacher/batches`, {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/batches`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
                 .then((res) => {
-                    if (!res.ok) throw new Error("Failed to fetch batches");
+                    if (!res.ok) throw new Error("Failed to fetch all batches");
                     return res.json();
                 })
                 .then(setBatchesRecords)
                 .catch((err) => console.error("Batches fetch error:", err));
         }
     }, []);
+
 
     useEffect(() => {
         const token = localStorage.getItem("authToken");
@@ -78,7 +81,7 @@ export default function Teacher() {
         };
 
         batchesRecords.forEach((batch) => {
-            fetchStudents(batch.batchId);
+            fetchStudents(batch._id);
         });
     }, [batchesRecords]);
 
@@ -163,22 +166,14 @@ export default function Teacher() {
         }
     };
 
-    if (!teacher) return <p>Loading teacher data...</p>;
 
-    return (
-        <>
-            <Navbar />
-            <div className="main-content">
-                <div className="student-details">
-                    <h1>Teacher details</h1>
-                    <div className="container">
-                        <span>Name : {teacher.name}</span>
-                        <br />
-                        <span>Email : {teacher.email}</span>
-                        <br />
-                        <span>Role : {teacher.role}</span>
-                    </div>
-                </div>
+    return (<>
+
+        <Navbar />
+
+
+        <div className="main-content">
+            <div className="flex gap-5">
 
                 <div className="batches-container">
                     <h1>Batches</h1>
@@ -186,13 +181,14 @@ export default function Teacher() {
                         <div className="row">
                             {batchesRecords.length > 0 ? (
                                 batchesRecords.map((batch, index) => {
-                                    const batchId = batch.batchId;
+                                    const batchId = batch._id;
                                     const selectedDate = selectedDates[batchId] || new Date();
 
                                     return (
                                         <div className="col-12 col-md-6 col-lg-5" key={index}>
                                             <div className="card batch-card mb-3">
-                                                <h5 className="card-title">{batch.batchName}</h5>
+                                                <h5 className="card-title">{batch.name}</h5>
+                                                <span>{batch.createdAt}</span>
                                                 <div className="d-flex gap-3">
                                                     <button className="button" onClick={() => setShowStudentListFor(batchId)}>
                                                         Show all students
@@ -202,7 +198,7 @@ export default function Teacher() {
                                                         onClose={() => setShowStudentListFor(null)}
                                                     >
                                                         <div>
-                                                            <h3>{batch.batchName}</h3>
+                                                            <h3>{batch.name}</h3>
                                                             <ul className="mt-2">
                                                                 {students[batchId]?.map((student, idx) => (
                                                                     <li key={student._id} className="mb-3">
@@ -315,7 +311,7 @@ export default function Teacher() {
                                                         onClose={() => closeAttendanceModal(batchId)}
                                                     >
                                                         <div>
-                                                            <h3>{batch.batchName}</h3>
+                                                            <h3>{batch.name}</h3>
                                                             <DatePicker
                                                                 className="datePicker"
                                                                 dateFormat="yyyy-MM-dd"
@@ -381,12 +377,13 @@ export default function Teacher() {
                         </div>
                     </div>
                 </div>
-            {(teacher.role=="admin") &&
-                <Link to="/admin" className="button" style={{ backgroundColor: "gold", color: "black" }}>Admin Special</Link>
-            }
-            </div>
 
-            <Footer />
-        </>
-    );
+
+            </div>
+            <button className="button">Add a batch</button>
+        </div>
+
+        <Footer />
+
+    </>)
 }

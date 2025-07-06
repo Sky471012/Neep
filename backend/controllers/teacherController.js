@@ -13,7 +13,7 @@ exports.getTeacher = async (req, res) => {
   }
 };
 
-exports.getbatches = async (req, res) => {
+exports.getBatches = async (req, res) => {
   try {
     const batches = await Batches.find({ teacherId: req.user.id });
     res.json(batches);

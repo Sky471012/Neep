@@ -5,6 +5,15 @@ const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
 const FeeStatus = require('../models/Fee');
 
+exports.getBatches = async (req, res) => {
+  try {
+      const batches = await Batch.find();
+      res.json(batches);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+}
+
 exports.createBatch = async (req, res) => {
   try {
     const batch = await Batch.create({ name: req.body.name });

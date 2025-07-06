@@ -6,7 +6,7 @@ const { verifyToken, isTeacher } = require('../middleware/authMiddleware');
 router.use(verifyToken, isTeacher);
 
 router.get('/', teacherController.getTeacher);
-router.get('/batches', teacherController.getbatches);
+router.get('/batches', teacherController.getBatches);
 router.get('/batchStudents/:batchId', teacherController.getBatchStudents);
 router.get('/attendance/:studentId', teacherController.getStudentsAttendance);
 router.post('/attendance/mark', teacherController.markAttendance);

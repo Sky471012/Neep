@@ -10,6 +10,7 @@ import Contactus from './pages/Contactus';
 import DownloadApp from './pages/DownloadApp';
 import Student from './pages/Student';
 import Teacher from './pages/Teacher';
+import Admin from './pages/Admin';
 
 function App() {
 
@@ -38,6 +39,7 @@ function App() {
             <Route exact path='/downloadapp' element={<DownloadApp/>} />
             <Route exact path='/student' element={<Student/>} />
             <Route exact path='/teacher' element={<Teacher/>} />
+            <Route exact path='/admin' element={<Admin/>} />
           </Routes>
         </BrowserRouter>
       )}
