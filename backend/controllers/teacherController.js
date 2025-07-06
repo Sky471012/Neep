@@ -42,6 +42,18 @@ exports.getBatchStudents = async (req, res) => {
   }
 };
 
+exports.getStudentsAttendance = async (req, res) => {
+  try{
+    const { studentId } = req.params;
+  
+    const attendance = await Attendance.find({ studentId });
+
+    res.json({ attendance })
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
 exports.markAttendance = async (req, res) => {
   const { studentId, batchId, date, status } = req.body;
   try {

@@ -8,6 +8,7 @@ router.use(verifyToken, isTeacher);
 router.get('/', teacherController.getTeacher);
 router.get('/batches', teacherController.getbatches);
 router.get('/batchStudents/:batchId', teacherController.getBatchStudents);
+router.get('/attendance/:studentId', teacherController.getStudentsAttendance);
 router.post('/attendance/mark', teacherController.markAttendance);
 
 module.exports = router;

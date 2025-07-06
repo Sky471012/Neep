@@ -146,13 +146,24 @@ export default function Navbar() {
             </Link>
           </li>
 
-          {(localStorage.getItem("authToken")) &&
+          {(localStorage.getItem("authToken")) && (localStorage.getItem("student")) &&
             <li >
               <Link
                 to="/student"
                 className={`button ${isRouteActive("/student") ? "active" : ""}`}
               >
-                User
+                Student
+              </Link>
+            </li>
+          }
+
+          {(localStorage.getItem("authToken")) && (localStorage.getItem("teacher")) && (!localStorage.getItem("student")) &&
+            <li >
+              <Link
+                to="/teacher"
+                className={`button ${isRouteActive("/teacher") ? "active" : ""}`}
+              >
+                Teacher
               </Link>
             </li>
           }
@@ -235,15 +246,25 @@ export default function Navbar() {
           <i className="bi bi-envelope-fill"></i>Contact Us
         </Link>
 
-        {(localStorage.getItem("authToken")) &&
-              <Link
-                to="/student"
-                onClick={() => setSidebarOpen(false)}
-                className={`button ${isRouteActive("/student") ? "active" : ""}`}
-              >
-                User
-              </Link>
-          }
+        {(localStorage.getItem("authToken")) && (localStorage.getItem("student")) &&
+          <Link
+            to="/student"
+            onClick={() => setSidebarOpen(false)}
+            className={`button ${isRouteActive("/student") ? "active" : ""}`}
+          >
+            Student
+          </Link>
+        }
+        
+        {(localStorage.getItem("authToken")) && (localStorage.getItem("teacher")) && (!localStorage.getItem("student")) &&
+          <Link
+            to="/teacher"
+            onClick={() => setSidebarOpen(false)}
+            className={`button ${isRouteActive("/teacher") ? "active" : ""}`}
+          >
+            Teacher
+          </Link>
+        }
 
         {
           (!localStorage.getItem("authToken")) ?
