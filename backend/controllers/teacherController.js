@@ -4,15 +4,6 @@ const Batches = require("../models/Batch_teachers");
 const BatchStudent = require("../models/Batch_students");
 const Student = require("../models/Student");
 
-exports.getTeacher = async (req, res) => {
-  try {
-    const credentials = await Teacher.findById(req.user.id);
-    res.json(credentials);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
 exports.getBatches = async (req, res) => {
   try {
     const batches = await Batches.find({ teacherId: req.user.id });

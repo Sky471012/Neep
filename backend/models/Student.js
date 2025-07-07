@@ -10,7 +10,6 @@ const studentSchema = new Schema({
   phone: {
     type: String,
     required: true,
-    unique: true,
   },
   dob: {
     type: String,

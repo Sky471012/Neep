@@ -3,15 +3,6 @@ const Attendance = require('../models/Attendance');
 const FeeStatus = require('../models/Fee');
 const Batches = require('../models/Batch_students');
 
-exports.getStudent = async (req, res) => {
-  try {
-    const credentials = await Student.findById( req.user.id );
-    res.json(credentials);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
 exports.getAttendance = async (req, res) => {
   try {
     const records = await Attendance.find({ studentId: req.user.id });

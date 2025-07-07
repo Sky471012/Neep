@@ -1,21 +1,20 @@
-const Batch = require('../models/Batch');
-const BatchStudent = require('../models/Batch_students');
-const Attendance = require('../models/Attendance');
-const Fee = require('../models/Fee');
-const Student = require('../models/Student');
-const Teacher = require('../models/Admins_teachers');
-const BatchTeacher = require('../models/Batch_teachers');
-
+const Batch = require("../models/Batch");
+const BatchStudent = require("../models/Batch_students");
+const Attendance = require("../models/Attendance");
+const Fee = require("../models/Fee");
+const Student = require("../models/Student");
+const Teacher = require("../models/Admins_teachers");
+const BatchTeacher = require("../models/Batch_teachers");
 
 // Batches Management
 exports.getBatches = async (req, res) => {
   try {
-      const batches = await Batch.find();
-      res.json(batches);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-}
+    const batches = await Batch.find();
+    res.json(batches);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.getBatchStudents = async (req, res) => {
   try {
@@ -38,34 +37,34 @@ exports.getBatchStudents = async (req, res) => {
 };
 
 exports.getStudentsAttendance = async (req, res) => {
-  try{
+  try {
     const { studentId } = req.params;
-  
+
     const attendance = await Attendance.find({ studentId });
 
-    res.json({ attendance })
+    res.json({ attendance });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-}
+};
 
 exports.getTeacher = async (req, res) => {
-  try{
+  try {
     const { batchId } = req.params;
-  
+
     const batchLink = await BatchTeacher.find({ batchId });
 
-     const teacherIds = batchLink.map((bs) => bs.teacherId);
+    const teacherIds = batchLink.map((bs) => bs.teacherId);
 
     const teacher = await Teacher.find({ _id: { $in: teacherIds } }).select(
       "name email phone dob"
     );
 
-    res.json({ teacher })
+    res.json({ teacher });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-}
+};
 
 exports.markAttendance = async (req, res) => {
   const { studentId, batchId, date, status } = req.body;
@@ -83,7 +82,15 @@ exports.markAttendance = async (req, res) => {
 
 exports.createBatch = async (req, res) => {
   try {
-    const batch = await Batch.create({ name: req.body.name });
+    const existingBatch = await Batch.findOne({ name: req.body.name.trim() });
+
+    if (existingBatch) {
+      return res
+        .status(400)
+        .json({ message: "Batch with same name already exists." });
+    }
+
+    const batch = await Batch.create({ name: req.body.name.trim() });
     res.json(batch);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -93,22 +100,21 @@ exports.createBatch = async (req, res) => {
 exports.deleteBatch = async (req, res) => {
   try {
     await Batch.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Batch deleted' });
+    res.json({ message: "Batch deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-
 // Students Management
 exports.getStudents = async (req, res) => {
   try {
-      const students = await Student.find();
-      res.json(students);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-}
+    const students = await Student.find();
+    res.json(students);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.getStudentBatches = async (req, res) => {
   try {
@@ -120,9 +126,7 @@ exports.getStudentBatches = async (req, res) => {
     const batchIds = studentLinks.map((sb) => sb.batchId);
 
     // Step 2: Fetch batch details
-    const batches = await Batch.find({ _id: { $in: batchIds } }).select(
-      "name"
-    );
+    const batches = await Batch.find({ _id: { $in: batchIds } }).select("name");
 
     res.json({ batches });
   } catch (err) {
@@ -133,19 +137,48 @@ exports.getStudentBatches = async (req, res) => {
 exports.getStudentFeeStatus = async (req, res) => {
   try {
     const { studentId } = req.params;
-  
+
     const feeStatus = await Fee.find({ studentId });
 
-    res.json({ feeStatus })
+    res.json({ feeStatus });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+exports.createStudent = async (req, res) => {
+  try {
+    const existingStudent = await Student.findOne({
+      name: req.body.name.trim(),
+      phone: req.body.phone.trim(),
+    });
+
+    if (existingStudent) {
+      return res.status(400).json({
+        message: "Student with same name and phone number already exists.",
+      });
+    }
+
+    const student = await Student.create({
+      name: req.body.name.trim(),
+      phone: req.body.phone.trim(),
+      dob: req.body.dob.trim(), // this must match DD-MM-YYYY
+    });
+
+    res.json(student);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 exports.addStudentToBatch = async (req, res) => {
   try {
-    await BatchStudent.create({ batchId: req.params.batchId, studentId: req.body.studentId });
-    res.json({ message: 'Student added to batch' });
+    await BatchStudent.create({
+      batchId: req.params.batchId,
+      studentId: req.body.studentId,
+    });
+    res.json({ message: "Student added to batch" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -153,23 +186,27 @@ exports.addStudentToBatch = async (req, res) => {
 
 exports.removeStudentFromBatch = async (req, res) => {
   try {
-    await BatchStudent.findOneAndDelete({ batchId: req.params.batchId, studentId: req.params.studentId });
-    res.json({ message: 'Student removed from batch' });
+    await BatchStudent.findOneAndDelete({
+      batchId: req.params.batchId,
+      studentId: req.params.studentId,
+    });
+    res.json({ message: "Student removed from batch" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
 
+
 // Teachers Management
 exports.getTeachers = async (req, res) => {
   try {
-      const teachers = await Teacher.find();
-      res.json(teachers);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-}
+    const teachers = await Teacher.find();
+    res.json(teachers);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.getTeacherBatches = async (req, res) => {
   try {
@@ -181,11 +218,33 @@ exports.getTeacherBatches = async (req, res) => {
     const batchIds = teacherLinks.map((tb) => tb.batchId);
 
     // Step 2: Fetch batch details
-    const batches = await Batch.find({ _id: { $in: batchIds } }).select(
-      "name"
-    );
+    const batches = await Batch.find({ _id: { $in: batchIds } }).select("name");
 
     res.json({ batches });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.createTeacher = async (req, res) => {
+  try {
+    const existingTeacher = await Teacher.findOne({
+      email: req.body.email.trim(),
+    });
+
+    if (existingTeacher) {
+      return res.status(400).json({
+        message: "Teacher with same email already exists.",
+      });
+    }
+
+    const teacher = await Teacher.create({
+      name: req.body.name.trim(),
+      email: req.body.email.trim(),
+      role: 'teacher'
+    });
+
+    res.json(teacher);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

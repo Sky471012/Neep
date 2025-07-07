@@ -1,4 +1,3 @@
-// components/BatchControls.jsx
 import React, { useEffect, useState } from "react";
 import StudentList from "../modals/StudentList";
 import AttendanceList from "../modals/AttendanceMarking";
@@ -11,7 +10,8 @@ export default function BatchControls({ batchesRecords }) {
     const [selectedDates, setSelectedDates] = useState({});
     const [markedStatus, setMarkedStatus] = useState({});
     const [attendanceMap, setAttendanceMap] = useState({});
-    const [activeStudentAttendance, setActiveStudentAttendance] = useState({});
+    // Changed: Single student attendance tracking instead of multiple
+    const [activeStudentAttendance, setActiveStudentAttendance] = useState(null);
     const [teacher, setTeacher] = useState({});
 
     const allMonths = [
@@ -48,7 +48,6 @@ export default function BatchControls({ batchesRecords }) {
             }
         };
 
-
         const findTeacher = async (batchId) => {
             try {
                 const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/findTeacher/${batchId}`, {
@@ -56,7 +55,6 @@ export default function BatchControls({ batchesRecords }) {
                 });
                 const teacherGet = await res.json();
                 if (!res.ok) throw new Error(teacherGet.message || "Error fetching teacher");
-
 
                 setTeacher(prev => ({
                     ...prev,
@@ -105,7 +103,8 @@ export default function BatchControls({ batchesRecords }) {
     };
 
     const showStudentAttendance = async (studentId, batchId) => {
-        if (activeStudentAttendance[studentId]) return;
+        // Changed: Only fetch if this student's attendance is not already active
+        if (activeStudentAttendance === studentId) return;
 
         try {
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/attendance/${studentId}`, {
@@ -165,19 +164,22 @@ export default function BatchControls({ batchesRecords }) {
                                                                     <button
                                                                         className="button"
                                                                         onClick={() => {
-                                                                            setActiveStudentAttendance((prev) => ({
-                                                                                ...prev,
-                                                                                [student._id]: !prev[student._id],
-                                                                            }));
-                                                                            if (!activeStudentAttendance[student._id]) {
+                                                                            // Changed: Toggle logic for single student
+                                                                            if (activeStudentAttendance === student._id) {
+                                                                                // If this student's attendance is already shown, hide it
+                                                                                setActiveStudentAttendance(null);
+                                                                            } else {
+                                                                                // Show this student's attendance and hide others
+                                                                                setActiveStudentAttendance(student._id);
                                                                                 showStudentAttendance(student._id, batchId);
                                                                             }
                                                                         }}
                                                                     >
-                                                                        {activeStudentAttendance[student._id] ? "Hide Attendance" : "Show Attendance"}
+                                                                        {activeStudentAttendance === student._id ? "Hide Attendance" : "Show Attendance"}
                                                                     </button>
                                                                 </div>
-                                                                {activeStudentAttendance[student._id] && (
+                                                                {/* Changed: Only show if this specific student is active */}
+                                                                {activeStudentAttendance === student._id && (
                                                                     <div className="attendance-calendar mt-2">
                                                                         <div id={`carousel-${student._id}`} className="carousel slide">
                                                                             <div className="carousel-inner">
@@ -302,7 +304,6 @@ export default function BatchControls({ batchesRecords }) {
                                             </AttendanceList>
                                         </div>
                                         <div className="d-flex mt-3 gap-3">
-                                            <button className="button">Add Student</button>
                                             <button className="button">Assign Teacher</button>
                                             <button className="btn btn-danger">Remove Batch</button>
                                         </div>

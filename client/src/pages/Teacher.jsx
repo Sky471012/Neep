@@ -15,7 +15,8 @@ export default function Teacher() {
     const [selectedDates, setSelectedDates] = useState({});
     const [markedStatus, setMarkedStatus] = useState({});
     const [attendanceMap, setAttendanceMap] = useState({});
-    const [activeStudentAttendance, setActiveStudentAttendance] = useState({});
+    // Changed: Single student attendance tracking instead of multiple
+    const [activeStudentAttendance, setActiveStudentAttendance] = useState(null);
 
     const allMonths = [
         "April", "May", "June", "July", "August", "September",
@@ -27,7 +28,6 @@ export default function Teacher() {
     const activeMonthIndex = jsMonth >= 3 ? jsMonth - 3 : jsMonth + 9;
     const currentYear = now.getFullYear();
     const academicYearStart = jsMonth >= 3 ? currentYear : currentYear - 1;
-
 
     useEffect(() => {
         const storedTeacher = localStorage.getItem("teacher");
@@ -126,8 +126,8 @@ export default function Teacher() {
     };
 
     const showStudentAttendance = async (studentId, batchId) => {
-        // If already shown or already fetched, skip re-fetch
-        if (activeStudentAttendance[studentId]) return;
+        // Changed: Only fetch if this student's attendance is not already active
+        if (activeStudentAttendance === studentId) return;
 
         const token = localStorage.getItem("authToken");
 
@@ -211,23 +211,23 @@ export default function Teacher() {
                                                                             <button
                                                                                 className="button"
                                                                                 onClick={() => {
-                                                                                    setActiveStudentAttendance((prev) => ({
-                                                                                        ...prev,
-                                                                                        [student._id]: !prev[student._id],
-                                                                                    }));
-
-                                                                                    // Only fetch attendance if toggling to show
-                                                                                    if (!activeStudentAttendance[student._id]) {
+                                                                                    // Changed: Toggle logic for single student
+                                                                                    if (activeStudentAttendance === student._id) {
+                                                                                        // If this student's attendance is already shown, hide it
+                                                                                        setActiveStudentAttendance(null);
+                                                                                    } else {
+                                                                                        // Show this student's attendance and hide others
+                                                                                        setActiveStudentAttendance(student._id);
                                                                                         showStudentAttendance(student._id, batchId);
                                                                                     }
                                                                                 }}
                                                                             >
-                                                                                {activeStudentAttendance[student._id] ? "Hide Attendance" : "Show Attendance"}
+                                                                                {activeStudentAttendance === student._id ? "Hide Attendance" : "Show Attendance"}
                                                                             </button>
-
                                                                         </div>
 
-                                                                        {activeStudentAttendance[student._id] && (
+                                                                        {/* Changed: Only show if this specific student is active */}
+                                                                        {activeStudentAttendance === student._id && (
                                                                             <div className="attendance-calendar mt-2">
                                                                                 <div id={`carousel-${student._id}`} className="carousel slide">
                                                                                     <div className="carousel-inner">
@@ -299,11 +299,9 @@ export default function Teacher() {
                                                                                 </div>
                                                                             </div>
                                                                         )}
-
                                                                     </li>
                                                                 ))}
                                                             </ul>
-
                                                         </div>
                                                     </StudentList>
 

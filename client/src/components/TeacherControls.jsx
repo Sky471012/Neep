@@ -78,10 +78,6 @@ export default function TeacherControls({ teachersRecords }) {
                                                     </ul>
                                                 </div>
                                             </BatchList>
-
-                                            <button className="button" >
-                                                Add to a Batch
-                                            </button>
                                            
                                             <button className="btn btn-danger" >
                                                 Remove Teacher
