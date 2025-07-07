@@ -6,6 +6,8 @@ const Student = require('../models/Student');
 const Teacher = require('../models/Admins_teachers');
 const BatchTeacher = require('../models/Batch_teachers');
 
+
+// Batches Management
 exports.getBatches = async (req, res) => {
   try {
       const batches = await Batch.find();
@@ -97,6 +99,37 @@ exports.deleteBatch = async (req, res) => {
   }
 };
 
+
+// Students Management
+exports.getStudents = async (req, res) => {
+  try {
+      const students = await Student.find();
+      res.json(students);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+}
+
+exports.getStudentBatches = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    // Step 1: Get all batchIds of that student
+    const studentLinks = await BatchStudent.find({ studentId });
+
+    const batchIds = studentLinks.map((sb) => sb.batchId);
+
+    // Step 2: Fetch batch details
+    const batches = await Batch.find({ _id: { $in: batchIds } }).select(
+      "name"
+    );
+
+    res.json({ batches });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.addStudentToBatch = async (req, res) => {
   try {
     await BatchStudent.create({ batchId: req.params.batchId, studentId: req.body.studentId });
@@ -115,19 +148,37 @@ exports.removeStudentFromBatch = async (req, res) => {
   }
 };
 
-exports.markAttendance = async (req, res) => {
-  const { studentId, batchId, date, status } = req.body;
+
+// Teachers Management
+exports.getTeachers = async (req, res) => {
   try {
-    const record = await Attendance.findOneAndUpdate(
-      { studentId, date },
-      { studentId, batchId, date, status, markedBy: req.user.id },
-      { upsert: true, new: true }
+      const teachers = await Teacher.find();
+      res.json(teachers);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+}
+
+exports.getTeacherBatches = async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+
+    // Step 1: Get all batchIds of that teacher
+    const teacherLinks = await BatchTeacher.find({ teacherId });
+
+    const batchIds = teacherLinks.map((tb) => tb.batchId);
+
+    // Step 2: Fetch batch details
+    const batches = await Batch.find({ _id: { $in: batchIds } }).select(
+      "name"
     );
-    res.json(record);
+
+    res.json({ batches });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 exports.updateFeeStatus = async (req, res) => {
   const { studentId, month, isPaid } = req.body;

@@ -17,11 +17,20 @@ router.post('/batch', adminController.createBatch);
 router.delete('/batch/:id', adminController.deleteBatch);
 
 // Student Management
+router.get('/students', adminController.getStudents);
+router.get('/studentBatches/:studentId', adminController.getStudentBatches);
+
+
 router.post('/batch/:batchId/student', adminController.addStudentToBatch);
 router.delete('/batch/:batchId/student/:studentId', adminController.removeStudentFromBatch);
 
+
+// Teacher Management
+router.get('/teachers', adminController.getTeachers);
+router.get('/teacherBatches/:teacherId', adminController.getTeacherBatches);
+
+
 // Attendance & Fee
-router.post('/attendance/mark', adminController.markAttendance);
 router.post('/fee-status/update', adminController.updateFeeStatus);
 
 module.exports = router;

@@ -2,10 +2,14 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import BatchControls from "../components/BatchControls";
+import StudentControls from "../components/StudentControls";
+import TeacherControls from "../components/TeacherControls";
 
 export default function Admin() {
     const [admin, setAdmin] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
+    const [studentsRecords, setStudentsRecords] = useState([]);
+    const [teachersRecords, setTeachersRecords] = useState([]);
 
     useEffect(() => {
         const storedAdmin = localStorage.getItem("teacher");
@@ -20,6 +24,7 @@ export default function Admin() {
                 return;
             }
 
+            // Fetching batches
             fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/batches`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
@@ -29,6 +34,30 @@ export default function Admin() {
                 })
                 .then(setBatchesRecords)
                 .catch((err) => console.error("Batches fetch error:", err));
+
+
+            // fetching students
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/students`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Failed to fetch all stuents");
+                    return res.json();
+                })
+                .then(setStudentsRecords)
+                .catch((err) => console.error("Students fetch error:", err));
+
+            
+            // fetching teachers
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/teachers`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Failed to fetch all teacher");
+                    return res.json();
+                })
+                .then(setTeachersRecords)
+                .catch((err) => console.error("Teachers fetch error:", err));
         }
     }, []);
 
@@ -48,6 +77,10 @@ export default function Admin() {
                     </div>
 
                     <BatchControls batchesRecords={batchesRecords} />
+
+                    <StudentControls studentsRecords={studentsRecords} />
+
+                    <TeacherControls teachersRecords={teachersRecords} />
                 </div>
             </div>
 
