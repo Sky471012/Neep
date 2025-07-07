@@ -12,15 +12,15 @@ router.get('/attendance/:studentId', adminController.getStudentsAttendance);
 router.get('/findTeacher/:batchId', adminController.getTeacher);
 router.post('/attendance/mark', adminController.markAttendance);
 router.post('/batchCreate', adminController.createBatch);
+router.delete('/batchDelete/:batchId', adminController.deleteBatch);
 
-
-router.delete('/batch/:id', adminController.deleteBatch);
 
 // Student Management
 router.get('/students', adminController.getStudents);
 router.get('/studentBatches/:studentId', adminController.getStudentBatches);
 router.get('/student-fee-status/:studentId', adminController.getStudentFeeStatus);
 router.post('/studentCreate', adminController.createStudent);
+router.delete('/studentDelete/:studentId', adminController.deleteStudent);
 
 
 router.post('/batch/:batchId/student', adminController.addStudentToBatch);
@@ -31,9 +31,10 @@ router.delete('/batch/:batchId/student/:studentId', adminController.removeStuden
 router.get('/teachers', adminController.getTeachers);
 router.get('/teacherBatches/:teacherId', adminController.getTeacherBatches);
 router.post('/teacherCreate', adminController.createTeacher);
+router.delete('/teacherDelete/:teacherId', adminController.deleteTeacher);
 
 
-// Attendance & Fee
+//Fee
 router.post('/fee-status/update', adminController.updateFeeStatus);
 
 module.exports = router;

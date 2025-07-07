@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import BatchList from "../modals/BatchList";
 import Fee from "../modals/Fee";
 
-export default function StudentControls({ studentsRecords }) {
+export default function StudentControls({ studentsRecords, setStudentsRecords }) {
 
     const [batches, setBatches] = useState({});
     const [showBatchListFor, setShowBatchListFor] = useState(null);
@@ -77,6 +77,42 @@ export default function StudentControls({ studentsRecords }) {
         });
 
     }, [studentsRecords]);
+
+
+    const deleteStudent = async (studentId) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this student?");
+        if (!confirmDelete) return;
+
+        try {
+            const res = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/admin/studentDelete/${studentId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Failed to delete student.");
+                return;
+            }
+
+            alert("Student deleted successfully!");
+             // ✅ Remove student from local list without refresh
+            const updated = studentsRecords.filter(s => s._id !== studentId);
+            setStudentsRecords(updated);
+
+
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert("Something went wrong while deleting.");
+        }
+    };
+
 
 
 
@@ -173,7 +209,7 @@ export default function StudentControls({ studentsRecords }) {
                                         <div className="d-flex mt-3 gap-3">
                                             <button className="button">Add to a Batch</button>
                                             <button className="button">Update Fee</button>
-                                            <button className="btn btn-danger">Remove Student</button>
+                                            <button className="btn btn-danger" onClick={() => deleteStudent(student._id)}>Delete Student</button>
                                         </div>
                                     </div>
                                 </div>

@@ -97,14 +97,35 @@ exports.createBatch = async (req, res) => {
   }
 };
 
+
 exports.deleteBatch = async (req, res) => {
   try {
-    await Batch.findByIdAndDelete(req.params.id);
-    res.json({ message: "Batch deleted" });
+
+    const batchId = req.params.batchId;
+    
+    // delete from Batch
+    await Batch.findOneAndDelete({
+      _id: batchId
+    });
+    
+    // delete from Batch_teachers
+    await BatchTeacher.deleteMany({
+      batchId: batchId
+    });
+
+    // delete from Batch_students
+    await BatchStudent.deleteMany({
+      batchId: batchId
+    });
+    
+    res.json({ message: "Student removed from database" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+
 
 // Students Management
 exports.getStudents = async (req, res) => {
@@ -170,6 +191,38 @@ exports.createStudent = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.deleteStudent = async (req, res) => {
+  try {
+
+    const studentId = req.params.studentId;
+    
+    // delete from Student
+    await Student.findOneAndDelete({
+      _id: studentId
+    });
+    
+    // delete from Batch_students
+    await BatchStudent.deleteMany({
+      studentId: studentId
+    });
+    
+    // delete from Attendance
+    await Attendance.deleteMany({
+      studentId: studentId
+    });
+    
+    // delete from Fee
+    await Fee.deleteMany({
+      studentId: studentId
+    });
+    res.json({ message: "Student removed from database" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 
 
 exports.addStudentToBatch = async (req, res) => {
@@ -249,6 +302,29 @@ exports.createTeacher = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.deleteTeacher = async (req, res) => {
+  try {
+
+    const teacherId = req.params.teacherId;
+    
+    // delete from Teacher
+    await Teacher.findOneAndDelete({
+      _id: teacherId
+    });
+    
+    // delete from Batch_teachers
+    await BatchTeacher.deleteMany({
+      teacherId: teacherId
+    });
+    
+    res.json({ message: "Student removed from database" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 
 
 exports.updateFeeStatus = async (req, res) => {

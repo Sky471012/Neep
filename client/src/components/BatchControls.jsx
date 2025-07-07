@@ -3,7 +3,7 @@ import StudentList from "../modals/StudentList";
 import AttendanceList from "../modals/AttendanceMarking";
 import DatePicker from "react-datepicker";
 
-export default function BatchControls({ batchesRecords }) {
+export default function BatchControls({ batchesRecords, setBatchesRecords }) {
     const [students, setStudents] = useState({});
     const [showStudentListFor, setShowStudentListFor] = useState(null);
     const [openAttendanceModals, setOpenAttendanceModals] = useState({});
@@ -124,6 +124,42 @@ export default function BatchControls({ batchesRecords }) {
         } catch (err) {
             console.error("Failed to fetch student attendance:", err);
             alert("Error fetching attendance");
+        }
+    };
+
+    const deleteBatch = async (batchId) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this batch?");
+        if (!confirmDelete) return;
+
+        try {
+            const res = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/admin/batchDelete/${batchId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Failed to delete batch.");
+                return;
+            }
+
+            alert("Batch deleted successfully!");
+
+            // ✅ Remove batch from local list without refresh
+            const updated = batchesRecords.filter(b => b._id !== batchId);
+            setBatchesRecords(updated);
+
+
+
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert("Something went wrong while deleting.");
         }
     };
 
@@ -305,7 +341,7 @@ export default function BatchControls({ batchesRecords }) {
                                         </div>
                                         <div className="d-flex mt-3 gap-3">
                                             <button className="button">Assign Teacher</button>
-                                            <button className="btn btn-danger">Remove Batch</button>
+                                            <button className="btn btn-danger" onClick={() => deleteBatch(batch._id)}>Delete Batch</button>
                                         </div>
                                     </div>
                                 </div>

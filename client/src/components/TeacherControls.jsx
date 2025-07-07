@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import BatchList from "../modals/BatchList";
 
-export default function TeacherControls({ teachersRecords }) {
+export default function TeacherControls({ teachersRecords, setTeachersRecords }) {
 
     const [batches, setBatches] = useState({});
     const [showBatchListFor, setShowBatchListFor] = useState(null);
@@ -33,6 +33,43 @@ export default function TeacherControls({ teachersRecords }) {
             fetchBatches(teacher._id);
         });
     }, [teachersRecords]);
+
+
+    const deleteTeacher = async (teacherId) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this teacher?");
+        if (!confirmDelete) return;
+
+        try {
+            const res = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/admin/teacherDelete/${teacherId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Failed to delete teacher.");
+                return;
+            }
+
+            alert("Teacher deleted successfully!");
+
+            // ✅ Remove teacher from local list without refresh
+            const updated = teachersRecords.filter(t => t._id !== teacherId);
+            setTeachersRecords(updated);
+
+
+
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert("Something went wrong while deleting.");
+        }
+    };
 
 
 
@@ -78,9 +115,9 @@ export default function TeacherControls({ teachersRecords }) {
                                                     </ul>
                                                 </div>
                                             </BatchList>
-                                           
-                                            <button className="btn btn-danger" >
-                                                Remove Teacher
+
+                                            <button className="btn btn-danger" onClick={() => deleteTeacher(teacher._id)}>
+                                                Delete Teacher
                                             </button>
 
                                         </div>

@@ -231,9 +231,9 @@ export default function Admin() {
                     <button className="button" onClick={() => setOpenTeacherModal(true)}>Add teacher</button>
                 </div>
 
-                <BatchControls batchesRecords={batchesRecords} />
-                <StudentControls studentsRecords={studentsRecords} />
-                <TeacherControls teachersRecords={teachersRecords} />
+                <BatchControls batchesRecords={batchesRecords} setBatchesRecords={setBatchesRecords} />
+                <StudentControls studentsRecords={studentsRecords} setStudentsRecords={setStudentsRecords} />
+                <TeacherControls teachersRecords={teachersRecords} setTeachersRecords={setTeachersRecords} />
             </div>
 
             <Footer />
