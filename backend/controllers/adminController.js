@@ -1,7 +1,7 @@
 const Batch = require('../models/Batch');
 const BatchStudent = require('../models/Batch_students');
 const Attendance = require('../models/Attendance');
-const FeeStatus = require('../models/Fee');
+const Fee = require('../models/Fee');
 const Student = require('../models/Student');
 const Teacher = require('../models/Admins_teachers');
 const BatchTeacher = require('../models/Batch_teachers');
@@ -130,6 +130,18 @@ exports.getStudentBatches = async (req, res) => {
   }
 };
 
+exports.getStudentFeeStatus = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+  
+    const feeStatus = await Fee.find({ studentId });
+
+    res.json({ feeStatus })
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.addStudentToBatch = async (req, res) => {
   try {
     await BatchStudent.create({ batchId: req.params.batchId, studentId: req.body.studentId });
@@ -183,7 +195,7 @@ exports.getTeacherBatches = async (req, res) => {
 exports.updateFeeStatus = async (req, res) => {
   const { studentId, month, isPaid } = req.body;
   try {
-    const fee = await FeeStatus.findOneAndUpdate(
+    const fee = await Fee.findOneAndUpdate(
       { studentId, month },
       { studentId, month, isPaid, paidOn: isPaid ? new Date() : null },
       { upsert: true, new: true }

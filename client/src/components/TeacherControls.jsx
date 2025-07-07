@@ -80,13 +80,13 @@ export default function TeacherControls({ teachersRecords }) {
                                             </BatchList>
 
                                             <button className="button" >
-                                                Check Fee status
+                                                Add to a Batch
+                                            </button>
+                                           
+                                            <button className="btn btn-danger" >
+                                                Remove Teacher
                                             </button>
 
-                                        </div>
-                                        <div className="d-flex mt-3 gap-3">
-                                            <button className="button">Add to a batch</button>
-                                            <button className="button">Update Fee</button>
                                         </div>
                                     </div>
                                 </div>

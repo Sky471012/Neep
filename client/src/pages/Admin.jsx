@@ -69,18 +69,18 @@ export default function Admin() {
                 <div className="flex gap-5">
                     <div className="adminbar d-flex gap-3 m-5">
                         <a href="#batches">Batches</a>
-                        <a>Students</a>
-                        <a>Teachers</a>
+                        <a href="#students">Students</a>
+                        <a href="#teachers">Teachers</a>
                         <button className="button">Add a batch</button>
                         <button className="button">Add student</button>
                         <button className="button">Add teacher</button>
                     </div>
 
-                    <BatchControls batchesRecords={batchesRecords} />
+                    {/* <BatchControls batchesRecords={batchesRecords} /> */}
 
                     <StudentControls studentsRecords={studentsRecords} />
 
-                    <TeacherControls teachersRecords={teachersRecords} />
+                    {/* <TeacherControls teachersRecords={teachersRecords} /> */}
                 </div>
             </div>
 

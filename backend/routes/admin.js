@@ -19,6 +19,7 @@ router.delete('/batch/:id', adminController.deleteBatch);
 // Student Management
 router.get('/students', adminController.getStudents);
 router.get('/studentBatches/:studentId', adminController.getStudentBatches);
+router.get('/student-fee-status/:studentId', adminController.getStudentFeeStatus);
 
 
 router.post('/batch/:batchId/student', adminController.addStudentToBatch);

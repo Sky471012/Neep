@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import AttendanceViewing from "../modals/AttendanceViewing";
+import Fee from "../modals/Fee";
 
 export default function Student() {
 
     const [student, setStudent] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
+    const [showFee, setShowFee] = useState(null);
     const [feeRecords, setFeeRecords] = useState([]);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [attendanceMap, setAttendanceMap] = useState({});
@@ -62,6 +64,7 @@ export default function Student() {
                 })
                 .catch(err => console.error("Attendance fetch error:", err));
 
+            //fetching fee
             fetch(`${import.meta.env.VITE_BACKEND_URL}/student/fee-status`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
@@ -194,39 +197,47 @@ export default function Student() {
             </div>
 
             {/* Fee Table */}
-            <div className="fee-details">
-                <h1>Fee Details</h1>
-                <table className="table table-bordered table-striped text-center">
-                    <thead className="table-dark">
-                        <tr>
-                            <th>Month</th>
-                            <th>Status</th>
-                            <th>Amount</th>
-                            <th>Paid On</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {allMonths.map((month, index) => {
-                            const year = index < 9 ? academicYearStart : academicYearStart + 1;
-                            const fullMonth = `${month} ${year}`;
-                            const record = feeRecords.find(r =>
-                                r.month.trim().toLowerCase() === fullMonth.trim().toLowerCase()
-                            );
+            <button className="button" onClick={() => setShowFee(student._id)}>
+                Show Fee details
+            </button>
+            <Fee
+                isOpen={showFee === student._id}
+                onClose={() => setShowFee(null)}
+            >
+                <div className="fee-details">
+                    <h1>Fee Details</h1>
+                    <table className="table table-bordered table-striped text-center">
+                        <thead className="table-dark">
+                            <tr>
+                                <th>Month</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                                <th>Paid On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {allMonths.map((month, index) => {
+                                const year = index < 9 ? academicYearStart : academicYearStart + 1;
+                                const fullMonth = `${month} ${year}`;
+                                const record = feeRecords.find(r =>
+                                    r.month.trim().toLowerCase() === fullMonth.trim().toLowerCase()
+                                );
 
-                            return (
-                                <tr key={index}>
-                                    <td>{fullMonth}</td>
-                                    <td className={record ? "text-success fw-bold" : "text-danger fw-bold"}>
-                                        {record ? "Paid" : "Pending"}
-                                    </td>
-                                    <td>{record ? `₹${record.amount}` : "--"}</td>
-                                    <td>{record?.paidOn ? new Date(record.paidOn).toLocaleDateString() : "--"}</td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+                                return (
+                                    <tr key={index}>
+                                        <td>{fullMonth}</td>
+                                        <td className={record ? "text-success fw-bold" : "text-danger fw-bold"}>
+                                            {record ? "Paid" : "Pending"}
+                                        </td>
+                                        <td>{record ? `₹${record.amount}` : "--"}</td>
+                                        <td>{record?.paidOn ? new Date(record.paidOn).toLocaleDateString() : "--"}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </Fee>
         </div>
 
 

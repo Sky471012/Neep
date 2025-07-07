@@ -304,6 +304,7 @@ export default function BatchControls({ batchesRecords }) {
                                         <div className="d-flex mt-3 gap-3">
                                             <button className="button">Add Student</button>
                                             <button className="button">Assign Teacher</button>
+                                            <button className="btn btn-danger">Remove Batch</button>
                                         </div>
                                     </div>
                                 </div>

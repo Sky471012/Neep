@@ -1,14 +1,32 @@
 import React, { useEffect, useState } from "react";
 import BatchList from "../modals/BatchList";
+import Fee from "../modals/Fee";
 
 export default function StudentControls({ studentsRecords }) {
 
     const [batches, setBatches] = useState({});
     const [showBatchListFor, setShowBatchListFor] = useState(null);
+    const [showFee, setShowFee] = useState(null);
+    const [feeStatus, setFeeStatus] = useState(null);
+
+    const jsMonth = new Date().getMonth(); // 0 = Jan ... 11 = Dec
+    const activeMonthIndex = jsMonth >= 3 ? jsMonth - 3 : jsMonth + 9;
+
+    const allMonths = [
+        "April", "May", "June", "July", "August", "September",
+        "October", "November", "December", "January", "February", "March"
+    ];
+
+    const now = new Date();
+    // Fix: Calculate academic year start based on current month
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0 = Jan, 3 = April
+    const academicYearStart = currentMonth >= 3 ? currentYear : currentYear - 1;
 
     const token = localStorage.getItem("authToken");
 
     useEffect(() => {
+        // fetching students batches
         const fetchBatches = async (studentId) => {
             try {
                 const res = await fetch(
@@ -29,9 +47,35 @@ export default function StudentControls({ studentsRecords }) {
             }
         };
 
+
+        // fetching fee details
+        const fetchFeeStatus = async (studentId) => {
+            try {
+                const res = await fetch(
+                    `${import.meta.env.VITE_BACKEND_URL}/admin/student-fee-status/${studentId}`,
+                    {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                const fetchedFeeStatus = await res.json();
+                if (!res.ok) throw new Error(data.message || "Error fetching fee status");
+
+                setFeeStatus((prev) => ({
+                    ...prev,
+                    [studentId]: fetchedFeeStatus.feeStatus,
+                }));
+
+            } catch (err) {
+                console.error(`Error fetching feeStatus for student ${studentId}:`, err);
+            }
+
+        }
+
+
         studentsRecords.forEach((student) => {
             fetchBatches(student._id);
+            fetchFeeStatus(student._id);
         });
+
     }, [studentsRecords]);
 
 
@@ -80,14 +124,56 @@ export default function StudentControls({ studentsRecords }) {
                                                 </div>
                                             </BatchList>
 
-                                            <button className="button" >
+                                            <button className="button" onClick={() => setShowFee(studentId)}>
                                                 Check Fee status
                                             </button>
+                                            <Fee
+                                                isOpen={showFee === studentId}
+                                                onClose={() => setShowFee(null)}
+                                            >
+                                                <div className="fee-details">
+                                                    <h1>Fee Details</h1>
+                                                    <h3>{student.name}</h3>
+                                                    <table className="table table-bordered table-striped text-center">
+                                                        <thead className="table-dark">
+                                                            <tr>
+                                                                <th>Month</th>
+                                                                <th>Status</th>
+                                                                <th>Amount</th>
+                                                                <th>Paid On</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {allMonths.map((month, index) => {
+                                                                const year = index < 9 ? academicYearStart : academicYearStart + 1;
+                                                                const fullMonth = `${month} ${year}`;
+                                                                const studentFeeStatus = feeStatus?.[studentId] || [];  // ✅ safe access
+                                                                const record = studentFeeStatus.find(r =>
+                                                                    r.month.trim().toLowerCase() === fullMonth.trim().toLowerCase()
+                                                                );
+
+                                                                return (
+                                                                    <tr key={index}>
+                                                                        <td>{fullMonth}</td>
+                                                                        <td className={record ? "text-success fw-bold" : "text-danger fw-bold"}>
+                                                                            {record ? "Paid" : "Pending"}
+                                                                        </td>
+                                                                        <td>{record ? `₹${record.amount}` : "--"}</td>
+                                                                        <td>{record?.paidOn ? new Date(record.paidOn).toLocaleDateString() : "--"}</td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </Fee>
+
 
                                         </div>
                                         <div className="d-flex mt-3 gap-3">
-                                            <button className="button">Add to a batch</button>
+                                            <button className="button">Add to a Batch</button>
                                             <button className="button">Update Fee</button>
+                                            <button className="btn btn-danger">Remove Student</button>
                                         </div>
                                     </div>
                                 </div>
