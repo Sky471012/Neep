@@ -23,8 +23,7 @@ router.post('/studentCreate', adminController.createStudent);
 router.delete('/studentDelete/:studentId', adminController.deleteStudent);
 router.delete('/removeStudent/:studentId/:batchId', adminController.removeStudentFromBatch);
 router.post('/addStudent/:studentId/:batchId', adminController.addStudentToBatch);
-
-
+router.post('/update-fee/:studentId', adminController.updateFeeStatus);
 
 // Teacher Management
 router.get('/teachers', adminController.getTeachers);
@@ -32,9 +31,5 @@ router.get('/teacherBatches/:teacherId', adminController.getTeacherBatches);
 router.post('/teacherCreate', adminController.createTeacher);
 router.delete('/teacherDelete/:teacherId', adminController.deleteTeacher);
 router.delete('/removeTeacher/:teacherId/:batchId', adminController.removeTeacherFromBatch);
-
-
-//Fee
-router.post('/fee-status/update', adminController.updateFeeStatus);
 
 module.exports = router;

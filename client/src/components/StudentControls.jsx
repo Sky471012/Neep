@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import BatchList from "../modals/BatchList";
 import Fee from "../modals/Fee";
 import Batch from "../modals/Batch";
+import Student from "../modals/Student";
 
 export default function StudentControls({ studentsRecords, setStudentsRecords }) {
     const [batches, setBatches] = useState({});
@@ -9,6 +10,7 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
     const [showFee, setShowFee] = useState(null);
     const [feeStatus, setFeeStatus] = useState(null);
     const [openBatchModalFor, setOpenBatchModalFor] = useState(null);
+    const [openStudentModalFor, setOpenStudentModalFor] = useState(null);
     const [batchesList, setBatchesList] = useState([]);
     const [selectedBatch, setSelectedBatch] = useState({});
 
@@ -142,7 +144,6 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || "Failed to add student to batch");
 
-            alert("Student added to batch!");
             setBatches((prev) => ({
                 ...prev,
                 [studentId]: [...(prev[studentId] || []), data.batch],
@@ -153,6 +154,43 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
             alert("Error adding student to batch");
         }
     };
+
+    const updateFee = async (studentId, month, amount) => {
+        if (!month || !amount) return alert("Please select month and enter amount.");
+
+        try {
+            const res = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/admin/update-fee/${studentId}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ month, amount }),
+                }
+            );
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to update fee");
+
+            setOpenStudentModalFor(null);
+            // Optional: refetch fee status
+            const updatedFeeStatusRes = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/admin/student-fee-status/${studentId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const updatedData = await updatedFeeStatusRes.json();
+            setFeeStatus((prev) => ({
+                ...prev,
+                [studentId]: updatedData.feeStatus,
+            }));
+        } catch (err) {
+            console.error("Error updating fee:", err);
+            alert("Error updating fee");
+        }
+    };
+
 
     return (
         <div id="students" className="batches-container">
@@ -197,8 +235,8 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
                                             <button className="button" onClick={() => setShowFee(studentId)}>Check Fee status</button>
                                             <Fee isOpen={showFee === studentId} onClose={() => setShowFee(null)}>
                                                 <div className="fee-details">
-                                                    <h1>Fee Details</h1>
-                                                    <h3>{student.name}</h3>
+                                                    <h3>Fee Details</h3>
+                                                    <span><b>{student.name}</b></span>
                                                     <table className="table table-bordered table-striped text-center">
                                                         <thead className="table-dark">
                                                             <tr>
@@ -270,7 +308,70 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
                                                 </button>
                                             </Batch>
 
-                                            <button className="button">Update Fee</button>
+
+
+                                            <button className="button" onClick={() => setOpenStudentModalFor(studentId)}>Update Fee</button>
+                                            <Student
+                                                isOpen={openStudentModalFor === studentId}
+                                                onClose={() => setOpenStudentModalFor(null)}
+                                            >
+                                                <h3>Fee Updation of {student.name}</h3>
+
+                                                <div className="input-group mt-3">
+                                                    <label>Enter Amount in Rupees:</label>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Enter Amount..."
+                                                        className="form-control"
+                                                        value={selectedBatch[`${studentId}_amount`] || ""}
+                                                        onChange={(e) =>
+                                                            setSelectedBatch((prev) => ({
+                                                                ...prev,
+                                                                [`${studentId}_amount`]: e.target.value,
+                                                            }))
+                                                        }
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="mt-2">Select Month:</label>
+                                                    <select
+                                                        className="form-select"
+                                                        value={selectedBatch[`${studentId}_month`] || ""}
+                                                        onChange={(e) =>
+                                                            setSelectedBatch((prev) => ({
+                                                                ...prev,
+                                                                [`${studentId}_month`]: e.target.value,
+                                                            }))
+                                                        }
+                                                    >
+                                                        <option value="">-- Select a Month --</option>
+                                                        {allMonths.map((month, idx) => {
+                                                            const year = idx < 9 ? academicYearStart : academicYearStart + 1;
+                                                            const fullMonth = `${month} ${year}`;
+                                                            return (
+                                                                <option key={fullMonth} value={fullMonth}>
+                                                                    {fullMonth}
+                                                                </option>
+                                                            );
+                                                        })}
+                                                    </select>
+                                                </div>
+
+                                                <button
+                                                    className="button mt-3"
+                                                    onClick={() =>
+                                                        updateFee(
+                                                            studentId,
+                                                            selectedBatch[`${studentId}_month`],
+                                                            selectedBatch[`${studentId}_amount`]
+                                                        )
+                                                    }
+                                                >
+                                                    Update
+                                                </button>
+                                            </Student>
+
+
                                             <button className="btn btn-danger" onClick={() => deleteStudent(student._id)}>Delete Student</button>
                                         </div>
                                     </div>

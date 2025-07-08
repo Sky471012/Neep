@@ -124,7 +124,6 @@ exports.deleteBatch = async (req, res) => {
 
 exports.assignTeacher = async (req, res) => {
   try {
-    
     const batchId = req.params.batchId;
     const teacherId = req.params.teacherId;
     // Check if the batch exists
@@ -271,7 +270,6 @@ exports.removeStudentFromBatch = async (req, res) => {
 };
 
 exports.addStudentToBatch = async (req, res) => {
-  
   try {
     const studentId = req.params.studentId;
     const batchId = req.params.batchId;
@@ -310,7 +308,45 @@ exports.addStudentToBatch = async (req, res) => {
   }
 };
 
+exports.updateFeeStatus = async (req, res) => {
+  const { studentId } = req.params;
+  const { month, amount } = req.body;
+  const paidOn = new Date();
 
+  if (!month || !amount) {
+    return res
+      .status(400)
+      .json({ message: "All fields are required (month, amount)" });
+  }
+
+  try {
+    // Check if a record already exists for the same student + month
+    const existing = await Fee.findOne({ studentId, month });
+
+    let feeRecord;
+    if (existing) {
+      // Update existing
+      existing.amount = amount;
+      existing.paidOn = paidOn;
+      feeRecord = await existing.save();
+    } else {
+      // Create new
+      feeRecord = await Fee.create({
+        studentId,
+        amount,
+        month,
+        paidOn,
+      });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Fee updated successfully", fee: feeRecord });
+  } catch (err) {
+    console.error("Error updating fee:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 // Teachers Management
 exports.getTeachers = async (req, res) => {
@@ -391,20 +427,6 @@ exports.removeTeacherFromBatch = async (req, res) => {
       batchId: req.params.batchId,
     });
     res.json({ message: "Teacher removed from batch" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.updateFeeStatus = async (req, res) => {
-  const { studentId, month, isPaid } = req.body;
-  try {
-    const fee = await Fee.findOneAndUpdate(
-      { studentId, month },
-      { studentId, month, isPaid, paidOn: isPaid ? new Date() : null },
-      { upsert: true, new: true }
-    );
-    res.json(fee);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
