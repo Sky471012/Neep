@@ -35,10 +35,11 @@ a {
 }
 
 input,
-textarea {
+textarea,
+select {
   padding: 8px 16px;
   border: 2px solid #e1e8ed;
-  border-radius: 8px;
+  border-radius: 8px!important;
   background-color: #ffffff;
   color: #333333;
   outline: none;

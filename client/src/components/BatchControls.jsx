@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import StudentList from "../modals/StudentList";
 import AttendanceList from "../modals/AttendanceMarking";
 import DatePicker from "react-datepicker";
+import Teacher from "../modals/Teacher";
 
 export default function BatchControls({ batchesRecords, setBatchesRecords }) {
     const [students, setStudents] = useState({});
@@ -10,9 +11,11 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
     const [selectedDates, setSelectedDates] = useState({});
     const [markedStatus, setMarkedStatus] = useState({});
     const [attendanceMap, setAttendanceMap] = useState({});
-    // Changed: Single student attendance tracking instead of multiple
     const [activeStudentAttendance, setActiveStudentAttendance] = useState(null);
     const [teacher, setTeacher] = useState({});
+    const [openTeacherModals, setOpenTeacherModals] = useState({});
+    const [selectedTeachers, setSelectedTeachers] = useState({});
+    const [teachersList, setTeachersList] = useState([]);
 
     const allMonths = [
         "April", "May", "June", "July", "August", "September",
@@ -28,6 +31,8 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
     const token = localStorage.getItem("authToken");
 
     useEffect(() => {
+
+        // fetching all students of batch
         const fetchStudents = async (batchId) => {
             try {
                 const res = await fetch(
@@ -48,6 +53,7 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
             }
         };
 
+        // finding assigned teacher of batch
         const findTeacher = async (batchId) => {
             try {
                 const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/findTeacher/${batchId}`, {
@@ -67,11 +73,31 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
             }
         };
 
+        // fetching all teachers
+        const fetchTeachers = async () => {
+            try {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/teachers`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Error fetching teachers");
+
+                setTeachersList(data);
+            } catch (err) {
+                console.error("Error fetching teachers:", err);
+            }
+        };
+
+
         batchesRecords.forEach((batch) => {
             fetchStudents(batch._id);
             findTeacher(batch._id);
         });
+
+        fetchTeachers();
+
     }, [batchesRecords]);
+
 
     const markAttendance = async (studentId, batchId, status, date) => {
         if (!date) return alert("Please select a date first.");
@@ -162,6 +188,33 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
             alert("Something went wrong while deleting.");
         }
     };
+
+    const assignTeacherToBatch = async (batchId, teacherId) => {
+        if (!teacherId) return alert("Please select a teacher first.");
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/assignTeacher/${batchId}/${teacherId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Assignment failed");
+
+            setOpenTeacherModals((prev) => ({ ...prev, [batchId]: false }));
+
+            // Optional: update UI with new teacher
+            setTeacher((prev) => ({ ...prev, [batchId]: data.teacher }));
+            setOpenTeacherModals(false);
+        } catch (err) {
+            console.error("Error assigning teacher:", err);
+            alert("Failed to assign teacher.");
+        }
+    };
+
 
     const openAttendanceModal = (batchId) => setOpenAttendanceModals((prev) => ({ ...prev, [batchId]: true }));
     const closeAttendanceModal = (batchId) => setOpenAttendanceModals((prev) => ({ ...prev, [batchId]: false }));
@@ -340,9 +393,44 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
                                             </AttendanceList>
                                         </div>
                                         <div className="d-flex mt-3 gap-3">
-                                            <button className="button">Assign Teacher</button>
+                                            <button className="button" onClick={() => setOpenTeacherModals(prev => ({ ...prev, [batchId]: true }))}>
+                                                Assign/Change Teacher
+                                            </button>
                                             <button className="btn btn-danger" onClick={() => deleteBatch(batch._id)}>Delete Batch</button>
                                         </div>
+
+                                        <Teacher
+                                            isOpen={!!openTeacherModals[batchId]}
+                                            onClose={() => setOpenTeacherModals(prev => ({ ...prev, [batchId]: false }))}
+                                        >
+                                            <h3>Assigning Teacher to {batch.name}</h3>
+
+                                            <div className="input-group mt-3 gap-3">
+                                                <label>Select Teacher:</label>
+                                                <select
+                                                    className="form-select mt-1"
+                                                    value={selectedTeachers[batchId] || ""}
+                                                    onChange={(e) =>
+                                                        setSelectedTeachers((prev) => ({ ...prev, [batchId]: e.target.value }))
+                                                    }
+                                                >
+                                                    <option value="">-- Select a teacher --</option>
+                                                    {teachersList.map((teacher) => (
+                                                        <option key={teacher._id} value={teacher._id}>
+                                                            {teacher.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <button
+                                                className="button mt-3"
+                                                onClick={() => assignTeacherToBatch(batchId, selectedTeachers[batchId])}
+                                            >
+                                                Assign Teacher
+                                            </button>
+                                        </Teacher>
+
                                     </div>
                                 </div>
                             );

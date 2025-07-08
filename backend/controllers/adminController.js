@@ -97,35 +97,72 @@ exports.createBatch = async (req, res) => {
   }
 };
 
-
 exports.deleteBatch = async (req, res) => {
   try {
-
     const batchId = req.params.batchId;
-    
+
     // delete from Batch
     await Batch.findOneAndDelete({
-      _id: batchId
+      _id: batchId,
     });
-    
+
     // delete from Batch_teachers
     await BatchTeacher.deleteMany({
-      batchId: batchId
+      batchId: batchId,
     });
 
     // delete from Batch_students
     await BatchStudent.deleteMany({
-      batchId: batchId
+      batchId: batchId,
     });
-    
-    res.json({ message: "Student removed from database" });
+
+    res.json({ message: "Batch removed from database" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+exports.assignTeacher = async (req, res) => {
+  try {
+    
+    const batchId = req.params.batchId;
+    const teacherId = req.params.teacherId;
+    // Check if the batch exists
+    const batch = await Batch.findById(batchId);
+    if (!batch) {
+      return res.status(404).json({ message: "Batch not found." });
+    }
 
+    // Check if the teacher exists
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      return res.status(404).json({ message: "Teacher not found." });
+    }
 
+    // Check if assignment already exists
+    const existing = await BatchTeacher.findOne({ batchId });
+    if (existing) {
+      // Update the teacher assignment
+      existing.teacherId = teacherId;
+      existing.batchName = batch.name;
+      await existing.save();
+    } else {
+      // Create a new assignment
+      await BatchTeacher.create({
+        batchId,
+        batchName: batch.name,
+        teacherId,
+      });
+    }
+
+    return res.json({ message: "Teacher assigned successfully." });
+  } catch (error) {
+    console.error("Error assigning teacher:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error. Could not assign teacher." });
+  }
+};
 
 // Students Management
 exports.getStudents = async (req, res) => {
@@ -194,44 +231,28 @@ exports.createStudent = async (req, res) => {
 
 exports.deleteStudent = async (req, res) => {
   try {
-
     const studentId = req.params.studentId;
-    
+
     // delete from Student
     await Student.findOneAndDelete({
-      _id: studentId
+      _id: studentId,
     });
-    
+
     // delete from Batch_students
     await BatchStudent.deleteMany({
-      studentId: studentId
+      studentId: studentId,
     });
-    
+
     // delete from Attendance
     await Attendance.deleteMany({
-      studentId: studentId
+      studentId: studentId,
     });
-    
+
     // delete from Fee
     await Fee.deleteMany({
-      studentId: studentId
+      studentId: studentId,
     });
     res.json({ message: "Student removed from database" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-
-
-
-exports.addStudentToBatch = async (req, res) => {
-  try {
-    await BatchStudent.create({
-      batchId: req.params.batchId,
-      studentId: req.body.studentId,
-    });
-    res.json({ message: "Student added to batch" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -240,12 +261,52 @@ exports.addStudentToBatch = async (req, res) => {
 exports.removeStudentFromBatch = async (req, res) => {
   try {
     await BatchStudent.findOneAndDelete({
-      batchId: req.params.batchId,
       studentId: req.params.studentId,
+      batchId: req.params.batchId,
     });
     res.json({ message: "Student removed from batch" });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+exports.addStudentToBatch = async (req, res) => {
+  
+  try {
+    const studentId = req.params.studentId;
+    const batchId = req.params.batchId;
+
+    // Check if the batch exists
+    const batch = await Batch.findById(batchId);
+    if (!batch) {
+      return res.status(404).json({ message: "Batch not found." });
+    }
+
+    // Check if the teacher exists
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    // Check if assignment already exists
+    const existing = await BatchStudent.findOne({ batchId, studentId });
+    if (existing) {
+      return res.json({ message: "Already Exist in batch." });
+    } else {
+      // Create a new assignment
+      await BatchStudent.create({
+        batchId,
+        batchName: batch.name,
+        studentId,
+      });
+    }
+
+    return res.json({ message: "Student assigned successfully." });
+  } catch (error) {
+    console.error("Error adding student:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error. Could not add student." });
   }
 };
 
@@ -294,7 +355,7 @@ exports.createTeacher = async (req, res) => {
     const teacher = await Teacher.create({
       name: req.body.name.trim(),
       email: req.body.email.trim(),
-      role: 'teacher'
+      role: "teacher",
     });
 
     res.json(teacher);
@@ -305,27 +366,35 @@ exports.createTeacher = async (req, res) => {
 
 exports.deleteTeacher = async (req, res) => {
   try {
-
     const teacherId = req.params.teacherId;
-    
+
     // delete from Teacher
     await Teacher.findOneAndDelete({
-      _id: teacherId
+      _id: teacherId,
     });
-    
+
     // delete from Batch_teachers
     await BatchTeacher.deleteMany({
-      teacherId: teacherId
+      teacherId: teacherId,
     });
-    
-    res.json({ message: "Student removed from database" });
+
+    res.json({ message: "Teacher removed from database" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-
-
+exports.removeTeacherFromBatch = async (req, res) => {
+  try {
+    await BatchTeacher.findOneAndDelete({
+      teacherId: req.params.teacherId,
+      batchId: req.params.batchId,
+    });
+    res.json({ message: "Teacher removed from batch" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.updateFeeStatus = async (req, res) => {
   const { studentId, month, isPaid } = req.body;

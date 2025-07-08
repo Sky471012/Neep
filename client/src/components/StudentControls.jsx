@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import BatchList from "../modals/BatchList";
 import Fee from "../modals/Fee";
+import Batch from "../modals/Batch";
 
 export default function StudentControls({ studentsRecords, setStudentsRecords }) {
-
     const [batches, setBatches] = useState({});
     const [showBatchListFor, setShowBatchListFor] = useState(null);
     const [showFee, setShowFee] = useState(null);
     const [feeStatus, setFeeStatus] = useState(null);
-
-    const jsMonth = new Date().getMonth(); // 0 = Jan ... 11 = Dec
-    const activeMonthIndex = jsMonth >= 3 ? jsMonth - 3 : jsMonth + 9;
+    const [openBatchModalFor, setOpenBatchModalFor] = useState(null);
+    const [batchesList, setBatchesList] = useState([]);
+    const [selectedBatch, setSelectedBatch] = useState({});
 
     const allMonths = [
         "April", "May", "June", "July", "August", "September",
@@ -18,23 +18,20 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
     ];
 
     const now = new Date();
-    // Fix: Calculate academic year start based on current month
     const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0 = Jan, 3 = April
+    const currentMonth = now.getMonth();
     const academicYearStart = currentMonth >= 3 ? currentYear : currentYear - 1;
 
     const token = localStorage.getItem("authToken");
 
     useEffect(() => {
-        // fetching students batches
+
+        // fetching all students
         const fetchBatches = async (studentId) => {
             try {
-                const res = await fetch(
-                    `${import.meta.env.VITE_BACKEND_URL}/admin/studentBatches/${studentId}`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                );
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/studentBatches/${studentId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || "Error fetching batches");
 
@@ -47,77 +44,117 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
             }
         };
 
-
-        // fetching fee details
+        // fetching students fee
         const fetchFeeStatus = async (studentId) => {
             try {
-                const res = await fetch(
-                    `${import.meta.env.VITE_BACKEND_URL}/admin/student-fee-status/${studentId}`,
-                    {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    })
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/student-fee-status/${studentId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 const fetchedFeeStatus = await res.json();
-                if (!res.ok) throw new Error(data.message || "Error fetching fee status");
+                if (!res.ok) throw new Error(fetchedFeeStatus.message || "Error fetching fee status");
 
                 setFeeStatus((prev) => ({
                     ...prev,
                     [studentId]: fetchedFeeStatus.feeStatus,
                 }));
-
             } catch (err) {
                 console.error(`Error fetching feeStatus for student ${studentId}:`, err);
             }
+        };
 
-        }
+        // fetching all batches
+        const fetchAllBatches = async () => {
+            try {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/batches`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Error fetching batches");
 
+                setBatchesList(data);
+            } catch (err) {
+                console.error("Error fetching all batches:", err);
+            }
+        };
 
         studentsRecords.forEach((student) => {
             fetchBatches(student._id);
             fetchFeeStatus(student._id);
         });
 
+        fetchAllBatches();
     }, [studentsRecords]);
-
 
     const deleteStudent = async (studentId) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this student?");
         if (!confirmDelete) return;
 
         try {
-            const res = await fetch(
-                `${import.meta.env.VITE_BACKEND_URL}/admin/studentDelete/${studentId}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-                    },
-                }
-            );
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/studentDelete/${studentId}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
             const data = await res.json();
-
-            if (!res.ok) {
-                alert(data.message || "Failed to delete student.");
-                return;
-            }
+            if (!res.ok) return alert(data.message || "Failed to delete student.");
 
             alert("Student deleted successfully!");
-             // ✅ Remove student from local list without refresh
             const updated = studentsRecords.filter(s => s._id !== studentId);
             setStudentsRecords(updated);
-
-
         } catch (error) {
             console.error("Delete error:", error);
             alert("Something went wrong while deleting.");
         }
     };
 
+    const removeStudentFromBatch = async (studentId, batchId) => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/removeStudent/${studentId}/${batchId}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
+            const data = await res.json();
+            if (!res.ok) return alert(data.message || "Failed to remove student.");
 
+            setBatches((prev) => ({
+                ...prev,
+                [studentId]: prev[studentId].filter(b => b._id !== batchId)
+            }));
+        } catch (error) {
+            console.error("Remove error:", error);
+            alert("Something went wrong while removing.");
+        }
+    };
 
-    return (<>
+    const addStudentToBatch = async (studentId, batchId) => {
+        if (!batchId) return alert("Please select a batch first.");
 
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/addStudent/${studentId}/${batchId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to add student to batch");
+
+            alert("Student added to batch!");
+            setBatches((prev) => ({
+                ...prev,
+                [studentId]: [...(prev[studentId] || []), data.batch],
+            }));
+            setOpenBatchModalFor(null);
+        } catch (err) {
+            console.error("Error adding student to batch:", err);
+            alert("Error adding student to batch");
+        }
+    };
+
+    return (
         <div id="students" className="batches-container">
             <h1>Students</h1>
             <div className="container">
@@ -133,40 +170,32 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
                                         <span>Dob: {student.dob}</span>
                                         <span>Phone: {student.phone}</span>
                                         <span>Joined on: {student.createdAt}</span>
+
                                         <div className="d-flex gap-3">
-                                            <button className="button" onClick={() => setShowBatchListFor(studentId)}>
-                                                Show all Batches
-                                            </button>
-                                            <BatchList
-                                                isOpen={showBatchListFor === studentId}
-                                                onClose={() => setShowBatchListFor(null)}
-                                            >
+                                            <button className="button" onClick={() => setShowBatchListFor(studentId)}>Show all Batches</button>
+                                            <BatchList isOpen={showBatchListFor === studentId} onClose={() => setShowBatchListFor(null)}>
                                                 <div>
                                                     <h3>{student.name}</h3>
                                                     <ul className="mt-2">
-                                                        {batches[studentId]?.map((batch) => (
-                                                            <li key={batch._id} className="mb-3">
-                                                                <div className="d-flex flex-wrap gap-2">
-                                                                    <span>{batch.name}</span>
-                                                                    <button
-                                                                        className="button"
-                                                                    >
-                                                                        Remove Student
-                                                                    </button>
-                                                                </div>
-                                                            </li>
-                                                        ))}
+                                                        {batches[studentId]?.map((batch) =>
+                                                            batch ? (
+                                                                <li key={batch._id} className="mb-3">
+                                                                    <div className="d-flex flex-wrap gap-2">
+                                                                        <span>{batch.name}</span>
+                                                                        <button className="button" onClick={() => removeStudentFromBatch(studentId, batch._id)}>
+                                                                            Remove Student
+                                                                        </button>
+                                                                    </div>
+                                                                </li>
+                                                            ) : null // skip if batch is undefined
+                                                        )}
+
                                                     </ul>
                                                 </div>
                                             </BatchList>
 
-                                            <button className="button" onClick={() => setShowFee(studentId)}>
-                                                Check Fee status
-                                            </button>
-                                            <Fee
-                                                isOpen={showFee === studentId}
-                                                onClose={() => setShowFee(null)}
-                                            >
+                                            <button className="button" onClick={() => setShowFee(studentId)}>Check Fee status</button>
+                                            <Fee isOpen={showFee === studentId} onClose={() => setShowFee(null)}>
                                                 <div className="fee-details">
                                                     <h1>Fee Details</h1>
                                                     <h3>{student.name}</h3>
@@ -180,16 +209,16 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {allMonths.map((month, index) => {
-                                                                const year = index < 9 ? academicYearStart : academicYearStart + 1;
+                                                            {allMonths.map((month, idx) => {
+                                                                const year = idx < 9 ? academicYearStart : academicYearStart + 1;
                                                                 const fullMonth = `${month} ${year}`;
-                                                                const studentFeeStatus = feeStatus?.[studentId] || [];  // ✅ safe access
+                                                                const studentFeeStatus = feeStatus?.[studentId] || [];
                                                                 const record = studentFeeStatus.find(r =>
                                                                     r.month.trim().toLowerCase() === fullMonth.trim().toLowerCase()
                                                                 );
 
                                                                 return (
-                                                                    <tr key={index}>
+                                                                    <tr key={idx}>
                                                                         <td>{fullMonth}</td>
                                                                         <td className={record ? "text-success fw-bold" : "text-danger fw-bold"}>
                                                                             {record ? "Paid" : "Pending"}
@@ -203,11 +232,44 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
                                                     </table>
                                                 </div>
                                             </Fee>
-
-
                                         </div>
+
                                         <div className="d-flex mt-3 gap-3">
-                                            <button className="button">Add to a Batch</button>
+                                            <button className="button" onClick={() => setOpenBatchModalFor(studentId)}>Add to a Batch</button>
+                                            <Batch
+                                                isOpen={openBatchModalFor === studentId}
+                                                onClose={() => setOpenBatchModalFor(null)}
+                                            >
+                                                <h3>Adding {student.name} to:</h3>
+                                                <div className="input-group mt-3 gap-3">
+                                                    <label>Select Batch:</label>
+                                                    <select
+                                                        className="form-select mt-1"
+                                                        value={selectedBatch[student._id] || ""}
+                                                        onChange={(e) =>
+                                                            setSelectedBatch((prev) => ({
+                                                                ...prev,
+                                                                [student._id]: e.target.value
+                                                            }))
+                                                        }
+                                                    >
+                                                        <option value="">-- Select a Batch --</option>
+                                                        {batchesList?.map((batch) => (
+                                                            <option key={batch._id} value={batch._id}>
+                                                                {batch.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                <button
+                                                    className="button mt-3"
+                                                    onClick={() => addStudentToBatch(studentId, selectedBatch[student._id])}
+                                                >
+                                                    Add to Batch
+                                                </button>
+                                            </Batch>
+
                                             <button className="button">Update Fee</button>
                                             <button className="btn btn-danger" onClick={() => deleteStudent(student._id)}>Delete Student</button>
                                         </div>
@@ -221,5 +283,5 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
                 </div>
             </div>
         </div>
-    </>)
+    );
 }

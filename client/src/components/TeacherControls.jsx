@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import BatchList from "../modals/BatchList";
 
+
 export default function TeacherControls({ teachersRecords, setTeachersRecords }) {
 
     const [batches, setBatches] = useState({});
@@ -71,6 +72,39 @@ export default function TeacherControls({ teachersRecords, setTeachersRecords })
         }
     };
 
+    const removeTeacherFromBatch = async (teacherId, batchId) => {
+
+        try {
+            const res = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/admin/removeTeacher/${teacherId}/${batchId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Failed to remove teacher.");
+                return;
+            }
+
+            setBatches((prev) => ({
+                ...prev,
+                [teacherId]: prev[teacherId].filter(b => b._id !== batchId)
+            }));
+
+
+
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert("Something went wrong while deleting.");
+        }
+    };
+
 
 
     return (<>
@@ -106,6 +140,7 @@ export default function TeacherControls({ teachersRecords, setTeachersRecords })
                                                                     <span>{batch.name}</span>
                                                                     <button
                                                                         className="button"
+                                                                        onClick={() => removeTeacherFromBatch(teacherId, batch._id)}
                                                                     >
                                                                         Remove Teacher
                                                                     </button>

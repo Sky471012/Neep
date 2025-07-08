@@ -75,8 +75,8 @@ td {
   padding: 20px;
   border-radius: 8px;
   position: relative;
-  max-width: 500px;
-  width: 100%;
+  min-width: 70%;
+  max-width: 90%;
   max-height: 90vh;       /* 👈 Restrict height */
   overflow-y: auto;        /* 👈 Enable vertical scrolling */
 }
