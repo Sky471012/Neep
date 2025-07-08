@@ -37,7 +37,7 @@ export default function Student() {
             setStudent(JSON.parse(storedStudent));
 
             //fetching batches
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/student/batches`, {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/batches`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -46,7 +46,7 @@ export default function Student() {
 
 
             //fetching attendance
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/student/attendance`, {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/attendance`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -65,7 +65,7 @@ export default function Student() {
                 .catch(err => console.error("Attendance fetch error:", err));
 
             //fetching fee
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/student/fee-status`, {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/fee-status`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())

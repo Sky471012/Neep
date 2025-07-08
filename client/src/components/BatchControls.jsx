@@ -36,7 +36,7 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
         const fetchStudents = async (batchId) => {
             try {
                 const res = await fetch(
-                    `${import.meta.env.VITE_BACKEND_URL}/admin/batchStudents/${batchId}`,
+                    `${import.meta.env.VITE_BACKEND_URL}/api/admin/batchStudents/${batchId}`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                     }
@@ -56,7 +56,7 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
         // finding assigned teacher of batch
         const findTeacher = async (batchId) => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/findTeacher/${batchId}`, {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const teacherGet = await res.json();
@@ -76,7 +76,7 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
         // fetching all teachers
         const fetchTeachers = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/teachers`, {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();
@@ -106,7 +106,7 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
         const dateISO = dateOnly.toISOString();
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/attendance/mark`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/mark`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -133,7 +133,7 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
         if (activeStudentAttendance === studentId) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/attendance/${studentId}`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/${studentId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
@@ -159,7 +159,7 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
 
         try {
             const res = await fetch(
-                `${import.meta.env.VITE_BACKEND_URL}/admin/batchDelete/${batchId}`,
+                `${import.meta.env.VITE_BACKEND_URL}/api/admin/batchDelete/${batchId}`,
                 {
                     method: "DELETE",
                     headers: {
@@ -193,7 +193,7 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
         if (!teacherId) return alert("Please select a teacher first.");
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/assignTeacher/${batchId}/${teacherId}`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/assignTeacher/${batchId}/${teacherId}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

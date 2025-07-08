@@ -34,7 +34,7 @@ export default function LoginAdmin() {
     const sendOtp = async (isResend = false) => {
         try {
             setIsLoading(true);
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/login/admin-teacher/send-otp`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/send-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -87,7 +87,7 @@ export default function LoginAdmin() {
 
         try {
             setIsLoading(true);
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/login/admin-teacher/verify-otp`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, otp })

@@ -31,7 +31,7 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
         // fetching all students
         const fetchBatches = async (studentId) => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/studentBatches/${studentId}`, {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentBatches/${studentId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();
@@ -49,7 +49,7 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
         // fetching students fee
         const fetchFeeStatus = async (studentId) => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/student-fee-status/${studentId}`, {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/student-fee-status/${studentId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const fetchedFeeStatus = await res.json();
@@ -67,7 +67,7 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
         // fetching all batches
         const fetchAllBatches = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/batches`, {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();
@@ -92,7 +92,7 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
         if (!confirmDelete) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/studentDelete/${studentId}`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentDelete/${studentId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -111,7 +111,7 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
 
     const removeStudentFromBatch = async (studentId, batchId) => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/removeStudent/${studentId}/${batchId}`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/removeStudent/${studentId}/${batchId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -133,7 +133,7 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
         if (!batchId) return alert("Please select a batch first.");
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/addStudent/${studentId}/${batchId}`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudent/${studentId}/${batchId}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -160,7 +160,7 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
 
         try {
             const res = await fetch(
-                `${import.meta.env.VITE_BACKEND_URL}/admin/update-fee/${studentId}`,
+                `${import.meta.env.VITE_BACKEND_URL}/api/admin/update-fee/${studentId}`,
                 {
                     method: "POST",
                     headers: {
@@ -177,7 +177,7 @@ export default function StudentControls({ studentsRecords, setStudentsRecords })
             setOpenStudentModalFor(null);
             // Optional: refetch fee status
             const updatedFeeStatusRes = await fetch(
-                `${import.meta.env.VITE_BACKEND_URL}/admin/student-fee-status/${studentId}`,
+                `${import.meta.env.VITE_BACKEND_URL}/api/admin/student-fee-status/${studentId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             const updatedData = await updatedFeeStatusRes.json();

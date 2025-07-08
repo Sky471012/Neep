@@ -13,7 +13,7 @@ export default function TeacherControls({ teachersRecords, setTeachersRecords })
         const fetchBatches = async (teacherId) => {
             try {
                 const res = await fetch(
-                    `${import.meta.env.VITE_BACKEND_URL}/admin/teacherBatches/${teacherId}`,
+                    `${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherBatches/${teacherId}`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                     }
@@ -42,7 +42,7 @@ export default function TeacherControls({ teachersRecords, setTeachersRecords })
 
         try {
             const res = await fetch(
-                `${import.meta.env.VITE_BACKEND_URL}/admin/teacherDelete/${teacherId}`,
+                `${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherDelete/${teacherId}`,
                 {
                     method: "DELETE",
                     headers: {
@@ -76,7 +76,7 @@ export default function TeacherControls({ teachersRecords, setTeachersRecords })
 
         try {
             const res = await fetch(
-                `${import.meta.env.VITE_BACKEND_URL}/admin/removeTeacher/${teacherId}/${batchId}`,
+                `${import.meta.env.VITE_BACKEND_URL}/api/admin/removeTeacher/${teacherId}/${batchId}`,
                 {
                     method: "DELETE",
                     headers: {

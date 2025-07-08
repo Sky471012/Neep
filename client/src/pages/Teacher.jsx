@@ -42,7 +42,7 @@ export default function Teacher() {
                 return;
             }
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/teacher/batches`, {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/batches`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
                 .then((res) => {
@@ -60,7 +60,7 @@ export default function Teacher() {
         const fetchStudents = async (batchId) => {
             try {
                 const res = await fetch(
-                    `${import.meta.env.VITE_BACKEND_URL}/teacher/batchStudents/${batchId}`,
+                    `${import.meta.env.VITE_BACKEND_URL}/api/teacher/batchStudents/${batchId}`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                     }
@@ -98,7 +98,7 @@ export default function Teacher() {
         const dateISO = dateOnly.toISOString();
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/teacher/attendance/mark`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/mark`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -132,7 +132,7 @@ export default function Teacher() {
         const token = localStorage.getItem("authToken");
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/teacher/attendance/${studentId}`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/${studentId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from 'axios';
 import DatePicker from "react-datepicker";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -8,6 +9,7 @@ import TeacherControls from "../components/TeacherControls";
 import Batch from "../modals/Batch";
 import Student from "../modals/Student";
 import Teacher from "../modals/Teacher";
+import Popup from "../modals/Popup";
 
 export default function Admin() {
     const [admin, setAdmin] = useState(null);
@@ -17,16 +19,18 @@ export default function Admin() {
     const [openBatchModal, setOpenBatchModal] = useState(false);
     const [openStudentModal, setOpenStudentModal] = useState(false);
     const [openTeacherModal, setOpenTeacherModal] = useState(false);
+    const [openPopupModal, setOpenPopupModal] = useState(false);
     const [credentials, setCredentials] = useState({
         batch: "",
         studentName: "",
         studentPhone: "",
         studentDob: "",
         teacherName: "",
-        teacherEmail:""
+        teacherEmail: ""
     });
     const [dob, setDob] = useState(null);
-
+    const [description, setDescription] = useState('');
+    const [image, setImage] = useState(null);
 
 
     useEffect(() => {
@@ -43,7 +47,7 @@ export default function Admin() {
             }
 
             // Fetch batches
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/batches`, {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
                 .then((res) => {
@@ -54,7 +58,7 @@ export default function Admin() {
                 .catch((err) => console.error("Batches fetch error:", err));
 
             // Fetch students
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/students`, {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
                 .then((res) => {
@@ -65,7 +69,7 @@ export default function Admin() {
                 .catch((err) => console.error("Students fetch error:", err));
 
             // Fetch teachers
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/teachers`, {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
                 .then((res) => {
@@ -84,7 +88,7 @@ export default function Admin() {
         }
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/batchCreate`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchCreate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -112,7 +116,7 @@ export default function Admin() {
     const createStudent = async (studentName, studentPhone, studentDob) => {
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/studentCreate`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentCreate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -124,7 +128,7 @@ export default function Admin() {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message );
+                alert(data.message);
                 return;
             }
 
@@ -143,11 +147,11 @@ export default function Admin() {
         }
     };
 
-    
+
     const createTeacher = async (teacherName, teacherEmail) => {
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/teacherCreate`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherCreate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -159,7 +163,7 @@ export default function Admin() {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message );
+                alert(data.message);
                 return;
             }
 
@@ -174,6 +178,35 @@ export default function Admin() {
         } catch (error) {
             console.error("Error creating teacher:", error);
             alert("Something went wrong.");
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('description', description);
+        formData.append('image', image);
+
+        try {
+            const res = await axios.post(
+                `${import.meta.env.VITE_BACKEND_URL}/api/uploadPopup`,
+                formData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+
+            if (res.status === 200) {
+                alert('Popup updated successfully!');
+                setOpenPopupModal(false);
+            }
+        } catch (error) {
+            console.error('Popup upload error:', error.response?.data || error.message);
+            alert('Failed to upload popup. Unauthorized or server error.');
         }
     };
 
@@ -226,9 +259,10 @@ export default function Admin() {
                     <a href="#batches">Batches</a>
                     <a href="#students">Students</a>
                     <a href="#teachers">Teachers</a>
-                    <button className="button" onClick={() => setOpenBatchModal(true)}>Add a batch</button>
-                    <button className="button" onClick={() => setOpenStudentModal(true)}>Add student</button>
-                    <button className="button" onClick={() => setOpenTeacherModal(true)}>Add teacher</button>
+                    <button className="button" onClick={() => setOpenBatchModal(true)}>Add a Batch</button>
+                    <button className="button" onClick={() => setOpenStudentModal(true)}>Add a Student</button>
+                    <button className="button" onClick={() => setOpenTeacherModal(true)}>Add a Teacher</button>
+                    <button className="button" onClick={() => setOpenPopupModal(true)}>Update Popup</button>
                 </div>
 
                 <BatchControls batchesRecords={batchesRecords} setBatchesRecords={setBatchesRecords} />
@@ -306,7 +340,7 @@ export default function Admin() {
                     <button className='btn btn-success mt-2' type="submit">Add Student</button>
                 </form>
             </Student>
-            
+
             <Teacher
                 isOpen={openTeacherModal}
                 onClose={() => setOpenTeacherModal(false)}
@@ -339,6 +373,31 @@ export default function Admin() {
                     <button className='btn btn-success mt-2' type="submit">Add Teacher</button>
                 </form>
             </Teacher>
+
+            <Popup
+                isOpen={openPopupModal}
+                onClose={() => setOpenPopupModal(false)}
+            >
+                <h3>Updating Popup</h3>
+                <form onSubmit={handleSubmit} encType="multipart/form-data">
+                    <input
+                        type="file"
+                        onChange={(e) => setImage(e.target.files[0])}
+                        accept="image/*"
+                        required
+                    />
+                    <br />
+                    <textarea
+                        rows={4}
+                        placeholder="Enter popup description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        required
+                    />
+                    <br />
+                    <button type="submit">Upload</button>
+                </form>
+            </Popup>
         </>
     );
 }

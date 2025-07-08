@@ -24,7 +24,7 @@ export default function Login() {
             dob.getFullYear();
 
 
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/login/student`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login/student`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
