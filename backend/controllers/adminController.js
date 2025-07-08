@@ -116,6 +116,11 @@ exports.deleteBatch = async (req, res) => {
       batchId: batchId,
     });
 
+    // delete from Attendance
+    await Attendance.deleteMany({
+      batchId: batchId,
+    });
+
     res.json({ message: "Batch removed from database" });
   } catch (err) {
     res.status(500).json({ error: err.message });
