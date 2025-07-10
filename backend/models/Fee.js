@@ -19,17 +19,10 @@ const feeSchema = new Schema({
     type: String,
     required: false,
   },
-  feePaidDate: {
+  method: {
     type: String,
-    required: true,
-    default: function () {
-      // Get today's date in DD-MM-YYYY format
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const year = today.getFullYear();
-      return `${day}-${month}-${year}`;
-    },
+    enum: ["Online", "Cash"],
+    required: false,
   },
 });
 

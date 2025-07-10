@@ -25,7 +25,10 @@ exports.loginStudent = async (req, res) => {
         name: student.name,
         phone: student.phone,
         dob: student.dob,
-        createdAt: student.createdAt,
+        address: student.address,
+        class: student.class,
+        fee: student.fee,
+        dateOfJoining: student.dateOfJoining
       },
     });
   } catch (err) {

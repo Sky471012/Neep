@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { Inter28ptRegular } from "../assets/fonts/Inter_28pt-Regular";
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import AttendanceViewing from "../modals/AttendanceViewing";
@@ -32,6 +35,7 @@ export default function Student() {
     useEffect(() => {
         const storedStudent = localStorage.getItem("student");
         const token = localStorage.getItem("authToken");
+        console.log(token);
 
         if (storedStudent && token) {
             setStudent(JSON.parse(storedStudent));
@@ -74,6 +78,93 @@ export default function Student() {
         }
     }, []);
 
+    function generatePDFReceipt(student, record) {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        // ✅ Register custom Inter font
+        doc.addFileToVFS("Inter-Regular.ttf", Inter28ptRegular);
+        doc.addFont("Inter-Regular.ttf", "Inter", "normal");
+        doc.setFont("Inter");
+
+        const feeAmount = record.amount || 12000;
+        const amountInWords = convertAmountToWords(feeAmount);
+        const receiptId = `NEEPed-${record._id?.slice(-4) || Math.floor(Math.random() * 10000)}`;
+        const paidDate = record.paidDate || "--";
+        const method = record.method || "N/A";
+
+        const alignRight = (text, y) => {
+            const textWidth = doc.getTextWidth(text);
+            doc.text(text, pageWidth - 20 - textWidth, y);
+        };
+
+        // Header
+        doc.setFontSize(22);
+        doc.text("NEEP", 20, 20);
+
+        doc.setFontSize(12);
+        doc.text("Phone: 919313214643", 20, 28);
+        doc.text("Email: mohan.mahi13@gmail.com", 20, 34);
+
+        doc.setFontSize(16);
+        doc.text("INVOICE", pageWidth / 2, 45, null, null, "center");
+
+        doc.setFontSize(12);
+        doc.text(`Payment Method: ${method}`, 20, 55);
+        alignRight(`Receipt #: ${receiptId}`, 62);
+        alignRight(`Receipt Date: ${paidDate}`, 69);
+
+        alignRight(`Bill to: ${student.name}`, 76);
+        alignRight(`Class: ${student.class || "N/A"}`, 83);
+        alignRight(`Phone: ${student.phone}`, 90);
+
+        // Table with proper ₹ symbol
+        autoTable(doc, {
+            startY: 100,
+            head: [['# Item & Description', 'Amount']],
+            body: [
+                [`Installment-${record.installmentNo}_class_${student.class}`, `₹ ${feeAmount}`],
+                ['Sub Total', `\u20B9 ${feeAmount}`],
+                ['Total', `\u20B9 ${feeAmount}`],
+                ['Amount Received', `\u20B9 ${feeAmount}`],
+                ['Amount Received in Words:', `${amountInWords}`]
+            ],
+            styles: {
+                font: "Inter",
+                fontSize: 12,
+                cellPadding: 4
+            },
+            headStyles: {
+                font: "Inter",
+                fillColor: [0, 0, 0],
+                textColor: [255, 255, 255],
+                halign: 'center'
+            },
+            columnStyles: {
+                0: { cellWidth: 'auto', halign: 'left' },
+                1: { cellWidth: 80, halign: 'right' }
+            }
+        });
+
+
+        doc.setDrawColor(0);
+        doc.line(20, doc.lastAutoTable.finalY + 5, pageWidth - 20, doc.lastAutoTable.finalY + 5);
+
+        doc.text(`Notes: Received by ${method.toLowerCase()}`, 20, doc.lastAutoTable.finalY + 20);
+        doc.setFontSize(10);
+        doc.text("This is a computer generated pay receipt and does not require a signature", 20, doc.lastAutoTable.finalY + 30);
+
+        doc.save(`${student.name}_Installment${record.installmentNo}_Receipt.pdf`);
+    }
+
+    function convertAmountToWords(amount) {
+        const words = {
+            1000: "One Thousand",
+            12000: "Twelve Thousands",
+            14000: "Fourteen Thousands"
+        };
+        return words[amount] ? `${words[amount]} Rupees only` : `${amount} Rupees only`;
+    }
 
     if (!student) return <p>Loading student data...</p>;
 
@@ -91,7 +182,10 @@ export default function Student() {
                 <div className="container">
                     <span>Name : {student.name}</span><br />
                     <span>Phone : {student.phone}</span><br />
-                    <span>DOB : {student.dob}</span>
+                    <span>DOB : {student.dob}</span><br />
+                    <span>Class : {student.class}</span><br />
+                    <span>Address : {student.address}</span><br />
+                    <span>Date of Joining : {student.dateOfJoining}</span><br />
                 </div>
             </div>
 
@@ -200,37 +294,42 @@ export default function Student() {
             <button className="button" onClick={() => setShowFee(student._id)}>
                 Show Fee details
             </button>
-            <Fee
-                isOpen={showFee === student._id}
-                onClose={() => setShowFee(null)}
-            >
+            <Fee isOpen={showFee === student._id} onClose={() => setShowFee(null)}>
                 <div className="fee-details">
                     <h1>Fee Details</h1>
                     <table className="table table-bordered table-striped text-center">
                         <thead className="table-dark">
                             <tr>
-                                <th>Month</th>
+                                <th>Installment</th>
+                                <th>Due Date</th>
+                                <th>Paid Date</th>
+                                <th>Method</th>
                                 <th>Status</th>
-                                <th>Amount</th>
-                                <th>Paid On</th>
+                                <th>Receipt</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {allMonths.map((month, index) => {
-                                const year = index < 9 ? academicYearStart : academicYearStart + 1;
-                                const fullMonth = `${month} ${year}`;
-                                const record = feeRecords.find(r =>
-                                    r.month.trim().toLowerCase() === fullMonth.trim().toLowerCase()
-                                );
-
+                            {feeRecords.map((record, index) => {
+                                const status = record.paidDate ? "Paid" : "Pending";
                                 return (
                                     <tr key={index}>
-                                        <td>{fullMonth}</td>
-                                        <td className={record ? "text-success fw-bold" : "text-danger fw-bold"}>
-                                            {record ? "Paid" : "Pending"}
+                                        <td>Installment {record.installmentNo}</td>
+                                        <td>{record.dueDate || "--"}</td>
+                                        <td>{record.paidDate || "--"}</td>
+                                        <td>{record.method || "--"}</td>
+                                        <td className={record.paidDate ? "text-success fw-bold" : "text-danger fw-bold"}>
+                                            {status}
                                         </td>
-                                        <td>{record ? `₹${record.amount}` : "--"}</td>
-                                        <td>{record?.paidOn ? new Date(record.paidOn).toLocaleDateString() : "--"}</td>
+                                        <td>
+                                            {record.paidDate ? (
+                                                <button
+                                                    className="button"
+                                                    onClick={() => generatePDFReceipt(student, record)}
+                                                >
+                                                    Download
+                                                </button>
+                                            ) : "--"}
+                                        </td>
                                     </tr>
                                 );
                             })}
