@@ -1,8 +1,8 @@
-const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
 const FeeStatus = require('../models/Fee');
 const Batches = require('../models/Batch_students');
 const Test = require('../models/Test');
+const Timetable = require('../models/TimeTable');
 
 exports.getAttendance = async (req, res) => {
   try {
@@ -17,6 +17,16 @@ exports.getTest = async (req, res) => {
   try {
     const tests = await Test.find({ studentId: req.user.id });
     res.json(tests);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getTimetable = async (req, res) => {
+  const {batchId} = req.body;
+  try {
+    const timetable = await Timetable.find({ batchId });
+    res.json(timetable);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

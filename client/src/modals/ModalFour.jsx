@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export default function AttendanceViewing({ isOpen, onClose, children }) {
+export default function ModalFour({ isOpen, onClose, children }) {
   if (!isOpen) return null; // ✅ Use isOpen here — but DO NOT pass it to <div>
 
   return ReactDOM.createPortal(
@@ -11,6 +11,6 @@ export default function AttendanceViewing({ isOpen, onClose, children }) {
         {children}
       </div>
     </div>,
-    document.getElementById('attendance-viewing-root')
+    document.getElementById('modal-four-root')
   );
 }

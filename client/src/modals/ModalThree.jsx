@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export default function Fee({ isOpen, onClose, children }) {
+export default function ModalThree({ isOpen, onClose, children }) {
   if (!isOpen) return null; // ✅ Use isOpen here — but DO NOT pass it to <div>
 
   return ReactDOM.createPortal(
@@ -11,6 +11,6 @@ export default function Fee({ isOpen, onClose, children }) {
         {children}
       </div>
     </div>,
-    document.getElementById('fee-root')
+    document.getElementById('modal-three-root')
   );
 }

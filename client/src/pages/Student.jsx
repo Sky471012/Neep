@@ -4,21 +4,24 @@ import autoTable from "jspdf-autotable";
 import { Inter28ptRegular } from "../assets/fonts/Inter_28pt-Regular";
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import AttendanceViewing from "../modals/AttendanceViewing";
-import Fee from "../modals/Fee";
-import Test from "../modals/Test";
+import ModalOne from "../modals/ModalOne";
+import ModalTwo from "../modals/ModalTwo";
+import ModalThree from "../modals/ModalThree";
+import ModalFour from "../modals/ModalFour";
 
 export default function Student() {
 
     const [student, setStudent] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
-    const [showFee, setShowFee] = useState(null);
+    const [timetableRecords, setTimetableRecords] = useState({});
     const [testRecords, setTestRecords] = useState([]);
     const [feeRecords, setFeeRecords] = useState([]);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [attendanceMap, setAttendanceMap] = useState({});
-    const [showAttendance, setShowAttendance] = useState(null);
-    const [showTest, setShowTest] = useState(null);
+    const [showModalOne, setShowModalOne] = useState(null);
+    const [showModalTwo, setShowModalTwo] = useState(null);
+    const [showModalThree, setShowModalThree] = useState(null);
+    const [showModalFour, setShowModalFour] = useState(null);
 
 
     const jsMonth = new Date().getMonth(); // 0 = Jan ... 11 = Dec
@@ -79,15 +82,37 @@ export default function Student() {
                 .then(setTestRecords)
                 .catch(err => console.error("Test fetch error:", err));
 
+
             //fetching fee
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/fee-status`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` },
             })
                 .then(res => res.json())
                 .then(setFeeRecords)
                 .catch(err => console.error("Fee status fetch error:", err));
         }
     }, []);
+
+    function fetchTimetable(batchId) {
+        const token = localStorage.getItem("authToken");
+
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/timetable`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ batchId })
+        })
+            .then(res => res.json())
+            .then(data => {
+                setTimetableRecords(prev => ({
+                    ...prev,
+                    [batchId]: data
+                }));
+            })
+            .catch(err => console.error("Timetable fetch error:", err));
+    }
 
     function generatePDFReceipt(student, record) {
         const doc = new jsPDF();
@@ -213,14 +238,14 @@ export default function Student() {
 
 
                                         <div className="d-flex gap-3">
-                                            <button className="button" onClick={() => setShowAttendance(batch.batchId)}>
+                                            <button className="button" onClick={() => setShowModalOne(batch.batchId)}>
                                                 Show Attendance
                                             </button>
-                                            <AttendanceViewing
-                                                isOpen={showAttendance === batch.batchId}
-                                                onClose={() => setShowAttendance(null)}
+                                            <ModalOne
+                                                isOpen={showModalOne === batch.batchId}
+                                                onClose={() => setShowModalOne(null)}
                                             >
-                                                {showAttendance && (
+                                                {showModalOne && (
                                                     <div id={`carousel-${batch.batchId}`} className="carousel slide">
                                                         <h5 className="card-title">{batch.batchName}</h5>
                                                         <div className="carousel-inner">
@@ -290,14 +315,14 @@ export default function Student() {
                                                     </div>
 
                                                 )}
-                                            </AttendanceViewing>
+                                            </ModalOne>
 
-                                            <button className="button" onClick={() => setShowTest(batch.batchId)}>
+                                            <button className="button" onClick={() => setShowModalTwo(batch.batchId)}>
                                                 Show all Tests
                                             </button>
-                                            <Test
-                                                isOpen={showTest === batch.batchId}
-                                                onClose={() => setShowTest(null)}
+                                            <ModalTwo
+                                                isOpen={showModalTwo === batch.batchId}
+                                                onClose={() => setShowModalTwo(null)}
                                             >
                                                 <div className="test-details">
                                                     <h3>All Tests of {batch.batchName}</h3>
@@ -327,7 +352,51 @@ export default function Student() {
                                                         <p>No tests found for this batch.</p>
                                                     )}
                                                 </div>
-                                            </Test>
+                                            </ModalTwo>
+
+                                            <button
+                                                className="button"
+                                                onClick={() => {
+                                                    setShowModalThree(batch.batchId);
+                                                    fetchTimetable(batch.batchId);
+                                                }}
+                                            >
+                                                Show Timetable
+                                            </button>
+                                            <ModalThree
+                                                isOpen={showModalThree === batch.batchId}
+                                                onClose={() => setShowModalThree(null)}
+                                            >
+                                                <div className="timetable-details">
+                                                    <h3>Timetable for {batch.batchName}</h3>
+                                                    {timetableRecords[batch.batchId]?.length > 0 ? (
+                                                        <table className="table table-bordered text-center mt-3">
+                                                            <thead className="table-dark">
+                                                                <tr>
+                                                                    <th>Weekday</th>
+                                                                    <th>Time Slots</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {timetableRecords[batch.batchId].map((entry, index) => (
+                                                                    <tr key={index}>
+                                                                        <td>{entry.weekday}</td>
+                                                                        <td>
+                                                                            {entry.classTimings.map((slot, idx) => (
+                                                                                <div key={idx}>
+                                                                                    {slot.startTime} - {slot.endTime}
+                                                                                </div>
+                                                                            ))}
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    ) : (
+                                                        <p>No timetable found for this batch.</p>
+                                                    )}
+                                                </div>
+                                            </ModalThree>
                                         </div>
 
                                     </div>
@@ -341,10 +410,10 @@ export default function Student() {
             </div>
 
             {/* Fee Table */}
-            <button className="button" onClick={() => setShowFee(student._id)}>
+            <button className="button" onClick={() => setShowModalFour(student._id)}>
                 Show Fee details
             </button>
-            <Fee isOpen={showFee === student._id} onClose={() => setShowFee(null)}>
+            <ModalFour isOpen={showModalFour === student._id} onClose={() => setShowModalFour(null)}>
                 <div className="fee-details">
                     <h1>Fee Details</h1>
                     <table className="table table-bordered table-striped text-center">
@@ -360,7 +429,7 @@ export default function Student() {
                         </thead>
                         <tbody>
                             {feeRecords.map((record, index) => {
-                                const status = record.paidDate ? "Paid" : "Pending";
+                                const status = record.paidDate ? "Paid" : "Due";
                                 return (
                                     <tr key={index}>
                                         <td>Installment {record.installmentNo}</td>
@@ -386,7 +455,8 @@ export default function Student() {
                         </tbody>
                     </table>
                 </div>
-            </Fee>
+            </ModalFour>
+
         </div>
 
 

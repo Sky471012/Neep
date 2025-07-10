@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import DatePicker from "react-datepicker";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import StudentList from "../modals/StudentList";
+import StudentList from "../modals/ModalFour";
 import AttendanceList from "../modals/AttendanceMarking";
 
 export default function Teacher() {

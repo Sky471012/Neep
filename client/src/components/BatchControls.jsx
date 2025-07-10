@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import StudentList from "../modals/StudentList";
+import StudentList from "../modals/ModalFour";
 import AttendanceList from "../modals/AttendanceMarking";
 import DatePicker from "react-datepicker";
 import Teacher from "../modals/Teacher";

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export default function Test({ isOpen, onClose, children }) {
+export default function ModalTwo({ isOpen, onClose, children }) {
   if (!isOpen) return null; // ✅ Use isOpen here — but DO NOT pass it to <div>
 
   return ReactDOM.createPortal(
@@ -11,6 +11,6 @@ export default function Test({ isOpen, onClose, children }) {
         {children}
       </div>
     </div>,
-    document.getElementById('test-root')
+    document.getElementById('modal-two-root')
   );
 }
