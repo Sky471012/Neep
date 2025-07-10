@@ -6,16 +6,19 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import AttendanceViewing from "../modals/AttendanceViewing";
 import Fee from "../modals/Fee";
+import Test from "../modals/Test";
 
 export default function Student() {
 
     const [student, setStudent] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
     const [showFee, setShowFee] = useState(null);
+    const [testRecords, setTestRecords] = useState([]);
     const [feeRecords, setFeeRecords] = useState([]);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [attendanceMap, setAttendanceMap] = useState({});
     const [showAttendance, setShowAttendance] = useState(null);
+    const [showTest, setShowTest] = useState(null);
 
 
     const jsMonth = new Date().getMonth(); // 0 = Jan ... 11 = Dec
@@ -67,6 +70,14 @@ export default function Student() {
                     setAttendanceMap(newMap);
                 })
                 .catch(err => console.error("Attendance fetch error:", err));
+
+            //fetching test
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/test`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+                .then(res => res.json())
+                .then(setTestRecords)
+                .catch(err => console.error("Test fetch error:", err));
 
             //fetching fee
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/fee-status`, {
@@ -201,84 +212,123 @@ export default function Student() {
                                         <h5 className="card-title">{batch.batchName}</h5>
 
 
-                                        <button className="button" onClick={() => setShowAttendance(batch.batchId)}>
-                                            Show Attendance
-                                        </button>
-                                        <AttendanceViewing
-                                            isOpen={showAttendance === batch.batchId}
-                                            onClose={() => setShowAttendance(null)}
-                                        >
-                                            {showAttendance && (
-                                                <div id={`carousel-${batch.batchId}`} className="carousel slide">
-                                                    <h5 className="card-title">{batch.batchName}</h5>
-                                                    <div className="carousel-inner">
-                                                        {allMonths.map((month, idx) => {
-                                                            // Fix: Map academic months to calendar months/years
-                                                            // Academic year: April(0) to March(11)
-                                                            // Calendar mapping: April=3, May=4, ..., Dec=11, Jan=0, Feb=1, Mar=2
-                                                            let calendarMonth, calendarYear;
+                                        <div className="d-flex gap-3">
+                                            <button className="button" onClick={() => setShowAttendance(batch.batchId)}>
+                                                Show Attendance
+                                            </button>
+                                            <AttendanceViewing
+                                                isOpen={showAttendance === batch.batchId}
+                                                onClose={() => setShowAttendance(null)}
+                                            >
+                                                {showAttendance && (
+                                                    <div id={`carousel-${batch.batchId}`} className="carousel slide">
+                                                        <h5 className="card-title">{batch.batchName}</h5>
+                                                        <div className="carousel-inner">
+                                                            {allMonths.map((month, idx) => {
+                                                                // Fix: Map academic months to calendar months/years
+                                                                // Academic year: April(0) to March(11)
+                                                                // Calendar mapping: April=3, May=4, ..., Dec=11, Jan=0, Feb=1, Mar=2
+                                                                let calendarMonth, calendarYear;
 
-                                                            if (idx <= 8) { // April to December
-                                                                calendarMonth = idx + 3; // April=3, May=4, ..., Dec=11
-                                                                calendarYear = academicYearStart;
-                                                            } else { // January to March
-                                                                calendarMonth = idx - 9; // Jan=0, Feb=1, Mar=2
-                                                                calendarYear = academicYearStart + 1;
-                                                            }
+                                                                if (idx <= 8) { // April to December
+                                                                    calendarMonth = idx + 3; // April=3, May=4, ..., Dec=11
+                                                                    calendarYear = academicYearStart;
+                                                                } else { // January to March
+                                                                    calendarMonth = idx - 9; // Jan=0, Feb=1, Mar=2
+                                                                    calendarYear = academicYearStart + 1;
+                                                                }
 
-                                                            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                                                                const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
 
-                                                            return (
-                                                                <div className={`carousel-item ${idx === activeMonthIndex ? "active" : ""}`} key={month}>
-                                                                    <h6>{month} {calendarYear}</h6>
-                                                                    <div className="calendar-grid">
-                                                                        {[...Array(daysInMonth)].map((_, dateIdx) => {
-                                                                            // Fix: Use proper calendar month and year for date construction
-                                                                            const date = new Date(calendarYear, calendarMonth, dateIdx + 1);
-                                                                            const fullDate = date.toISOString().split('T')[0];
-                                                                            const key = `${batch.batchId}_${fullDate}`;
-                                                                            const status = attendanceMap[key];
+                                                                return (
+                                                                    <div className={`carousel-item ${idx === activeMonthIndex ? "active" : ""}`} key={month}>
+                                                                        <h6>{month} {calendarYear}</h6>
+                                                                        <div className="calendar-grid">
+                                                                            {[...Array(daysInMonth)].map((_, dateIdx) => {
+                                                                                // Fix: Use proper calendar month and year for date construction
+                                                                                const date = new Date(calendarYear, calendarMonth, dateIdx + 1);
+                                                                                const fullDate = date.toISOString().split('T')[0];
+                                                                                const key = `${batch.batchId}_${fullDate}`;
+                                                                                const status = attendanceMap[key];
 
-                                                                            return (
-                                                                                <div
-                                                                                    key={dateIdx}
-                                                                                    className={`date-box ${status === "present"
-                                                                                        ? "present"
-                                                                                        : status === "absent"
-                                                                                            ? "absent"
-                                                                                            : ""
-                                                                                        }`}
-                                                                                    title={`${month} ${dateIdx + 1}, ${calendarYear} - ${status || 'No record'}`}
-                                                                                >
-                                                                                    {dateIdx + 1}
-                                                                                </div>
-                                                                            );
-                                                                        })}
+                                                                                return (
+                                                                                    <div
+                                                                                        key={dateIdx}
+                                                                                        className={`date-box ${status === "present"
+                                                                                            ? "present"
+                                                                                            : status === "absent"
+                                                                                                ? "absent"
+                                                                                                : ""
+                                                                                            }`}
+                                                                                        title={`${month} ${dateIdx + 1}, ${calendarYear} - ${status || 'No record'}`}
+                                                                                    >
+                                                                                        {dateIdx + 1}
+                                                                                    </div>
+                                                                                );
+                                                                            })}
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            );
-                                                        })}
+                                                                );
+                                                            })}
+                                                        </div>
+
+                                                        {/* Custom Carousel Controls */}
+                                                        <div className="calendar-controls d-flex justify-content-between mt-2">
+                                                            <button className="btn btn-outline-secondary btn-sm"
+                                                                type="button"
+                                                                data-bs-target={`#carousel-${batch.batchId}`}
+                                                                data-bs-slide="prev">
+                                                                ‹ Previous
+                                                            </button>
+                                                            <button className="btn btn-outline-secondary btn-sm"
+                                                                type="button"
+                                                                data-bs-target={`#carousel-${batch.batchId}`}
+                                                                data-bs-slide="next">
+                                                                Next ›
+                                                            </button>
+                                                        </div>
                                                     </div>
 
-                                                    {/* Custom Carousel Controls */}
-                                                    <div className="calendar-controls d-flex justify-content-between mt-2">
-                                                        <button className="btn btn-outline-secondary btn-sm"
-                                                            type="button"
-                                                            data-bs-target={`#carousel-${batch.batchId}`}
-                                                            data-bs-slide="prev">
-                                                            ‹ Previous
-                                                        </button>
-                                                        <button className="btn btn-outline-secondary btn-sm"
-                                                            type="button"
-                                                            data-bs-target={`#carousel-${batch.batchId}`}
-                                                            data-bs-slide="next">
-                                                            Next ›
-                                                        </button>
-                                                    </div>
+                                                )}
+                                            </AttendanceViewing>
+
+                                            <button className="button" onClick={() => setShowTest(batch.batchId)}>
+                                                Show all Tests
+                                            </button>
+                                            <Test
+                                                isOpen={showTest === batch.batchId}
+                                                onClose={() => setShowTest(null)}
+                                            >
+                                                <div className="test-details">
+                                                    <h3>All Tests of {batch.batchName}</h3>
+                                                    <table className="table table-bordered table-striped text-center mt-3">
+                                                        <thead className="table-dark">
+                                                            <tr>
+                                                                <th>Test Name</th>
+                                                                <th>Date</th>
+                                                                <th>Max Marks</th>
+                                                                <th>Marks Scored</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {testRecords
+                                                                .filter(test => test.batchId === batch.batchId)
+                                                                .map((test, index) => (
+                                                                    <tr key={index}>
+                                                                        <td>{test.name}</td>
+                                                                        <td>{test.date}</td>
+                                                                        <td>{test.maxMarks}</td>
+                                                                        <td>{test.marksScored}</td>
+                                                                    </tr>
+                                                                ))}
+                                                        </tbody>
+                                                    </table>
+                                                    {testRecords.filter(test => test.batchId === batch.batchId).length === 0 && (
+                                                        <p>No tests found for this batch.</p>
+                                                    )}
                                                 </div>
-
-                                            )}
-                                        </AttendanceViewing>
+                                            </Test>
+                                        </div>
 
                                     </div>
                                 </div>

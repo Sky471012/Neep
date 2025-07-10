@@ -71,11 +71,13 @@ td {
 }
 
 .modal-box {
+  display: flex;
+  flex-direction: column;
   background: white;
   padding: 20px;
   border-radius: 8px;
   position: relative;
-  width: 50%;
+  width: 89%;
   min-height: 60vh;
   max-height: 90vh;       /* 👈 Restrict height */
   overflow-y: auto;        /* 👈 Enable vertical scrolling */
