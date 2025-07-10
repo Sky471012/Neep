@@ -44,7 +44,7 @@ exports.sendOtp = async (req, res) => {
     await OtpLog.create({
       email,
       otp,
-      expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
     });
 
     await sendMail(email, "Your OTP", `Your OTP is: ${otp}`);

@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
-
-const { Schema, model, Types } = mongoose;
+const { Schema, model } = mongoose;
 
 const optSchema = new Schema({
   email: {
@@ -14,6 +13,7 @@ const optSchema = new Schema({
   expiresAt: {
     type: Date,
     required: true,
+    index: { expires: 0 }, // TTL index: delete when `expiresAt` is reached
   },
   createdAt: {
     type: Date,

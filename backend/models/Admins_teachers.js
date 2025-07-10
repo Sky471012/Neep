@@ -1,26 +1,23 @@
 const mongoose = require("mongoose");
+const { Schema, model } = mongoose;
 
-const { Schema, model, Types } = mongoose;
-
-const admin_teacherSchema = new Schema({
+const adminTeacherSchema = new Schema({
   name: {
     type: String,
-    required: true,
+    required: true
   },
   email: {
     type: String,
-    required: true,
-    unique: true,
+    required: true 
+  },
+  phone: {
+    type: String,
+    required: true 
   },
   role: {
     type: String,
-    enum: ["admin", "teacher"],
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+    required: true 
+  }, // "admin" or "teacher"
 });
 
-module.exports = mongoose.model("admin_teacher", admin_teacherSchema);
+module.exports = model("AdminTeacher", adminTeacherSchema);

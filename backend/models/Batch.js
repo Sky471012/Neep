@@ -1,17 +1,23 @@
 const mongoose = require("mongoose");
-
-const { Schema, model, Types } = mongoose;
+const { Schema, model } = mongoose;
 
 const batchSchema = new Schema({
   name: {
     type: String,
-    required: true,
-    unique: true,
+    required: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  code: {
+    type: String,
+    required: true
+  },
+  startDate: {
+    type: String,
+    required: true
+  },
+  archive: {
+    type: Boolean,
+    default: false
   },
 });
 
-module.exports = mongoose.model("Batch", batchSchema);
+module.exports = model("Batch", batchSchema);
