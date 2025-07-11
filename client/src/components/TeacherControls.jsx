@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import BatchList from "../modals/BatchList";
+import BatchList from "../modals/ModalFive";
 
 
 export default function TeacherControls({ teachersRecords, setTeachersRecords }) {

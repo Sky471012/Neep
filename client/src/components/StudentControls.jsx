@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import BatchList from "../modals/BatchList";
+import BatchList from "../modals/ModalFive";
 import Fee from "../modals/ModalThree";
 import Batch from "../modals/Batch";
 import Student from "../modals/Student";

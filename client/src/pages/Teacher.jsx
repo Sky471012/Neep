@@ -3,17 +3,33 @@ import { Link, useNavigate } from 'react-router-dom'
 import DatePicker from "react-datepicker";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import StudentList from "../modals/ModalFour";
-import AttendanceList from "../modals/AttendanceMarking";
+import ModalOne from "../modals/ModalOne";
+import ModalTwo from "../modals/ModalTwo";
+import ModalThree from "../modals/ModalThree";
+import ModalFour from "../modals/ModalFour";
+import ModalFive from "../modals/ModalFive";
 
 export default function Teacher() {
     const [teacher, setTeacher] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
     const [students, setStudents] = useState({});
-    const [showStudentListFor, setShowStudentListFor] = useState(null);
-    const [openAttendanceModals, setOpenAttendanceModals] = useState({});
+    const [tests, setTests] = useState({});
+    const [timetable, setTimetable] = useState({});
+    const [showModalOneFor, setShowModalOneFor] = useState(null);
+    const [openModalTwo, setOpenModalTwo] = useState({});
+    const [openModalThree, setOpenModalThree] = useState({});
+    const [openModalFour, setOpenModalFour] = useState({});
+    const [showModalFiveFor, setShowModalFiveFor] = useState(null);
     const [selectedDates, setSelectedDates] = useState({});
     const [markedStatus, setMarkedStatus] = useState({});
+    const [testrecords, setTestRecords] = useState({});
+    const [testFormData, setTestFormData] = useState({});
+    const [formDates, setFormDates] = useState({});
+    const [testDetails, setTestDetails] = useState({
+        testName: "",
+        maxMarks: "",
+        testDate: null
+    });
     const [attendanceMap, setAttendanceMap] = useState({});
     // Changed: Single student attendance tracking instead of multiple
     const [activeStudentAttendance, setActiveStudentAttendance] = useState(null);
@@ -52,10 +68,12 @@ export default function Teacher() {
                 .then(setBatchesRecords)
                 .catch((err) => console.error("Batches fetch error:", err));
         }
-    }, []);
+    }, []); // Only on initial mount
 
+    // Fetch students and tests AFTER batches are loaded
     useEffect(() => {
         const token = localStorage.getItem("authToken");
+        if (!batchesRecords || batchesRecords.length === 0) return;
 
         const fetchStudents = async (batchId) => {
             try {
@@ -77,17 +95,63 @@ export default function Teacher() {
             }
         };
 
+        // Fetch tests AFTER batches are loaded
+        const fetchAlltests = async (batchId) => {
+            try {
+                const res = await fetch(
+                    `${import.meta.env.VITE_BACKEND_URL}/api/teacher/getTest/${batchId}`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Error fetching tests");
+
+                setTests((prev) => ({
+                    ...prev,
+                    [batchId]: data.test, // ✅ Use correct key
+                }));
+            } catch (err) {
+                console.error(`Error fetching tests for batch ${batchId}:`, err);
+            }
+        };
+
         batchesRecords.forEach((batch) => {
-            fetchStudents(batch.batchId);
+            if (batch.batchId) {
+                fetchStudents(batch.batchId);
+                fetchAlltests(batch.batchId);
+            }
         });
     }, [batchesRecords]);
 
-    const openAttendanceModal = (batchId) => {
-        setOpenAttendanceModals((prev) => ({ ...prev, [batchId]: true }));
+
+    // fetching timetable
+    const fetchTimetable = async (batchId) => {
+        const token = localStorage.getItem("authToken");
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/timetable/${batchId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Error fetching timetable");
+
+            setTimetable((prev) => ({
+                ...prev,
+                [batchId]: data.timetable || [] // Ensure it's an array
+            }));
+        } catch (err) {
+            console.error(`Error fetching timetable for batch ${batchId}:`, err);
+        }
     };
 
-    const closeAttendanceModal = (batchId) => {
-        setOpenAttendanceModals((prev) => ({ ...prev, [batchId]: false }));
+    const openTimetableModal = (batchId) => {
+        fetchTimetable(batchId); // fetch on open
+        setOpenModalThree((prev) => ({ ...prev, [batchId]: true }));
+    };
+
+    const closeTimetableModal = (batchId) => {
+        setOpenModalThree((prev) => ({ ...prev, [batchId]: false }));
     };
 
     const markAttendance = async (studentId, batchId, status, date) => {
@@ -123,6 +187,68 @@ export default function Teacher() {
             console.error("Attendance error:", err);
             alert("Failed to mark attendance.");
         }
+    };
+
+    const openAttendanceModal = (batchId) => {
+        setOpenModalTwo((prev) => ({ ...prev, [batchId]: true }));
+    };
+
+    const closeAttendanceModal = (batchId) => {
+        setOpenModalTwo((prev) => ({ ...prev, [batchId]: false }));
+    };
+
+    const addTest = async (studentId, batchId, name, maxMarks, marksScored, date) => {
+        if (!studentId || !batchId || !name || !maxMarks || !marksScored || !date) {
+            return alert("All fields are required.");
+        }
+
+        const token = localStorage.getItem("authToken");
+        const dateOnly = new Date(date.toDateString());
+        const dateISO = dateOnly.toISOString();
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/test/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    studentId,
+                    batchId,
+                    name,
+                    maxMarks,
+                    marksScored,
+                    date: dateISO
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to add test");
+
+            setTestRecords((prev) => ({
+                ...prev,
+                [`${studentId}_${batchId}_${name}_${dateOnly.toDateString()}`]: {
+                    studentId,
+                    batchId,
+                    name,
+                    maxMarks,
+                    marksScored,
+                    date: dateOnly.toDateString()
+                }
+            }));
+        } catch (err) {
+            console.error("Attendance error:", err);
+            alert("Failed to mark attendance.");
+        }
+    };
+
+    const openTestModal = (batchId) => {
+        setOpenModalFour((prev) => ({ ...prev, [batchId]: true }));
+    };
+
+    const closeTestModal = (batchId) => {
+        setOpenModalFour((prev) => ({ ...prev, [batchId]: false }));
     };
 
     const showStudentAttendance = async (studentId, batchId) => {
@@ -176,6 +302,8 @@ export default function Teacher() {
                         <br />
                         <span>Email : {teacher.email}</span>
                         <br />
+                        <span>Phone : {teacher.phone}</span>
+                        <br />
                         <span>Role : {teacher.role}</span>
                     </div>
                 </div>
@@ -193,13 +321,14 @@ export default function Teacher() {
                                         <div className="col-12 col-md-6 col-lg-5" key={index}>
                                             <div className="card batch-card mb-3">
                                                 <h5 className="card-title">{batch.batchName}</h5>
+                                                <h5 className="card-title">{batch.batchId}</h5>
                                                 <div className="d-flex gap-3">
-                                                    <button className="button" onClick={() => setShowStudentListFor(batchId)}>
+                                                    <button className="button" onClick={() => setShowModalOneFor(batchId)}>
                                                         Show all students
                                                     </button>
-                                                    <StudentList
-                                                        isOpen={showStudentListFor === batchId}
-                                                        onClose={() => setShowStudentListFor(null)}
+                                                    <ModalOne
+                                                        isOpen={showModalOneFor === batchId}
+                                                        onClose={() => setShowModalOneFor(null)}
                                                     >
                                                         <div>
                                                             <h3>{batch.batchName}</h3>
@@ -303,13 +432,13 @@ export default function Teacher() {
                                                                 ))}
                                                             </ul>
                                                         </div>
-                                                    </StudentList>
+                                                    </ModalOne>
 
                                                     <button className="button" onClick={() => openAttendanceModal(batchId)}>
                                                         Mark attendance
                                                     </button>
-                                                    <AttendanceList
-                                                        isOpen={openAttendanceModals[batchId]}
+                                                    <ModalTwo
+                                                        isOpen={openModalTwo[batchId]}
                                                         onClose={() => closeAttendanceModal(batchId)}
                                                     >
                                                         <div>
@@ -367,7 +496,201 @@ export default function Teacher() {
                                                                 </tbody>
                                                             </table>
                                                         </div>
-                                                    </AttendanceList>
+                                                    </ModalTwo>
+                                                </div>
+
+                                                <div className="d-flex mt-3 gap-3">
+                                                    <button className="button" onClick={() => openTimetableModal(batch.batchId)}>
+                                                        Show Timetable
+                                                    </button>
+                                                    <ModalThree
+                                                        isOpen={openModalThree[batch.batchId]}
+                                                        onClose={() => closeTimetableModal(batch.batchId)}
+                                                    >
+                                                        <div className="timetable-details">
+                                                            <h3>Timetable for {batch.batchName}</h3>
+                                                            {timetable[batch.batchId]?.length > 0 ? (
+                                                                <table className="table table-bordered text-center mt-3">
+                                                                    <thead className="table-dark">
+                                                                        <tr>
+                                                                            <th>Weekday</th>
+                                                                            <th>Time Slots</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {timetable[batch.batchId].map((entry, index) => (
+                                                                            <tr key={index}>
+                                                                                <td>{entry.weekday}</td>
+                                                                                <td>
+                                                                                    {entry.classTimings.map((slot, idx) => (
+                                                                                        <div key={idx}>
+                                                                                            {slot.startTime} - {slot.endTime}
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+                                                            ) : (
+                                                                <p>No timetable found for this batch.</p>
+                                                            )}
+                                                        </div>
+                                                    </ModalThree>
+
+                                                    <button className="button" onClick={() => openTestModal(batch.batchId)}>
+                                                        Add Test
+                                                    </button>
+                                                    <ModalFour
+                                                        isOpen={openModalFour[batch.batchId]}
+                                                        onClose={() => closeTestModal(batch.batchId)}
+                                                    >
+                                                        <div>
+                                                            <h3>Add Test for {batch.batchName}</h3>
+                                                            <form
+                                                                onSubmit={async (e) => {
+                                                                    e.preventDefault();
+                                                                    const { testName, maxMarks, testDate } = testDetails;
+                                                                    if (!testName || !maxMarks || !testDate) {
+                                                                        return alert("Please fill test name, max marks, and date.");
+                                                                    }
+
+                                                                    const date = new Date(testDate);
+                                                                    for (const student of students[batch.batchId] || []) {
+                                                                        const marksScored = testFormData[student._id];
+                                                                        if (marksScored !== undefined && marksScored !== "") {
+                                                                            await addTest(
+                                                                                student._id,
+                                                                                batch.batchId,
+                                                                                testName,
+                                                                                Number(maxMarks),
+                                                                                Number(marksScored),
+                                                                                date
+                                                                            );
+                                                                        }
+                                                                    }
+
+                                                                    setTestDetails({ testName: "", maxMarks: "", testDate: null });
+                                                                    setTestFormData({});
+                                                                    closeTestModal(batch.batchId);
+                                                                }}
+                                                            >
+                                                                <div className="mb-2">
+                                                                    <DatePicker
+                                                                        selected={testDetails.testDate}
+                                                                        onChange={(date) =>
+                                                                            setTestDetails((prev) => ({ ...prev, testDate: date }))
+                                                                        }
+                                                                        className="form-control mb-2"
+                                                                        dateFormat="yyyy-MM-dd"
+                                                                        placeholderText="Select test date"
+                                                                        required
+                                                                    />
+                                                                    <input
+                                                                        type="text"
+                                                                        placeholder="Test Name"
+                                                                        value={testDetails.testName}
+                                                                        onChange={(e) =>
+                                                                            setTestDetails((prev) => ({ ...prev, testName: e.target.value }))
+                                                                        }
+                                                                        className="form-control mb-1"
+                                                                        required
+                                                                    />
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="Max Marks"
+                                                                        value={testDetails.maxMarks}
+                                                                        onChange={(e) =>
+                                                                            setTestDetails((prev) => ({ ...prev, maxMarks: e.target.value }))
+                                                                        }
+                                                                        className="form-control mb-1"
+                                                                        required
+                                                                    />
+                                                                </div>
+
+                                                                <table className="table table-bordered">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Student Name</th>
+                                                                            <th>Marks Scored</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {(students[batch.batchId] || []).map((student) => (
+                                                                            <tr key={student._id}>
+                                                                                <td>{student.name}</td>
+                                                                                <td>
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        className="form-control"
+                                                                                        value={testFormData[student._id] || ""}
+                                                                                        onChange={(e) =>
+                                                                                            setTestFormData((prev) => ({
+                                                                                                ...prev,
+                                                                                                [student._id]: e.target.value
+                                                                                            }))
+                                                                                        }
+                                                                                        placeholder="Enter marks"
+                                                                                    />
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+
+                                                                <button type="submit" className="button">
+                                                                    Add
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </ModalFour>
+
+                                                    <button className="button" onClick={() => setShowModalFiveFor(batchId)}>
+                                                        Show all Tests
+                                                    </button>
+                                                    <ModalFive
+                                                        isOpen={showModalFiveFor === batchId}
+                                                        onClose={() => setShowModalFiveFor(null)}
+                                                    >
+                                                        {students[batchId] && tests[batchId] ? (
+                                                            tests[batchId].length === 0 ? (
+                                                                <div className="p-4 text-center text-gray-600">No tests found for this batch.</div>
+                                                            ) : (
+                                                                <div className="overflow-x-auto">
+                                                                    <h3>Showuing all Tests</h3>
+                                                                    <table className="table table-bordered w-full">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Student Name</th>
+                                                                                {tests[batchId].map((test) => (
+                                                                                    <th key={test._id}>
+                                                                                        {test.name} <br />
+                                                                                        ({new Date(test.date).toLocaleDateString()})
+                                                                                    </th>
+                                                                                ))}
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {students[batchId].map((student) => (
+                                                                                <tr key={student._id}>
+                                                                                    <td><b>{student.name}</b></td>
+                                                                                    {tests[batchId].map((test) => (
+                                                                                        <td key={test._id}>
+                                                                                            {test.studentId === student._id
+                                                                                                ? `${test.marksScored}/${test.maxMarks}`
+                                                                                                : "-"}
+                                                                                        </td>
+                                                                                    ))}
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            )
+                                                        ) : (
+                                                            <div className="p-4 text-center">No records found</div>
+                                                        )}
+                                                    </ModalFive>
                                                 </div>
                                             </div>
                                         </div>
@@ -379,9 +702,9 @@ export default function Teacher() {
                         </div>
                     </div>
                 </div>
-            {(teacher.role=="admin") &&
-                <Link to="/admin" className="button" style={{ backgroundColor: "gold", color: "black" }}>Admin Special</Link>
-            }
+                {(teacher.role == "admin") &&
+                    <Link to="/admin" className="button" style={{ backgroundColor: "gold", color: "black" }}>Admin Special</Link>
+                }
             </div>
 
             <Footer />

@@ -1,8 +1,10 @@
-const Teacher = require("../models/Admins_teachers");
 const Attendance = require("../models/Attendance");
 const Batches = require("../models/Batch_teachers");
 const BatchStudent = require("../models/Batch_students");
 const Student = require("../models/Student");
+const Timetable = require("../models/TimeTable");
+const Test = require('../models/Test');
+
 
 exports.getBatches = async (req, res) => {
   try {
@@ -33,17 +35,29 @@ exports.getBatchStudents = async (req, res) => {
   }
 };
 
-exports.getStudentsAttendance = async (req, res) => {
-  try{
-    const { studentId } = req.params;
-  
-    const attendance = await Attendance.find({ studentId });
+exports.getTimetable = async (req, res) => {
+  try {
+    const { batchId } = req.params;
 
-    res.json({ attendance })
+    const timetable = await Timetable.find({ batchId });
+
+    res.json({ timetable });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-}
+};
+
+exports.getStudentsAttendance = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const attendance = await Attendance.find({ studentId });
+
+    res.json({ attendance });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.markAttendance = async (req, res) => {
   const { studentId, batchId, date, status } = req.body;
@@ -54,6 +68,38 @@ exports.markAttendance = async (req, res) => {
       { upsert: true, new: true }
     );
     res.json(record);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.addTest = async (req, res) => {
+  const { studentId, batchId, name, maxMarks, marksScored, date } = req.body;
+  try {
+    const newTest = new Test({
+      studentId,
+      batchId,
+      name,
+      maxMarks,
+      marksScored,
+      date,
+    });
+
+    await newTest.save();
+
+    res.status(201).json({ message: "Test added successfully", test: newTest });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getTest = async (req, res) => {
+  try {
+    const { batchId } = req.params;
+
+    const test = await Test.find({ batchId });
+
+    res.json({ test });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
