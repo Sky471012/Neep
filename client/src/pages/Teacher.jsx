@@ -702,9 +702,6 @@ export default function Teacher() {
                         </div>
                     </div>
                 </div>
-                {(teacher.role == "admin") &&
-                    <Link to="/admin" className="button" style={{ backgroundColor: "gold", color: "black" }}>Admin Special</Link>
-                }
             </div>
 
             <Footer />

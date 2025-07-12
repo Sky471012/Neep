@@ -98,14 +98,18 @@ export default function LoginAdmin() {
 
             if (!response.ok) {
                 alert(json.message || "OTP verification failed.");
-                return;
+            } else {
+                console.log("Logined");
+                if(json.role === "teacher"){
+                    localStorage.setItem("role", "teacher");
+                } else {
+                    localStorage.setItem("role", "admin");
+                }
+                localStorage.setItem("authToken", json.authToken);
+                console.log(json.authToken);
+                navigate("/teacher"); // or "/admin" based on json.role
             }
 
-            console.log("Logined");
-            localStorage.setItem("teacher", JSON.stringify(json.user));
-            localStorage.setItem("authToken", json.authToken);
-            console.log(json.authToken);
-            navigate("/teacher"); // or "/admin" based on json.role
         } catch (err) {
             setIsLoading(false);
             console.error(err);

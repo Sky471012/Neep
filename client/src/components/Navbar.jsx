@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export default function Navbar() {
+  const authToken = localStorage.getItem("authToken");
+  const role = localStorage.getItem("role");
   const [scrolled, setScrolled] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
@@ -146,7 +148,8 @@ export default function Navbar() {
             </Link>
           </li>
 
-          {(localStorage.getItem("authToken")) && (localStorage.getItem("student")) &&
+
+          {authToken && role === "student" && (
             <li >
               <Link
                 to="/student"
@@ -155,9 +158,9 @@ export default function Navbar() {
                 Student
               </Link>
             </li>
-          }
+          )}
 
-          {(localStorage.getItem("authToken")) && (localStorage.getItem("teacher")) && (!localStorage.getItem("student")) &&
+          {authToken && (role === "teacher" || role === "admin") && (
             <li >
               <Link
                 to="/teacher"
@@ -166,7 +169,18 @@ export default function Navbar() {
                 Teacher
               </Link>
             </li>
-          }
+          )}
+
+          {authToken && role === "admin" && (
+            <li >
+              <Link
+                to="/admin"
+                className={`button ${isRouteActive("/teacher") ? "active" : ""}`}
+              >
+                Admin
+              </Link>
+            </li>
+          )}
 
           <li>
             {(!localStorage.getItem("authToken")) ?
@@ -246,25 +260,35 @@ export default function Navbar() {
           <i className="bi bi-envelope-fill"></i>Contact Us
         </Link>
 
-        {(localStorage.getItem("authToken")) && (localStorage.getItem("student")) &&
-          <Link
-            to="/student"
-            onClick={() => setSidebarOpen(false)}
-            className={`button ${isRouteActive("/student") ? "active" : ""}`}
-          >
-            Student
-          </Link>
-        }
-        
-        {(localStorage.getItem("authToken")) && (localStorage.getItem("teacher")) && (!localStorage.getItem("student")) &&
-          <Link
-            to="/teacher"
-            onClick={() => setSidebarOpen(false)}
-            className={`button ${isRouteActive("/teacher") ? "active" : ""}`}
-          >
-            Teacher
-          </Link>
-        }
+        {authToken && role === "student" && (
+            <Link
+              to="/student"
+              onClick={() => setSidebarOpen(false)}
+              className="button"
+            >
+              Student
+            </Link>
+        )}
+
+        {authToken && (role === "teacher" || role === "admin") && (
+            <Link
+              to="/teacher"
+              onClick={() => setSidebarOpen(false)}
+              className="button"
+            >
+              Teacher
+            </Link>
+        )}
+
+        {authToken && role === "admin" && (
+            <Link
+              to="/admin"
+              onClick={() => setSidebarOpen(false)}
+              className="button"
+            >
+              Admin
+            </Link>
+        )}
 
         {
           (!localStorage.getItem("authToken")) ?

@@ -6,9 +6,9 @@ import Footer from "../components/Footer";
 import BatchControls from "../components/BatchControls";
 import StudentControls from "../components/StudentControls";
 import TeacherControls from "../components/TeacherControls";
-import Batch from "../modals/Batch";
-import Student from "../modals/Student";
-import Teacher from "../modals/Teacher";
+import ModalOne from "../modals/ModalOne";
+import ModalTwo from "../modals/ModalTwo";
+import ModalThree from "../modals/ModalThree";
 import Popup from "../modals/Popup";
 
 export default function Admin() {
@@ -16,9 +16,9 @@ export default function Admin() {
     const [batchesRecords, setBatchesRecords] = useState([]);
     const [studentsRecords, setStudentsRecords] = useState([]);
     const [teachersRecords, setTeachersRecords] = useState([]);
-    const [openBatchModal, setOpenBatchModal] = useState(false);
-    const [openStudentModal, setOpenStudentModal] = useState(false);
-    const [openTeacherModal, setOpenTeacherModal] = useState(false);
+    const [openModalOne, setOpenModalOne] = useState(false);
+    const [openModalTwo, setOpenModalTwo] = useState(false);
+    const [openModalThree, setOpenModalThree] = useState(false);
     const [openPopupModal, setOpenPopupModal] = useState(false);
     const [credentials, setCredentials] = useState({
         batch: "",
@@ -104,7 +104,7 @@ export default function Admin() {
                 return;
             }
 
-            setOpenBatchModal(false); // close modal
+            setOpenModalOne(false); // close modal
             setBatchesRecords((prev) => [...prev, data]); // update state
             setCredentials({ batch: "" }); // reset form
         } catch (error) {
@@ -132,7 +132,7 @@ export default function Admin() {
                 return;
             }
 
-            setOpenStudentModal(false); // close modal
+            setOpenModalTwo(false); // close modal
             setStudentsRecords((prev) => [...prev, data]); // update state
             setCredentials((prev) => ({
                 ...prev,
@@ -167,7 +167,7 @@ export default function Admin() {
                 return;
             }
 
-            setOpenTeacherModal(false); // close modal
+            setOpenModalThree(false); // close modal
             setTeachersRecords((prev) => [...prev, data]); // update state
             setCredentials((prev) => ({
                 ...prev,
@@ -259,23 +259,23 @@ export default function Admin() {
                     <a href="#batches">Batches</a>
                     <a href="#students">Students</a>
                     <a href="#teachers">Teachers</a>
-                    <button className="button" onClick={() => setOpenBatchModal(true)}>Add a Batch</button>
-                    <button className="button" onClick={() => setOpenStudentModal(true)}>Add a Student</button>
-                    <button className="button" onClick={() => setOpenTeacherModal(true)}>Add a Teacher</button>
+                    <button className="button" onClick={() => setOpenModalOne(true)}>Add a Batch</button>
+                    <button className="button" onClick={() => setOpenModalTwo(true)}>Add a Student</button>
+                    <button className="button" onClick={() => setOpenModalThree(true)}>Add a Teacher</button>
                     <button className="button" onClick={() => setOpenPopupModal(true)}>Update Popup</button>
                 </div>
-
+{/* 
                 <BatchControls batchesRecords={batchesRecords} setBatchesRecords={setBatchesRecords} />
                 <StudentControls studentsRecords={studentsRecords} setStudentsRecords={setStudentsRecords} />
-                <TeacherControls teachersRecords={teachersRecords} setTeachersRecords={setTeachersRecords} />
+                <TeacherControls teachersRecords={teachersRecords} setTeachersRecords={setTeachersRecords} /> */}
             </div>
 
             <Footer />
 
 
-            <Batch
-                isOpen={openBatchModal}
-                onClose={() => setOpenBatchModal(false)}
+            <ModalOne
+                isOpen={openModalOne}
+                onClose={() => setOpenModalOne(false)}
                 onCreate={createBatch}
             >
                 <h3>Batch Creation</h3>
@@ -294,12 +294,12 @@ export default function Admin() {
                     </div>
                     <button className='btn btn-success mt-2' type="submit">Create Batch</button>
                 </form>
-            </Batch>
+            </ModalOne>
 
 
-            <Student
-                isOpen={openStudentModal}
-                onClose={() => setOpenStudentModal(false)}
+            <ModalTwo
+                isOpen={openModalTwo}
+                onClose={() => setOpenModalTwo(false)}
                 onCreate={createStudent}
             >
                 <h3>Adding a Student</h3>
@@ -339,11 +339,11 @@ export default function Admin() {
                     </div>
                     <button className='btn btn-success mt-2' type="submit">Add Student</button>
                 </form>
-            </Student>
+            </ModalTwo>
 
-            <Teacher
-                isOpen={openTeacherModal}
-                onClose={() => setOpenTeacherModal(false)}
+            <ModalThree
+                isOpen={openModalThree}
+                onClose={() => setOpenModalThree(false)}
                 onCreate={createTeacher}
             >
                 <h3>Adding a Teacher</h3>
@@ -372,7 +372,7 @@ export default function Admin() {
                     </div>
                     <button className='btn btn-success mt-2' type="submit">Add Teacher</button>
                 </form>
-            </Teacher>
+            </ModalThree>
 
             <Popup
                 isOpen={openPopupModal}

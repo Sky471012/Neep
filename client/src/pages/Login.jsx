@@ -38,7 +38,7 @@ export default function Login() {
             alert("Student not found!");
         } else {
             console.log("Logined");
-            localStorage.setItem("student", JSON.stringify(json.student));
+            localStorage.setItem("role", "student");
             localStorage.setItem("authToken", json.authToken);
             console.log(json.authToken);
             navigate("/student")
