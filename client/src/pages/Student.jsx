@@ -39,7 +39,7 @@ export default function Student() {
     const academicYearStart = currentMonth >= 3 ? currentYear : currentYear - 1;
 
     useEffect(() => {
-        const storedStudent = localStorage.getItem("student");
+        const storedStudent = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
         console.log(token);
 

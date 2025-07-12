@@ -1,6 +1,8 @@
 const Batch = require("../models/Batch");
 const BatchStudent = require("../models/Batch_students");
 const Attendance = require("../models/Attendance");
+const Timetable = require("../models/TimeTable");
+const Test = require("../models/Test");
 const Fee = require("../models/Fee");
 const Student = require("../models/Student");
 const Teacher = require("../models/Admins_teachers");
@@ -42,6 +44,18 @@ exports.getBatchStudents = async (req, res) => {
     );
 
     res.json({ students });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getBatchTimetable = async (req, res) => {
+  try {
+    const { batchId } = req.params;
+
+    const timetable = await Timetable.find({ batchId });
+
+    res.json({ timetable });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -108,6 +122,31 @@ exports.createBatch = async (req, res) => {
   }
 };
 
+exports.removeStudent = async (req, res) => {
+  const { batchId, studentId } = req.body;
+
+  if (!batchId || !studentId) {
+    return res.status(400).json({ error: "Missing batchId or studentId" });
+  }
+
+  try {
+    // Delete from BatchStudent
+    await BatchStudent.findOneAndDelete({ batchId, studentId });
+
+    // Delete from Attendance
+    await Attendance.deleteMany({ batchId, studentId });
+
+    // Delete from Test
+    await Test.deleteMany({ batchId, studentId });
+
+    res.json({ message: "Student removed." });
+  } catch (err) {
+    console.error("Remove student error:", err); // 👈 helpful for debugging
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 exports.deleteBatch = async (req, res) => {
   try {
     const batchId = req.params.batchId;
@@ -132,6 +171,16 @@ exports.deleteBatch = async (req, res) => {
       batchId: batchId,
     });
 
+    // delete from Timetable
+    await Timetable.deleteMany({
+      batchId: batchId,
+    });
+
+    // delete from Test
+    await Test.deleteMany({
+      batchId: batchId,
+    });
+
     res.json({ message: "Batch removed from database" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -140,42 +189,47 @@ exports.deleteBatch = async (req, res) => {
 
 exports.assignTeacher = async (req, res) => {
   try {
-    const batchId = req.params.batchId;
-    const teacherId = req.params.teacherId;
-    // Check if the batch exists
+    const { batchId, teacherId } = req.params;
+
+    // Check if batch exists
     const batch = await Batch.findById(batchId);
     if (!batch) {
       return res.status(404).json({ message: "Batch not found." });
     }
 
-    // Check if the teacher exists
+    // Check if teacher exists
     const teacher = await Teacher.findById(teacherId);
     if (!teacher) {
       return res.status(404).json({ message: "Teacher not found." });
     }
 
-    // Check if assignment already exists
-    const existing = await BatchTeacher.findOne({ batchId });
-    if (existing) {
-      // Update the teacher assignment
-      existing.teacherId = teacherId;
-      existing.batchName = batch.name;
-      await existing.save();
-    } else {
-      // Create a new assignment
-      await BatchTeacher.create({
-        batchId,
-        batchName: batch.name,
+    // Assign or update the teacher for the batch
+    await BatchTeacher.findOneAndUpdate(
+      { batchId }, // Filter: only this batch
+      {
         teacherId,
-      });
+        batchName: batch.name,
+      },
+      {
+        new: true,
+        upsert: true, // create if not exists
+        setDefaultsOnInsert: true,
+      }
+    );
+
+    const teacherUpdated = await Teacher.findById(teacherId);
+    res.status(200).json({ teacherUpdated });
+  } catch (error) {
+    console.error("Error assigning teacher to batch:", error);
+
+    // Handle MongoDB duplicate key error (unique constraint)
+    if (error.code === 11000) {
+      return res
+        .status(400)
+        .json({ message: "This batch already has a teacher assigned." });
     }
 
-    return res.json({ message: "Teacher assigned successfully." });
-  } catch (error) {
-    console.error("Error assigning teacher:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error. Could not assign teacher." });
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
 

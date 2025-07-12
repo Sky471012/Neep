@@ -13,6 +13,10 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
+    localStorage.removeItem("role");
+    localStorage.removeItem("student");
+    localStorage.removeItem("teacher");
+    localStorage.removeItem("admin");
   }
 
   useEffect(() => {

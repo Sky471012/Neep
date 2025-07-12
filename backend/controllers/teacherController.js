@@ -75,23 +75,38 @@ exports.markAttendance = async (req, res) => {
 
 exports.addTest = async (req, res) => {
   const { studentId, batchId, name, maxMarks, marksScored, date } = req.body;
+
   try {
-    const newTest = new Test({
-      studentId,
-      batchId,
-      name,
-      maxMarks,
-      marksScored,
-      date,
+    const updatedTest = await Test.findOneAndUpdate(
+      {
+        studentId,
+        batchId,
+        name,
+        date, // match these four fields for uniqueness
+      },
+      {
+        $set: {
+          maxMarks,
+          marksScored,
+        },
+      },
+      {
+        new: true,          // return the updated document
+        upsert: true,       // create if not found
+        setDefaultsOnInsert: true,
+      }
+    );
+
+    res.status(201).json({
+      message: "Test added or updated successfully",
+      test: updatedTest,
     });
-
-    await newTest.save();
-
-    res.status(201).json({ message: "Test added successfully", test: newTest });
   } catch (err) {
+    console.error("Error adding/updating test:", err);
     res.status(500).json({ error: err.message });
   }
 };
+
 
 exports.getTest = async (req, res) => {
   try {

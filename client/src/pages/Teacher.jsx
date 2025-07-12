@@ -46,7 +46,7 @@ export default function Teacher() {
     const academicYearStart = jsMonth >= 3 ? currentYear : currentYear - 1;
 
     useEffect(() => {
-        const storedTeacher = localStorage.getItem("teacher");
+        const storedTeacher = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
 
         if (storedTeacher && token && storedTeacher !== "undefined") {
@@ -203,8 +203,12 @@ export default function Teacher() {
         }
 
         const token = localStorage.getItem("authToken");
-        const dateOnly = new Date(date.toDateString());
-        const dateISO = dateOnly.toISOString();
+
+        // ✅ Format date to dd-mm-yyyy
+        const dd = ("0" + date.getDate()).slice(-2);
+        const mm = ("0" + (date.getMonth() + 1)).slice(-2);
+        const yyyy = date.getFullYear();
+        const formattedDate = `${dd}-${mm}-${yyyy}`;
 
         try {
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/test/add`, {
@@ -219,27 +223,33 @@ export default function Teacher() {
                     name,
                     maxMarks,
                     marksScored,
-                    date: dateISO
+                    date: formattedDate // ✅ dd-mm-yyyy
                 }),
             });
 
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || "Failed to add test");
 
-            setTestRecords((prev) => ({
+            setTests((prev) => ({
                 ...prev,
-                [`${studentId}_${batchId}_${name}_${dateOnly.toDateString()}`]: {
-                    studentId,
-                    batchId,
-                    name,
-                    maxMarks,
-                    marksScored,
-                    date: dateOnly.toDateString()
-                }
+                [batchId]: [
+                    ...(prev[batchId] || []).filter(
+                        t => !(t.name === name && t.date === formattedDate && t.studentId === studentId)
+                    ), // remove old entry if exists
+                    {
+                        _id: data.test._id, // if returned by backend
+                        studentId,
+                        batchId,
+                        name,
+                        maxMarks,
+                        marksScored,
+                        date: formattedDate
+                    }
+                ]
             }));
         } catch (err) {
-            console.error("Attendance error:", err);
-            alert("Failed to mark attendance.");
+            console.error("Test error:", err);
+            alert("Failed to add test.");
         }
     };
 
@@ -654,38 +664,56 @@ export default function Teacher() {
                                                     >
                                                         {students[batchId] && tests[batchId] ? (
                                                             tests[batchId].length === 0 ? (
-                                                                <div className="p-4 text-center text-gray-600">No tests found for this batch.</div>
-                                                            ) : (
-                                                                <div className="overflow-x-auto">
-                                                                    <h3>Showuing all Tests</h3>
-                                                                    <table className="table table-bordered w-full">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th>Student Name</th>
-                                                                                {tests[batchId].map((test) => (
-                                                                                    <th key={test._id}>
-                                                                                        {test.name} <br />
-                                                                                        ({new Date(test.date).toLocaleDateString()})
-                                                                                    </th>
-                                                                                ))}
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            {students[batchId].map((student) => (
-                                                                                <tr key={student._id}>
-                                                                                    <td><b>{student.name}</b></td>
-                                                                                    {tests[batchId].map((test) => (
-                                                                                        <td key={test._id}>
-                                                                                            {test.studentId === student._id
-                                                                                                ? `${test.marksScored}/${test.maxMarks}`
-                                                                                                : "-"}
-                                                                                        </td>
-                                                                                    ))}
-                                                                                </tr>
-                                                                            ))}
-                                                                        </tbody>
-                                                                    </table>
+                                                                <div className="p-4 text-center text-gray-600">
+                                                                    No tests found for this batch.
                                                                 </div>
+                                                            ) : (
+                                                                // ✅ Add this here:
+                                                                (() => {
+                                                                    const uniqueTests = Array.from(
+                                                                        new Map(
+                                                                            tests[batchId].map(test => [`${test.name}_${test.date}`, test])
+                                                                        ).values()
+                                                                    );
+
+                                                                    return (
+                                                                        <div className="overflow-x-auto">
+                                                                            <h3>Showing All Tests</h3>
+                                                                            <table className="table table-bordered w-full">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th>Student Name</th>
+                                                                                        {uniqueTests.map((test) => (
+                                                                                            <th key={`${test.name}_${test.date}`}>
+                                                                                                {test.name} <br /> ({test.date})
+                                                                                            </th>
+                                                                                        ))}
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    {students[batchId].map((student) => (
+                                                                                        <tr key={student._id}>
+                                                                                            <td><b>{student.name}</b></td>
+                                                                                            {uniqueTests.map((test) => {
+                                                                                                const match = tests[batchId].find(
+                                                                                                    t =>
+                                                                                                        t.name === test.name &&
+                                                                                                        t.date === test.date &&
+                                                                                                        t.studentId === student._id
+                                                                                                );
+                                                                                                return (
+                                                                                                    <td key={`${test.name}_${test.date}_${student._id}`}>
+                                                                                                        {match ? `${match.marksScored}/${match.maxMarks}` : "-"}
+                                                                                                    </td>
+                                                                                                );
+                                                                                            })}
+                                                                                        </tr>
+                                                                                    ))}
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    );
+                                                                })()
                                                             )
                                                         ) : (
                                                             <div className="p-4 text-center">No records found</div>

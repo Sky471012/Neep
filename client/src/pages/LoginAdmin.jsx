@@ -53,7 +53,7 @@ export default function LoginAdmin() {
                 return;
             }
 
-            
+
             if (isResend) {
                 setOtp(''); // Clear previous OTP
                 setCanResend(false);
@@ -100,14 +100,23 @@ export default function LoginAdmin() {
                 alert(json.message || "OTP verification failed.");
             } else {
                 console.log("Logined");
-                if(json.role === "teacher"){
+
+                if (json.user.role === "teacher") {
                     localStorage.setItem("role", "teacher");
-                } else {
+                    localStorage.setItem("user", JSON.stringify(json.user));
+                    navigate("/teacher"); // ✅ navigate to teacher dashboard
+                } else if (json.user.role === "admin") {
                     localStorage.setItem("role", "admin");
+                    localStorage.setItem("user", JSON.stringify(json.user));
+                    navigate("/admin"); // ✅ optionally change route to /admin
+                } else {
+                    // 🚨 Safety fallback for unknown role
+                    alert("Unknown role. Login aborted.");
+                    return;
                 }
+
                 localStorage.setItem("authToken", json.authToken);
                 console.log(json.authToken);
-                navigate("/teacher"); // or "/admin" based on json.role
             }
 
         } catch (err) {

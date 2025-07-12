@@ -36,7 +36,7 @@ export default function Admin() {
 
 
     useEffect(() => {
-        const storedAdmin = localStorage.getItem("admin");
+        const storedAdmin = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
 
         if (storedAdmin && token && storedAdmin !== "undefined") {
