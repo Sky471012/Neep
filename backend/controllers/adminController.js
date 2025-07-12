@@ -16,6 +16,17 @@ exports.getBatches = async (req, res) => {
   }
 };
 
+exports.getBatch = async (req, res) => {
+  try {
+    const { batchId } = req.params;
+
+    const batch = await Batch.findById(batchId);
+    res.json(batch);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getBatchStudents = async (req, res) => {
   try {
     const { batchId } = req.params;
@@ -36,18 +47,6 @@ exports.getBatchStudents = async (req, res) => {
   }
 };
 
-exports.getStudentsAttendance = async (req, res) => {
-  try {
-    const { studentId } = req.params;
-
-    const attendance = await Attendance.find({ studentId });
-
-    res.json({ attendance });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
 exports.getTeacher = async (req, res) => {
   try {
     const { batchId } = req.params;
@@ -61,6 +60,18 @@ exports.getTeacher = async (req, res) => {
     );
 
     res.json({ teacher });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getStudentsAttendance = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const attendance = await Attendance.find({ studentId });
+
+    res.json({ attendance });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom'
 import DatePicker from "react-datepicker";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import BatchControls from "../components/BatchControls";
 import StudentControls from "../components/StudentControls";
 import TeacherControls from "../components/TeacherControls";
 import ModalOne from "../modals/ModalOne";
@@ -12,10 +12,12 @@ import ModalThree from "../modals/ModalThree";
 import Popup from "../modals/Popup";
 
 export default function Admin() {
+    const navigate = useNavigate();
     const [admin, setAdmin] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
     const [studentsRecords, setStudentsRecords] = useState([]);
     const [teachersRecords, setTeachersRecords] = useState([]);
+    const [teacher, setTeacher] = useState({});
     const [openModalOne, setOpenModalOne] = useState(false);
     const [openModalTwo, setOpenModalTwo] = useState(false);
     const [openModalThree, setOpenModalThree] = useState(false);
@@ -34,7 +36,7 @@ export default function Admin() {
 
 
     useEffect(() => {
-        const storedAdmin = localStorage.getItem("teacher");
+        const storedAdmin = localStorage.getItem("admin");
         const token = localStorage.getItem("authToken");
 
         if (storedAdmin && token && storedAdmin !== "undefined") {
@@ -80,6 +82,35 @@ export default function Admin() {
                 .catch((err) => console.error("Teachers fetch error:", err));
         }
     }, []);
+
+    useEffect(() => {
+        const token = localStorage.getItem("authToken");
+
+        // finding assigned teacher of batch
+        const findTeacher = async (batchId) => {
+            try {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const teacherGet = await res.json();
+                if (!res.ok) throw new Error(teacherGet.message || "Error fetching teacher");
+
+                setTeacher(prev => ({
+                    ...prev,
+                    [batchId]: teacherGet.teacher[0],
+                }));
+
+            } catch (err) {
+                console.error("Failed to fetch assigned teacher:", err);
+                alert("Error fetching assigned teacher.");
+            }
+        };
+
+        batchesRecords.forEach((batch) => {
+            findTeacher(batch._id);
+        });
+
+    }, [batchesRecords]);
 
     const createBatch = async (batchName) => {
         if (!batchName.trim()) {
@@ -264,9 +295,37 @@ export default function Admin() {
                     <button className="button" onClick={() => setOpenModalThree(true)}>Add a Teacher</button>
                     <button className="button" onClick={() => setOpenPopupModal(true)}>Update Popup</button>
                 </div>
-{/* 
-                <BatchControls batchesRecords={batchesRecords} setBatchesRecords={setBatchesRecords} />
-                <StudentControls studentsRecords={studentsRecords} setStudentsRecords={setStudentsRecords} />
+
+                <div id="batches" className="batches-container">
+                    <h1>Batches</h1>
+                    <div className="container">
+                        <div className="row">
+                            {batchesRecords.length > 0 ? (
+                                batchesRecords.map((batch, index) => {
+                                    const batchId = batch._id;
+
+                                    return (
+                                        <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                            <div className="card batch-card mb-3">
+                                                <h5 className="card-title">{batch.name}</h5>
+                                                <span>Started on: {batch.startDate}</span>
+                                                <span>Teacher: {teacher[batchId]?.name || "N/A"}</span>
+                                                <button className="button mt-2" onClick={() => navigate(`/batch/${batch._id}`)}>
+                                                    Open Batch
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <p>No batches found.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+
+                {/* <StudentControls studentsRecords={studentsRecords} setStudentsRecords={setStudentsRecords} />
                 <TeacherControls teachersRecords={teachersRecords} setTeachersRecords={setTeachersRecords} /> */}
             </div>
 

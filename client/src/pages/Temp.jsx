@@ -4,7 +4,7 @@ import AttendanceList from "../modals/AttendanceMarking";
 import DatePicker from "react-datepicker";
 import Teacher from "../modals/Teacher";
 
-export default function BatchControls({ batchesRecords, setBatchesRecords }) {
+export default function Temp({ batchesRecords, setBatchesRecords }) {
     const [students, setStudents] = useState({});
     const [showStudentListFor, setShowStudentListFor] = useState(null);
     const [openAttendanceModals, setOpenAttendanceModals] = useState({});
@@ -233,7 +233,7 @@ export default function BatchControls({ batchesRecords, setBatchesRecords }) {
                                 <div className="col-12 col-md-6 col-lg-5" key={index}>
                                     <div className="card batch-card mb-3">
                                         <h5 className="card-title">{batch.name}</h5>
-                                        <span>Created At: {batch.createdAt}</span>
+                                        <span>Started on: {batch.startDate}</span>
                                         <span>Teacher: {teacher[batchId]?.name || "N/A"}</span>
                                         <div className="d-flex gap-3">
                                             <button className="button" onClick={() => setShowStudentListFor(batchId)}>
