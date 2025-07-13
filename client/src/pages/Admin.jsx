@@ -5,7 +5,6 @@ import DatePicker from "react-datepicker";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import StudentControls from "../components/StudentControls";
-import TeacherControls from "../components/TeacherControls";
 import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
@@ -325,8 +324,33 @@ export default function Admin() {
                 </div>
 
 
-                {/* <StudentControls studentsRecords={studentsRecords} setStudentsRecords={setStudentsRecords} />
-                <TeacherControls teachersRecords={teachersRecords} setTeachersRecords={setTeachersRecords} /> */}
+                {/* <StudentControls studentsRecords={studentsRecords} setStudentsRecords={setStudentsRecords} /> */}
+
+                <div id="teachers" className="batches-container">
+                    <h1>Teachers</h1>
+                    <div className="container">
+                        <div className="row">
+                            {teachersRecords.length > 0 ? (
+                                teachersRecords.map((teacher, index) => {
+                                    const teacherId = teacher._id;
+
+                                    return (
+                                        <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                            <div className="card batch-card mb-3">
+                                                <h5 className="card-title">{teacher.name}</h5>
+                                                <button className="button mt-2" onClick={() => navigate(`/teacher/${teacher._id}`)}>
+                                                    Open Teacher
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <p>No teacher found.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <Footer />

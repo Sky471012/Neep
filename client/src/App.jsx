@@ -12,6 +12,7 @@ import Student from './pages/Student';
 import Teacher from './pages/Teacher';
 import Admin from './pages/Admin';
 import BatchControls from './pages/BatchControls';
+import TeacherControls from './pages/TeacherControls';
 
 function App() {
 
@@ -42,6 +43,7 @@ function App() {
             <Route exact path='/teacher' element={<Teacher/>} />
             <Route exact path='/admin' element={<Admin/>} />
             <Route path="/batch/:batchId" element={<BatchControls />} />
+            <Route path="/teacher/:teacherId" element={<TeacherControls />} />
           </Routes>
         </BrowserRouter>
       )}

@@ -61,7 +61,7 @@ exports.getBatchTimetable = async (req, res) => {
   }
 };
 
-exports.getTeacher = async (req, res) => {
+exports.getBatchTeacher = async (req, res) => {
   try {
     const { batchId } = req.params;
 
@@ -180,7 +180,7 @@ exports.deleteBatch = async (req, res) => {
     });
 
     // delete from Batch_teachers
-    await BatchTeacher.deleteMany({
+    await BatchTeacher.findOneAndDelete({
       batchId: batchId,
     });
 
@@ -526,11 +526,24 @@ exports.updateFeeStatus = async (req, res) => {
   }
 };
 
+
+
 // Teachers Management
 exports.getTeachers = async (req, res) => {
   try {
     const teachers = await Teacher.find();
     res.json(teachers);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getTeacher = async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+
+    const teacher = await Teacher.findById(teacherId);
+    res.json(teacher);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -599,13 +612,17 @@ exports.deleteTeacher = async (req, res) => {
 };
 
 exports.removeTeacherFromBatch = async (req, res) => {
+  const { batchId, teacherId } = req.body;
+
+  if (!batchId || !teacherId) {
+    return res.status(400).json({ error: "Missing batchId or teacherId" });
+  }
   try {
-    await BatchTeacher.findOneAndDelete({
-      teacherId: req.params.teacherId,
-      batchId: req.params.batchId,
-    });
-    res.json({ message: "Teacher removed from batch" });
+    await BatchTeacher.findOneAndDelete({ batchId, teacherId });
+    
+    res.json({ message: "Teacher removed." });
   } catch (err) {
+    console.error("Remove teacher error:", err);
     res.status(500).json({ error: err.message });
   }
 };

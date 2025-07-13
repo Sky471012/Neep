@@ -305,16 +305,16 @@ export default function Teacher() {
         <>
             <Navbar />
             <div className="main-content">
-                <div className="student-details">
+                <div className="student-details container card mb-5 p-3">
                     <h1>Teacher details</h1>
                     <div className="container">
-                        <span>Name : {teacher.name}</span>
+                        <span>Name : <strong>{teacher.name}</strong></span>
                         <br />
-                        <span>Email : {teacher.email}</span>
+                        <span>Email : <strong>{teacher.email}</strong></span>
                         <br />
-                        <span>Phone : {teacher.phone}</span>
+                        <span>Phone : <strong>{teacher.phone}</strong></span>
                         <br />
-                        <span>Role : {teacher.role}</span>
+                        <span>Role : <strong>{teacher.role}</strong></span>
                     </div>
                 </div>
 

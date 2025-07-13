@@ -15,7 +15,6 @@ export default function BatchControls() {
   const { batchId } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
-  console.log(token);
 
   const [batch, setBatch] = useState({});
   const [students, setStudents] = useState([]);
@@ -332,484 +331,444 @@ export default function BatchControls() {
     dateOfJoining: "",
   });
 
-  const updateForm = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  return (<>
+    <Navbar />
 
-  const handleCreateStudent = async (e) => {
-    e.preventDefault();
+    
+    <div className="main-content">
+      <div className="container mt-4">
+        <div className="card mb-5 p-3">
+          <div className="d-flex justify-content-between align-items-start">
+            <h2>{batch?.name || "No name"}</h2>
 
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/createStudent/${batchId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Failed to create student.");
-        return;
-      }
-
-      alert("Student created and added!");
-      setStudents((prev) => [...prev, data.student]);
-      setModalFive(false);
-      setFormData({
-        name: "",
-        phone: "",
-        dob: "",
-        address: "",
-        class: "",
-        fee: "",
-        dateOfJoining: "",
-      });
-    } catch (err) {
-      console.error("Create student error:", err);
-      alert("Something went wrong.");
-    }
-  };
-
-
-  return (
-    <>
-      <Navbar />
-      <div className="main-content">
-        <div className="container mt-4">
-          <div className="card mb-5 p-3">
-            <div className="d-flex justify-content-between align-items-start">
-              <h2>{batch?.name || "No name"}</h2>
-
-              <div className="dropdown">
-                <button
-                  className="btn btn-sm"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  ⋮
-                </button>
-                <ul className="dropdown-menu dropdown-menu-end shadow">
-                  <li>
-                    <button className="dropdown-item" onClick={openModalOneHandler}>
-                      Mark / Change Attendance
-                    </button>
-                  </li>
-                  <li>
-                    <button className="dropdown-item" onClick={() => setModalTwo(true)}>
-                      Assign / Change Teacher
-                    </button>
-                  </li>
-                  <li>
-                    <button className="dropdown-item" onClick={() => setModalFour(true)}>
-                      Add / Edit Timetable
-                    </button>
-                  </li>
-                  <li>
-                    <button className="dropdown-item" onClick={() => setModalFive(true)}>Add Students</button>
-                  </li>
-                  <li>
-                    <button className="dropdown-item text-danger" onClick={() => deleteBatch(batch._id)}>
-                      Delete Batch
-                    </button>
-                  </li>
-                </ul>
-              </div>
+            <div className="dropdown">
+              <button
+                className="btn btn-sm"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                ⋮
+              </button>
+              <ul className="dropdown-menu dropdown-menu-end shadow">
+                <li>
+                  <button className="dropdown-item" onClick={openModalOneHandler}>
+                    Mark / Change Attendance
+                  </button>
+                </li>
+                <li>
+                  <button className="dropdown-item" onClick={() => setModalTwo(true)}>
+                    Assign / Change Teacher
+                  </button>
+                </li>
+                <li>
+                  <button className="dropdown-item" onClick={() => setModalFour(true)}>
+                    Add / Edit Timetable
+                  </button>
+                </li>
+                <li>
+                  <button className="dropdown-item" onClick={() => setModalFive(true)}>Add Students</button>
+                </li>
+                <li>
+                  <button className="dropdown-item text-danger" onClick={() => deleteBatch(batch._id)}>
+                    Delete Batch
+                  </button>
+                </li>
+              </ul>
             </div>
-            <p className="mt-3">Batch code:<strong> {batch.code}<br /></strong>
-              Started on:<strong> {batch.startDate}<br /></strong>
-              Teacher:<strong> {teacher?.name || "Not assigned"}</strong></p>
           </div>
+          <p className="mt-3">Batch code:<strong> {batch.code}<br /></strong>
+            Started on:<strong> {batch.startDate}<br /></strong>
+            Teacher:<strong> {teacher?.name || "Not assigned"}<br /></strong>
+            Number of students:<strong> {students.length}</strong></p>
+        </div>
 
-          {/* Timetable */}
-          <div className="timetable-details">
-            <h2>Timetable</h2>
-            {timetable && timetable.length > 0 ? (
-              <table className="table table-bordered text-center mt-3">
-                <thead className="table-dark">
-                  <tr>
-                    <th>Weekday</th>
-                    <th>Time Slots</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {timetable.map((entry, index) => (
-                    <tr key={index}>
-                      <td>{entry.weekday}</td>
-                      <td>
-                        {entry.classTimings.map((slot, idx) => {
-                          const parsedStart = parse(slot.startTime, 'hh:mm a', new Date());
-                          const parsedEnd = parse(slot.endTime, 'hh:mm a', new Date());
-                          const displayStart = isNaN(parsedStart) ? slot.startTime : format(parsedStart, 'hh:mm a');
-                          const displayEnd = isNaN(parsedEnd) ? slot.endTime : format(parsedEnd, 'hh:mm a');
-
-                          return (
-                            <div key={idx}>
-                              {displayStart} - {displayEnd}
-                            </div>
-                          );
-                        })}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p>No timetable made.</p>
-            )}
-          </div>
-
-          {/* Students List Section */}
-          <div className="mt-4">
-            <h2>All Students</h2>
-            <table className="table table-borderless align-middle">
+        {/* Timetable */}
+        <div className="timetable-details">
+          <h2>Timetable</h2>
+          {timetable && timetable.length > 0 ? (
+            <table className="table table-bordered text-center mt-3">
+              <thead className="table-dark">
+                <tr>
+                  <th>Weekday</th>
+                  <th>Time Slots</th>
+                </tr>
+              </thead>
               <tbody>
-                {students.map((s) => (
-                  <tr key={s._id}>
-                    <td style={{ width: "40%" }}>{s.name}</td>
-                    <td style={{ width: "30%" }}>
-                      <button className="btn btn-outline-primary btn-sm" onClick={() => showStudentAttendance(s)}>Show Attendance</button>
-                    </td>
-                    <td style={{ width: "30%" }}>
-                      <button className="btn btn-outline-danger btn-sm" onClick={() => removeStudent(batchId, s._id)}>Remove</button>
+                {timetable.map((entry, index) => (
+                  <tr key={index}>
+                    <td>{entry.weekday}</td>
+                    <td>
+                      {entry.classTimings.map((slot, idx) => {
+                        const parsedStart = parse(slot.startTime, 'hh:mm a', new Date());
+                        const parsedEnd = parse(slot.endTime, 'hh:mm a', new Date());
+                        const displayStart = isNaN(parsedStart) ? slot.startTime : format(parsedStart, 'hh:mm a');
+                        const displayEnd = isNaN(parsedEnd) ? slot.endTime : format(parsedEnd, 'hh:mm a');
+
+                        return (
+                          <div key={idx}>
+                            {displayStart} - {displayEnd}
+                          </div>
+                        );
+                      })}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          ) : (
+            <p>No timetable made.</p>
+          )}
+        </div>
+
+        {/* Students List Section */}
+        <div className="mt-4">
+          <h2>All Students</h2>
+          <table className="table table-borderless align-middle">
+            <tbody>
+              {students.map((s) => (
+                <tr key={s._id}>
+                  <td style={{ width: "40%" }}>{s.name}</td>
+                  <td style={{ width: "30%" }}>
+                    <button className="btn btn-outline-primary btn-sm" onClick={() => showStudentAttendance(s)}>Show Attendance</button>
+                  </td>
+                  <td style={{ width: "30%" }}>
+                    <button className="btn btn-outline-danger btn-sm" onClick={() => removeStudent(batchId, s._id)}>Remove</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Attendance Modal */}
+        <ModalOne isOpen={openModalOne} onClose={closeAttendanceModalHandler}>
+          <div>
+            <h3>{batch.name}</h3>
+            <DatePicker
+              className="datePicker"
+              dateFormat="yyyy-MM-dd"
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              placeholderText="Select date"
+            />
+            <table className="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Mark Attendance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((student) => {
+                  const key = `${student._id}_${selectedDate.toDateString()}`;
+                  return (
+                    <tr key={student._id}>
+                      <td>{student.name}</td>
+                      <td>
+                        <button
+                          className={`btn btn-success btn-sm me-2 ${markedStatus[key] === "present" ? "active" : ""
+                            }`}
+                          onClick={() => markAttendance(student._id, "present")}
+                        >
+                          Present
+                        </button>
+                        <button
+                          className={`btn btn-danger btn-sm ${markedStatus[key] === "absent" ? "active" : ""
+                            }`}
+                          onClick={() => markAttendance(student._id, "absent")}
+                        >
+                          Absent
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </ModalOne>
+
+        {/* Assign Teacher Modal */}
+        <ModalTwo
+          isOpen={modalTwo}
+          onClose={() => setModalTwo(false)}
+        >
+          <h3>Assigning Teacher to {batch.name}</h3>
+
+          <div className="input-group mt-3 gap-3">
+            <label>Select Teacher:</label>
+            <select
+              className="form-select mt-1"
+              value={selectedTeacher[batchId] || ""}
+              onChange={(e) =>
+                setSelectedTeacher((prev) => ({ ...prev, [batchId]: e.target.value }))
+              }
+            >
+              <option value="">-- Select a teacher --</option>
+              {teachersList.map((teacher) => (
+                <option key={teacher._id} value={teacher._id}>
+                  {teacher.name}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Attendance Modal */}
-          <ModalOne isOpen={openModalOne} onClose={closeAttendanceModalHandler}>
-            <div>
-              <h3>{batch.name}</h3>
-              <DatePicker
-                className="datePicker"
-                dateFormat="yyyy-MM-dd"
-                selected={selectedDate}
-                onChange={(date) => setSelectedDate(date)}
-                placeholderText="Select date"
-              />
-              <table className="table table-bordered mt-3">
-                <thead>
-                  <tr>
-                    <th>Student Name</th>
-                    <th>Mark Attendance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((student) => {
-                    const key = `${student._id}_${selectedDate.toDateString()}`;
+          <button
+            className="button mt-3"
+            onClick={() => assignTeacherToBatch(batchId, selectedTeacher[batchId])}
+          >
+            Assign Teacher
+          </button>
+        </ModalTwo>
+
+
+        <ModalThree
+          isOpen={modalThree}
+          onClose={() => {
+            setModalThree(false);
+            setActiveStudent(null);
+          }}
+        >
+          {activeStudent && (
+            <div className="attendance-calendar mt-2">
+              <div id={`carousel-${activeStudent._id}`} className="carousel slide">
+                <div className="carousel-inner">
+                  {allMonths.map((month, monthIdx) => {
+                    let calendarMonth, calendarYear;
+                    if (monthIdx <= 8) {
+                      calendarMonth = monthIdx + 3;
+                      calendarYear = academicYearStart;
+                    } else {
+                      calendarMonth = monthIdx - 9;
+                      calendarYear = academicYearStart + 1;
+                    }
+
+                    const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
                     return (
-                      <tr key={student._id}>
-                        <td>{student.name}</td>
-                        <td>
-                          <button
-                            className={`btn btn-success btn-sm me-2 ${markedStatus[key] === "present" ? "active" : ""
-                              }`}
-                            onClick={() => markAttendance(student._id, "present")}
-                          >
-                            Present
-                          </button>
-                          <button
-                            className={`btn btn-danger btn-sm ${markedStatus[key] === "absent" ? "active" : ""
-                              }`}
-                            onClick={() => markAttendance(student._id, "absent")}
-                          >
-                            Absent
-                          </button>
-                        </td>
-                      </tr>
+                      <div
+                        key={month}
+                        className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`}
+                      >
+                        <h6>{month} {calendarYear}</h6>
+                        <div className="calendar-grid">
+                          {[...Array(daysInMonth)].map((_, d) => {
+                            const date = new Date(calendarYear, calendarMonth, d + 1);
+                            const formatted = date.toISOString().split("T")[0];
+                            const key = `${batchId}_${formatted}`;
+                            const status = attendanceMap[key];
+
+                            return (
+                              <div
+                                key={d}
+                                className={`date-box ${status === "present"
+                                  ? "present"
+                                  : status === "absent"
+                                    ? "absent"
+                                    : ""
+                                  }`}
+                                title={`${month} ${d + 1}, ${calendarYear} - ${status || "No record"}`}
+                              >
+                                {d + 1}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     );
                   })}
-                </tbody>
-              </table>
-            </div>
-          </ModalOne>
-
-          {/* Assign Teacher Modal */}
-          <ModalTwo
-            isOpen={modalTwo}
-            onClose={() => setModalTwo(false)}
-          >
-            <h3>Assigning Teacher to {batch.name}</h3>
-
-            <div className="input-group mt-3 gap-3">
-              <label>Select Teacher:</label>
-              <select
-                className="form-select mt-1"
-                value={selectedTeacher[batchId] || ""}
-                onChange={(e) =>
-                  setSelectedTeacher((prev) => ({ ...prev, [batchId]: e.target.value }))
-                }
-              >
-                <option value="">-- Select a teacher --</option>
-                {teachersList.map((teacher) => (
-                  <option key={teacher._id} value={teacher._id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              className="button mt-3"
-              onClick={() => assignTeacherToBatch(batchId, selectedTeacher[batchId])}
-            >
-              Assign Teacher
-            </button>
-          </ModalTwo>
-
-
-          <ModalThree
-            isOpen={modalThree}
-            onClose={() => {
-              setModalThree(false);
-              setActiveStudent(null);
-            }}
-          >
-            {activeStudent && (
-              <div className="attendance-calendar mt-2">
-                <div id={`carousel-${activeStudent._id}`} className="carousel slide">
-                  <div className="carousel-inner">
-                    {allMonths.map((month, monthIdx) => {
-                      let calendarMonth, calendarYear;
-                      if (monthIdx <= 8) {
-                        calendarMonth = monthIdx + 3;
-                        calendarYear = academicYearStart;
-                      } else {
-                        calendarMonth = monthIdx - 9;
-                        calendarYear = academicYearStart + 1;
-                      }
-
-                      const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-
-                      return (
-                        <div
-                          key={month}
-                          className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`}
-                        >
-                          <h6>{month} {calendarYear}</h6>
-                          <div className="calendar-grid">
-                            {[...Array(daysInMonth)].map((_, d) => {
-                              const date = new Date(calendarYear, calendarMonth, d + 1);
-                              const formatted = date.toISOString().split("T")[0];
-                              const key = `${batchId}_${formatted}`;
-                              const status = attendanceMap[key];
-
-                              return (
-                                <div
-                                  key={d}
-                                  className={`date-box ${status === "present"
-                                    ? "present"
-                                    : status === "absent"
-                                      ? "absent"
-                                      : ""
-                                    }`}
-                                  title={`${month} ${d + 1}, ${calendarYear} - ${status || "No record"}`}
-                                >
-                                  {d + 1}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="calendar-controls d-flex justify-content-between mt-2">
-                    <button
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={() =>
-                        setActiveMonthIndex((prev) => (prev - 1 + 12) % 12)
-                      }
-                    >
-                      ‹ Previous
-                    </button>
-                    <button
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={() =>
-                        setActiveMonthIndex((prev) => (prev + 1) % 12)
-                      }
-                    >
-                      Next ›
-                    </button>
-                  </div>
+                </div>
+                <div className="calendar-controls d-flex justify-content-between mt-2">
+                  <button
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() =>
+                      setActiveMonthIndex((prev) => (prev - 1 + 12) % 12)
+                    }
+                  >
+                    ‹ Previous
+                  </button>
+                  <button
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() =>
+                      setActiveMonthIndex((prev) => (prev + 1) % 12)
+                    }
+                  >
+                    Next ›
+                  </button>
                 </div>
               </div>
-            )}
-          </ModalThree>
-
-          <ModalFour isOpen={modalFour} onClose={() => setModalFour(false)}>
-            <TimetableEditor
-              batch={batch}
-              timetable={timetable}
-              onSave={updateTimetable}
-              initialDay="Monday" // 👈 Add this line
-            />
-          </ModalFour>
-
-
-          <ModalFive
-            isOpen={modalFive}
-            onClose={() => {
-              setModalFive(false);
-              setSelectedToAdd([]);
-              setSearchTerm("");
-              setMode("select");
-              setNewStudentData({
-                name: "",
-                phone: "",
-                dob: format(new Date(), "dd-MM-yyyy"),
-                address: "",
-                class: "Kids",
-                fee: "",
-                dateOfJoining: format(new Date(), "dd-MM-yyyy"),
-              });
-            }}
-          >
-            <h3>Add Students to {batch.name}</h3>
-
-            <div className="btn-group mb-3 mt-3">
-              <button
-                className={`btn btn-outline-primary ${mode === "select" ? "active" : ""}`}
-                onClick={() => setMode("select")}
-              >
-                Select Existing
-              </button>
-              <button
-                className={`btn btn-outline-primary ${mode === "create" ? "active" : ""}`}
-                onClick={() => setMode("create")}
-              >
-                Create New
-              </button>
             </div>
+          )}
+        </ModalThree>
 
-            {mode === "select" ? (
-              <>
-                <input
-                  type="text"
-                  className="form-control mb-3"
-                  placeholder="Search by name..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <div style={{ maxHeight: "300px", overflowY: "auto", margin:"10px" }}>
-                  {filteredStudents.map((student) => (
-                    <div key={student._id} className="form-check mt-1">
-                      <input
-                        type="checkbox"
-                        className="form-check-input me-2"
-                        id={student._id}
-                        checked={selectedToAdd.includes(student._id)}
-                        onChange={() => toggleSelectStudent(student._id)}
-                      />
-                      <label className="form-check-label" htmlFor={student._id}>
-                        {student.name} ({student.phone})
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <button className="button" onClick={handleAddSelectedStudents}>
-                  Add Selected Students
-                </button>
-              </>
-            ) : (
-              <>
-                <input
-                  className="form-control mb-2"
-                  placeholder="Name"
-                  value={newStudentData.name}
-                  onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
-                />
-                <input
-                  className="form-control mb-2"
-                  placeholder="Phone"
-                  value={newStudentData.phone}
-                  onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
-                />
-                <DatePicker
-                  selected={parse(newStudentData.dob, "dd-MM-yyyy", new Date())}
-                  onChange={(date) =>
-                    setNewStudentData({
-                      ...newStudentData,
-                      dob: format(date, "dd-MM-yyyy"),
-                    })
-                  }
-                  value={""} // ✅ this keeps input box empty
-                  dateFormat="dd-MM-yyyy"
-                  className="form-control mb-2"
-                  placeholderText="Date of Birth"
-                />
-                <input
-                  className="form-control mb-2"
-                  placeholder="Address"
-                  value={newStudentData.address}
-                  onChange={(e) => setNewStudentData({ ...newStudentData, address: e.target.value })}
-                />
-                <select
-                  className="form-select mb-2"
-                  value={newStudentData.class}
-                  onChange={(e) => setNewStudentData({ ...newStudentData, class: e.target.value })}
-                >
-                  {["Kids", "English Spoken", "9", "10", "11", "12"].map((cls) => (
-                    <option key={cls} value={cls}>{cls}</option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  className="form-control mb-2"
-                  placeholder="Fee"
-                  value={newStudentData.fee}
-                  onChange={(e) => setNewStudentData({ ...newStudentData, fee: e.target.value })}
-                />
-                <DatePicker
-                  selected={parse(newStudentData.dateOfJoining, "dd-MM-yyyy", new Date())}
-                  onChange={(date) =>
-                    setNewStudentData({
-                      ...newStudentData,
-                      dateOfJoining: format(date, "dd-MM-yyyy"),
-                    })
-                  }
-                  value={""} // ✅ keeps input box empty
-                  dateFormat="dd-MM-yyyy"
-                  className="form-control mb-3"
-                  placeholderText="Date of Joining"
-                />
-                <button className="button" onClick={async () => {
-                  try {
-                    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudentByCreating/${batchId}`, {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                      },
-                      body: JSON.stringify({ ...newStudentData, batchName: batch.name }),
-                    });
-                    const data = await res.json();
-                    if (!res.ok) return alert(data.message || "Error creating student");
-                    alert("Student created and added!");
-                    setStudents((prev) => [...prev, data.student]);
-                    setModalFive(false);
-                  } catch (err) {
-                    alert("Failed to create student.");
-                    console.error(err);
-                  }
-                }}>
-                  Create Student
-                </button>
-              </>
-            )}
-          </ModalFive>
+        <ModalFour isOpen={modalFour} onClose={() => setModalFour(false)}>
+          <TimetableEditor
+            batch={batch}
+            timetable={timetable}
+            onSave={updateTimetable}
+            initialDay="Monday" // 👈 Add this line
+          />
+        </ModalFour>
 
 
-        </div>
+        <ModalFive
+          isOpen={modalFive}
+          onClose={() => {
+            setModalFive(false);
+            setSelectedToAdd([]);
+            setSearchTerm("");
+            setMode("select");
+            setNewStudentData({
+              name: "",
+              phone: "",
+              dob: format(new Date(), "dd-MM-yyyy"),
+              address: "",
+              class: "Kids",
+              fee: "",
+              dateOfJoining: format(new Date(), "dd-MM-yyyy"),
+            });
+          }}
+        >
+          <h3>Add Students to {batch.name}</h3>
+
+          <div className="btn-group mb-3 mt-3">
+            <button
+              className={`btn btn-outline-primary ${mode === "select" ? "active" : ""}`}
+              onClick={() => setMode("select")}
+            >
+              Select Existing
+            </button>
+            <button
+              className={`btn btn-outline-primary ${mode === "create" ? "active" : ""}`}
+              onClick={() => setMode("create")}
+            >
+              Create New
+            </button>
+          </div>
+
+          {mode === "select" ? (
+            <>
+              <input
+                type="text"
+                className="form-control mb-3"
+                placeholder="Search by name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <div style={{ maxHeight: "300px", overflowY: "auto", margin: "10px" }}>
+                {filteredStudents.map((student) => (
+                  <div key={student._id} className="form-check mt-1">
+                    <input
+                      type="checkbox"
+                      className="form-check-input me-2"
+                      id={student._id}
+                      checked={selectedToAdd.includes(student._id)}
+                      onChange={() => toggleSelectStudent(student._id)}
+                    />
+                    <label className="form-check-label" htmlFor={student._id}>
+                      {student.name} ({student.phone})
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <button className="button" onClick={handleAddSelectedStudents}>
+                Add Selected Students
+              </button>
+            </>
+          ) : (
+            <>
+              <input
+                className="form-control mb-2"
+                placeholder="Name"
+                value={newStudentData.name}
+                onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
+              />
+              <input
+                className="form-control mb-2"
+                placeholder="Phone"
+                value={newStudentData.phone}
+                onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
+              />
+              <DatePicker
+                selected={parse(newStudentData.dob, "dd-MM-yyyy", new Date())}
+                onChange={(date) =>
+                  setNewStudentData({
+                    ...newStudentData,
+                    dob: format(date, "dd-MM-yyyy"),
+                  })
+                }
+                value={""} // ✅ this keeps input box empty
+                dateFormat="dd-MM-yyyy"
+                className="form-control mb-2"
+                placeholderText="Date of Birth"
+              />
+              <input
+                className="form-control mb-2"
+                placeholder="Address"
+                value={newStudentData.address}
+                onChange={(e) => setNewStudentData({ ...newStudentData, address: e.target.value })}
+              />
+              <select
+                className="form-select mb-2"
+                value={newStudentData.class}
+                onChange={(e) => setNewStudentData({ ...newStudentData, class: e.target.value })}
+              >
+                {["Kids", "English Spoken", "9", "10", "11", "12"].map((cls) => (
+                  <option key={cls} value={cls}>{cls}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                className="form-control mb-2"
+                placeholder="Fee"
+                value={newStudentData.fee}
+                onChange={(e) => setNewStudentData({ ...newStudentData, fee: e.target.value })}
+              />
+              <DatePicker
+                selected={parse(newStudentData.dateOfJoining, "dd-MM-yyyy", new Date())}
+                onChange={(date) =>
+                  setNewStudentData({
+                    ...newStudentData,
+                    dateOfJoining: format(date, "dd-MM-yyyy"),
+                  })
+                }
+                value={""} // ✅ keeps input box empty
+                dateFormat="dd-MM-yyyy"
+                className="form-control mb-3"
+                placeholderText="Date of Joining"
+              />
+              <button className="button" onClick={async () => {
+                try {
+                  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudentByCreating/${batchId}`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ ...newStudentData, batchName: batch.name }),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) return alert(data.message || "Error creating student");
+                  alert("Student created and added!");
+                  setStudents((prev) => [...prev, data.student]);
+                  setModalFive(false);
+                } catch (err) {
+                  alert("Failed to create student.");
+                  console.error(err);
+                }
+              }}>
+                Create Student
+              </button>
+            </>
+          )}
+        </ModalFive>
+
+
       </div>
-      <Footer />
-    </>
-  );
+    </div>
+
+
+    <Footer />
+  </>);
 }

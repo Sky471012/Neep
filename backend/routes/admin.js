@@ -10,7 +10,7 @@ router.get('/batches', adminController.getBatches);
 router.get('/getBatchDetails/:batchId', adminController.getBatch);
 router.get('/batchStudents/:batchId', adminController.getBatchStudents);
 router.get('/batchTimetable/:batchId', adminController.getBatchTimetable);
-router.get('/findTeacher/:batchId', adminController.getTeacher);
+router.get('/findTeacher/:batchId', adminController.getBatchTeacher);
 router.get('/attendance/:studentId', adminController.getStudentsAttendance);
 router.post('/attendance/mark', adminController.markAttendance);
 router.post('/batchCreate', adminController.createBatch);
@@ -33,9 +33,10 @@ router.post('/update-fee/:studentId', adminController.updateFeeStatus);
 
 // Teacher Management
 router.get('/teachers', adminController.getTeachers);
+router.get('/getTeacherDetails/:teacherId', adminController.getTeacher);
 router.get('/teacherBatches/:teacherId', adminController.getTeacherBatches);
 router.post('/teacherCreate', adminController.createTeacher);
 router.delete('/teacherDelete/:teacherId', adminController.deleteTeacher);
-router.delete('/removeTeacher/:teacherId/:batchId', adminController.removeTeacherFromBatch);
+router.delete('/removeTeacher', adminController.removeTeacherFromBatch);
 
 module.exports = router;

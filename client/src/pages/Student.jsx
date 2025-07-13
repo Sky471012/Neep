@@ -213,15 +213,15 @@ export default function Student() {
         <div className="main-content student-container">
 
             {/* Student Details */}
-            <div className="student-details">
+            <div className="student-details container card mb-5 p-3">
                 <h1>Student details</h1>
                 <div className="container">
-                    <span>Name : {student.name}</span><br />
-                    <span>Phone : {student.phone}</span><br />
-                    <span>DOB : {student.dob}</span><br />
-                    <span>Class : {student.class}</span><br />
-                    <span>Address : {student.address}</span><br />
-                    <span>Date of Joining : {student.dateOfJoining}</span><br />
+                    <span>Name : <strong>{student.name}</strong></span><br />
+                    <span>Phone : <strong>{student.phone}</strong></span><br />
+                    <span>DOB : <strong>{student.dob}</strong></span><br />
+                    <span>Class : <strong>{student.class}</strong></span><br />
+                    <span>Address : <strong>{student.address}</strong></span><br />
+                    <span>Date of Joining : <strong>{student.dateOfJoining}</strong></span><br />
                 </div>
             </div>
 
