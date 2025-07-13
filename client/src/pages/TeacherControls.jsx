@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -139,6 +139,9 @@ export default function TeacherControls() {
                             {batches.map((b) => (
                                 <tr key={b._id}>
                                     <td style={{ width: "40%" }}>{b.name}</td>
+                                    <td style={{ width: "30%" }}>
+                                        <Link to={`/batch/${b._id}`} className="btn btn-outline-primary btn-sm">Open Batch</Link>
+                                    </td>
                                     <td style={{ width: "30%" }}>
                                         <button className="btn btn-outline-danger btn-sm" onClick={() => removeTeacher(b._id, teacherId)}>Remove</button>
                                     </td>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import { format, parse } from 'date-fns';
 import Navbar from "../components/Navbar";
@@ -334,7 +334,7 @@ export default function BatchControls() {
   return (<>
     <Navbar />
 
-    
+
     <div className="main-content">
       <div className="container mt-4">
         <div className="card mb-5 p-3">
@@ -377,10 +377,21 @@ export default function BatchControls() {
               </ul>
             </div>
           </div>
-          <p className="mt-3">Batch code:<strong> {batch.code}<br /></strong>
-            Started on:<strong> {batch.startDate}<br /></strong>
-            Teacher:<strong> {teacher?.name || "Not assigned"}<br /></strong>
-            Number of students:<strong> {students.length}</strong></p>
+          <p className="mt-3">
+            Batch code: <strong>{batch.code}<br /></strong>
+            Started on: <strong>{batch.startDate}<br /></strong>
+            Teacher:
+            <strong>
+              {teacher?.name || "Not assigned"}
+              {teacher && (
+                <Link to={`/teacher/${teacher._id}`} className="ms-1">
+                  <i className="bi bi-box-arrow-up-right"></i>
+                </Link>
+              )}
+              <br />
+            </strong>
+            Number of students: <strong>{students.length}</strong>
+          </p>
         </div>
 
         {/* Timetable */}
@@ -428,11 +439,14 @@ export default function BatchControls() {
             <tbody>
               {students.map((s) => (
                 <tr key={s._id}>
-                  <td style={{ width: "40%" }}>{s.name}</td>
-                  <td style={{ width: "30%" }}>
+                  <td style={{ width: "40%" }}>{s.name} ({s.phone})</td>
+                  <td style={{ width: "20%" }}>
                     <button className="btn btn-outline-primary btn-sm" onClick={() => showStudentAttendance(s)}>Show Attendance</button>
                   </td>
-                  <td style={{ width: "30%" }}>
+                  <td style={{ width: "20%" }}>
+                    <Link className="btn btn-outline-primary btn-sm">Open Studnt</Link>
+                  </td>
+                  <td style={{ width: "20%" }}>
                     <button className="btn btn-outline-danger btn-sm" onClick={() => removeStudent(batchId, s._id)}>Remove</button>
                   </td>
                 </tr>
@@ -464,7 +478,7 @@ export default function BatchControls() {
                   const key = `${student._id}_${selectedDate.toDateString()}`;
                   return (
                     <tr key={student._id}>
-                      <td>{student.name}</td>
+                      <td>{student.name} ({student.phone})</td>
                       <td>
                         <button
                           className={`btn btn-success btn-sm me-2 ${markedStatus[key] === "present" ? "active" : ""

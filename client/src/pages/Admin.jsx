@@ -300,22 +300,17 @@ export default function Admin() {
                     <div className="container">
                         <div className="row">
                             {batchesRecords.length > 0 ? (
-                                batchesRecords.map((batch, index) => {
-                                    const batchId = batch._id;
+                                batchesRecords.map((batch, index) => (
 
-                                    return (
-                                        <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                    <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                        <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
                                             <div className="card batch-card mb-3">
                                                 <h5 className="card-title">{batch.name}</h5>
-                                                <span>Started on: {batch.startDate}</span>
-                                                <span>Teacher: {teacher[batchId]?.name || "N/A"}</span>
-                                                <button className="button mt-2" onClick={() => navigate(`/batch/${batch._id}`)}>
-                                                    Open Batch
-                                                </button>
+                                                <span>Code: {batch.code}</span>
                                             </div>
-                                        </div>
-                                    );
-                                })
+                                        </Link>
+                                    </div>
+                                ))
                             ) : (
                                 <p>No batches found.</p>
                             )}
@@ -331,20 +326,16 @@ export default function Admin() {
                     <div className="container">
                         <div className="row">
                             {teachersRecords.length > 0 ? (
-                                teachersRecords.map((teacher, index) => {
-                                    const teacherId = teacher._id;
-
-                                    return (
-                                        <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                teachersRecords.map((teacher, index) => (
+                                    <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                        <Link to={`/teacher/${teacher._id}`} className="text-decoration-none text-dark">
                                             <div className="card batch-card mb-3">
                                                 <h5 className="card-title">{teacher.name}</h5>
-                                                <button className="button mt-2" onClick={() => navigate(`/teacher/${teacher._id}`)}>
-                                                    Open Teacher
-                                                </button>
+                                                <span>Phone: {teacher.phone}</span>
                                             </div>
-                                        </div>
-                                    );
-                                })
+                                        </Link>
+                                    </div>
+                                ))
                             ) : (
                                 <p>No teacher found.</p>
                             )}
