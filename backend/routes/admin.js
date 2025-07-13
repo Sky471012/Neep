@@ -14,6 +14,7 @@ router.get('/findTeacher/:batchId', adminController.getTeacher);
 router.get('/attendance/:studentId', adminController.getStudentsAttendance);
 router.post('/attendance/mark', adminController.markAttendance);
 router.post('/batchCreate', adminController.createBatch);
+router.post('/updateTimetable/:batchId', adminController.updateTimetable);
 router.delete('/batchDelete/:batchId', adminController.deleteBatch);
 router.delete('/removeStudent', adminController.removeStudent);
 router.post('/assignTeacher/:batchId/:teacherId', adminController.assignTeacher)

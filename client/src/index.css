@@ -155,3 +155,53 @@ td {
   font-size: 16px;
   color: #333;
 }
+
+.dropdown-menu {
+  font-size: 1rem;
+  border: None;
+  padding: 10px;
+}
+
+.dropdown-menu button{
+  padding: 7px;
+}
+
+/* Main wrapper */
+.react-time-picker {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Input container */
+.react-time-picker__wrapper {
+  border-radius: 50px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+}
+
+/* Hour, Minute inputs */
+.react-time-picker__inputGroup__input {
+  width: 50px;
+  padding: 3px 5px;
+  border: none;
+  text-align: center;
+}
+
+/* AM/PM Selector */
+.react-time-picker__inputGroup__amPm {
+  padding: 3px 6px;
+  border: none;
+}
+
+/* Remove focus ring */
+.react-time-picker__inputGroup__input:focus,
+.react-time-picker__inputGroup__amPm:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Optional: Hide clear & clock buttons */
+.react-time-picker__clear-button,
+.react-time-picker__clock-button {
+  display: none;
+}

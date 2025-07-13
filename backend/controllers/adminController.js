@@ -122,6 +122,30 @@ exports.createBatch = async (req, res) => {
   }
 };
 
+exports.updateTimetable = async (req, res) => {
+  try {
+    const { batchId } = req.params;
+    const { timetable } = req.body;
+
+    // Step 1: Delete all existing entries for this batch
+    await Timetable.deleteMany({ batchId });
+
+    // Step 2: Filter out any entries with an empty classTimings array
+    const filteredTimetable = timetable
+      .filter((entry) => entry.classTimings && entry.classTimings.length > 0)
+      .map((entry) => ({ ...entry, batchId }));
+
+    // Step 3: Insert only non-empty entries
+    if (filteredTimetable.length > 0) {
+      await Timetable.insertMany(filteredTimetable);
+    }
+
+    res.json({ message: "Updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.removeStudent = async (req, res) => {
   const { batchId, studentId } = req.body;
 
@@ -145,7 +169,6 @@ exports.removeStudent = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 exports.deleteBatch = async (req, res) => {
   try {

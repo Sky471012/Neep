@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
+import { format, parse } from 'date-fns';
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import TimetableEditor from "../components/TimetableEditor";
 import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
+import ModalFour from "../modals/ModalFour";
 
-export default function BatchDetails() {
+export default function BatchControls() {
   const { batchId } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
@@ -22,6 +25,7 @@ export default function BatchDetails() {
   const [openModalOne, setOpenModalOne] = useState(false);
   const [modalTwo, setModalTwo] = useState(false);
   const [modalThree, setModalThree] = useState(false);
+  const [modalFour, setModalFour] = useState(false);
   const [markedStatus, setMarkedStatus] = useState({});
   const [selectedTeacher, setSelectedTeacher] = useState({});
   const [attendanceMap, setAttendanceMap] = useState({});
@@ -214,29 +218,87 @@ export default function BatchDetails() {
     setOpenModalOne(false);
   };
 
+
+  const updateTimetable = async (finalTimetable) => {
+    try {
+      // Filter out empty classTimings
+      const cleanedTimetable = finalTimetable.filter(
+        (entry) => entry.classTimings && entry.classTimings.length > 0
+      );
+
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/updateTimetable/${batchId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ timetable: cleanedTimetable }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update");
+
+      setTimetable(cleanedTimetable); // Update state locally with filtered data
+      setModalFour(false);
+    } catch (err) {
+      alert("Failed to update timetable");
+      console.error(err);
+    }
+  };
+
   return (
     <>
       <Navbar />
       <div className="main-content">
         <div className="container mt-4">
-          <div className="card mb-5" style={{ padding: "20px" }}>
-            <h2>{batch?.name || "No name"}</h2>
-            <p><strong>Batch code:</strong> {batch.code}</p>
-            <p><strong>Started on:</strong> {batch.startDate}</p>
-            <p><strong>Teacher:</strong> {teacher?.name || "Not assigned"}</p>
+          <div className="card mb-5 p-3">
+            <div className="d-flex justify-content-between align-items-start">
+              <h2>{batch?.name || "No name"}</h2>
 
-            <div className="d-flex gap-3 mt-3">
-              <button className="button" onClick={openModalOneHandler}>Mark / Change Attendance</button>
-              <button className="button" onClick={() => setModalTwo(true)}>Assign / Change Teacher</button>
-              <button className="button">Add / Edit Timetable</button>
-              <button className="button">Add Student</button>
-              <button className="btn btn-danger" onClick={() => deleteBatch(batch._id)}>Delete Batch</button>
+              <div className="dropdown">
+                <button
+                  className="btn btn-sm"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  ⋮
+                </button>
+                <ul className="dropdown-menu dropdown-menu-end shadow">
+                  <li>
+                    <button className="dropdown-item" onClick={openModalOneHandler}>
+                      Mark / Change Attendance
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={() => setModalTwo(true)}>
+                      Assign / Change Teacher
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={() => setModalFour(true)}>
+                      Add / Edit Timetable
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item">Add Student</button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item text-danger" onClick={() => deleteBatch(batch._id)}>
+                      Delete Batch
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
+            <p className="mt-3">Batch code:<strong> {batch.code}<br /></strong>
+              Started on:<strong> {batch.startDate}<br /></strong>
+              Teacher:<strong> {teacher?.name || "Not assigned"}</strong></p>
           </div>
 
           {/* Timetable */}
           <div className="timetable-details">
-            <h3>Timetable</h3>
+            <h2>Timetable</h2>
             {timetable && timetable.length > 0 ? (
               <table className="table table-bordered text-center mt-3">
                 <thead className="table-dark">
@@ -250,11 +312,18 @@ export default function BatchDetails() {
                     <tr key={index}>
                       <td>{entry.weekday}</td>
                       <td>
-                        {entry.classTimings.map((slot, idx) => (
-                          <div key={idx}>
-                            {slot.startTime} - {slot.endTime}
-                          </div>
-                        ))}
+                        {entry.classTimings.map((slot, idx) => {
+                          const parsedStart = parse(slot.startTime, 'hh:mm a', new Date());
+                          const parsedEnd = parse(slot.endTime, 'hh:mm a', new Date());
+                          const displayStart = isNaN(parsedStart) ? slot.startTime : format(parsedStart, 'hh:mm a');
+                          const displayEnd = isNaN(parsedEnd) ? slot.endTime : format(parsedEnd, 'hh:mm a');
+
+                          return (
+                            <div key={idx}>
+                              {displayStart} - {displayEnd}
+                            </div>
+                          );
+                        })}
                       </td>
                     </tr>
                   ))}
@@ -445,6 +514,15 @@ export default function BatchDetails() {
               </div>
             )}
           </ModalThree>
+
+          <ModalFour isOpen={modalFour} onClose={() => setModalFour(false)}>
+            <TimetableEditor
+              batch={batch}
+              timetable={timetable}
+              onSave={updateTimetable}
+              initialDay="Monday" // 👈 Add this line
+            />
+          </ModalFour>
 
         </div>
       </div>
