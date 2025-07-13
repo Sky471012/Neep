@@ -256,6 +256,91 @@ exports.assignTeacher = async (req, res) => {
   }
 };
 
+exports.addStudentsToBatch = async (req, res) => {
+  try {
+    const { batchId, studentIds } = req.body;
+
+    if (!Array.isArray(studentIds)) {
+      return res.status(400).json({ message: "Invalid studentIds array." });
+    }
+
+    const batch = await Batch.findById(batchId);
+    if (!batch) {
+      return res.status(404).json({ message: "Batch not found." });
+    }
+
+    // Step 1: Get already added student IDs for this batch
+    const existingLinks = await BatchStudent.find({ batchId });
+    const existingStudentIds = existingLinks.map((link) => link.studentId.toString());
+
+    // Step 2: Filter new studentIds
+    const newStudentIds = studentIds.filter(
+      (id) => !existingStudentIds.includes(id)
+    );
+
+    if (newStudentIds.length === 0) {
+      return res.status(400).json({ message: "No new students to add." });
+    }
+
+    // Step 3: Create new batch-student links
+    const newLinks = newStudentIds.map((studentId) => ({
+      batchId,
+      batchName: batch.name,
+      studentId,
+    }));
+
+    await BatchStudent.insertMany(newLinks);
+
+    // Step 4: Fetch and return added student details
+    const addedStudents = await Student.find({ _id: { $in: newStudentIds } });
+
+    return res.status(200).json({ message: "Students added", addedStudents });
+  } catch (err) {
+    console.error("Add Students Error:", err);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.addStudentByCreating = async (req, res) => {
+  const { batchId } = req.params;
+
+  try {
+    const existingStudent = await Student.findOne({
+      name: req.body.name.trim(),
+      phone: req.body.phone.trim(),
+      dob: req.body.dob.trim(),
+    });
+
+    if (existingStudent) {
+      return res.status(400).json({
+        message: "Student with same name, phone and DOB already exists.",
+      });
+    }
+
+    const student = await Student.create({
+      name: req.body.name.trim(),
+      phone: req.body.phone.trim(),
+      dob: req.body.dob.trim(), // must be DD-MM-YYYY
+      address: req.body.address.trim(),
+      class: req.body.class.trim(),
+      fee: req.body.fee,
+      dateOfJoining: req.body.dateOfJoining.trim(), // must be DD-MM-YYYY
+    });
+
+    const batchStudent = await BatchStudent.create({
+      batchId,
+      batchName: req.body.batchName,
+      studentId: student._id,
+    });
+
+    res.status(201).json({ message: "Student created and added to batch.", student });
+  } catch (err) {
+    console.error("Error creating student:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 // Students Management
 exports.getStudents = async (req, res) => {
   try {

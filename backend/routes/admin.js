@@ -18,6 +18,8 @@ router.post('/updateTimetable/:batchId', adminController.updateTimetable);
 router.delete('/batchDelete/:batchId', adminController.deleteBatch);
 router.delete('/removeStudent', adminController.removeStudent);
 router.post('/assignTeacher/:batchId/:teacherId', adminController.assignTeacher)
+router.post('/addStudents', adminController.addStudentsToBatch);
+router.post('/addStudentByCreating/:batchId', adminController.addStudentByCreating);
 
 // Student Management
 router.get('/students', adminController.getStudents);

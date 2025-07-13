@@ -9,6 +9,7 @@ import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
 import ModalFour from "../modals/ModalFour";
+import ModalFive from "../modals/ModalFive";
 
 export default function BatchControls() {
   const { batchId } = useParams();
@@ -26,11 +27,27 @@ export default function BatchControls() {
   const [modalTwo, setModalTwo] = useState(false);
   const [modalThree, setModalThree] = useState(false);
   const [modalFour, setModalFour] = useState(false);
+  const [modalFive, setModalFive] = useState(false);
+  const [allStudents, setAllStudents] = useState({});
   const [markedStatus, setMarkedStatus] = useState({});
   const [selectedTeacher, setSelectedTeacher] = useState({});
   const [attendanceMap, setAttendanceMap] = useState({});
   const [activeStudent, setActiveStudent] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedToAdd, setSelectedToAdd] = useState([]);
+  const [mode, setMode] = useState("select"); // "select" or "create"
+  const [newStudentData, setNewStudentData] = useState({
+    name: "",
+    phone: "",
+    dob: format(new Date(), "dd-MM-yyyy"),
+    address: "",
+    class: "Kids",
+    fee: "",
+    dateOfJoining: format(new Date(), "dd-MM-yyyy"),
+  });
+
   const academicYearStart = new Date().getMonth() < 3 ? new Date().getFullYear() - 1 : new Date().getFullYear();
+
 
   const allMonths = [
     "April", "May", "June", "July", "August", "September",
@@ -63,13 +80,17 @@ export default function BatchControls() {
       const res5 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchTimetable/${batchId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      const res6 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const [bData, sData, tData, tList, ttData] = await Promise.all([res1.json(), res2.json(), res3.json(), res4.json(), res5.json()]);
+      const [bData, sData, tData, tList, ttData, asData] = await Promise.all([res1.json(), res2.json(), res3.json(), res4.json(), res5.json(), res6.json()]);
       setBatch(bData || {});
       setStudents(sData.students || []);
       setTeacher(tData.teacher[0] || null);
       setTeachersList(tList || []);
       setTimetable(ttData.timetable || []);
+      setAllStudents(asData || {});
     };
 
     fetchData();
@@ -246,6 +267,114 @@ export default function BatchControls() {
     }
   };
 
+  const handleAddSelectedStudents = async () => {
+    if (selectedToAdd.length === 0) {
+      return alert("Please select at least one student.");
+    }
+
+    const studentsToAdd = Object.values(allStudents).filter((s) =>
+      selectedToAdd.includes(s._id)
+    );
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudents`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          batchId,
+          studentIds: selectedToAdd, // just IDs
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to add students.");
+        return;
+      }
+
+      setStudents((prev) => [...prev, ...data.addedStudents]);
+      setModalFive(false);
+      setSelectedToAdd([]);
+      setSearchTerm("");
+    } catch (err) {
+      console.error("Add students error:", err);
+      alert("Error while adding students.");
+    }
+  };
+
+  const filteredStudents = Object.values(allStudents).filter((s) => {
+    const alreadyInBatch = students.some((st) => st._id === s._id);
+    const searchLower = searchTerm.toLowerCase();
+    const nameMatch = s.name.toLowerCase().includes(searchLower);
+    const phoneMatch = s.phone && s.phone.includes(searchLower);
+    return !alreadyInBatch && (nameMatch || phoneMatch);
+  });
+
+  const toggleSelectStudent = (studentId) => {
+    setSelectedToAdd((prev) =>
+      prev.includes(studentId)
+        ? prev.filter((id) => id !== studentId)
+        : [...prev, studentId]
+    );
+  };
+
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    dob: "",
+    address: "",
+    class: "",
+    fee: "",
+    dateOfJoining: "",
+  });
+
+  const updateForm = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCreateStudent = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/createStudent/${batchId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to create student.");
+        return;
+      }
+
+      alert("Student created and added!");
+      setStudents((prev) => [...prev, data.student]);
+      setModalFive(false);
+      setFormData({
+        name: "",
+        phone: "",
+        dob: "",
+        address: "",
+        class: "",
+        fee: "",
+        dateOfJoining: "",
+      });
+    } catch (err) {
+      console.error("Create student error:", err);
+      alert("Something went wrong.");
+    }
+  };
+
+
   return (
     <>
       <Navbar />
@@ -281,7 +410,7 @@ export default function BatchControls() {
                     </button>
                   </li>
                   <li>
-                    <button className="dropdown-item">Add Student</button>
+                    <button className="dropdown-item" onClick={() => setModalFive(true)}>Add Students</button>
                   </li>
                   <li>
                     <button className="dropdown-item text-danger" onClick={() => deleteBatch(batch._id)}>
@@ -523,6 +652,160 @@ export default function BatchControls() {
               initialDay="Monday" // 👈 Add this line
             />
           </ModalFour>
+
+
+          <ModalFive
+            isOpen={modalFive}
+            onClose={() => {
+              setModalFive(false);
+              setSelectedToAdd([]);
+              setSearchTerm("");
+              setMode("select");
+              setNewStudentData({
+                name: "",
+                phone: "",
+                dob: format(new Date(), "dd-MM-yyyy"),
+                address: "",
+                class: "Kids",
+                fee: "",
+                dateOfJoining: format(new Date(), "dd-MM-yyyy"),
+              });
+            }}
+          >
+            <h3>Add Students to {batch.name}</h3>
+
+            <div className="btn-group mb-3 mt-3">
+              <button
+                className={`btn btn-outline-primary ${mode === "select" ? "active" : ""}`}
+                onClick={() => setMode("select")}
+              >
+                Select Existing
+              </button>
+              <button
+                className={`btn btn-outline-primary ${mode === "create" ? "active" : ""}`}
+                onClick={() => setMode("create")}
+              >
+                Create New
+              </button>
+            </div>
+
+            {mode === "select" ? (
+              <>
+                <input
+                  type="text"
+                  className="form-control mb-3"
+                  placeholder="Search by name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <div style={{ maxHeight: "300px", overflowY: "auto", margin:"10px" }}>
+                  {filteredStudents.map((student) => (
+                    <div key={student._id} className="form-check mt-1">
+                      <input
+                        type="checkbox"
+                        className="form-check-input me-2"
+                        id={student._id}
+                        checked={selectedToAdd.includes(student._id)}
+                        onChange={() => toggleSelectStudent(student._id)}
+                      />
+                      <label className="form-check-label" htmlFor={student._id}>
+                        {student.name} ({student.phone})
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <button className="button" onClick={handleAddSelectedStudents}>
+                  Add Selected Students
+                </button>
+              </>
+            ) : (
+              <>
+                <input
+                  className="form-control mb-2"
+                  placeholder="Name"
+                  value={newStudentData.name}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
+                />
+                <input
+                  className="form-control mb-2"
+                  placeholder="Phone"
+                  value={newStudentData.phone}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
+                />
+                <DatePicker
+                  selected={parse(newStudentData.dob, "dd-MM-yyyy", new Date())}
+                  onChange={(date) =>
+                    setNewStudentData({
+                      ...newStudentData,
+                      dob: format(date, "dd-MM-yyyy"),
+                    })
+                  }
+                  value={""} // ✅ this keeps input box empty
+                  dateFormat="dd-MM-yyyy"
+                  className="form-control mb-2"
+                  placeholderText="Date of Birth"
+                />
+                <input
+                  className="form-control mb-2"
+                  placeholder="Address"
+                  value={newStudentData.address}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, address: e.target.value })}
+                />
+                <select
+                  className="form-select mb-2"
+                  value={newStudentData.class}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, class: e.target.value })}
+                >
+                  {["Kids", "English Spoken", "9", "10", "11", "12"].map((cls) => (
+                    <option key={cls} value={cls}>{cls}</option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  className="form-control mb-2"
+                  placeholder="Fee"
+                  value={newStudentData.fee}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, fee: e.target.value })}
+                />
+                <DatePicker
+                  selected={parse(newStudentData.dateOfJoining, "dd-MM-yyyy", new Date())}
+                  onChange={(date) =>
+                    setNewStudentData({
+                      ...newStudentData,
+                      dateOfJoining: format(date, "dd-MM-yyyy"),
+                    })
+                  }
+                  value={""} // ✅ keeps input box empty
+                  dateFormat="dd-MM-yyyy"
+                  className="form-control mb-3"
+                  placeholderText="Date of Joining"
+                />
+                <button className="button" onClick={async () => {
+                  try {
+                    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudentByCreating/${batchId}`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({ ...newStudentData, batchName: batch.name }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) return alert(data.message || "Error creating student");
+                    alert("Student created and added!");
+                    setStudents((prev) => [...prev, data.student]);
+                    setModalFive(false);
+                  } catch (err) {
+                    alert("Failed to create student.");
+                    console.error(err);
+                  }
+                }}>
+                  Create Student
+                </button>
+              </>
+            )}
+          </ModalFive>
+
 
         </div>
       </div>
