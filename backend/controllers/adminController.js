@@ -351,6 +351,17 @@ exports.getStudents = async (req, res) => {
   }
 };
 
+exports.getStudent = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const student = await Student.findById(studentId);
+    res.json(student);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getStudentBatches = async (req, res) => {
   try {
     const { studentId } = req.params;

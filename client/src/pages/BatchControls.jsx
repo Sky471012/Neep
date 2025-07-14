@@ -384,7 +384,7 @@ export default function BatchControls() {
             <strong>
               {teacher?.name || "Not assigned"}
               {teacher && (
-                <Link to={`/teacher/${teacher._id}`} className="ms-1">
+                <Link to={`/teacher/${teacher._id}`} className="ms-1 text-primary">
                   <i className="bi bi-box-arrow-up-right"></i>
                 </Link>
               )}
@@ -439,14 +439,11 @@ export default function BatchControls() {
             <tbody>
               {students.map((s) => (
                 <tr key={s._id}>
-                  <td style={{ width: "40%" }}>{s.name} ({s.phone})</td>
-                  <td style={{ width: "20%" }}>
+                  <td style={{ width: "40%" }}>{s.name} ({s.phone})<Link className="ms-1 text-primary" to={`/student/${s._id}`}><i className="bi bi-box-arrow-up-right"></i></Link></td>
+                  <td style={{ width: "30%" }}>
                     <button className="btn btn-outline-primary btn-sm" onClick={() => showStudentAttendance(s)}>Show Attendance</button>
                   </td>
-                  <td style={{ width: "20%" }}>
-                    <Link className="btn btn-outline-primary btn-sm">Open Studnt</Link>
-                  </td>
-                  <td style={{ width: "20%" }}>
+                  <td style={{ width: "30%" }}>
                     <button className="btn btn-outline-danger btn-sm" onClick={() => removeStudent(batchId, s._id)}>Remove</button>
                   </td>
                 </tr>

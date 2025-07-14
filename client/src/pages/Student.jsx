@@ -194,12 +194,33 @@ export default function Student() {
     }
 
     function convertAmountToWords(amount) {
-        const words = {
-            1000: "One Thousand",
-            12000: "Twelve Thousands",
-            14000: "Fourteen Thousands"
-        };
-        return words[amount] ? `${words[amount]} Rupees only` : `${amount} Rupees only`;
+        const a = [
+            '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
+            'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen',
+            'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+        ];
+        const b = [
+            '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty',
+            'Sixty', 'Seventy', 'Eighty', 'Ninety'
+        ];
+
+        function numToWords(n) {
+            if (n < 20) return a[n];
+            if (n < 100) return b[Math.floor(n / 10)] + (n % 10 ? ' ' + a[n % 10] : '');
+            if (n < 1000) return a[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' and ' + numToWords(n % 100) : '');
+            if (n < 100000) return numToWords(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 ? ' ' + numToWords(n % 1000) : '');
+            if (n < 10000000) return numToWords(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 ? ' ' + numToWords(n % 100000) : '');
+            return numToWords(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 ? ' ' + numToWords(n % 10000000) : '');
+        }
+
+        const numberPart = Math.floor(amount);
+        const decimalPart = Math.round((amount - numberPart) * 100);
+
+        let words = numToWords(numberPart) + ' Rupees';
+        if (decimalPart > 0) {
+            words += ' and ' + numToWords(decimalPart) + ' Paise';
+        }
+        return words + ' only';
     }
 
     if (!student) return <p>Loading student data...</p>;
@@ -420,6 +441,7 @@ export default function Student() {
                         <thead className="table-dark">
                             <tr>
                                 <th>Installment</th>
+                                <th>Amount</th>
                                 <th>Due Date</th>
                                 <th>Paid Date</th>
                                 <th>Method</th>
@@ -433,6 +455,7 @@ export default function Student() {
                                 return (
                                     <tr key={index}>
                                         <td>Installment {record.installmentNo}</td>
+                                        <td>{record.amount || "--"}</td>
                                         <td>{record.dueDate || "--"}</td>
                                         <td>{record.paidDate || "--"}</td>
                                         <td>{record.method || "--"}</td>

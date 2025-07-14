@@ -127,7 +127,6 @@ export default function TeacherControls() {
                     <p className="mt-3">Contact Number:<strong> {teacher.phone}<br /></strong>
                         Role:<strong> {teacher.role}<br /></strong>
                         Email:<strong> {teacher.email}<br /></strong>
-                        Teacher:<strong> {teacher?.name || "Not assigned"}<br /></strong>
                         Number of batches:<strong> {batches.length}</strong></p>
                 </div>
 

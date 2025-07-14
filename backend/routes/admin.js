@@ -23,6 +23,7 @@ router.post('/addStudentByCreating/:batchId', adminController.addStudentByCreati
 
 // Student Management
 router.get('/students', adminController.getStudents);
+router.get('/getStudentDetails/:studentId', adminController.getStudent);
 router.get('/studentBatches/:studentId', adminController.getStudentBatches);
 router.get('/student-fee-status/:studentId', adminController.getStudentFeeStatus);
 router.post('/studentCreate', adminController.createStudent);

@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import DatePicker from "react-datepicker";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import StudentControls from "../components/StudentControls";
 import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
@@ -321,6 +320,29 @@ export default function Admin() {
 
                 {/* <StudentControls studentsRecords={studentsRecords} setStudentsRecords={setStudentsRecords} /> */}
 
+                <div id="students" className="batches-container">
+                    <h1>Students</h1>
+                    <div className="container">
+                        <div className="row">
+                            {studentsRecords.length > 0 ? (
+                                studentsRecords.map((student, index) => (
+                                    <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                        <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
+                                            <div className="card batch-card mb-3">
+                                                <h5 className="card-title">{student.name}</h5>
+                                                <span>Phone: {student.phone}</span>
+                                            </div>
+                                        </Link>
+                                    </div>
+                                ))
+                            ) : (
+                                <p>No student found.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                
+                
                 <div id="teachers" className="batches-container">
                     <h1>Teachers</h1>
                     <div className="container">
