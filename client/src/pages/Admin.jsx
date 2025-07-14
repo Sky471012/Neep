@@ -301,7 +301,7 @@ export default function Admin() {
                             {batchesRecords.length > 0 ? (
                                 batchesRecords.map((batch, index) => (
 
-                                    <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                    <div className="col-12 col-sm-6 col-lg-4" key={index}>
                                         <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
                                             <div className="card batch-card mb-3">
                                                 <h5 className="card-title">{batch.name}</h5>
@@ -318,15 +318,13 @@ export default function Admin() {
                 </div>
 
 
-                {/* <StudentControls studentsRecords={studentsRecords} setStudentsRecords={setStudentsRecords} /> */}
-
                 <div id="students" className="batches-container">
                     <h1>Students</h1>
                     <div className="container">
                         <div className="row">
                             {studentsRecords.length > 0 ? (
                                 studentsRecords.map((student, index) => (
-                                    <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                    <div className="col-12 col-sm-6 col-lg-4" key={index}>
                                         <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
                                             <div className="card batch-card mb-3">
                                                 <h5 className="card-title">{student.name}</h5>
@@ -349,7 +347,7 @@ export default function Admin() {
                         <div className="row">
                             {teachersRecords.length > 0 ? (
                                 teachersRecords.map((teacher, index) => (
-                                    <div className="col-12 col-md-6 col-lg-5" key={index}>
+                                    <div className="col-12 col-sm-6 col-lg-4" key={index}>
                                         <Link to={`/teacher/${teacher._id}`} className="text-decoration-none text-dark">
                                             <div className="card batch-card mb-3">
                                                 <h5 className="card-title">{teacher.name}</h5>
