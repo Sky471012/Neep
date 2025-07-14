@@ -28,9 +28,9 @@ router.get('/studentBatches/:studentId', adminController.getStudentBatches);
 router.get('/student-fee-status/:studentId', adminController.getStudentFeeStatus);
 router.post('/studentCreate', adminController.createStudent);
 router.delete('/studentDelete/:studentId', adminController.deleteStudent);
-router.delete('/removeStudent/:studentId/:batchId', adminController.removeStudentFromBatch);
 router.post('/addStudent/:studentId/:batchId', adminController.addStudentToBatch);
 router.post('/update-fee/:studentId', adminController.updateFeeStatus);
+router.post('/addBatches', adminController.addStudentToBatches);
 
 // Teacher Management
 router.get('/teachers', adminController.getTeachers);

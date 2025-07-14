@@ -225,6 +225,13 @@ export default function Student() {
 
     if (!student) return <p>Loading student data...</p>;
 
+    const totalPaid = feeRecords.reduce((sum, record) => {
+        return sum + (record.paidDate ? (record.amount || 0) : 0);
+    }, 0);
+
+    const totalFee = parseInt(student?.fee || 0);
+    const balance = totalFee - totalPaid;
+
 
     return (<>
 
@@ -477,6 +484,11 @@ export default function Student() {
                             })}
                         </tbody>
                     </table>
+                    <div className="d-flex gap-4 mt-3" style={{ fontSize: "1.5rem" }}>
+                        <span><strong>Total Fee:</strong> ₹ {totalFee}</span>
+                        <span><strong>Paid:</strong> ₹ {totalPaid}</span>
+                        <span><strong>Balance:</strong> ₹ {balance}</span>
+                    </div>
                 </div>
             </ModalFour>
 

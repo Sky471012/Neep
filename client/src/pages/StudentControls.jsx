@@ -5,6 +5,7 @@ import autoTable from "jspdf-autotable";
 import { Inter28ptRegular } from "../assets/fonts/Inter_28pt-Regular";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ModalOne from "../modals/ModalOne";
 
 export default function StudentControls() {
 
@@ -16,6 +17,12 @@ export default function StudentControls() {
     const [student, setStudent] = useState({});
     const [batches, setBatches] = useState([]);
     const [fee, setFee] = useState([]);
+    const [allBatches, setAllBatches] = useState([]);
+    const [modalOne, setModalOne] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedToAdd, setSelectedToAdd] = useState([]);
+
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -28,11 +35,15 @@ export default function StudentControls() {
             const res3 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/student-fee-status/${studentId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+            const res4 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-            const [sData, bData, fData] = await Promise.all([res1.json(), res2.json(), res3.json()]);
+            const [sData, bData, fData, abData] = await Promise.all([res1.json(), res2.json(), res3.json(), res4.json()]);
             setStudent(sData || {});
             setBatches(bData.batches || []);
             setFee(fData.feeStatus || []);
+            setAllBatches(abData || {});
         };
 
         fetchData();
@@ -148,6 +159,112 @@ export default function StudentControls() {
         return words + ' only';
     }
 
+    const totalPaid = fee.reduce((sum, record) => {
+        return sum + (record.paidDate ? (record.amount || 0) : 0);
+    }, 0);
+
+    const totalFee = parseInt(student.fee) || 0;
+    const balance = totalFee - totalPaid;
+
+    const removeStudent = async (batchId, studentId) => {
+        const confirmDelete = window.confirm("Are you sure you want to remove student?");
+        if (!confirmDelete) return;
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/removeStudent`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ batchId, studentId }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Failed to remove student.");
+                return;
+            }
+
+            setBatches((prevBatches) => prevBatches.filter((b) => b._id !== batchId));
+        } catch (error) {
+            console.error("Remove error:", error);
+            alert("Something went wrong while removing.");
+        }
+    };
+
+    const deleteStudent = async (studentId) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this student?");
+        if (!confirmDelete) return;
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentDelete/${studentId}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const data = await res.json();
+            if (!res.ok) return alert(data.message || "Failed to delete student.");
+
+            alert("Student deleted successfully!");
+            navigate("/admin");
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert("Something went wrong while deleting.");
+        }
+    };
+
+    const handleAddToSelectedBatches = async () => {
+        if (selectedToAdd.length === 0) {
+            return alert("Please select at least one batch.");
+        }
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addBatches`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    studentId,
+                    batchIds: selectedToAdd,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Failed to add to batches.");
+                return;
+            }
+
+            setBatches((prev) => [...prev, ...data.addedBatches]);
+            setModalOne(false); // ✅ correct modal
+            setSelectedToAdd([]);
+            setSearchTerm("");
+        } catch (err) {
+            console.error("Add to batches error:", err);
+            alert("Error while adding to batches.");
+        }
+    };
+
+    const filteredBatches = allBatches.filter((b) => {
+        const alreadyInBatch = batches.some((bt) => bt._id === b._id);
+        const searchLower = searchTerm.toLowerCase();
+        const nameMatch = b.name.toLowerCase().includes(searchLower);
+        return !alreadyInBatch && nameMatch;
+    });
+
+    const toggleSelectBatch = (batchId) => {
+        setSelectedToAdd((prev) =>
+            prev.includes(batchId)
+                ? prev.filter((id) => id !== batchId)
+                : [...prev, batchId]
+        );
+    };
+
     return (<>
 
         <Navbar />
@@ -170,7 +287,16 @@ export default function StudentControls() {
                             <ul className="dropdown-menu dropdown-menu-end shadow">
                                 <li>
                                     <button
-                                        className={'dropdown-item text-danger'}
+                                        className="dropdown-item"
+                                        onClick={() => setModalOne(true)}
+                                    >
+                                        Add to Batches
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        className="dropdown-item text-danger"
+                                        onClick={() => deleteStudent(student._id)}
                                     >
                                         Delete Student
                                     </button>
@@ -183,7 +309,6 @@ export default function StudentControls() {
                         DOB:<strong> {student.dob}<br /></strong>
                         Class:<strong> {student.class}<br /></strong>
                         Address:<strong> {student.address}<br /></strong>
-                        Fee:<strong> {student.fee}<br /></strong>
                         Date of Joining:<strong> {student.dateOfJoining}<br /></strong>
                         Student ID:<strong> {student._id}<br /></strong>
                         Number of batches:<strong> {batches.length}</strong></p>
@@ -201,7 +326,7 @@ export default function StudentControls() {
                                         <Link to={`/batch/${b._id}`} className="btn btn-outline-primary btn-sm">Open Batch</Link>
                                     </td>
                                     <td style={{ width: "30%" }}>
-                                        <button className="btn btn-outline-danger btn-sm" onClick={() => removeTeacher(b._id, teacherId)}>Remove</button>
+                                        <button className="btn btn-outline-danger btn-sm" onClick={() => removeStudent(b._id, student._id)}>Remove</button>
                                     </td>
                                 </tr>
                             ))}
@@ -209,49 +334,108 @@ export default function StudentControls() {
                     </table>
                 </div>
 
-                <div className="mt-4">
-                    <h2>Fee status</h2>
-                    <table className="table table-bordered table-striped text-center">
-                        <thead className="table-dark">
-                            <tr>
-                                <th>Installment</th>
-                                <th>Amount</th>
-                                <th>Due Date</th>
-                                <th>Paid Date</th>
-                                <th>Method</th>
-                                <th>Status</th>
-                                <th>Receipt</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {fee.map((record, index) => {
-                                const status = record.paidDate ? "Paid" : "Due";
-                                return (
-                                    <tr key={index}>
-                                        <td>Installment {record.installmentNo}</td>
-                                        <td>{record.amount || "--"}</td>
-                                        <td>{record.dueDate || "--"}</td>
-                                        <td>{record.paidDate || "--"}</td>
-                                        <td>{record.method || "--"}</td>
-                                        <td className={record.paidDate ? "text-success fw-bold" : "text-danger fw-bold"}>
-                                            {status}
-                                        </td>
-                                        <td>
-                                            {record.paidDate ? (
-                                                <button
-                                                    className="button"
-                                                    onClick={() => generatePDFReceipt(student, record)}
-                                                >
-                                                    Download
-                                                </button>
-                                            ) : "--"}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                <div className="mt-5">
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                        <h2 className="card-title">Fee Status</h2>
+                        {/* Dropdown for Edit/Delete */}
+                        <div className="dropdown">
+                            <button
+                                className="btn btn-outline-secondary btn-sm"
+                            >
+                                Edit
+                            </button>
+                        </div>
+                    </div>
+                    <div className="row row-cols-1 row-cols-md-2 g-4 ">
+                        {fee.map((record, index) => {
+                            const status = record.paidDate ? "Paid" : "Due";
+                            const statusClass = record.paidDate ? "text-success" : "text-danger";
+
+                            return (
+                                <div className="col" key={index}>
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <h4 className="card-title">Installment {record.installmentNo}</h4>
+
+
+                                            <p className="mb-1"><strong>Amount:</strong> ₹ {record.amount || "--"}</p>
+                                            <p className="mb-1"><strong>Due Date:</strong> {record.dueDate || "--"}</p>
+                                            <p className="mb-1"><strong>Paid Date:</strong> {record.paidDate || "--"}</p>
+                                            <p className="mb-1"><strong>Method:</strong> {record.method || "--"}</p>
+
+                                            <div className="d-flex justify-content-between align-items-center mt-3">
+                                                <h5 className={`fw-bold ${statusClass}`}>{status}</h5>
+
+                                                <div className="d-flex gap-2">
+                                                    {record.paidDate && (
+                                                        <button
+                                                            className="btn btn-outline-primary btn-sm"
+                                                            onClick={() => generatePDFReceipt(student, record)}
+                                                        >
+                                                            Download
+                                                        </button>
+                                                    )}
+                                                    <button className="btn btn-outline-secondary btn-sm">
+                                                        Edit
+                                                    </button>
+                                                    <button className="btn btn-outline-danger btn-sm">
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="d-flex gap-4 mt-3" style={{ fontSize: "1.5rem" }}>
+                        <span><strong>Total Fee:</strong> ₹ {totalFee}</span>
+                        <span><strong>Paid:</strong> ₹ {totalPaid}</span>
+                        <span><strong>Balance:</strong> ₹ {balance}</span>
+                    </div>
                 </div>
+
+
+                <ModalOne
+                    isOpen={modalOne}
+                    onClose={() => {
+                        setModalOne(false);
+                        setSearchTerm("");
+                    }}
+                >
+                    <h3>Add Student to batches</h3>
+
+                    <input
+                        type="text"
+                        className="form-control mb-3"
+                        placeholder="Search by name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <div style={{ maxHeight: "300px", overflowY: "auto", margin: "10px" }}>
+                        {filteredBatches.map((batch) => (
+                            <div key={batch._id} className="form-check mt-1">
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input me-2"
+                                    id={batch._id}
+                                    checked={selectedToAdd.includes(batch._id)}
+                                    onChange={() => toggleSelectBatch(batch._id)}
+                                />
+                                <label className="form-check-label" htmlFor={batch._id}>
+                                    {batch.name}
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+                    <button className="button" onClick={handleAddToSelectedBatches}>
+                        Add to selected Batches
+                    </button>
+
+                </ModalOne>
+
+
             </div>
         </div>
 

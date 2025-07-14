@@ -321,16 +321,6 @@ export default function BatchControls() {
     );
   };
 
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    dob: "",
-    address: "",
-    class: "",
-    fee: "",
-    dateOfJoining: "",
-  });
-
   return (<>
     <Navbar />
 
@@ -367,7 +357,9 @@ export default function BatchControls() {
                   </button>
                 </li>
                 <li>
-                  <button className="dropdown-item" onClick={() => setModalFive(true)}>Add Students</button>
+                  <button className="dropdown-item" onClick={() => setModalFive(true)}>
+                    Add Students
+                    </button>
                 </li>
                 <li>
                   <button className="dropdown-item text-danger" onClick={() => deleteBatch(batch._id)}>
@@ -663,7 +655,7 @@ export default function BatchControls() {
               <input
                 type="text"
                 className="form-control mb-3"
-                placeholder="Search by name..."
+                placeholder="Search by name or number..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

@@ -446,18 +446,6 @@ exports.deleteStudent = async (req, res) => {
   }
 };
 
-exports.removeStudentFromBatch = async (req, res) => {
-  try {
-    await BatchStudent.findOneAndDelete({
-      studentId: req.params.studentId,
-      batchId: req.params.batchId,
-    });
-    res.json({ message: "Student removed from batch" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
 exports.addStudentToBatch = async (req, res) => {
   try {
     const studentId = req.params.studentId;
@@ -536,6 +524,56 @@ exports.updateFeeStatus = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.addStudentToBatches = async (req, res) => {
+  try {
+    const { batchIds, studentId } = req.body;
+
+    if (!Array.isArray(batchIds)) {
+      return res.status(400).json({ message: "Invalid batchIds array." });
+    }
+
+    // Validate student exists
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    // Step 1: Get already added batch IDs
+    const existingLinks = await BatchStudent.find({ studentId });
+    const existingBatchIds = existingLinks.map(link => link.batchId.toString());
+
+    // Step 2: Filter out already-added batch IDs
+    const newBatchIds = batchIds.filter(id => !existingBatchIds.includes(id));
+
+    if (newBatchIds.length === 0) {
+      return res.status(400).json({ message: "No new batches to add." });
+    }
+
+    // Step 3: Fetch batch names for these newBatchIds
+    const newBatches = await Batch.find({ _id: { $in: newBatchIds } });
+
+    // Step 4: Create batch-student links
+    const newLinks = newBatches.map(batch => ({
+      batchId: batch._id,
+      batchName: batch.name,
+      studentId: student._id
+    }));
+
+    await BatchStudent.insertMany(newLinks);
+
+    // Step 5: Return added batches
+    return res.status(200).json({
+      message: "Batches added successfully.",
+      addedBatches: newBatches
+    });
+
+  } catch (err) {
+    console.error("Add Batches Error:", err);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 
 
 
