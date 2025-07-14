@@ -53,7 +53,6 @@ export default function TeacherControls() {
                 return;
             }
 
-            alert("Teacher deleted successfully!");
             navigate("/admin");
         } catch (error) {
             console.error("Delete error:", error);

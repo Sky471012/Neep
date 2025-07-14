@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { format } from "date-fns";
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'
 import DatePicker from "react-datepicker";
@@ -20,17 +21,20 @@ export default function Admin() {
     const [openModalTwo, setOpenModalTwo] = useState(false);
     const [openModalThree, setOpenModalThree] = useState(false);
     const [openPopupModal, setOpenPopupModal] = useState(false);
+    const [description, setDescription] = useState('');
+    const [image, setImage] = useState(null);
+    const [dob, setDob] = useState(new Date());
+    const [dateOfJoining, setDateOfJoining] = useState(new Date());
     const [credentials, setCredentials] = useState({
-        batch: "",
         studentName: "",
         studentPhone: "",
-        studentDob: "",
+        studentAddress: "",
+        studentClass: "",
+        studentFee: "",
         teacherName: "",
         teacherEmail: ""
     });
-    const [dob, setDob] = useState(null);
-    const [description, setDescription] = useState('');
-    const [image, setImage] = useState(null);
+
 
 
     useEffect(() => {
@@ -142,8 +146,7 @@ export default function Admin() {
         }
     };
 
-    const createStudent = async (studentName, studentPhone, studentDob) => {
-
+    const createStudent = async (name, phone, dob, address, className, fee, dateOfJoining) => {
         try {
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentCreate`, {
                 method: "POST",
@@ -151,7 +154,15 @@ export default function Admin() {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
-                body: JSON.stringify({ name: studentName, phone: studentPhone, dob: studentDob }),
+                body: JSON.stringify({
+                    name,
+                    phone,
+                    dob,
+                    address,
+                    class: className,
+                    fee,
+                    dateOfJoining
+                }),
             });
 
             const data = await res.json();
@@ -161,21 +172,25 @@ export default function Admin() {
                 return;
             }
 
-            setOpenModalTwo(false); // close modal
-            setStudentsRecords((prev) => [...prev, data]); // update state
-            setCredentials((prev) => ({
-                ...prev,
+            setOpenModalTwo(false);
+            setStudentsRecords((prev) => [...prev, data]);
+
+            // reset
+            setCredentials({
                 studentName: "",
                 studentPhone: "",
-                studentDob: ""
-            }));
-            // reset form
-        } catch (error) {
-            console.error("Error creating student:", error);
-            alert("Something went wrong.");
+                studentAddress: "",
+                studentClass: "",
+                studentFee: ""
+            });
+            setDob(new Date());
+            setDateOfJoining(new Date());
+            navigate(`/student/${data._id}`);
+        } catch (err) {
+            console.error("Create student error:", err);
+            alert("Error creating student.");
         }
     };
-
 
     const createTeacher = async (teacherName, teacherEmail) => {
 
@@ -240,19 +255,10 @@ export default function Admin() {
     };
 
     const handleInputChange = (e) => {
-        setCredentials({ ...credentials, [e.target.name]: e.target.value });
-    };
-
-    const handleDateChange = (date) => {
-        setDob(date);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        const formattedDob = `${day}-${month}-${year}`;
-
+        const { name, value } = e.target;
         setCredentials((prev) => ({
             ...prev,
-            studentDob: formattedDob,
+            [name]: value,
         }));
     };
 
@@ -263,10 +269,18 @@ export default function Admin() {
 
     const handleStudentFormSubmit = (e) => {
         e.preventDefault();
+
+        const formattedDob = dob ? format(dob, "dd-MM-yyyy") : "";
+        const formattedJoining = dateOfJoining ? format(dateOfJoining, "dd-MM-yyyy") : "";
+
         createStudent(
             credentials.studentName,
             credentials.studentPhone,
-            credentials.studentDob
+            formattedDob,
+            credentials.studentAddress,
+            credentials.studentClass,
+            parseInt(credentials.studentFee),
+            formattedJoining
         );
     };
 
@@ -339,8 +353,8 @@ export default function Admin() {
                         </div>
                     </div>
                 </div>
-                
-                
+
+
                 <div id="teachers" className="batches-container">
                     <h1>Teachers</h1>
                     <div className="container">
@@ -398,40 +412,96 @@ export default function Admin() {
             >
                 <h3>Adding a Student</h3>
                 <form className='login-form mt-3' onSubmit={handleStudentFormSubmit}>
-                    <div className="input-group flex gap-1">
-                        <label htmlFor="studentName">Student Name</label>
+                    <div className="mb-2 d-flex gap-3 w-75">
+                        <label className="form-label">Name:</label>
                         <input
                             type="text"
-                            id="studentName"
+                            className="form-control"
                             name="studentName"
                             value={credentials.studentName}
                             onChange={handleInputChange}
                             required
-                            placeholder='Write Student Name...'
                         />
-                        <label htmlFor="studentPhone">Student Phone</label>
+                    </div>
+
+                    <div className="d-flex gap-3 w-75">
+                        <label className="form-label">Phone:</label>
                         <input
                             type="tel"
-                            id="studentPhone"
+                            className="form-control"
                             name="studentPhone"
                             value={credentials.studentPhone}
                             onChange={handleInputChange}
                             required
-                            placeholder='Write Student Phone Number...'
-                        />
-                        <label htmlFor="studentDob">Student DOB</label>
-                        <DatePicker
-                            className='datePicker'
-                            dateFormat="dd-MM-yyyy"
-                            id="studentDob"
-                            name="studentDob"
-                            selected={dob}
-                            onChange={handleDateChange}
-                            required
-                            placeholderText='Select Student DOB (dd-mm-yyyy)'
                         />
                     </div>
-                    <button className='btn btn-success mt-2' type="submit">Add Student</button>
+
+                    <div className="d-flex gap-3 w-75">
+                        <label className="form-label">DOB (dd-mm-yyyy):</label>
+                        <DatePicker
+                            className="form-control"
+                            dateFormat="dd-MM-yyyy"
+                            selected={dob}
+                            onChange={(date) => setDob(date)}
+                            placeholderText="Select DOB"
+                            required
+                            maxDate={new Date()}
+                        />
+                    </div>
+
+                    <div className="d-flex gap-3 w-75">
+                        <label className="form-label">Address:</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            name="studentAddress"
+                            value={credentials.studentAddress}
+                            onChange={handleInputChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="d-flex gap-3 w-75">
+                        <label className="form-label">Class:</label>
+                        <select
+                            className="form-select"
+                            name="studentClass"
+                            value={credentials.studentClass}
+                            onChange={handleInputChange}
+                            required
+                        >
+                            <option value="">Select Class</option>
+                            {["Kids", "English Spoken", "9", "10", "11", "12"].map((cls) => (
+                                <option key={cls} value={cls}>{cls}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="d-flex gap-3 w-75">
+                        <label className="form-label">Fee:</label>
+                        <input
+                            type="number"
+                            className="form-control"
+                            name="studentFee"
+                            value={credentials.studentFee}
+                            onChange={handleInputChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="d-flex gap-3 w-75">
+                        <label className="form-label">Date of Joining (dd-mm-yyyy):</label>
+                        <DatePicker
+                            className="form-control"
+                            dateFormat="dd-MM-yyyy"
+                            selected={dateOfJoining}
+                            onChange={(date) => setDateOfJoining(date)}
+                            placeholderText="Select Joining Date"
+                            required
+                        />
+                    </div>
+
+                    <button className="btn btn-success mt-3" type="submit">Add Student</button>
                 </form>
             </ModalTwo>
 

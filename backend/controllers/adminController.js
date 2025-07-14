@@ -394,9 +394,20 @@ exports.getStudentFeeStatus = async (req, res) => {
 
 exports.createStudent = async (req, res) => {
   try {
+    const {
+      name,
+      phone,
+      dob,
+      address,
+      class: studentClass,
+      fee,
+      dateOfJoining
+    } = req.body;
+
+    // Check if student exists
     const existingStudent = await Student.findOne({
-      name: req.body.name.trim(),
-      phone: req.body.phone.trim(),
+      name: name.trim(),
+      phone: phone.trim(),
     });
 
     if (existingStudent) {
@@ -405,15 +416,42 @@ exports.createStudent = async (req, res) => {
       });
     }
 
+    // Validate DOB format: DD-MM-YYYY
+    const dobRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
+    if (!dobRegex.test(dob)) {
+      return res.status(400).json({
+        message: "Date of birth must be in DD-MM-YYYY format.",
+      });
+    }
+
+    if (!dobRegex.test(dateOfJoining)) {
+      return res.status(400).json({
+        message: "Date of joining must be in DD-MM-YYYY format.",
+      });
+    }
+
+    // Validate class enum
+    const allowedClasses = ["Kids", "English Spoken", "9", "10", "11", "12"];
+    if (!allowedClasses.includes(studentClass)) {
+      return res.status(400).json({
+        message: "Invalid class selected.",
+      });
+    }
+
     const student = await Student.create({
-      name: req.body.name.trim(),
-      phone: req.body.phone.trim(),
-      dob: req.body.dob.trim(), // this must match DD-MM-YYYY
+      name: name.trim(),
+      phone: phone.trim(),
+      dob: dob.trim(),
+      address: address.trim(),
+      class: studentClass,
+      fee,
+      dateOfJoining: dateOfJoining.trim(),
     });
 
-    res.json(student);
+    res.status(200).json(student);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Create Student Error:", err);
+    res.status(500).json({ error: "Internal server error." });
   }
 };
 

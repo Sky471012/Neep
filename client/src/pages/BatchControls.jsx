@@ -142,7 +142,6 @@ export default function BatchControls() {
         return;
       }
 
-      alert("Batch deleted successfully!");
       navigate("/admin");
     } catch (error) {
       console.error("Delete error:", error);

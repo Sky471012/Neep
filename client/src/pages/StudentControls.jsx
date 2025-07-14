@@ -207,7 +207,6 @@ export default function StudentControls() {
             const data = await res.json();
             if (!res.ok) return alert(data.message || "Failed to delete student.");
 
-            alert("Student deleted successfully!");
             navigate("/admin");
         } catch (error) {
             console.error("Delete error:", error);
