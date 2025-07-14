@@ -107,7 +107,15 @@ exports.markAttendance = async (req, res) => {
 
 exports.createBatch = async (req, res) => {
   try {
-    const existingBatch = await Batch.findOne({ name: req.body.name.trim() });
+    const name = req.body.name?.trim();
+    const startDate = req.body.startDate?.trim();
+    let code = req.body.code?.trim();
+
+    if (!name || !startDate) {
+      return res.status(400).json({ message: "Name and startDate are required." });
+    }
+
+    const existingBatch = await Batch.findOne({ name });
 
     if (existingBatch) {
       return res
@@ -115,7 +123,17 @@ exports.createBatch = async (req, res) => {
         .json({ message: "Batch with same name already exists." });
     }
 
-    const batch = await Batch.create({ name: req.body.name.trim() });
+    // Generate code if not provided
+    if (!code) {
+      code = `B-${Date.now().toString().slice(-6)}`;
+    }
+
+    const batch = await Batch.create({
+      name,
+      code,
+      startDate,
+    });
+
     res.json(batch);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -656,24 +674,33 @@ exports.getTeacherBatches = async (req, res) => {
 
 exports.createTeacher = async (req, res) => {
   try {
-    const existingTeacher = await Teacher.findOne({
-      email: req.body.email.trim(),
-    });
+    const { name, email, phone } = req.body;
+
+    // Basic validation
+    if (!name || !email || !phone) {
+      return res.status(400).json({ message: "Name, email, and phone are required." });
+    }
+
+    const trimmedEmail = email.trim();
+
+    const existingTeacher = await Teacher.findOne({ email: trimmedEmail });
 
     if (existingTeacher) {
       return res.status(400).json({
-        message: "Teacher with same email already exists.",
+        message: "Teacher with the same email already exists.",
       });
     }
 
     const teacher = await Teacher.create({
-      name: req.body.name.trim(),
-      email: req.body.email.trim(),
+      name: name.trim(),
+      email: trimmedEmail,
+      phone: phone.trim(),
       role: "teacher",
     });
 
     res.json(teacher);
   } catch (err) {
+    console.error("Teacher creation error:", err);
     res.status(500).json({ error: err.message });
   }
 };

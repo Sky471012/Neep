@@ -25,6 +25,7 @@ export default function Admin() {
     const [image, setImage] = useState(null);
     const [dob, setDob] = useState(new Date());
     const [dateOfJoining, setDateOfJoining] = useState(new Date());
+    const [startDate, setStartDate] = useState(new Date());
     const [credentials, setCredentials] = useState({
         studentName: "",
         studentPhone: "",
@@ -32,10 +33,9 @@ export default function Admin() {
         studentClass: "",
         studentFee: "",
         teacherName: "",
-        teacherEmail: ""
+        teacherEmail: "",
+        teacherPhone: "",
     });
-
-
 
     useEffect(() => {
         const storedAdmin = localStorage.getItem("user");
@@ -114,11 +114,14 @@ export default function Admin() {
 
     }, [batchesRecords]);
 
-    const createBatch = async (batchName) => {
+    const createBatch = async (batchName, batchStartDate) => {
         if (!batchName.trim()) {
             alert("Please enter a batch name.");
             return;
         }
+
+        const formattedDate = format(batchStartDate, "dd-MM-yyyy");
+        const code = `B-${Date.now().toString().slice(-6)}`; // or any code generator logic
 
         try {
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchCreate`, {
@@ -127,7 +130,7 @@ export default function Admin() {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
-                body: JSON.stringify({ name: batchName }),
+                body: JSON.stringify({ name: batchName, code, startDate: formattedDate }),
             });
 
             const data = await res.json();
@@ -137,9 +140,11 @@ export default function Admin() {
                 return;
             }
 
-            setOpenModalOne(false); // close modal
-            setBatchesRecords((prev) => [...prev, data]); // update state
-            setCredentials({ batch: "" }); // reset form
+            setOpenModalOne(false);
+            setBatchesRecords((prev) => [...prev, data]);
+            setCredentials({ batch: "" });
+            setStartDate(new Date());
+            navigate(`/batch/${data._id}`);
         } catch (error) {
             console.error("Error creating batch:", error);
             alert("Something went wrong.");
@@ -192,8 +197,7 @@ export default function Admin() {
         }
     };
 
-    const createTeacher = async (teacherName, teacherEmail) => {
-
+    const createTeacher = async (teacherName, teacherEmail, teacherPhone) => {
         try {
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherCreate`, {
                 method: "POST",
@@ -201,7 +205,12 @@ export default function Admin() {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
-                body: JSON.stringify({ name: teacherName, email: teacherEmail }),
+                body: JSON.stringify({
+                    name: teacherName,
+                    email: teacherEmail,
+                    phone: teacherPhone,
+                    role: "teacher"
+                }),
             });
 
             const data = await res.json();
@@ -211,14 +220,16 @@ export default function Admin() {
                 return;
             }
 
-            setOpenModalThree(false); // close modal
-            setTeachersRecords((prev) => [...prev, data]); // update state
+            setOpenModalThree(false);
+            setTeachersRecords((prev) => [...prev, data]);
+
+            // Reset form
             setCredentials((prev) => ({
                 ...prev,
                 teacherName: "",
-                teacherEmail: ""
+                teacherEmail: "",
+                teacherPhone: ""
             }));
-            // reset form
         } catch (error) {
             console.error("Error creating teacher:", error);
             alert("Something went wrong.");
@@ -264,7 +275,7 @@ export default function Admin() {
 
     const handleBatchFormSubmit = (e) => {
         e.preventDefault();
-        createBatch(credentials.batch);
+        createBatch(credentials.batch, startDate);
     };
 
     const handleStudentFormSubmit = (e) => {
@@ -288,7 +299,8 @@ export default function Admin() {
         e.preventDefault();
         createTeacher(
             credentials.teacherName,
-            credentials.teacherEmail
+            credentials.teacherEmail,
+            credentials.teacherPhone
         );
     };
 
@@ -388,7 +400,7 @@ export default function Admin() {
             >
                 <h3>Batch Creation</h3>
                 <form className='login-form mt-3' onSubmit={handleBatchFormSubmit}>
-                    <div className="input-group flex gap-1">
+                    <div className="input-group flex gap-1 mb-2">
                         <label htmlFor="batch">Batch Name</label>
                         <input
                             type="text"
@@ -400,6 +412,19 @@ export default function Admin() {
                             placeholder='Write Batch Name...'
                         />
                     </div>
+
+                    <div className="input-group flex gap-1">
+                        <label htmlFor="startDate">Start Date</label>
+                        <DatePicker
+                            className="form-control"
+                            dateFormat="dd-MM-yyyy"
+                            selected={startDate}
+                            onChange={(date) => setStartDate(date)}
+                            placeholderText="Select Start Date"
+                            required
+                        />
+                    </div>
+
                     <button className='btn btn-success mt-2' type="submit">Create Batch</button>
                 </form>
             </ModalOne>
@@ -513,7 +538,7 @@ export default function Admin() {
                 <h3>Adding a Teacher</h3>
                 <form className='login-form mt-3' onSubmit={handleTeacherFormSubmit}>
                     <div className="input-group flex gap-1">
-                        <label htmlFor="studentName">Teacher Name</label>
+                        <label htmlFor="teacherName">Teacher Name</label>
                         <input
                             type="text"
                             id="teacherName"
@@ -526,12 +551,22 @@ export default function Admin() {
                         <label htmlFor="teacherEmail">Teacher Email</label>
                         <input
                             type="email"
-                            id="teacherhone"
+                            id="teacherEmail"
                             name="teacherEmail"
                             value={credentials.teacherEmail}
                             onChange={handleInputChange}
                             required
-                            placeholder='Write Teacher email...'
+                            placeholder='Write Teacher Email...'
+                        />
+                        <label htmlFor="teacherPhone">Teacher Phone</label>
+                        <input
+                            type="tel"
+                            id="teacherPhone"
+                            name="teacherPhone"
+                            value={credentials.teacherPhone}
+                            onChange={handleInputChange}
+                            required
+                            placeholder='Write Teacher Phone...'
                         />
                     </div>
                     <button className='btn btn-success mt-2' type="submit">Add Teacher</button>
