@@ -29,10 +29,6 @@ const studentSchema = new Schema({
     enum: ["Kids", "English Spoken", "9", "10", "11", "12"],
     required: true,
   },
-  fee: {
-    type: Number,
-    required: true,
-  },
   dateOfJoining: {
     type: String,
     required: true,

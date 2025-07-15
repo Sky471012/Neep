@@ -25,11 +25,15 @@ router.post('/addStudentByCreating/:batchId', adminController.addStudentByCreati
 router.get('/students', adminController.getStudents);
 router.get('/getStudentDetails/:studentId', adminController.getStudent);
 router.get('/studentBatches/:studentId', adminController.getStudentBatches);
-router.get('/student-fee-status/:studentId', adminController.getStudentFeeStatus);
+router.get('/fee/:studentId', adminController.getStudentFee);
+router.get('/installments/:studentId', adminController.getStudentInstallments);
 router.post('/studentCreate', adminController.createStudent);
 router.delete('/studentDelete/:studentId', adminController.deleteStudent);
 router.post('/addStudent/:studentId/:batchId', adminController.addStudentToBatch);
-router.post('/update-fee/:studentId', adminController.updateFeeStatus);
+router.patch('/fee/update-fee/:studentId', adminController.updateFee);
+router.post('/fee/addInstallment', adminController.addInstallment);
+router.delete('/fee/removeInstallment/:installmentId', adminController.removeInstallment);
+router.patch('/fee/redistributeInstallment/:installmentId', adminController.redistributeInstallment);
 router.post('/addBatches', adminController.addStudentToBatches);
 
 // Teacher Management

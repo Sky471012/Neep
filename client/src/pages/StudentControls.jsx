@@ -16,7 +16,8 @@ export default function StudentControls() {
 
     const [student, setStudent] = useState({});
     const [batches, setBatches] = useState([]);
-    const [fee, setFee] = useState([]);
+    const [installments, setInstallments] = useState([]);
+    const [fee, setFee] = useState({});
     const [allBatches, setAllBatches] = useState([]);
     const [modalOne, setModalOne] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -32,18 +33,22 @@ export default function StudentControls() {
             const res2 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentBatches/${studentId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            const res3 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/student-fee-status/${studentId}`, {
+            const res3 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/${studentId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const res4 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+            const res5 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/installments/${studentId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-            const [sData, bData, fData, abData] = await Promise.all([res1.json(), res2.json(), res3.json(), res4.json()]);
+            const [sData, bData, fData, abData, iData] = await Promise.all([res1.json(), res2.json(), res3.json(), res4.json(), res5.json()]);
             setStudent(sData || {});
             setBatches(bData.batches || []);
-            setFee(fData.feeStatus || []);
+            setFee(Array.isArray(fData.fee) ? fData.fee[0] : {});
             setAllBatches(abData || {});
+            setInstallments(Array.isArray(iData) ? iData : iData.installments || []);
         };
 
         fetchData();
@@ -159,11 +164,11 @@ export default function StudentControls() {
         return words + ' only';
     }
 
-    const totalPaid = fee.reduce((sum, record) => {
+    const totalPaid = installments.reduce((sum, record) => {
         return sum + (record.paidDate ? (record.amount || 0) : 0);
     }, 0);
 
-    const totalFee = parseInt(student.fee) || 0;
+    const totalFee = fee?.totalAmount || 0;
     const balance = totalFee - totalPaid;
 
     const removeStudent = async (batchId, studentId) => {
@@ -264,6 +269,100 @@ export default function StudentControls() {
         );
     };
 
+    const handleAddInstallment = async () => {
+        const newInstallment = {
+            feeId: fee._id,
+            studentId: student._id,
+            installmentNo: installments.length + 1,
+            dueDate: new Date().toISOString().split("T")[0],
+            amount: 0
+        };
+
+        const response = await fetch(
+            `${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/addInstallment`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(newInstallment),
+            }
+        );
+
+        if (response.ok) {
+            const data = await response.json();
+            setInstallments((prev) => [...prev, data.installment]);
+        } else {
+            alert("Failed to add installment");
+        }
+    };
+
+    const handleRemoveInstallment = async (record) => {
+        const confirm = window.confirm("Are you sure you want to remove this installment?");
+        if (!confirm) return;
+
+        const unpaid = installments.filter(i => !i.paidDate && i._id !== record._id);
+        if (unpaid.length === 0) return alert("No unpaid installments left to redistribute");
+
+        const redistribution = record.amount / unpaid.length;
+
+        const updatedInstallments = await Promise.all(
+            unpaid.map(async (i) => {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/redistributeInstallment/${i._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ amount: i.amount + redistribution }),
+                });
+                return res.ok ? (await res.json()).updatedInstallment : i;
+            })
+        );
+
+        const delRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/removeInstallment/${record._id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (delRes.ok) {
+            setInstallments((prev) =>
+                prev.filter((i) => i._id !== record._id).map((i) => {
+                    const updated = updatedInstallments.find((u) => u._id === i._id);
+                    return updated || i;
+                })
+            );
+        } else {
+            alert("Failed to delete installment");
+        }
+    };
+
+    const editTotalAmount = async () => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/update-fee/${studentId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ amount: newAmount }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Failed to remove student.");
+                return;
+            }
+
+            setBatches((prevBatches) => prevBatches.filter((b) => b._id !== batchId));
+        } catch (error) {
+            console.error("Remove error:", error);
+            alert("Something went wrong while removing.");
+        }
+    };
+
     return (<>
 
         <Navbar />
@@ -336,26 +435,30 @@ export default function StudentControls() {
                 <div className="mt-5">
                     <div className="d-flex justify-content-between align-items-start mb-2">
                         <h2 className="card-title">Fee Status</h2>
-                        {/* Dropdown for Edit/Delete */}
-                        <div className="dropdown">
-                            <button
-                                className="btn btn-outline-secondary btn-sm"
-                            >
-                                Edit
-                            </button>
-                        </div>
+                        <button
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={handleAddInstallment}
+                        >
+                            Add Installment
+                        </button>
                     </div>
-                    <div className="row row-cols-1 row-cols-md-2 g-4 ">
-                        {fee.map((record, index) => {
+
+                    <div className="d-flex gap-4 mt-3 mb-1" style={{ fontSize: "1.2rem" }}>
+                        <span><strong>Total Fee:</strong> ₹ {totalFee}</span>
+                        <span><strong>Paid:</strong> ₹ {totalPaid}</span>
+                        <span><strong>Balance:</strong> ₹ {balance}</span>
+                    </div>
+
+                    <div className="row row-cols-1 row-cols-md-2 g-4 mt-2">
+                        {installments.map((record, index) => {
                             const status = record.paidDate ? "Paid" : "Due";
                             const statusClass = record.paidDate ? "text-success" : "text-danger";
 
                             return (
-                                <div className="col" key={index}>
-                                    <div className="card">
+                                <div className="col" key={record._id}>
+                                    <div className="card h-100">
                                         <div className="card-body">
-                                            <h4 className="card-title">Installment {record.installmentNo}</h4>
-
+                                            <h5 className="card-title">Installment {record.installmentNo}</h5>
 
                                             <p className="mb-1"><strong>Amount:</strong> ₹ {record.amount || "--"}</p>
                                             <p className="mb-1"><strong>Due Date:</strong> {record.dueDate || "--"}</p>
@@ -363,7 +466,7 @@ export default function StudentControls() {
                                             <p className="mb-1"><strong>Method:</strong> {record.method || "--"}</p>
 
                                             <div className="d-flex justify-content-between align-items-center mt-3">
-                                                <h5 className={`fw-bold ${statusClass}`}>{status}</h5>
+                                                <span className={`fw-bold ${statusClass}`}>{status}</span>
 
                                                 <div className="d-flex gap-2">
                                                     {record.paidDate && (
@@ -377,7 +480,10 @@ export default function StudentControls() {
                                                     <button className="btn btn-outline-secondary btn-sm">
                                                         Edit
                                                     </button>
-                                                    <button className="btn btn-outline-danger btn-sm">
+                                                    <button
+                                                        className="btn btn-outline-danger btn-sm"
+                                                        onClick={() => handleRemoveInstallment(record)}
+                                                    >
                                                         Remove
                                                     </button>
                                                 </div>
@@ -387,11 +493,6 @@ export default function StudentControls() {
                                 </div>
                             );
                         })}
-                    </div>
-                    <div className="d-flex gap-4 mt-3" style={{ fontSize: "1.5rem" }}>
-                        <span><strong>Total Fee:</strong> ₹ {totalFee}</span>
-                        <span><strong>Paid:</strong> ₹ {totalPaid}</span>
-                        <span><strong>Balance:</strong> ₹ {balance}</span>
                     </div>
                 </div>
 

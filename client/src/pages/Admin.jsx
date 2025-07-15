@@ -31,7 +31,6 @@ export default function Admin() {
         studentPhone: "",
         studentAddress: "",
         studentClass: "",
-        studentFee: "",
         teacherName: "",
         teacherEmail: "",
         teacherPhone: "",
@@ -151,7 +150,7 @@ export default function Admin() {
         }
     };
 
-    const createStudent = async (name, phone, dob, address, className, fee, dateOfJoining) => {
+    const createStudent = async (name, phone, dob, address, className, dateOfJoining) => {
         try {
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentCreate`, {
                 method: "POST",
@@ -165,7 +164,6 @@ export default function Admin() {
                     dob,
                     address,
                     class: className,
-                    fee,
                     dateOfJoining
                 }),
             });
@@ -186,7 +184,6 @@ export default function Admin() {
                 studentPhone: "",
                 studentAddress: "",
                 studentClass: "",
-                studentFee: ""
             });
             setDob(new Date());
             setDateOfJoining(new Date());
@@ -290,7 +287,6 @@ export default function Admin() {
             formattedDob,
             credentials.studentAddress,
             credentials.studentClass,
-            parseInt(credentials.studentFee),
             formattedJoining
         );
     };
@@ -500,18 +496,6 @@ export default function Admin() {
                                 <option key={cls} value={cls}>{cls}</option>
                             ))}
                         </select>
-                    </div>
-
-                    <div className="d-flex gap-3 w-75">
-                        <label className="form-label">Fee:</label>
-                        <input
-                            type="number"
-                            className="form-control"
-                            name="studentFee"
-                            value={credentials.studentFee}
-                            onChange={handleInputChange}
-                            required
-                        />
                     </div>
 
                     <div className="d-flex gap-3 w-75">

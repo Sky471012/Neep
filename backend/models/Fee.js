@@ -2,27 +2,15 @@ const mongoose = require("mongoose");
 const { Schema, model, Types } = mongoose;
 
 const feeSchema = new Schema({
-  installmentNo: {
-    type: Number,
-    required: true,
-  },
   studentId: {
     type: Types.ObjectId,
     ref: "Student",
     required: true,
+    unique: true, // one fee record per student
   },
-  dueDate: {
-    type: String,
+  totalAmount: {
+    type: Number,
     required: true,
-  },
-  paidDate: {
-    type: String,
-    required: false,
-  },
-  method: {
-    type: String,
-    enum: ["Online", "Cash"],
-    required: false,
   },
 });
 

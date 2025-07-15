@@ -4,6 +4,7 @@ const Attendance = require("../models/Attendance");
 const Timetable = require("../models/TimeTable");
 const Test = require("../models/Test");
 const Fee = require("../models/Fee");
+const Installment = require("../models/Installment");
 const Student = require("../models/Student");
 const Teacher = require("../models/Admins_teachers");
 const BatchTeacher = require("../models/Batch_teachers");
@@ -112,7 +113,9 @@ exports.createBatch = async (req, res) => {
     let code = req.body.code?.trim();
 
     if (!name || !startDate) {
-      return res.status(400).json({ message: "Name and startDate are required." });
+      return res
+        .status(400)
+        .json({ message: "Name and startDate are required." });
     }
 
     const existingBatch = await Batch.findOne({ name });
@@ -289,7 +292,9 @@ exports.addStudentsToBatch = async (req, res) => {
 
     // Step 1: Get already added student IDs for this batch
     const existingLinks = await BatchStudent.find({ batchId });
-    const existingStudentIds = existingLinks.map((link) => link.studentId.toString());
+    const existingStudentIds = existingLinks.map((link) =>
+      link.studentId.toString()
+    );
 
     // Step 2: Filter new studentIds
     const newStudentIds = studentIds.filter(
@@ -341,7 +346,6 @@ exports.addStudentByCreating = async (req, res) => {
       dob: req.body.dob.trim(), // must be DD-MM-YYYY
       address: req.body.address.trim(),
       class: req.body.class.trim(),
-      fee: req.body.fee,
       dateOfJoining: req.body.dateOfJoining.trim(), // must be DD-MM-YYYY
     });
 
@@ -351,13 +355,14 @@ exports.addStudentByCreating = async (req, res) => {
       studentId: student._id,
     });
 
-    res.status(201).json({ message: "Student created and added to batch.", student });
+    res
+      .status(201)
+      .json({ message: "Student created and added to batch.", student });
   } catch (err) {
     console.error("Error creating student:", err);
     res.status(500).json({ error: err.message });
   }
 };
-
 
 // Students Management
 exports.getStudents = async (req, res) => {
@@ -398,13 +403,25 @@ exports.getStudentBatches = async (req, res) => {
   }
 };
 
-exports.getStudentFeeStatus = async (req, res) => {
+exports.getStudentFee = async (req, res) => {
   try {
     const { studentId } = req.params;
 
-    const feeStatus = await Fee.find({ studentId });
+    const fee = await Fee.find({ studentId });
 
-    res.json({ feeStatus });
+    res.json({ fee });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getStudentInstallments = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const installments = await Installment.find({ studentId });
+
+    res.json({ installments });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -418,8 +435,7 @@ exports.createStudent = async (req, res) => {
       dob,
       address,
       class: studentClass,
-      fee,
-      dateOfJoining
+      dateOfJoining,
     } = req.body;
 
     // Check if student exists
@@ -462,7 +478,6 @@ exports.createStudent = async (req, res) => {
       dob: dob.trim(),
       address: address.trim(),
       class: studentClass,
-      fee,
       dateOfJoining: dateOfJoining.trim(),
     });
 
@@ -541,36 +556,23 @@ exports.addStudentToBatch = async (req, res) => {
   }
 };
 
-exports.updateFeeStatus = async (req, res) => {
+exports.updateFee = async (req, res) => {
   const { studentId } = req.params;
-  const { month, amount } = req.body;
-  const paidOn = new Date();
+  const { amount } = req.body;
 
-  if (!month || !amount) {
-    return res
-      .status(400)
-      .json({ message: "All fields are required (month, amount)" });
+  if (!amount) {
+    return res.status(400).json({ message: "Amount is required" });
   }
 
   try {
-    // Check if a record already exists for the same student + month
-    const existing = await Fee.findOne({ studentId, month });
+    const feeRecord = await Fee.findOne({ studentId });
 
-    let feeRecord;
-    if (existing) {
-      // Update existing
-      existing.amount = amount;
-      existing.paidOn = paidOn;
-      feeRecord = await existing.save();
-    } else {
-      // Create new
-      feeRecord = await Fee.create({
-        studentId,
-        amount,
-        month,
-        paidOn,
-      });
+    if (!feeRecord) {
+      return res.status(404).json({ message: "Fee record not found" });
     }
+
+    feeRecord.totalAmount = amount;
+    await feeRecord.save();
 
     res
       .status(200)
@@ -578,6 +580,103 @@ exports.updateFeeStatus = async (req, res) => {
   } catch (err) {
     console.error("Error updating fee:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.addInstallment = async (req, res) => {
+  try {
+    const { studentId, feeId, installmentNo, amount, dueDate } = req.body;
+
+    const feeExists = await Fee.findById(feeId);
+    if (!feeExists)
+      return res.status(404).json({ message: "Fee record not found" });
+
+    const newInstallment = new Installment({
+      feeId,
+      studentId,
+      installmentNo,
+      amount,
+      dueDate,
+    });
+
+    await newInstallment.save();
+    res
+      .status(201)
+      .json({ message: "Installment added", installment: newInstallment });
+  } catch (err) {
+    console.error("Add Installment Error:", err);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.removeInstallment = async (req, res) => {
+  try {
+    const installmentId = req.params.installmentId;
+    const installment = await Installment.findById(installmentId);
+    if (!installment)
+      return res.status(404).json({ message: "Installment not found" });
+
+    if (installment.paidDate) {
+      return res
+        .status(400)
+        .json({ message: "Cannot remove a paid installment" });
+    }
+
+    const { studentId, feeId, amount } = installment;
+
+    const otherUnpaid = await Installment.find({
+      feeId,
+      studentId,
+      _id: { $ne: installmentId },
+      paidDate: { $exists: false },
+    });
+
+    if (otherUnpaid.length === 0) {
+      return res
+        .status(400)
+        .json({
+          message: "No other unpaid installments to redistribute amount",
+        });
+    }
+
+    const redistributedAmount = amount / otherUnpaid.length;
+
+    await Promise.all(
+      otherUnpaid.map((inst) =>
+        Installment.findByIdAndUpdate(inst._id, {
+          $inc: { amount: redistributedAmount },
+        })
+      )
+    );
+
+    await Installment.findByIdAndDelete(installmentId);
+
+    res.json({ message: "Installment removed and amount redistributed" });
+  } catch (err) {
+    console.error("Error removing installment:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.redistributeInstallment = async (req, res) => {
+  const installmentId = req.params.installmentId;
+  const { amount } = req.body;
+
+  try {
+    const installment = await Installment.findById(installmentId);
+    if (!installment) {
+      return res.status(404).json({ message: "Installment not found" });
+    }
+
+    installment.amount = amount;
+    await installment.save();
+
+    return res.json({ updatedInstallment: installment });
+  } catch (err) {
+    console.error("Error updating installment:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
   }
 };
 
@@ -597,10 +696,12 @@ exports.addStudentToBatches = async (req, res) => {
 
     // Step 1: Get already added batch IDs
     const existingLinks = await BatchStudent.find({ studentId });
-    const existingBatchIds = existingLinks.map(link => link.batchId.toString());
+    const existingBatchIds = existingLinks.map((link) =>
+      link.batchId.toString()
+    );
 
     // Step 2: Filter out already-added batch IDs
-    const newBatchIds = batchIds.filter(id => !existingBatchIds.includes(id));
+    const newBatchIds = batchIds.filter((id) => !existingBatchIds.includes(id));
 
     if (newBatchIds.length === 0) {
       return res.status(400).json({ message: "No new batches to add." });
@@ -610,10 +711,10 @@ exports.addStudentToBatches = async (req, res) => {
     const newBatches = await Batch.find({ _id: { $in: newBatchIds } });
 
     // Step 4: Create batch-student links
-    const newLinks = newBatches.map(batch => ({
+    const newLinks = newBatches.map((batch) => ({
       batchId: batch._id,
       batchName: batch.name,
-      studentId: student._id
+      studentId: student._id,
     }));
 
     await BatchStudent.insertMany(newLinks);
@@ -621,17 +722,13 @@ exports.addStudentToBatches = async (req, res) => {
     // Step 5: Return added batches
     return res.status(200).json({
       message: "Batches added successfully.",
-      addedBatches: newBatches
+      addedBatches: newBatches,
     });
-
   } catch (err) {
     console.error("Add Batches Error:", err);
     return res.status(500).json({ message: "Internal server error." });
   }
 };
-
-
-
 
 // Teachers Management
 exports.getTeachers = async (req, res) => {
@@ -678,7 +775,9 @@ exports.createTeacher = async (req, res) => {
 
     // Basic validation
     if (!name || !email || !phone) {
-      return res.status(400).json({ message: "Name, email, and phone are required." });
+      return res
+        .status(400)
+        .json({ message: "Name, email, and phone are required." });
     }
 
     const trimmedEmail = email.trim();
@@ -733,7 +832,7 @@ exports.removeTeacherFromBatch = async (req, res) => {
   }
   try {
     await BatchTeacher.findOneAndDelete({ batchId, teacherId });
-    
+
     res.json({ message: "Teacher removed." });
   } catch (err) {
     console.error("Remove teacher error:", err);

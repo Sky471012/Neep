@@ -41,7 +41,6 @@ export default function BatchControls() {
     dob: format(new Date(), "dd-MM-yyyy"),
     address: "",
     class: "Kids",
-    fee: "",
     dateOfJoining: format(new Date(), "dd-MM-yyyy"),
   });
 
@@ -358,7 +357,7 @@ export default function BatchControls() {
                 <li>
                   <button className="dropdown-item" onClick={() => setModalFive(true)}>
                     Add Students
-                    </button>
+                  </button>
                 </li>
                 <li>
                   <button className="dropdown-item text-danger" onClick={() => deleteBatch(batch._id)}>
@@ -627,7 +626,6 @@ export default function BatchControls() {
               dob: format(new Date(), "dd-MM-yyyy"),
               address: "",
               class: "Kids",
-              fee: "",
               dateOfJoining: format(new Date(), "dd-MM-yyyy"),
             });
           }}
@@ -700,7 +698,6 @@ export default function BatchControls() {
                     dob: format(date, "dd-MM-yyyy"),
                   })
                 }
-                value={""} // ✅ this keeps input box empty
                 dateFormat="dd-MM-yyyy"
                 className="form-control mb-2"
                 placeholderText="Date of Birth"
@@ -720,13 +717,6 @@ export default function BatchControls() {
                   <option key={cls} value={cls}>{cls}</option>
                 ))}
               </select>
-              <input
-                type="number"
-                className="form-control mb-2"
-                placeholder="Fee"
-                value={newStudentData.fee}
-                onChange={(e) => setNewStudentData({ ...newStudentData, fee: e.target.value })}
-              />
               <DatePicker
                 selected={parse(newStudentData.dateOfJoining, "dd-MM-yyyy", new Date())}
                 onChange={(date) =>
@@ -735,7 +725,6 @@ export default function BatchControls() {
                     dateOfJoining: format(date, "dd-MM-yyyy"),
                   })
                 }
-                value={""} // ✅ keeps input box empty
                 dateFormat="dd-MM-yyyy"
                 className="form-control mb-3"
                 placeholderText="Date of Joining"
@@ -752,7 +741,6 @@ export default function BatchControls() {
                   });
                   const data = await res.json();
                   if (!res.ok) return alert(data.message || "Error creating student");
-                  alert("Student created and added!");
                   setStudents((prev) => [...prev, data.student]);
                   setModalFive(false);
                 } catch (err) {
