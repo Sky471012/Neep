@@ -336,7 +336,7 @@ export default function BatchControls() {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                ⋮
+                <h3>⋮</h3>
               </button>
               <ul className="dropdown-menu dropdown-menu-end shadow">
                 <li>

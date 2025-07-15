@@ -612,46 +612,58 @@ exports.addInstallment = async (req, res) => {
 exports.removeInstallment = async (req, res) => {
   try {
     const installmentId = req.params.installmentId;
+
     const installment = await Installment.findById(installmentId);
     if (!installment)
       return res.status(404).json({ message: "Installment not found" });
 
     if (installment.paidDate) {
-      return res
-        .status(400)
-        .json({ message: "Cannot remove a paid installment" });
+      return res.status(400).json({ message: "Cannot remove a paid installment" });
     }
 
     const { studentId, feeId, amount } = installment;
 
+    // Get other unpaid installments excluding the one to delete
     const otherUnpaid = await Installment.find({
-      feeId,
       studentId,
+      feeId,
       _id: { $ne: installmentId },
       paidDate: { $exists: false },
-    });
+    }).sort({ dueDate: 1 }); // Sorting to maintain order
 
     if (otherUnpaid.length === 0) {
-      return res
-        .status(400)
-        .json({
-          message: "No other unpaid installments to redistribute amount",
-        });
+      return res.status(400).json({
+        message: "No other unpaid installments to redistribute amount",
+      });
     }
 
-    const redistributedAmount = amount / otherUnpaid.length;
+    // Redistribute amount equally
+    const equalShare = Math.floor(amount / otherUnpaid.length);
+    const remainder = amount % otherUnpaid.length;
 
     await Promise.all(
-      otherUnpaid.map((inst) =>
+      otherUnpaid.map((inst, idx) =>
         Installment.findByIdAndUpdate(inst._id, {
-          $inc: { amount: redistributedAmount },
+          $inc: { amount: idx === 0 ? equalShare + remainder : equalShare },
         })
       )
     );
 
+    // Delete the installment
     await Installment.findByIdAndDelete(installmentId);
 
-    res.json({ message: "Installment removed and amount redistributed" });
+    // Renumber all installments (both paid and unpaid)
+    const all = await Installment.find({ studentId, feeId }).sort({ dueDate: 1 });
+
+    await Promise.all(
+      all.map((inst, idx) =>
+        Installment.findByIdAndUpdate(inst._id, {
+          installmentNo: idx + 1,
+        })
+      )
+    );
+
+    res.json({ message: "Installment removed, amount redistributed, and installments renumbered." });
   } catch (err) {
     console.error("Error removing installment:", err);
     res.status(500).json({ message: "Server error" });
@@ -679,6 +691,86 @@ exports.redistributeInstallment = async (req, res) => {
       .json({ message: "Server error", error: err.message });
   }
 };
+
+exports.createFeeWithInstallments = async (req, res) => {
+  try {
+    const { studentId, amount, numberOfInstallments } = req.body;
+
+    if (!studentId || !amount || !numberOfInstallments || amount <= 0 || numberOfInstallments <= 0) {
+      return res.status(400).json({ message: "Missing or invalid inputs." });
+    }
+
+    // Check if student already has a fee record
+    const existing = await Fee.findOne({ studentId });
+    if (existing) {
+      return res.status(400).json({ message: "Fee structure already exists for this student." });
+    }
+
+    // 1. Create Fee
+    const newFee = new Fee({
+      studentId,
+      totalAmount: amount,
+    });
+
+    await newFee.save();
+
+    // 2. Calculate amounts
+    const equalAmount = Math.floor(amount / numberOfInstallments);
+    const remainder = amount % numberOfInstallments;
+
+    // 3. Create installments
+    const today = new Date();
+    const installments = [];
+
+    for (let i = 0; i < numberOfInstallments; i++) {
+      const dueDate = new Date(today);
+      dueDate.setMonth(today.getMonth() + i); // one month gap
+
+      const inst = new Installment({
+        studentId,
+        feeId: newFee._id,
+        installmentNo: i + 1,
+        amount: i === 0 ? equalAmount + remainder : equalAmount,
+        dueDate: dueDate.toISOString().split("T")[0], // YYYY-MM-DD
+      });
+
+      await inst.save();
+      installments.push(inst);
+    }
+
+    return res.status(201).json({
+      message: "Fee and installments created successfully",
+      fee: newFee,
+      installments,
+    });
+  } catch (err) {
+    console.error("Error creating fee & installments:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+exports.deleteFeeStructure = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const fee = await Fee.findOne({ studentId });
+    if (!fee) {
+      return res.status(404).json({ message: "Fee record not found." });
+    }
+
+    // Delete all related installments
+    await Installment.deleteMany({ feeId: fee._id });
+
+    // Delete the fee record
+    await Fee.deleteOne({ _id: fee._id });
+
+    return res.status(200).json({ message: "Fee and installments deleted successfully." });
+  } catch (err) {
+    console.error("Error deleting fee structure:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
 
 exports.addStudentToBatches = async (req, res) => {
   try {

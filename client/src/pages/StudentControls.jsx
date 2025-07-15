@@ -6,6 +6,7 @@ import { Inter28ptRegular } from "../assets/fonts/Inter_28pt-Regular";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ModalOne from "../modals/ModalOne";
+import ModalTwo from "../modals/ModalTwo";
 
 export default function StudentControls() {
 
@@ -20,9 +21,12 @@ export default function StudentControls() {
     const [fee, setFee] = useState({});
     const [allBatches, setAllBatches] = useState([]);
     const [modalOne, setModalOne] = useState(false);
+    const [modalTwo, setModalTwo] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedToAdd, setSelectedToAdd] = useState([]);
-
+    const [isEditingFee, setIsEditingFee] = useState(false);
+    const [editedFee, setEditedFee] = useState(fee?.totalAmount || 0);
+    const [numInstallments, setNumInstallments] = useState(3); // Default 3
 
 
     useEffect(() => {
@@ -302,44 +306,39 @@ export default function StudentControls() {
         const confirm = window.confirm("Are you sure you want to remove this installment?");
         if (!confirm) return;
 
-        const unpaid = installments.filter(i => !i.paidDate && i._id !== record._id);
-        if (unpaid.length === 0) return alert("No unpaid installments left to redistribute");
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/removeInstallment/${record._id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-        const redistribution = record.amount / unpaid.length;
+            const data = await res.json();
 
-        const updatedInstallments = await Promise.all(
-            unpaid.map(async (i) => {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/redistributeInstallment/${i._id}`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ amount: i.amount + redistribution }),
-                });
-                return res.ok ? (await res.json()).updatedInstallment : i;
-            })
-        );
+            if (!res.ok) {
+                alert(data.message || "Failed to delete installment");
+                return;
+            }
 
-        const delRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/removeInstallment/${record._id}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-        });
+            // 🟢 Fetch updated installments after backend redistribution & renumbering
+            const refreshed = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/installments/${studentId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-        if (delRes.ok) {
-            setInstallments((prev) =>
-                prev.filter((i) => i._id !== record._id).map((i) => {
-                    const updated = updatedInstallments.find((u) => u._id === i._id);
-                    return updated || i;
-                })
-            );
-        } else {
-            alert("Failed to delete installment");
+            const updatedList = await refreshed.json();
+
+            setInstallments(Array.isArray(updatedList) ? updatedList : updatedList.installments || []);
+        } catch (error) {
+            console.error("Error removing installment:", error);
+            alert("Something went wrong.");
         }
     };
 
-    const editTotalAmount = async () => {
+    const editTotalAmount = async (newAmount) => {
         try {
+            // 1. Update fee total amount
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/update-fee/${studentId}`, {
                 method: "PATCH",
                 headers: {
@@ -352,14 +351,120 @@ export default function StudentControls() {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message || "Failed to remove student.");
+                alert(data.message || "Failed to change Total Amount.");
                 return;
             }
 
-            setBatches((prevBatches) => prevBatches.filter((b) => b._id !== batchId));
+            setFee(data.fee); // update fee state
+
+            // 2. Redistribute unpaid installments
+            const unpaid = installments.filter((i) => !i.paidDate);
+
+            if (unpaid.length > 0) {
+                const totalPaid = installments.reduce(
+                    (sum, inst) => sum + (inst.paidDate ? inst.amount : 0),
+                    0
+                );
+
+                const remaining = newAmount - totalPaid;
+                const equalShare = Math.floor(remaining / unpaid.length);
+                const remainder = remaining % unpaid.length;
+
+                const updated = await Promise.all(
+                    unpaid.map(async (i, index) => {
+                        const res = await fetch(
+                            `${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/redistributeInstallment/${i._id}`,
+                            {
+                                method: "PATCH",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({
+                                    amount: index === 0 ? equalShare + remainder : equalShare, // distribute remainder to first
+                                }),
+                            }
+                        );
+                        return res.ok ? (await res.json()).updatedInstallment : i;
+                    })
+                );
+
+                setInstallments((prev) =>
+                    prev.map((i) => {
+                        const updatedOne = updated.find((u) => u._id === i._id);
+                        return updatedOne || i;
+                    })
+                );
+            }
+
+            setIsEditingFee(false); // close edit mode
         } catch (error) {
-            console.error("Remove error:", error);
-            alert("Something went wrong while removing.");
+            console.error("Update error:", error);
+            alert("Something went wrong while updating.");
+        }
+    };
+
+    const handleAddFeeStructureSubmit = async () => {
+        if (!editedFee || !numInstallments || editedFee <= 0 || numInstallments <= 0) {
+            alert("Please enter valid fee and number of installments.");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/createFeeWithInstallments`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    studentId,
+                    amount: editedFee,
+                    numberOfInstallments: numInstallments, // ✅ include this
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.message || "Failed to create fee structure.");
+                return;
+            }
+
+            // Save fee and installment data from response
+            setFee(data.fee);
+            setInstallments(data.installments);
+            setModalTwo(false);
+        } catch (error) {
+            console.error("Error creating fee structure:", error);
+            alert("Something went wrong while adding fee structure.");
+        }
+    };
+
+    const handleRemoveFeeStructure = async () => {
+        const confirm = window.confirm("Are you sure you want to delete this fee structure?");
+        if (!confirm) return;
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/deleteFeeStructure/${studentId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Failed to delete fee structure.");
+                return;
+            }
+
+            // Clear local fee and installments
+            setFee({});
+            setInstallments([]);
+        } catch (err) {
+            console.error("Delete fee error:", err);
+            alert("Something went wrong while deleting fee structure.");
         }
     };
 
@@ -380,7 +485,7 @@ export default function StudentControls() {
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
                             >
-                                ⋮
+                                <h3>⋮</h3>
                             </button>
                             <ul className="dropdown-menu dropdown-menu-end shadow">
                                 <li>
@@ -390,6 +495,23 @@ export default function StudentControls() {
                                     >
                                         Add to Batches
                                     </button>
+                                </li>
+                                <li>
+                                    {fee?._id ? (
+                                        <button
+                                            className="dropdown-item text-danger"
+                                            onClick={handleRemoveFeeStructure}
+                                        >
+                                            Remove Fee Structure
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="dropdown-item"
+                                            onClick={() => setModalTwo(true)}
+                                        >
+                                            Add Fee Structure
+                                        </button>
+                                    )}
                                 </li>
                                 <li>
                                     <button
@@ -444,7 +566,41 @@ export default function StudentControls() {
                     </div>
 
                     <div className="d-flex gap-4 mt-3 mb-1" style={{ fontSize: "1.2rem" }}>
-                        <span><strong>Total Fee:</strong> ₹ {totalFee}</span>
+                        {isEditingFee ? (
+                            <>
+                                <span><strong>Total Fee: </strong>₹
+                                    <input
+                                        type="number"
+                                        value={editedFee}
+                                        onChange={(e) => setEditedFee(e.target.value)}
+                                        style={{ width: "120px", padding: "2px 5px" }}
+                                    />
+                                    <button
+                                        className="btn btn-outline-success btn-sm"
+                                        onClick={() => editTotalAmount(editedFee)}
+                                    >
+                                        Done
+                                    </button>
+                                    <button
+                                        className="btn btn-outline-secondary btn-sm"
+                                        onClick={() => setIsEditingFee(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                <span><strong>Total Fee:</strong> ₹ {totalFee}
+                                    <button className="btn btn-outline-secondary btn-sm" onClick={() => {
+                                        setEditedFee(totalFee);
+                                        setIsEditingFee(true);
+                                    }}>
+                                        Edit
+                                    </button>
+                                </span>
+                            </>
+                        )}
                         <span><strong>Paid:</strong> ₹ {totalPaid}</span>
                         <span><strong>Balance:</strong> ₹ {balance}</span>
                     </div>
@@ -469,12 +625,19 @@ export default function StudentControls() {
                                                 <span className={`fw-bold ${statusClass}`}>{status}</span>
 
                                                 <div className="d-flex gap-2">
-                                                    {record.paidDate && (
+                                                    {record.paidDate ? (
                                                         <button
                                                             className="btn btn-outline-primary btn-sm"
                                                             onClick={() => generatePDFReceipt(student, record)}
                                                         >
                                                             Download
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            className="btn btn-outline-success btn-sm"
+                                                            onClick={() => generatePDFReceipt(student, record)}
+                                                        >
+                                                            Paid
                                                         </button>
                                                     )}
                                                     <button className="btn btn-outline-secondary btn-sm">
@@ -532,12 +695,48 @@ export default function StudentControls() {
                     <button className="button" onClick={handleAddToSelectedBatches}>
                         Add to selected Batches
                     </button>
-
                 </ModalOne>
+
+                <ModalTwo
+                    isOpen={modalTwo}
+                    onClose={() => {
+                        setModalTwo(false);
+                    }}
+                >
+                    <h3 className="mb-3">Adding Fee Structure of {student.name}</h3>
+
+                    <div className="mb-3">
+                        <label className="form-label">Total Fee Amount</label>
+                        <input
+                            type="number"
+                            className="form-control"
+                            value={editedFee}
+                            onChange={(e) => setEditedFee(e.target.value)}
+                            min="1"
+                            placeholder="Enter total fee amount"
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label">Number of Installments</label>
+                        <input
+                            type="number"
+                            className="form-control"
+                            value={numInstallments}
+                            onChange={(e) => setNumInstallments(e.target.value)}
+                            min="1"
+                            placeholder="Enter number of installments"
+                        />
+                    </div>
+
+                    <button className="btn btn-primary" onClick={handleAddFeeStructureSubmit}>
+                        Create Fee Structure
+                    </button>
+                </ModalTwo>
 
 
             </div>
-        </div>
+        </div >
 
 
         <Footer />
