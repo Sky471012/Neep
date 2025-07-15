@@ -265,33 +265,33 @@ export default function Navbar() {
         </Link>
 
         {authToken && role === "student" && (
-            <Link
-              to="/student"
-              onClick={() => setSidebarOpen(false)}
-              className="button"
-            >
-              Student
-            </Link>
+          <Link
+            to="/student"
+            onClick={() => setSidebarOpen(false)}
+            className="button"
+          >
+            Student
+          </Link>
         )}
 
         {authToken && (role === "teacher" || role === "admin") && (
-            <Link
-              to="/teacher"
-              onClick={() => setSidebarOpen(false)}
-              className="button"
-            >
-              Teacher
-            </Link>
+          <Link
+            to="/teacher"
+            onClick={() => setSidebarOpen(false)}
+            className="button"
+          >
+            Teacher
+          </Link>
         )}
 
         {authToken && role === "admin" && (
-            <Link
-              to="/admin"
-              onClick={() => setSidebarOpen(false)}
-              className="button"
-            >
-              Admin
-            </Link>
+          <Link
+            to="/admin"
+            onClick={() => setSidebarOpen(false)}
+            className="button"
+          >
+            Admin
+          </Link>
         )}
 
         {

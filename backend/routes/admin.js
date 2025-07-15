@@ -48,4 +48,8 @@ router.post('/teacherCreate', adminController.createTeacher);
 router.delete('/teacherDelete/:teacherId', adminController.deleteTeacher);
 router.delete('/removeTeacher', adminController.removeTeacherFromBatch);
 
+
+// Fee tracking
+router.get('/fee/installments/unpaid', adminController.getUnpaidInstallments);
+
 module.exports = router;

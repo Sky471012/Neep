@@ -306,14 +306,15 @@ export default function Admin() {
             <Navbar />
 
             <div className="main-content">
-                <div className="adminbar d-flex gap-3 m-5">
-                    <a href="#batches">Batches</a>
-                    <a href="#students">Students</a>
-                    <a href="#teachers">Teachers</a>
-                    <button className="button" onClick={() => setOpenModalOne(true)}>Add a Batch</button>
-                    <button className="button" onClick={() => setOpenModalTwo(true)}>Add a Student</button>
-                    <button className="button" onClick={() => setOpenModalThree(true)}>Add a Teacher</button>
-                    <button className="button" onClick={() => setOpenPopupModal(true)}>Update Popup</button>
+                <div className="adminbar d-flex gap-5 m-5">
+                    <Link to="/FeeTracking" className="text-primary">Fee Tracking</Link>
+                    <a href="#batches"className="text-primary">All Batches</a>
+                    <a href="#students"className="text-primary">All Students</a>
+                    <a href="#teachers"className="text-primary">All Teachers</a>
+                    <a className="text-primary" onClick={() => setOpenModalOne(true)}>Add a Batch</a>
+                    <a className="text-primary" onClick={() => setOpenModalTwo(true)}>Add a Student</a>
+                    <a className="text-primary" onClick={() => setOpenModalThree(true)}>Add a Teacher</a>
+                    <a className="text-primary" onClick={() => setOpenPopupModal(true)}>Update Popup</a>
                 </div>
 
                 <div id="batches" className="batches-container">

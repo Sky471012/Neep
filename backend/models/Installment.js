@@ -17,11 +17,11 @@ const installmentSchema = new Schema({
     required: true,
   },
   dueDate: {
-    type: String,
+    type: Date,
     required: true,
   },
   paidDate: {
-    type: String,
+    type: Date,
     required: false,
   },
   method: {

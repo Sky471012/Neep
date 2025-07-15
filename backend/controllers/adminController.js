@@ -9,13 +9,34 @@ const Student = require("../models/Student");
 const Teacher = require("../models/Admins_teachers");
 const BatchTeacher = require("../models/Batch_teachers");
 
-const formatToDDMMYYYY = (dateStr) => {
-  const date = new Date(dateStr);
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
+function parseDDMMYYYY(dateStr) {
+  if (!dateStr || typeof dateStr !== "string") {
+    throw new Error("paidDate is missing or not a string");
+  }
+
+  const [dd, mm, yyyy] = dateStr.split("-");
+
+  if (
+    !dd ||
+    !mm ||
+    !yyyy ||
+    dd.length !== 2 ||
+    mm.length !== 2 ||
+    yyyy.length !== 4
+  ) {
+    throw new Error(`Invalid date format: ${dateStr}`);
+  }
+
+  // Build a valid ISO string
+  const isoDateStr = `${yyyy}-${mm}-${dd}`;
+  const parsed = new Date(isoDateStr);
+
+  if (isNaN(parsed.getTime())) {
+    throw new Error(`Invalid date after parsing: ${isoDateStr}`);
+  }
+
+  return parsed;
+}
 
 // Batches Management
 exports.getBatches = async (req, res) => {
@@ -754,7 +775,9 @@ exports.createFeeWithInstallments = async (req, res) => {
         feeId: newFee._id,
         installmentNo: i + 1,
         amount: i === 0 ? equalAmount + remainder : equalAmount,
-        dueDate: dueDate.toISOString().split("T")[0], // YYYY-MM-DD
+        dueDate: dueDate,         // stored as native Date object
+        paidDate: null,           // explicitly set to null
+        method: null              // explicitly set to null
       });
 
       await inst.save();
@@ -805,21 +828,22 @@ exports.markInstallmentPaid = async (req, res) => {
   const { paidDate, method } = req.body;
 
   try {
+    console.log("Incoming paidDate string:", paidDate);
+
     const installment = await Installment.findById(id);
     if (!installment) {
       return res.status(404).json({ message: "Installment not found" });
     }
 
-    // Format paidDate to dd-mm-yyyy
-    installment.paidDate = formatToDDMMYYYY(paidDate);
+    installment.paidDate = new Date(paidDate); // ✅ No custom parser
     installment.method = method;
 
     await installment.save();
 
     res.json({ message: "Installment marked as paid", installment });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error in markInstallmentPaid:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -1017,5 +1041,25 @@ exports.removeTeacherFromBatch = async (req, res) => {
   } catch (err) {
     console.error("Remove teacher error:", err);
     res.status(500).json({ error: err.message });
+  }
+};
+
+// Fee tracking
+exports.getUnpaidInstallments = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const installments = await Installment.find({
+      dueDate: { $lte: new Date() },
+      $or: [{ paidDate: { $exists: false } }, { paidDate: null }],
+    })
+      .populate("studentId")
+      .populate("feeId");
+
+    res.json(installments);
+  } catch (err) {
+    console.error("Error fetching unpaid installments:", err.message);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
