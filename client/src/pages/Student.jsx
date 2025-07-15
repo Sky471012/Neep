@@ -15,7 +15,8 @@ export default function Student() {
     const [batchesRecords, setBatchesRecords] = useState([]);
     const [timetableRecords, setTimetableRecords] = useState({});
     const [testRecords, setTestRecords] = useState([]);
-    const [feeRecords, setFeeRecords] = useState([]);
+    const [feeRecord, setFeeRecord] = useState([]);
+    const [installments, setInstallments] = useState([]);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [attendanceMap, setAttendanceMap] = useState({});
     const [showModalOne, setShowModalOne] = useState(null);
@@ -88,7 +89,10 @@ export default function Student() {
                 headers: { 'Authorization': `Bearer ${token}` },
             })
                 .then(res => res.json())
-                .then(setFeeRecords)
+                .then(data => {
+                    setFeeRecord(data.fee || null);
+                    setInstallments(Array.isArray(data.installments) ? data.installments : []);
+                })
                 .catch(err => console.error("Fee status fetch error:", err));
         }
     }, []);
@@ -225,13 +229,12 @@ export default function Student() {
 
     if (!student) return <p>Loading student data...</p>;
 
-    const totalPaid = feeRecords.reduce((sum, record) => {
-        return sum + (record.paidDate ? (record.amount || 0) : 0);
-    }, 0);
+    const totalPaid = Array.isArray(installments)
+        ? installments.reduce((sum, inst) => sum + (inst.paidDate ? inst.amount || 0 : 0), 0)
+        : 0;
 
-    const totalFee = parseInt(student?.fee || 0);
+    const totalFee = feeRecord?.totalAmount || 0;
     const balance = totalFee - totalPaid;
-
 
     return (<>
 
@@ -457,7 +460,7 @@ export default function Student() {
                             </tr>
                         </thead>
                         <tbody>
-                            {feeRecords.map((record, index) => {
+                            {Array.isArray(installments) && installments.map((record, index) => {
                                 const status = record.paidDate ? "Paid" : "Due";
                                 return (
                                     <tr key={index}>

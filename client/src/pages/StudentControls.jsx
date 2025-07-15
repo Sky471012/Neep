@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Inter28ptRegular } from "../assets/fonts/Inter_28pt-Regular";
@@ -27,6 +28,27 @@ export default function StudentControls() {
     const [isEditingFee, setIsEditingFee] = useState(false);
     const [editedFee, setEditedFee] = useState(fee?.totalAmount || 0);
     const [numInstallments, setNumInstallments] = useState(3); // Default 3
+    const [editingInstallmentId, setEditingInstallmentId] = useState(null);
+    const [paidDateInput, setPaidDateInput] = useState(null); // use Date object
+    const [methodInput, setMethodInput] = useState("Cash");
+    const [editingInstallmentData, setEditingInstallmentData] = useState(null);
+    const [editedAmount, setEditedAmount] = useState(0);
+    const [editedDueDate, setEditedDueDate] = useState(null);
+    const [editedPaidDate, setEditedPaidDate] = useState(null);
+    const [editedMethod, setEditedMethod] = useState("Cash");
+
+    const formatDateToDDMMYYYY = (dateString) => {
+        if (!dateString) return "--";
+
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "--";
+
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    };
 
 
     useEffect(() => {
@@ -71,7 +93,7 @@ export default function StudentControls() {
         const feeAmount = record.amount || 12000;
         const amountInWords = convertAmountToWords(feeAmount);
         const receiptId = `NEEPed-${record._id?.slice(-4) || Math.floor(Math.random() * 10000)}`;
-        const paidDate = record.paidDate || "--";
+        const paidDate = formatDateToDDMMYYYY(record.paidDate);
         const method = record.method || "N/A";
 
         const alignRight = (text, y) => {
@@ -468,6 +490,109 @@ export default function StudentControls() {
         }
     };
 
+    const handleMarkPaid = async (installmentId) => {
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/mark-paid/${installmentId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    paidDate: paidDateInput?.toISOString().split("T")[0],
+                    method: methodInput,
+                }),
+            });
+
+            const updated = await res.json();
+            if (res.ok) {
+                setInstallments(prev =>
+                    prev.map(inst =>
+                        inst._id === installmentId ? { ...inst, paidDate: paidDateInput, method: methodInput } : inst
+                    )
+                );
+                setEditingInstallmentId(null);
+                setPaidDateInput("");
+                setMethodInput("Cash");
+            } else {
+                console.error(updated.message || "Failed to update");
+            }
+        } catch (err) {
+            console.error("Error marking as paid:", err);
+        }
+    };
+
+    // Add this function to handle starting edit mode
+    const handleEditInstallment = (record) => {
+        setEditingInstallmentData(record._id);
+        setEditedAmount(record.amount || 0);
+        setEditedDueDate(record.dueDate ? new Date(record.dueDate) : new Date());
+
+        const parsedPaidDate = record.paidDate ? new Date(record.paidDate) : null;
+        setEditedPaidDate(isNaN(parsedPaidDate) ? null : parsedPaidDate);
+
+        setEditedMethod(record.method || "Cash");
+    };
+
+
+    // Add this function to handle saving edited installment
+    const handleSaveEditedInstallment = async (installmentId) => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/updateInstallment/${installmentId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    amount: editedAmount,
+                    dueDate: editedDueDate?.toISOString().split("T")[0],
+                    paidDate: editedPaidDate?.toISOString().split("T")[0] || null,
+                    method: editedPaidDate ? editedMethod : null,
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.message || "Failed to update installment");
+                return;
+            }
+
+            // Update the installment in local state
+            setInstallments(prev =>
+                prev.map(inst =>
+                    inst._id === installmentId ? {
+                        ...inst,
+                        amount: editedAmount,
+                        dueDate: editedDueDate?.toISOString().split("T")[0],
+                        paidDate: editedPaidDate?.toISOString().split("T")[0] || null,
+                        method: editedPaidDate ? editedMethod : null,
+                    } : inst
+                )
+            );
+
+            // Reset editing state
+            setEditingInstallmentData(null);
+            setEditedAmount(0);
+            setEditedDueDate(null);
+            setEditedPaidDate(null);
+            setEditedMethod("Cash");
+        } catch (error) {
+            console.error("Error updating installment:", error);
+            alert("Something went wrong while updating installment.");
+        }
+    };
+
+    // Add this function to handle canceling edit
+    const handleCancelEdit = () => {
+        setEditingInstallmentData(null);
+        setEditedAmount(0);
+        setEditedDueDate(null);
+        setEditedPaidDate(null);
+        setEditedMethod("Cash");
+    };
+
     return (<>
 
         <Navbar />
@@ -609,6 +734,8 @@ export default function StudentControls() {
                         {installments.map((record, index) => {
                             const status = record.paidDate ? "Paid" : "Due";
                             const statusClass = record.paidDate ? "text-success" : "text-danger";
+                            const isEditing = editingInstallmentData === record._id;
+                            const isMarkingPaid = editingInstallmentId === record._id;
 
                             return (
                                 <div className="col" key={record._id}>
@@ -616,39 +743,195 @@ export default function StudentControls() {
                                         <div className="card-body">
                                             <h5 className="card-title">Installment {record.installmentNo}</h5>
 
-                                            <p className="mb-1"><strong>Amount:</strong> ₹ {record.amount || "--"}</p>
-                                            <p className="mb-1"><strong>Due Date:</strong> {record.dueDate || "--"}</p>
-                                            <p className="mb-1"><strong>Paid Date:</strong> {record.paidDate || "--"}</p>
-                                            <p className="mb-1"><strong>Method:</strong> {record.method || "--"}</p>
+                                            {/* Amount Field */}
+                                            <p className="mb-1">
+                                                <strong>Amount:</strong>
+                                                {isEditing ? (
+                                                    <input
+                                                        type="number"
+                                                        value={editedAmount}
+                                                        onChange={(e) => setEditedAmount(Number(e.target.value))}
+                                                        className="form-control d-inline-block ms-2"
+                                                        style={{ width: "120px" }}
+                                                    />
+                                                ) : (
+                                                    ` ₹ ${record.amount || "--"}`
+                                                )}
+                                            </p>
+
+                                            {/* Due Date Field */}
+                                            <p className="mb-1">
+                                                <strong>Due Date:</strong>
+                                                {isEditing ? (
+                                                    <DatePicker
+                                                        selected={editedDueDate}
+                                                        onChange={(date) => setEditedDueDate(date)}
+                                                        dateFormat="yyyy-MM-dd"
+                                                        className="form-control d-inline-block ms-2"
+                                                        style={{ width: "150px" }}
+                                                    />
+                                                ) : (
+                                                    ` ${formatDateToDDMMYYYY(record.dueDate) || "--"}`
+                                                )}
+                                            </p>
+
+                                            {/* Paid Date Field */}
+                                            {isMarkingPaid ? (
+                                                <div className="mb-1 d-flex align-items-center">
+                                                    <strong className="me-2">Paid Date:</strong>
+                                                    <DatePicker
+                                                        selected={paidDateInput}
+                                                        onChange={(date) => setPaidDateInput(date)}
+                                                        dateFormat="yyyy-MM-dd"
+                                                        className="form-control"
+                                                        placeholderText="Select date"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <p className="mb-1">
+                                                    <strong>Paid Date:</strong>
+                                                    {isEditing ? (
+                                                        <DatePicker
+                                                            selected={editedPaidDate}
+                                                            onChange={(date) => setEditedPaidDate(date)}
+                                                            dateFormat="yyyy-MM-dd"
+                                                            className="form-control d-inline-block ms-2"
+                                                            style={{ width: "150px" }}
+                                                            placeholderText="Select date"
+                                                            isClearable
+                                                        />
+                                                    ) : (
+                                                        ` ${formatDateToDDMMYYYY(record.paidDate) || "--"}`
+                                                    )}
+                                                </p>
+                                            )}
+
+                                            {/* Method Field */}
+                                            {isMarkingPaid ? (
+                                                <div className="mb-1">
+                                                    <strong>Method:</strong>
+                                                    <select
+                                                        className="form-select d-inline-block ms-2 w-auto"
+                                                        value={methodInput}
+                                                        onChange={(e) => setMethodInput(e.target.value)}
+                                                    >
+                                                        <option value="Cash">Cash</option>
+                                                        <option value="Online">Online</option>
+                                                    </select>
+                                                </div>
+                                            ) : (
+                                                <p className="mb-1">
+                                                    <strong>Method:</strong>
+                                                    {isEditing ? (
+                                                        <select
+                                                            className="form-select d-inline-block ms-2 w-auto"
+                                                            value={editedMethod}
+                                                            onChange={(e) => setEditedMethod(e.target.value)}
+                                                            disabled={!editedPaidDate}
+                                                        >
+                                                            <option value="Cash">Cash</option>
+                                                            <option value="Online">Online</option>
+                                                        </select>
+                                                    ) : (
+                                                        ` ${record.method || "--"}`
+                                                    )}
+                                                </p>
+                                            )}
 
                                             <div className="d-flex justify-content-between align-items-center mt-3">
                                                 <span className={`fw-bold ${statusClass}`}>{status}</span>
 
                                                 <div className="d-flex gap-2">
-                                                    {record.paidDate ? (
-                                                        <button
-                                                            className="btn btn-outline-primary btn-sm"
-                                                            onClick={() => generatePDFReceipt(student, record)}
-                                                        >
-                                                            Download
-                                                        </button>
+                                                    {isEditing ? (
+                                                        // Edit mode buttons
+                                                        <>
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                onClick={() => {
+                                                                    if (editedPaidDate) {
+                                                                        setEditedPaidDate(null);
+                                                                        setEditedMethod("Cash");
+                                                                    } else {
+                                                                        setEditedPaidDate(new Date());
+                                                                        setEditedMethod("Cash");
+                                                                    }
+                                                                }}
+                                                            >
+                                                                {editedPaidDate ? "Mark as Due" : "Mark as Paid"}
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-outline-success btn-sm"
+                                                                onClick={() => handleSaveEditedInstallment(record._id)}
+                                                            >
+                                                                Save
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-outline-secondary btn-sm"
+                                                                onClick={handleCancelEdit}
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </>
+                                                    ) : isMarkingPaid ? (
+                                                        // Mark as paid mode buttons
+                                                        <>
+                                                            <button
+                                                                className="btn btn-outline-success btn-sm"
+                                                                onClick={() => handleMarkPaid(record._id)}
+                                                            >
+                                                                Mark Paid
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-outline-secondary btn-sm"
+                                                                onClick={() => {
+                                                                    setEditingInstallmentId(null);
+                                                                    setPaidDateInput("");
+                                                                    setMethodInput("Cash");
+                                                                }}
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </>
                                                     ) : (
-                                                        <button
-                                                            className="btn btn-outline-success btn-sm"
-                                                            onClick={() => generatePDFReceipt(student, record)}
-                                                        >
-                                                            Paid
-                                                        </button>
+                                                        // Normal mode buttons
+                                                        <>
+                                                            {record.paidDate ? (
+                                                                <button
+                                                                    className="btn btn-outline-primary btn-sm"
+                                                                    onClick={() => generatePDFReceipt(student, record)}
+                                                                >
+                                                                    Download
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    className="btn btn-outline-success btn-sm"
+                                                                    onClick={() => {
+                                                                        setEditingInstallmentId(record._id);
+                                                                        setPaidDateInput(new Date());
+                                                                        setMethodInput("Cash");
+                                                                    }}
+                                                                >
+                                                                    Paid
+                                                                </button>
+                                                            )}
+
+                                                            <button
+                                                                className="btn btn-outline-secondary btn-sm"
+                                                                onClick={() => handleEditInstallment(record)}
+                                                            >
+                                                                Edit
+                                                            </button>
+
+                                                            {!record.paidDate && (
+                                                                <button
+                                                                    className="btn btn-outline-danger btn-sm"
+                                                                    onClick={() => handleRemoveInstallment(record)}
+                                                                >
+                                                                    Remove
+                                                                </button>
+                                                            )}
+                                                        </>
                                                     )}
-                                                    <button className="btn btn-outline-secondary btn-sm">
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-outline-danger btn-sm"
-                                                        onClick={() => handleRemoveInstallment(record)}
-                                                    >
-                                                        Remove
-                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -658,7 +941,6 @@ export default function StudentControls() {
                         })}
                     </div>
                 </div>
-
 
                 <ModalOne
                     isOpen={modalOne}

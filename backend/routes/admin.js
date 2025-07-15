@@ -36,6 +36,8 @@ router.delete('/fee/removeInstallment/:installmentId', adminController.removeIns
 router.patch('/fee/redistributeInstallment/:installmentId', adminController.redistributeInstallment);
 router.post('/fee/createFeeWithInstallments', adminController.createFeeWithInstallments);
 router.delete('/fee/deleteFeeStructure/:studentId', adminController.deleteFeeStructure);
+router.patch("/fee/mark-paid/:id", adminController.markInstallmentPaid);
+router.patch("/fee/updateInstallment/:id", adminController.updateInstallment);
 router.post('/addBatches', adminController.addStudentToBatches);
 
 // Teacher Management

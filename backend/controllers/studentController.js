@@ -1,5 +1,6 @@
 const Attendance = require('../models/Attendance');
-const FeeStatus = require('../models/Fee');
+const Fee = require('../models/Fee');
+const Installment = require('../models/Installment');
 const Batches = require('../models/Batch_students');
 const Test = require('../models/Test');
 const Timetable = require('../models/TimeTable');
@@ -34,10 +35,19 @@ exports.getTimetable = async (req, res) => {
 
 exports.getFeeStatus = async (req, res) => {
   try {
-    const status = await FeeStatus.find({ studentId: req.user.id });
-    res.json(status);
+    const studentId = req.user.id;
+
+    console.log("Getting fee for student:", studentId);
+    const fee = await Fee.findOne({ studentId });
+
+    if (!fee) return res.status(404).json({ message: "No fee record found" });
+
+    const installments = await Installment.find({ studentId }).sort({ installmentNo: 1 });
+
+    res.json({ fee, installments });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

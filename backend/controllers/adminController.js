@@ -9,6 +9,14 @@ const Student = require("../models/Student");
 const Teacher = require("../models/Admins_teachers");
 const BatchTeacher = require("../models/Batch_teachers");
 
+const formatToDDMMYYYY = (dateStr) => {
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
 // Batches Management
 exports.getBatches = async (req, res) => {
   try {
@@ -618,7 +626,9 @@ exports.removeInstallment = async (req, res) => {
       return res.status(404).json({ message: "Installment not found" });
 
     if (installment.paidDate) {
-      return res.status(400).json({ message: "Cannot remove a paid installment" });
+      return res
+        .status(400)
+        .json({ message: "Cannot remove a paid installment" });
     }
 
     const { studentId, feeId, amount } = installment;
@@ -653,7 +663,9 @@ exports.removeInstallment = async (req, res) => {
     await Installment.findByIdAndDelete(installmentId);
 
     // Renumber all installments (both paid and unpaid)
-    const all = await Installment.find({ studentId, feeId }).sort({ dueDate: 1 });
+    const all = await Installment.find({ studentId, feeId }).sort({
+      dueDate: 1,
+    });
 
     await Promise.all(
       all.map((inst, idx) =>
@@ -663,7 +675,10 @@ exports.removeInstallment = async (req, res) => {
       )
     );
 
-    res.json({ message: "Installment removed, amount redistributed, and installments renumbered." });
+    res.json({
+      message:
+        "Installment removed, amount redistributed, and installments renumbered.",
+    });
   } catch (err) {
     console.error("Error removing installment:", err);
     res.status(500).json({ message: "Server error" });
@@ -696,14 +711,22 @@ exports.createFeeWithInstallments = async (req, res) => {
   try {
     const { studentId, amount, numberOfInstallments } = req.body;
 
-    if (!studentId || !amount || !numberOfInstallments || amount <= 0 || numberOfInstallments <= 0) {
+    if (
+      !studentId ||
+      !amount ||
+      !numberOfInstallments ||
+      amount <= 0 ||
+      numberOfInstallments <= 0
+    ) {
       return res.status(400).json({ message: "Missing or invalid inputs." });
     }
 
     // Check if student already has a fee record
     const existing = await Fee.findOne({ studentId });
     if (existing) {
-      return res.status(400).json({ message: "Fee structure already exists for this student." });
+      return res
+        .status(400)
+        .json({ message: "Fee structure already exists for this student." });
     }
 
     // 1. Create Fee
@@ -745,7 +768,9 @@ exports.createFeeWithInstallments = async (req, res) => {
     });
   } catch (err) {
     console.error("Error creating fee & installments:", err);
-    return res.status(500).json({ message: "Server error", error: err.message });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
   }
 };
 
@@ -764,13 +789,76 @@ exports.deleteFeeStructure = async (req, res) => {
     // Delete the fee record
     await Fee.deleteOne({ _id: fee._id });
 
-    return res.status(200).json({ message: "Fee and installments deleted successfully." });
+    return res
+      .status(200)
+      .json({ message: "Fee and installments deleted successfully." });
   } catch (err) {
     console.error("Error deleting fee structure:", err);
-    return res.status(500).json({ message: "Server error", error: err.message });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
   }
 };
 
+exports.markInstallmentPaid = async (req, res) => {
+  const { id } = req.params;
+  const { paidDate, method } = req.body;
+
+  try {
+    const installment = await Installment.findById(id);
+    if (!installment) {
+      return res.status(404).json({ message: "Installment not found" });
+    }
+
+    // Format paidDate to dd-mm-yyyy
+    installment.paidDate = formatToDDMMYYYY(paidDate);
+    installment.method = method;
+
+    await installment.save();
+
+    res.json({ message: "Installment marked as paid", installment });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.updateInstallment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateFields = {};
+    const { amount, dueDate, paidDate, method } = req.body;
+
+    if (amount !== undefined) updateFields.amount = amount;
+    if (dueDate !== undefined) updateFields.dueDate = dueDate;
+
+    if (paidDate === null || paidDate === "") {
+      updateFields.paidDate = null;
+      updateFields.method = null;
+    } else if (paidDate !== undefined) {
+      updateFields.paidDate = paidDate;
+      if (method) updateFields.method = method;
+    }
+
+    const updated = await Installment.findByIdAndUpdate(id, updateFields, {
+      new: true,
+    });
+
+    if (!updated) {
+      return res.status(404).json({ message: "Installment not found" });
+    }
+
+    return res.json({
+      message: "Installment updated successfully",
+      installment: updated,
+    });
+  } catch (error) {
+    console.error("Error updating installment:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
+  }
+};
 
 exports.addStudentToBatches = async (req, res) => {
   try {
