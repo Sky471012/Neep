@@ -39,6 +39,15 @@ export default function Student() {
     const currentMonth = now.getMonth(); // 0 = Jan, 3 = April
     const academicYearStart = currentMonth >= 3 ? currentYear : currentYear - 1;
 
+    function formatDate(dateStr) {
+        if (!dateStr) return "--";
+        const date = new Date(dateStr);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
     useEffect(() => {
         const storedStudent = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
@@ -130,7 +139,8 @@ export default function Student() {
         const feeAmount = record.amount || 12000;
         const amountInWords = convertAmountToWords(feeAmount);
         const receiptId = `NEEPed-${record._id?.slice(-4) || Math.floor(Math.random() * 10000)}`;
-        const paidDate = record.paidDate || "--";
+        const paidDate = formatDate(record.paidDate);
+
         const method = record.method || "N/A";
 
         const alignRight = (text, y) => {
@@ -466,8 +476,8 @@ export default function Student() {
                                     <tr key={index}>
                                         <td>Installment {record.installmentNo}</td>
                                         <td>{record.amount || "--"}</td>
-                                        <td>{record.dueDate || "--"}</td>
-                                        <td>{record.paidDate || "--"}</td>
+                                        <td>{formatDate(record.dueDate)}</td>
+                                        <td>{formatDate(record.paidDate)}</td>
                                         <td>{record.method || "--"}</td>
                                         <td className={record.paidDate ? "text-success fw-bold" : "text-danger fw-bold"}>
                                             {status}

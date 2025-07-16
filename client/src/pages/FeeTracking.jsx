@@ -165,10 +165,10 @@ export default function FeeTracking() {
                                 <div className='d-flex justify-content-between align-items-center'>
                                     <span>Installments</span>
                                     <div className="dropdown">
-                                        <button className="btn btn-sm dropdown-toggle border-0 bg-white" type="button" data-bs-toggle="dropdown">
+                                        <button className="btn btn-sm" type="button" data-bs-toggle="dropdown">
                                             Filter <i className="bi bi-funnel"></i>
                                         </button>
-                                        <ul className="dropdown-menu">
+                                        <ul className="dropdown-menu dropdown-menu-end shadow">
                                             <li>
                                                 <button className="dropdown-item" onClick={() => {
                                                     const sorted = sortInstallments(unpaidInstallments, "asc");
@@ -233,10 +233,10 @@ export default function FeeTracking() {
                                 <div className='d-flex justify-content-between align-items-center'>
                                     <span>Installments</span>
                                     <div className="dropdown">
-                                        <button className="btn btn-sm dropdown-toggle border-0 bg-white" type="button" data-bs-toggle="dropdown">
+                                        <button className="btn btn-sm" type="button" data-bs-toggle="dropdown">
                                             Filter <i className="bi bi-funnel"></i>
                                         </button>
-                                        <ul className="dropdown-menu">
+                                        <ul className="dropdown-menu dropdown-menu-end shadow">
                                             <li>
                                                 <button className="dropdown-item" onClick={() => {
                                                     const sorted = sortInstallments(upcomingInstallments, "asc");
@@ -300,10 +300,10 @@ export default function FeeTracking() {
                                 <div className='d-flex justify-content-between align-items-center'>
                                     <span>Installments</span>
                                     <div className="dropdown">
-                                        <button className="btn btn-sm dropdown-toggle border-0 bg-white" type="button" data-bs-toggle="dropdown">
+                                        <button className="btn btn-sm" type="button" data-bs-toggle="dropdown">
                                             Filter <i className="bi bi-funnel"></i>
                                         </button>
-                                        <ul className="dropdown-menu">
+                                        <ul className="dropdown-menu dropdown-menu-end shadow">
                                             <li>
                                                 <button className="dropdown-item" onClick={() => {
                                                     const sorted = sortInstallments(paidInstallments, "asc");
@@ -343,7 +343,7 @@ export default function FeeTracking() {
                                                 <div className="d-flex justify-content-between align-items-start pb-1 ps-2 pe-2">
                                                     <span>Class: {className}</span>
                                                     <span>Installment #: {num}</span>
-                                                    <span className="text-primary">{getDaysSincePaid(inst.paidDate)}</span>
+                                                    <span className="text-success">{getDaysSincePaid(inst.paidDate)}</span>
                                                 </div>
                                             </Link>
                                         </div>
