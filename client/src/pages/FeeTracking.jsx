@@ -13,6 +13,11 @@ export default function FeeTracking() {
     const [paidInstallments, setPaidInstallments] = useState([]);
     const [totalPaidAmount, setTotalPaidAmount] = useState([]);
 
+    const [unpaidSortOrder, setUnpaidSortOrder] = useState("asc");
+    const [upcomingSortOrder, setUpcomingSortOrder] = useState("asc");
+    const [paidSortOrder, setPaidSortOrder] = useState("asc");
+
+
     const getDaysOverdue = (dueDate) => {
         const due = new Date(dueDate);
         const now = new Date();
@@ -53,6 +58,14 @@ export default function FeeTracking() {
             ? "Paid today"
             : `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
     }
+
+    const sortInstallments = (data, order) => {
+        return [...data].sort((a, b) =>
+            order === "asc"
+                ? new Date(a.dueDate) - new Date(b.dueDate)
+                : new Date(b.dueDate) - new Date(a.dueDate)
+        );
+    };
 
 
     useEffect(() => {
@@ -115,7 +128,7 @@ export default function FeeTracking() {
                 .then(res => res.json())
                 .then(data => {
                     const sorted = data.installments.sort(
-                        (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
+                        (a, b) => new Date(b.dueDate) - new Date(a.dueDate)
                     );
 
                     const totalPaid = sorted.reduce(
@@ -148,6 +161,36 @@ export default function FeeTracking() {
                                     <span>Outstanding Payment</span>
                                     <h3>₹ {totalUnpaidAmount}</h3>
                                 </div>
+
+                                <div className='d-flex justify-content-between align-items-center'>
+                                    <span>Installments</span>
+                                    <div className="dropdown">
+                                        <button className="btn btn-sm dropdown-toggle border-0 bg-white" type="button" data-bs-toggle="dropdown">
+                                            Filter <i className="bi bi-funnel"></i>
+                                        </button>
+                                        <ul className="dropdown-menu">
+                                            <li>
+                                                <button className="dropdown-item" onClick={() => {
+                                                    const sorted = sortInstallments(unpaidInstallments, "asc");
+                                                    setUnpaidInstallments(sorted);
+                                                    setUnpaidSortOrder("asc");
+                                                }}>
+                                                    Oldest First
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button className="dropdown-item" onClick={() => {
+                                                    const sorted = sortInstallments(unpaidInstallments, "desc");
+                                                    setUnpaidInstallments(sorted);
+                                                    setUnpaidSortOrder("desc");
+                                                }}>
+                                                    Newest First
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
 
                                 {unpaidInstallments.map((inst) => {
                                     const student = inst.studentId; // directly populated
@@ -187,6 +230,35 @@ export default function FeeTracking() {
                                     <h3>₹ {totalUpcomingAmount}</h3>
                                 </div>
 
+                                <div className='d-flex justify-content-between align-items-center'>
+                                    <span>Installments</span>
+                                    <div className="dropdown">
+                                        <button className="btn btn-sm dropdown-toggle border-0 bg-white" type="button" data-bs-toggle="dropdown">
+                                            Filter <i className="bi bi-funnel"></i>
+                                        </button>
+                                        <ul className="dropdown-menu">
+                                            <li>
+                                                <button className="dropdown-item" onClick={() => {
+                                                    const sorted = sortInstallments(upcomingInstallments, "asc");
+                                                    setUpcomingInstallments(sorted);
+                                                    setUpcomingSortOrder("asc");
+                                                }}>
+                                                    Oldest First
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button className="dropdown-item" onClick={() => {
+                                                    const sorted = sortInstallments(upcomingInstallments, "desc");
+                                                    setUpcomingInstallments(sorted);
+                                                    setUpcomingSortOrder("desc");
+                                                }}>
+                                                    Newest First
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
                                 {upcomingInstallments.map((inst) => {
                                     const student = inst.studentId; // directly populated
                                     const name = student?.name || "Unknown";
@@ -223,6 +295,35 @@ export default function FeeTracking() {
                                 <div className="mt-3 mb-3">
                                     <span>Earned Payment</span>
                                     <h3>₹ {totalPaidAmount}</h3>
+                                </div>
+
+                                <div className='d-flex justify-content-between align-items-center'>
+                                    <span>Installments</span>
+                                    <div className="dropdown">
+                                        <button className="btn btn-sm dropdown-toggle border-0 bg-white" type="button" data-bs-toggle="dropdown">
+                                            Filter <i className="bi bi-funnel"></i>
+                                        </button>
+                                        <ul className="dropdown-menu">
+                                            <li>
+                                                <button className="dropdown-item" onClick={() => {
+                                                    const sorted = sortInstallments(paidInstallments, "asc");
+                                                    setPaidInstallments(sorted);
+                                                    setPaidSortOrder("asc");
+                                                }}>
+                                                    Oldest First
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button className="dropdown-item" onClick={() => {
+                                                    const sorted = sortInstallments(paidInstallments, "desc");
+                                                    setPaidInstallments(sorted);
+                                                    setPaidSortOrder("desc");
+                                                }}>
+                                                    Newest First
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
 
                                 {paidInstallments.map((inst) => {
