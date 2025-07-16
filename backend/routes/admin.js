@@ -51,5 +51,7 @@ router.delete('/removeTeacher', adminController.removeTeacherFromBatch);
 
 // Fee tracking
 router.get('/fee/installments/unpaid', adminController.getUnpaidInstallments);
+router.get('/fee/installments/upcoming', adminController.getUpcomingInstallments);
+router.get('/fee/installments/paid', adminController.getPaidInstallments);
 
 module.exports = router;

@@ -1063,3 +1063,49 @@ exports.getUnpaidInstallments = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+exports.getUpcomingInstallments = async (req, res) => {
+  try {
+    const tomorrow = new Date();
+    tomorrow.setHours(0, 0, 0, 0); // Set to start of today
+    tomorrow.setDate(tomorrow.getDate() + 1); // Move to tomorrow
+
+    const upcomingInstallments = await Installment.find({
+      dueDate: { $gte: tomorrow },
+      $or: [{ paidDate: { $exists: false } }, { paidDate: null }],
+    })
+      .populate("studentId")
+      .populate("feeId");
+
+    res.json(upcomingInstallments);
+  } catch (err) {
+    console.error("Error fetching upcoming installments:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// controllers/adminController.js
+
+exports.getPaidInstallments = async (req, res) => {
+  try {
+    const installments = await Installment.find({
+      paidDate: { $ne: null },
+    })
+      .populate("studentId")
+      .populate("feeId");
+
+    // Sort by paidDate descending (most recently paid first)
+    const sorted = installments.sort(
+      (a, b) => new Date(b.paidDate) - new Date(a.paidDate)
+    );
+
+    const totalPaidAmount = sorted.reduce((sum, inst) => {
+      return sum + (inst.amount || 0);
+    }, 0);
+
+    res.json({ installments: sorted, totalPaidAmount });
+  } catch (err) {
+    console.error("Error fetching paid installments:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};

@@ -6,8 +6,12 @@ import Footer from '../components/Footer'
 export default function FeeTracking() {
 
     const [admin, setAdmin] = useState(null);
-    const [installments, setInstallments] = useState([]);
+    const [unpaidInstallments, setUnpaidInstallments] = useState([]);
     const [totalUnpaidAmount, setTotalUnpaidAmount] = useState([]);
+    const [upcomingInstallments, setUpcomingInstallments] = useState([]);
+    const [totalUpcomingAmount, setTotalUpcomingAmount] = useState([]);
+    const [paidInstallments, setPaidInstallments] = useState([]);
+    const [totalPaidAmount, setTotalPaidAmount] = useState([]);
 
     const getDaysOverdue = (dueDate) => {
         const due = new Date(dueDate);
@@ -15,6 +19,40 @@ export default function FeeTracking() {
         const diff = Math.floor((now - due) / (1000 * 60 * 60 * 24)); // days
         return diff > 0 ? `${diff} days ago` : "Due today";
     };
+
+    function getDaysLeft(dueDate) {
+        const now = new Date();
+        const due = new Date(dueDate);
+
+        // Clear time components for accurate day difference
+        now.setHours(0, 0, 0, 0);
+        due.setHours(0, 0, 0, 0);
+
+        const diffInMs = due - now;
+        const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+
+        if (diffInDays === 0) return "Due today";
+        if (diffInDays === 1) return "Due tomorrow";
+        return `${diffInDays} days left`;
+    }
+
+    function getDaysSincePaid(paidDate) {
+        if (!paidDate) return "Not Paid";
+
+        const paid = new Date(paidDate);
+        const today = new Date();
+
+        // Clear time part
+        paid.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        const diffInMs = today - paid;
+        const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+        return diffInDays === 0
+            ? "Paid today"
+            : `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+    }
 
 
     useEffect(() => {
@@ -30,6 +68,7 @@ export default function FeeTracking() {
                 return;
             }
 
+            // ferching unpaid installments
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/unpaid`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
@@ -44,10 +83,50 @@ export default function FeeTracking() {
                         0
                     );
 
-                    setInstallments(sorted);
+                    setUnpaidInstallments(sorted);
                     setTotalUnpaidAmount(totalOutstanding);
                 })
                 .catch(err => console.error("Error loading unpaid installments:", err));
+
+            // ferching upcoming installments
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/upcoming`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const sorted = data.sort(
+                        (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
+                    );
+
+                    const totalUpcoming = sorted.reduce(
+                        (sum, inst) => sum + (inst.amount || 0),
+                        0
+                    );
+
+                    setUpcomingInstallments(sorted);
+                    setTotalUpcomingAmount(totalUpcoming);
+                })
+                .catch(err => console.error("Error loading upcoming installments:", err));
+
+            // ferching paid installments
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/paid`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const sorted = data.installments.sort(
+                        (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
+                    );
+
+                    const totalPaid = sorted.reduce(
+                        (sum, inst) => sum + (inst.amount || 0),
+                        0
+                    );
+
+                    setPaidInstallments(sorted);
+                    setTotalPaidAmount(totalPaid);
+                })
+                .catch(err => console.error("Error loading paid installments:", err));
         }
     }, []);
 
@@ -70,11 +149,12 @@ export default function FeeTracking() {
                                     <h3>₹ {totalUnpaidAmount}</h3>
                                 </div>
 
-                                {installments.map((inst) => {
+                                {unpaidInstallments.map((inst) => {
                                     const student = inst.studentId; // directly populated
                                     const name = student?.name || "Unknown";
                                     const className = student?.class || "--";
                                     const amount = inst.amount || 0;
+                                    const num = inst.installmentNo || 0;
 
                                     return (
                                         <div key={inst._id} className="student-box width-100 border border-2 border-secondary rounded mt-2">
@@ -85,6 +165,7 @@ export default function FeeTracking() {
                                                 </div>
                                                 <div className="d-flex justify-content-between align-items-start pb-1 ps-2 pe-2">
                                                     <span>Class: {className}</span>
+                                                    <span>Installment #: {num}</span>
                                                     <span className="text-danger">{getDaysOverdue(inst.dueDate)}</span>
                                                 </div>
                                             </Link>
@@ -99,14 +180,80 @@ export default function FeeTracking() {
                     <div className="col-12 col-sm-6 col-md-4">
                         <div className="card text-center p-3 shadow-sm">
                             <h4>Upcoming</h4>
+                            <div className="flex mt-3">
+
+                                <div className="mt-3 mb-3">
+                                    <span>Upcoming Payment</span>
+                                    <h3>₹ {totalUpcomingAmount}</h3>
+                                </div>
+
+                                {upcomingInstallments.map((inst) => {
+                                    const student = inst.studentId; // directly populated
+                                    const name = student?.name || "Unknown";
+                                    const className = student?.class || "--";
+                                    const amount = inst.amount || 0;
+                                    const num = inst.installmentNo || 0;
+
+                                    return (
+                                        <div key={inst._id} className="student-box width-100 border border-2 border-secondary rounded mt-2">
+                                            <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
+                                                <div className="d-flex justify-content-between align-items-start pt-1 ps-2 pe-2">
+                                                    <h5>{name}</h5>
+                                                    <span>₹ {amount}/-</span>
+                                                </div>
+                                                <div className="d-flex justify-content-between align-items-start pb-1 ps-2 pe-2">
+                                                    <span>Class: {className}</span>
+                                                    <span>Installment #: {num}</span>
+                                                    <span className="text-primary">{getDaysLeft(inst.dueDate)}</span>
+                                                </div>
+                                            </Link>
+                                        </div>
+                                    );
+                                })}
+
+                            </div>
                         </div>
                     </div>
 
                     <div className="col-12 col-sm-6 col-md-4">
                         <div className="card text-center p-3 shadow-sm">
                             <h4>Paid</h4>
+                            <div className="flex mt-3">
+
+                                <div className="mt-3 mb-3">
+                                    <span>Earned Payment</span>
+                                    <h3>₹ {totalPaidAmount}</h3>
+                                </div>
+
+                                {paidInstallments.map((inst) => {
+                                    const student = inst.studentId; // directly populated
+                                    const name = student?.name || "Unknown";
+                                    const className = student?.class || "--";
+                                    const amount = inst.amount || 0;
+                                    const num = inst.installmentNo || 0;
+
+                                    return (
+                                        <div key={inst._id} className="student-box width-100 border border-2 border-secondary rounded mt-2">
+                                            <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
+                                                <div className="d-flex justify-content-between align-items-start pt-1 ps-2 pe-2">
+                                                    <h5>{name}</h5>
+                                                    <span>₹ {amount}/-</span>
+                                                </div>
+                                                <div className="d-flex justify-content-between align-items-start pb-1 ps-2 pe-2">
+                                                    <span>Class: {className}</span>
+                                                    <span>Installment #: {num}</span>
+                                                    <span className="text-primary">{getDaysSincePaid(inst.paidDate)}</span>
+                                                </div>
+                                            </Link>
+                                        </div>
+                                    );
+                                })}
+
+                            </div>
                         </div>
                     </div>
+
+
                 </div>
             </div>
         </div>
