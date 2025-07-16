@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import ExcelUpload from '../components/ExcelUpload';
 
 export default function FeeTracking() {
 
@@ -358,7 +359,9 @@ export default function FeeTracking() {
                 </div>
             </div>
         </div>
+        
 
+        <ExcelUpload/>
 
 
         <Footer />

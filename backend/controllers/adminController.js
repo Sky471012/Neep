@@ -8,6 +8,7 @@ const Installment = require("../models/Installment");
 const Student = require("../models/Student");
 const Teacher = require("../models/Admins_teachers");
 const BatchTeacher = require("../models/Batch_teachers");
+const XLSX = require("xlsx");
 
 function parseDDMMYYYY(dateStr) {
   if (!dateStr || typeof dateStr !== "string") {
@@ -1107,5 +1108,65 @@ exports.getPaidInstallments = async (req, res) => {
   } catch (err) {
     console.error("Error fetching paid installments:", err);
     res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// Upload excel
+exports.uploadExcelSheet = async (req, res) => {
+  try {
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    // Normalize: trim and lowercase name + string phone
+    const uploadedStudents = data.map((row) => ({
+      name: row.name?.trim(),
+      phone: row.phone?.toString().trim(),
+      dob: row.dob?.trim(),
+      address: row.address?.trim(),
+      class: row.class?.trim(),
+      dateOfJoining: row.dateOfJoining?.trim(),
+    }));
+
+    // Step 1: Remove duplicates within uploaded sheet
+    const uniqueBySheet = [];
+    const seen = new Set();
+
+    for (const student of uploadedStudents) {
+      const key = `${student.name.toLowerCase()}-${student.phone}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueBySheet.push(student);
+      }
+    }
+
+    // Step 2: Remove duplicates against DB
+    const existing = await Student.find({
+      $or: uniqueBySheet.map((s) => ({
+        name: s.name,
+        phone: s.phone,
+      })),
+    });
+
+    const existingKeys = new Set(
+      existing.map((s) => `${s.name.toLowerCase()}-${s.phone}`)
+    );
+
+    const finalToInsert = uniqueBySheet.filter(
+      (s) => !existingKeys.has(`${s.name.toLowerCase()}-${s.phone}`)
+    );
+
+    if (finalToInsert.length === 0) {
+      return res.status(400).json({ message: "No unique students to insert." });
+    }
+
+    const insertedStudents = await Student.insertMany(finalToInsert);
+    res.json({
+      message: `${insertedStudents.length} students uploaded successfully`,
+      insertedStudents,
+    });
+  } catch (error) {
+    console.error("Excel upload error:", error);
+    res.status(500).json({ message: "Error uploading students", error });
   }
 };

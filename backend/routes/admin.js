@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
+const upload = require("../middleware/upload");
 
 router.use(verifyToken, isAdmin);
 
@@ -44,7 +45,6 @@ router.post('/addBatches', adminController.addStudentToBatches);
 router.get('/teachers', adminController.getTeachers);
 router.get('/getTeacherDetails/:teacherId', adminController.getTeacher);
 router.get('/teacherBatches/:teacherId', adminController.getTeacherBatches);
-router.post('/teacherCreate', adminController.createTeacher);
 router.delete('/teacherDelete/:teacherId', adminController.deleteTeacher);
 router.delete('/removeTeacher', adminController.removeTeacherFromBatch);
 
@@ -53,5 +53,8 @@ router.delete('/removeTeacher', adminController.removeTeacherFromBatch);
 router.get('/fee/installments/unpaid', adminController.getUnpaidInstallments);
 router.get('/fee/installments/upcoming', adminController.getUpcomingInstallments);
 router.get('/fee/installments/paid', adminController.getPaidInstallments);
+
+// Upload excel
+router.post('/upload', upload.single("file"), adminController.uploadExcelSheet);
 
 module.exports = router;

@@ -784,8 +784,36 @@ ul {
   transform: scale(1.1) translateY(-2px);
 }
 
+.instagram-link{
+  position: fixed;
+  bottom: clamp(180px, 17vh, 270px);
+  right: clamp(20px, 5vw, 40px);
+  background: radial-gradient(
+    circle at 30% 107%,
+    #fdf497 0%,
+    #fdf497 5%,
+    #fd5949 45%,
+    #d6249f 60%,
+    #285AEB 90%
+  );
+  color: white;
+  border-radius: 50%;
+  padding: 14px 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  font-size: clamp(24px, 5vw, 32px);
+  z-index: 2001;
+  transition: all 0.3s ease;
+  text-align: center;
+  line-height: 1;
+}
+
+.instagram-link:hover {
+  transform: scale(1.1) translateY(-2px);
+}
+
 .whatsapp-link i,
-.make-a-call i {
+.make-a-call i,
+.instagram-link i {
   font-size: 1em;
 }
 
