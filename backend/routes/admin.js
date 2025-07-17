@@ -8,6 +8,7 @@ router.use(verifyToken, isAdmin);
 
 // Batch Management
 router.get('/batches', adminController.getBatches);
+router.get('/archivedBatches', adminController.getArchivedBatches);
 router.get('/getBatchDetails/:batchId', adminController.getBatch);
 router.get('/batchStudents/:batchId', adminController.getBatchStudents);
 router.get('/batchTimetable/:batchId', adminController.getBatchTimetable);
@@ -21,6 +22,7 @@ router.delete('/removeStudent', adminController.removeStudent);
 router.post('/assignTeacher/:batchId/:teacherId', adminController.assignTeacher)
 router.post('/addStudents', adminController.addStudentsToBatch);
 router.post('/addStudentByCreating/:batchId', adminController.addStudentByCreating);
+router.put('/:batchId/archive', adminController.toggleArchiveStatus);
 
 // Student Management
 router.get('/students', adminController.getStudents);

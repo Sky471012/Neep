@@ -8,18 +8,21 @@ import Footer from "../components/Footer";
 import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
+import ModalFive from "../modals/ModalFive";
 import Popup from "../modals/Popup";
 
 export default function Admin() {
     const navigate = useNavigate();
     const [admin, setAdmin] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
+    const [archivedBatchesRecords, setArchivedBatchesRecords] = useState([]);
     const [studentsRecords, setStudentsRecords] = useState([]);
     const [teachersRecords, setTeachersRecords] = useState([]);
     const [teacher, setTeacher] = useState({});
     const [openModalOne, setOpenModalOne] = useState(false);
     const [openModalTwo, setOpenModalTwo] = useState(false);
     const [openModalThree, setOpenModalThree] = useState(false);
+    const [openModalFive, setOpenModalFive] = useState(false);
     const [openPopupModal, setOpenPopupModal] = useState(false);
     const [description, setDescription] = useState('');
     const [image, setImage] = useState(null);
@@ -59,6 +62,17 @@ export default function Admin() {
                 })
                 .then(setBatchesRecords)
                 .catch((err) => console.error("Batches fetch error:", err));
+           
+            // Fetch archived batches
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/archivedBatches`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Failed to fetch all archived batches");
+                    return res.json();
+                })
+                .then(setArchivedBatchesRecords)
+                .catch((err) => console.error("Archived Batches fetch error:", err));
 
             // Fetch students
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, {
@@ -308,31 +322,32 @@ export default function Admin() {
             <div className="main-content">
                 <div className="adminbar d-flex gap-5 m-5">
                     <Link to="/FeeTracking" className="text-primary">Fee Tracking</Link>
-                    <a href="#batches"className="text-primary">All Batches</a>
-                    <a href="#students"className="text-primary">All Students</a>
-                    <a href="#teachers"className="text-primary">All Teachers</a>
+                    <a href="#batches" className="text-primary">All Batches</a>
+                    <a href="#students" className="text-primary">All Students</a>
+                    <a href="#teachers" className="text-primary">All Teachers</a>
                     <a className="text-primary" onClick={() => setOpenModalOne(true)}>Add a Batch</a>
                     <a className="text-primary" onClick={() => setOpenModalTwo(true)}>Add a Student</a>
                     <a className="text-primary" onClick={() => setOpenModalThree(true)}>Add a Teacher</a>
                     <a className="text-primary" onClick={() => setOpenPopupModal(true)}>Update Popup</a>
+                    <a className="text-primary" onClick={() => setOpenModalFive(true)}>Archived Batches</a>
                 </div>
 
                 <div id="batches" className="batches-container">
-                    <h1>Batches</h1>
+                    <h1>Batches({batchesRecords.length})</h1>
                     <div className="container">
                         <div className="row">
                             {batchesRecords.length > 0 ? (
-                                batchesRecords.map((batch, index) => (
-
-                                    <div className="col-12 col-sm-6 col-lg-4" key={index}>
-                                        <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
-                                            <div className="card batch-card mb-3">
-                                                <h5 className="card-title">{batch.name}</h5>
-                                                <span>Code: {batch.code}</span>
-                                            </div>
-                                        </Link>
-                                    </div>
-                                ))
+                                batchesRecords
+                                    .map((batch, index) => (
+                                        <div className="col-12 col-sm-6 col-lg-4" key={index}>
+                                            <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
+                                                <div className="card batch-card mb-3">
+                                                    <h5 className="card-title">{batch.name}</h5>
+                                                    <span>Code: {batch.code}</span>
+                                                </div>
+                                            </Link>
+                                        </div>
+                                    ))
                             ) : (
                                 <p>No batches found.</p>
                             )}
@@ -342,7 +357,7 @@ export default function Admin() {
 
 
                 <div id="students" className="batches-container">
-                    <h1>Students</h1>
+                    <h1>Students({studentsRecords.length})</h1>
                     <div className="container">
                         <div className="row">
                             {studentsRecords.length > 0 ? (
@@ -365,7 +380,7 @@ export default function Admin() {
 
 
                 <div id="teachers" className="batches-container">
-                    <h1>Teachers</h1>
+                    <h1>Teachers({teachersRecords.length})</h1>
                     <div className="container">
                         <div className="row">
                             {teachersRecords.length > 0 ? (
@@ -493,7 +508,7 @@ export default function Admin() {
                             required
                         >
                             <option value="">Select Class</option>
-                            {["Kids", "English Spoken", "9", "10", "11", "12"].map((cls) => (
+                            {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
                                 <option key={cls} value={cls}>{cls}</option>
                             ))}
                         </select>
@@ -582,6 +597,30 @@ export default function Admin() {
                     <button type="submit">Upload</button>
                 </form>
             </Popup>
+
+            <ModalFive
+                isOpen={openModalFive}
+                onClose={() => setOpenModalFive(false)}
+            >
+                <h3>Archived Batches</h3>
+                <div className="flex align-items-center">
+
+                    {archivedBatchesRecords.length > 0 ? (
+                        archivedBatchesRecords
+                            .map((batch, index) => (
+                                    <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
+                                        <div className="card batch-card mb-3">
+                                            <h5 className="card-title">{batch.name}</h5>
+                                            <span>Code: {batch.code}</span>
+                                        </div>
+                                    </Link>
+                            ))
+                    ) : (
+                        <p>No archived batches found.</p>
+                    )}
+
+                </div>
+            </ModalFive>
         </>
     );
 }

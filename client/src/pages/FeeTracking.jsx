@@ -13,6 +13,9 @@ export default function FeeTracking() {
     const [totalUpcomingAmount, setTotalUpcomingAmount] = useState([]);
     const [paidInstallments, setPaidInstallments] = useState([]);
     const [totalPaidAmount, setTotalPaidAmount] = useState([]);
+    const [selectedUnpaidClass, setSelectedUnpaidClass] = useState(null);
+    const [selectedUpcomingClass, setSelectedUpcomingClass] = useState(null);
+    const [selectedPaidClass, setSelectedPaidClass] = useState(null);
 
     const [unpaidSortOrder, setUnpaidSortOrder] = useState("asc");
     const [upcomingSortOrder, setUpcomingSortOrder] = useState("asc");
@@ -188,34 +191,61 @@ export default function FeeTracking() {
                                                     Newest First
                                                 </button>
                                             </li>
+                                            <li>
+                                                <div className="dropdown-item">
+                                                    Filter by Class:
+                                                    <ul className="list-unstyled ms-2 mt-1">
+                                                        {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(cls => (
+                                                            <li key={cls}>
+                                                                <button
+                                                                    className="btn btn-sm text-start"
+                                                                    onClick={() => setSelectedUnpaidClass(cls)}
+                                                                >
+                                                                    {cls}
+                                                                </button>
+                                                            </li>
+                                                        ))}
+                                                        <li>
+                                                            <button
+                                                                className="btn btn-sm text-start text-danger"
+                                                                onClick={() => setSelectedUnpaidClass(null)}
+                                                            >
+                                                                Clear Filter
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
 
 
-                                {unpaidInstallments.map((inst) => {
-                                    const student = inst.studentId; // directly populated
-                                    const name = student?.name || "Unknown";
-                                    const className = student?.class || "--";
-                                    const amount = inst.amount || 0;
-                                    const num = inst.installmentNo || 0;
+                                {unpaidInstallments
+                                    .filter(inst => !selectedUnpaidClass || inst.studentId?.class === selectedUnpaidClass)
+                                    .map(inst => {
+                                        const student = inst.studentId;
+                                        const name = student?.name || "Unknown";
+                                        const className = student?.class || "--";
+                                        const amount = inst.amount || 0;
+                                        const num = inst.installmentNo || 0;
 
-                                    return (
-                                        <div key={inst._id} className="student-box width-100 border border-2 border-secondary rounded mt-2">
-                                            <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
-                                                <div className="d-flex justify-content-between align-items-start pt-1 ps-2 pe-2">
-                                                    <h5>{name}</h5>
-                                                    <span>₹ {amount}/-</span>
-                                                </div>
-                                                <div className="d-flex justify-content-between align-items-start pb-1 ps-2 pe-2">
-                                                    <span>Class: {className}</span>
-                                                    <span>Installment #: {num}</span>
-                                                    <span className="text-danger">{getDaysOverdue(inst.dueDate)}</span>
-                                                </div>
-                                            </Link>
-                                        </div>
-                                    );
-                                })}
+                                        return (
+                                            <div key={inst._id} className="student-box width-100 border border-2 border-secondary rounded mt-2">
+                                                <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
+                                                    <div className="d-flex justify-content-between align-items-start pt-1 ps-2 pe-2">
+                                                        <h5>{name}</h5>
+                                                        <span>₹ {amount}/-</span>
+                                                    </div>
+                                                    <div className="d-flex justify-content-between align-items-start pb-1 ps-2 pe-2">
+                                                        <span>Class: {className}</span>
+                                                        <span>Installment #: {num}</span>
+                                                        <span className="text-danger">{getDaysOverdue(inst.dueDate)}</span>
+                                                    </div>
+                                                </Link>
+                                            </div>
+                                        );
+                                    })}
 
                             </div>
                         </div>
@@ -256,11 +286,38 @@ export default function FeeTracking() {
                                                     Newest First
                                                 </button>
                                             </li>
+                                            <li>
+                                                <div className="dropdown-item">
+                                                    Filter by Class:
+                                                    <ul className="list-unstyled ms-2 mt-1">
+                                                        {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(cls => (
+                                                            <li key={cls}>
+                                                                <button
+                                                                    className="btn btn-sm text-start"
+                                                                    onClick={() => setSelectedUpcomingClass(cls)}
+                                                                >
+                                                                    {cls}
+                                                                </button>
+                                                            </li>
+                                                        ))}
+                                                        <li>
+                                                            <button
+                                                                className="btn btn-sm text-start text-danger"
+                                                                onClick={() => setSelectedUpcomingClass(null)}
+                                                            >
+                                                                Clear Filter
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
 
-                                {upcomingInstallments.map((inst) => {
+                                {upcomingInstallments
+                                .filter(inst => !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass)
+                                .map((inst) => {
                                     const student = inst.studentId; // directly populated
                                     const name = student?.name || "Unknown";
                                     const className = student?.class || "--";
@@ -323,11 +380,38 @@ export default function FeeTracking() {
                                                     Newest First
                                                 </button>
                                             </li>
+                                            <li>
+                                                <div className="dropdown-item">
+                                                    Filter by Class:
+                                                    <ul className="list-unstyled ms-2 mt-1">
+                                                        {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(cls => (
+                                                            <li key={cls}>
+                                                                <button
+                                                                    className="btn btn-sm text-start"
+                                                                    onClick={() => setSelectedPaidClass(cls)}
+                                                                >
+                                                                    {cls}
+                                                                </button>
+                                                            </li>
+                                                        ))}
+                                                        <li>
+                                                            <button
+                                                                className="btn btn-sm text-start text-danger"
+                                                                onClick={() => setSelectedPaidClass(null)}
+                                                            >
+                                                                Clear Filter
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
 
-                                {paidInstallments.map((inst) => {
+                                {paidInstallments
+                                .filter(inst => !selectedPaidClass || inst.studentId?.class === selectedPaidClass)
+                                .map((inst) => {
                                     const student = inst.studentId; // directly populated
                                     const name = student?.name || "Unknown";
                                     const className = student?.class || "--";
@@ -359,9 +443,9 @@ export default function FeeTracking() {
                 </div>
             </div>
         </div>
-        
 
-        <ExcelUpload/>
+
+        <ExcelUpload />
 
 
         <Footer />

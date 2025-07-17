@@ -10,40 +10,21 @@ const Teacher = require("../models/Admins_teachers");
 const BatchTeacher = require("../models/Batch_teachers");
 const XLSX = require("xlsx");
 
-function parseDDMMYYYY(dateStr) {
-  if (!dateStr || typeof dateStr !== "string") {
-    throw new Error("paidDate is missing or not a string");
-  }
 
-  const [dd, mm, yyyy] = dateStr.split("-");
-
-  if (
-    !dd ||
-    !mm ||
-    !yyyy ||
-    dd.length !== 2 ||
-    mm.length !== 2 ||
-    yyyy.length !== 4
-  ) {
-    throw new Error(`Invalid date format: ${dateStr}`);
-  }
-
-  // Build a valid ISO string
-  const isoDateStr = `${yyyy}-${mm}-${dd}`;
-  const parsed = new Date(isoDateStr);
-
-  if (isNaN(parsed.getTime())) {
-    throw new Error(`Invalid date after parsing: ${isoDateStr}`);
-  }
-
-  return parsed;
-}
-
-// Batches Management
+// Batch Management
 exports.getBatches = async (req, res) => {
   try {
-    const batches = await Batch.find();
+    const batches = await Batch.find({ archive: false }); // Only unarchived batches
     res.json(batches);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getArchivedBatches = async (req, res) => {
+  try {
+    const archivedBatches = await Batch.find({ archive: true }); // Only archived batches
+    res.json(archivedBatches);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -394,7 +375,29 @@ exports.addStudentByCreating = async (req, res) => {
   }
 };
 
-// Students Management
+exports.toggleArchiveStatus = async (req, res) => {
+  try {
+    const batchId = req.params.batchId;
+    const { archive } = req.body;
+
+    const updatedBatch = await Batch.findByIdAndUpdate(
+      batchId,
+      { archive },
+      { new: true }
+    );
+
+    if (!updatedBatch) {
+      return res.status(404).json({ message: "Batch not found" });
+    }
+
+    res.json(updatedBatch);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+// Student Management
 exports.getStudents = async (req, res) => {
   try {
     const students = await Student.find();
@@ -424,8 +427,11 @@ exports.getStudentBatches = async (req, res) => {
 
     const batchIds = studentLinks.map((sb) => sb.batchId);
 
-    // Step 2: Fetch batch details
-    const batches = await Batch.find({ _id: { $in: batchIds } }).select("name");
+    // Step 2: Fetch only unarchived batch details
+    const batches = await Batch.find({
+      _id: { $in: batchIds },
+      archive: false
+    }).select("name");
 
     res.json({ batches });
   } catch (err) {
@@ -495,7 +501,16 @@ exports.createStudent = async (req, res) => {
     }
 
     // Validate class enum
-    const allowedClasses = ["Kids", "English Spoken", "9", "10", "11", "12"];
+    const allowedClasses = [
+      "Kids",
+      "English Spoken",
+      "9",
+      "10",
+      "11",
+      "12",
+      "Entrance Exams",
+      "Graduation",
+    ];
     if (!allowedClasses.includes(studentClass)) {
       return res.status(400).json({
         message: "Invalid class selected.",
@@ -660,7 +675,7 @@ exports.removeInstallment = async (req, res) => {
       studentId,
       feeId,
       _id: { $ne: installmentId },
-      paidDate: { $exists: false },
+      $or: [{ paidDate: { $exists: false } }, { paidDate: null }],
     }).sort({ dueDate: 1 }); // Sorting to maintain order
 
     if (otherUnpaid.length === 0) {
@@ -743,7 +758,28 @@ exports.createFeeWithInstallments = async (req, res) => {
       return res.status(400).json({ message: "Missing or invalid inputs." });
     }
 
-    // Check if student already has a fee record
+    // ✅ Check if student exists and get their date of joining
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    let doj;
+    if (
+      typeof student.dateOfJoining === "string" &&
+      student.dateOfJoining.includes("-")
+    ) {
+      const [day, month, year] = student.dateOfJoining.split("-").map(Number);
+      doj = new Date(year, month - 1, day);
+    } else {
+      doj = new Date(student.dateOfJoining);
+    }
+
+    if (isNaN(doj)) {
+      return res.status(400).json({ message: "Invalid date of joining." });
+    }
+
+    // ✅ Check if student already has a fee record
     const existing = await Fee.findOne({ studentId });
     if (existing) {
       return res
@@ -764,21 +800,20 @@ exports.createFeeWithInstallments = async (req, res) => {
     const remainder = amount % numberOfInstallments;
 
     // 3. Create installments
-    const today = new Date();
     const installments = [];
 
     for (let i = 0; i < numberOfInstallments; i++) {
-      const dueDate = new Date(today);
-      dueDate.setMonth(today.getMonth() + i); // one month gap
+      const dueDate = new Date(doj); // start from date of joining
+      dueDate.setMonth(doj.getMonth() + i); // add i months
 
       const inst = new Installment({
         studentId,
         feeId: newFee._id,
         installmentNo: i + 1,
         amount: i === 0 ? equalAmount + remainder : equalAmount,
-        dueDate: dueDate,         // stored as native Date object
-        paidDate: null,           // explicitly set to null
-        method: null              // explicitly set to null
+        dueDate: dueDate,
+        paidDate: null,
+        method: null,
       });
 
       await inst.save();
@@ -829,8 +864,6 @@ exports.markInstallmentPaid = async (req, res) => {
   const { paidDate, method } = req.body;
 
   try {
-    console.log("Incoming paidDate string:", paidDate);
-
     const installment = await Installment.findById(id);
     if (!installment) {
       return res.status(404).json({ message: "Installment not found" });
@@ -935,7 +968,7 @@ exports.addStudentToBatches = async (req, res) => {
   }
 };
 
-// Teachers Management
+// Teacher Management
 exports.getTeachers = async (req, res) => {
   try {
     const teachers = await Teacher.find();
@@ -966,7 +999,10 @@ exports.getTeacherBatches = async (req, res) => {
     const batchIds = teacherLinks.map((tb) => tb.batchId);
 
     // Step 2: Fetch batch details
-    const batches = await Batch.find({ _id: { $in: batchIds } }).select("name");
+    const batches = await Batch.find({
+      _id: { $in: batchIds },
+      archive: false
+    }).select("name");
 
     res.json({ batches });
   } catch (err) {

@@ -1,15 +1,35 @@
 const Attendance = require("../models/Attendance");
-const Batches = require("../models/Batch_teachers");
+const BatchesTeacher = require("../models/Batch_teachers");
 const BatchStudent = require("../models/Batch_students");
+const Batch = require("../models/Batch");
 const Student = require("../models/Student");
 const Timetable = require("../models/TimeTable");
-const Test = require('../models/Test');
-
+const Test = require("../models/Test");
 
 exports.getBatches = async (req, res) => {
   try {
-    const batches = await Batches.find({ teacherId: req.user.id });
-    res.json(batches);
+    // Step 1: Get all teacher's batch mappings
+    const teacherBatches = await BatchesTeacher.find({
+      teacherId: req.user.id,
+    });
+
+    // Step 2: Extract batchIds from those mappings
+    const batchIds = teacherBatches.map((bt) => bt.batchId);
+
+    // Step 3: Get only unarchived batches from Batch collection
+    const unarchivedBatches = await Batch.find({
+      _id: { $in: batchIds },
+      archive: false,
+    });
+
+    const unarchivedBatchIds = unarchivedBatches.map((b) => b._id.toString());
+
+    // Step 4: Filter teacherBatches where batchId is in unarchivedBatchIds
+    const filteredTeacherBatches = teacherBatches.filter((tb) =>
+      unarchivedBatchIds.includes(tb.batchId.toString())
+    );
+
+    res.json(filteredTeacherBatches);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -91,8 +111,8 @@ exports.addTest = async (req, res) => {
         },
       },
       {
-        new: true,          // return the updated document
-        upsert: true,       // create if not found
+        new: true, // return the updated document
+        upsert: true, // create if not found
         setDefaultsOnInsert: true,
       }
     );
@@ -106,7 +126,6 @@ exports.addTest = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 exports.getTest = async (req, res) => {
   try {

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import { format, parse } from 'date-fns';
+import axios from 'axios';
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import TimetableEditor from "../components/TimetableEditor";
@@ -46,11 +47,20 @@ export default function BatchControls() {
 
   const academicYearStart = new Date().getMonth() < 3 ? new Date().getFullYear() - 1 : new Date().getFullYear();
 
-
   const allMonths = [
     "April", "May", "June", "July", "August", "September",
     "October", "November", "December", "January", "February", "March"
   ];
+
+  const weekdayOrder = {
+    "Monday": 1,
+    "Tuesday": 2,
+    "Wednesday": 3,
+    "Thursday": 4,
+    "Friday": 5,
+    "Saturday": 6,
+    "Sunday": 7
+  };
 
   function getAcademicMonthIndex(month) {
     // Convert calendar month (0–11) to academic month index (0–11)
@@ -62,6 +72,8 @@ export default function BatchControls() {
 
 
   useEffect(() => {
+    console.log(token);
+
     const fetchData = async () => {
       const res1 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getBatchDetails/${batchId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -319,6 +331,31 @@ export default function BatchControls() {
     );
   };
 
+  const handleArchiveToggle = async (batchId, newArchiveStatus) => {
+    try {
+      const res = await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/admin/${batchId}/archive`,
+        { archive: newArchiveStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.status === 200) {
+        // Update the local state to reflect archive change
+        setBatch((prev) => ({
+          ...prev,
+          archive: newArchiveStatus,
+        }));
+      }
+    } catch (error) {
+      console.error("Error updating archive status:", error);
+      alert("Failed to update archive status.");
+    }
+  };
+
   return (<>
     <Navbar />
 
@@ -360,6 +397,14 @@ export default function BatchControls() {
                   </button>
                 </li>
                 <li>
+                  <button
+                    className={`dropdown-item ${batch.archive ? 'text-success' : 'text-danger'}`}
+                    onClick={() => handleArchiveToggle(batch._id, !batch.archive)}
+                  >
+                    {batch.archive ? 'Unarchive Batch' : 'Archive Batch'}
+                  </button>
+                </li>
+                <li>
                   <button className="dropdown-item text-danger" onClick={() => deleteBatch(batch._id)}>
                     Delete Batch
                   </button>
@@ -396,25 +441,27 @@ export default function BatchControls() {
                 </tr>
               </thead>
               <tbody>
-                {timetable.map((entry, index) => (
-                  <tr key={index}>
-                    <td>{entry.weekday}</td>
-                    <td>
-                      {entry.classTimings.map((slot, idx) => {
-                        const parsedStart = parse(slot.startTime, 'hh:mm a', new Date());
-                        const parsedEnd = parse(slot.endTime, 'hh:mm a', new Date());
-                        const displayStart = isNaN(parsedStart) ? slot.startTime : format(parsedStart, 'hh:mm a');
-                        const displayEnd = isNaN(parsedEnd) ? slot.endTime : format(parsedEnd, 'hh:mm a');
+                {timetable
+                  .sort((a, b) => weekdayOrder[a.weekday] - weekdayOrder[b.weekday])
+                  .map((entry, index) => (
+                    <tr key={index}>
+                      <td>{entry.weekday}</td>
+                      <td>
+                        {entry.classTimings.map((slot, idx) => {
+                          const parsedStart = parse(slot.startTime, 'hh:mm a', new Date());
+                          const parsedEnd = parse(slot.endTime, 'hh:mm a', new Date());
+                          const displayStart = isNaN(parsedStart) ? slot.startTime : format(parsedStart, 'hh:mm a');
+                          const displayEnd = isNaN(parsedEnd) ? slot.endTime : format(parsedEnd, 'hh:mm a');
 
-                        return (
-                          <div key={idx}>
-                            {displayStart} - {displayEnd}
-                          </div>
-                        );
-                      })}
-                    </td>
-                  </tr>
-                ))}
+                          return (
+                            <div key={idx}>
+                              {displayStart} - {displayEnd}
+                            </div>
+                          );
+                        })}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           ) : (

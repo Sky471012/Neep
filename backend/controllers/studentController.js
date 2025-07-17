@@ -1,7 +1,8 @@
 const Attendance = require('../models/Attendance');
 const Fee = require('../models/Fee');
 const Installment = require('../models/Installment');
-const Batches = require('../models/Batch_students');
+const BatchesStudent = require('../models/Batch_students');
+const Batch = require('../models/Batch');
 const Test = require('../models/Test');
 const Timetable = require('../models/TimeTable');
 
@@ -37,7 +38,6 @@ exports.getFeeStatus = async (req, res) => {
   try {
     const studentId = req.user.id;
 
-    console.log("Getting fee for student:", studentId);
     const fee = await Fee.findOne({ studentId });
 
     if (!fee) return res.status(404).json({ message: "No fee record found" });
@@ -53,9 +53,27 @@ exports.getFeeStatus = async (req, res) => {
 
 exports.getbatches = async (req, res) => {
   try {
-    const batches = await Batches.find({ studentId: req.user.id });
-    res.json(batches);
+    // Step 1: Get all batch mappings for the student
+    const studentBatches = await BatchesStudent.find({ studentId: req.user.id });
+
+    const batchIds = studentBatches.map((bs) => bs.batchId);
+
+    // Step 2: Get only unarchived batches
+    const unarchivedBatches = await Batch.find({
+      _id: { $in: batchIds },
+      archive: false
+    });
+
+    const unarchivedBatchIds = unarchivedBatches.map((b) => b._id.toString());
+
+    // Step 3: Filter studentBatches to include only unarchived ones
+    const filteredStudentBatches = studentBatches.filter((sb) =>
+      unarchivedBatchIds.includes(sb.batchId.toString())
+    );
+
+    res.json(filteredStudentBatches);
   } catch (err) {
+    console.error("Error fetching student batches:", err);
     res.status(500).json({ error: err.message });
   }
 };

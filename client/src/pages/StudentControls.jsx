@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Inter28ptRegular } from "../assets/fonts/Inter_28pt-Regular";
+import { Inter18ptBold } from "../assets/fonts/Inter_18pt-Bold-bold";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ModalOne from "../modals/ModalOne";
@@ -50,6 +51,15 @@ export default function StudentControls() {
         return `${day}-${month}-${year}`;
     };
 
+     function formatDate(dateStr) {
+        if (!dateStr) return "--";
+        const date = new Date(dateStr);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -87,13 +97,16 @@ export default function StudentControls() {
 
         // ✅ Register custom Inter font
         doc.addFileToVFS("Inter-Regular.ttf", Inter28ptRegular);
+        doc.addFileToVFS("Inter-Bold.ttf", Inter18ptBold);
         doc.addFont("Inter-Regular.ttf", "Inter", "normal");
+        doc.addFont("Inter-Bold.ttf", "Inter", "bold");
         doc.setFont("Inter");
 
         const feeAmount = record.amount || 12000;
         const amountInWords = convertAmountToWords(feeAmount);
         const receiptId = `NEEPed-${record._id?.slice(-4) || Math.floor(Math.random() * 10000)}`;
-        const paidDate = formatDateToDDMMYYYY(record.paidDate);
+        const paidDate = formatDate(record.paidDate);
+
         const method = record.method || "N/A";
 
         const alignRight = (text, y) => {
@@ -102,24 +115,30 @@ export default function StudentControls() {
         };
 
         // Header
-        doc.setFontSize(22);
-        doc.text("NEEP", 20, 20);
+        doc.setFontSize(16);
+        doc.setFont("Inter", "bold");
+        doc.text("Mr. Mohan Verma", 20, 20);
 
         doc.setFontSize(12);
-        doc.text("Phone: 919313214643", 20, 28);
-        doc.text("Email: mohan.mahi13@gmail.com", 20, 34);
+        doc.setFont("Inter", "normal");
+        doc.text("Managing Director", 20, 24);
+        doc.text("Phone: +91 9313214643", 20, 32);
+        doc.text("+91 9891214643", 34, 37);
+        doc.text("Email: neep.md@gmail.com", 20, 42);
 
         doc.setFontSize(16);
-        doc.text("INVOICE", pageWidth / 2, 45, null, null, "center");
+        doc.setFont("Inter", "bold");
+        doc.text("INVOICE", pageWidth / 2, 51, null, null, "center");
 
         doc.setFontSize(12);
-        doc.text(`Payment Method: ${method}`, 20, 55);
-        alignRight(`Receipt #: ${receiptId}`, 62);
-        alignRight(`Receipt Date: ${paidDate}`, 69);
+        doc.setFont("Inter", "normal");
+        doc.text(`Payment Method: ${method}`, 20, 61);
+        alignRight(`Receipt #: ${receiptId}`, 68);
+        alignRight(`Receipt Date: ${paidDate}`, 75);
 
-        alignRight(`Bill to: ${student.name}`, 76);
-        alignRight(`Class: ${student.class || "N/A"}`, 83);
-        alignRight(`Phone: ${student.phone}`, 90);
+        alignRight(`Bill to: ${student.name}`, 82);
+        alignRight(`Class: ${student.class || "N/A"}`, 89);
+        alignRight(`Phone: ${student.phone}`, 96);
 
         // Table with proper ₹ symbol
         autoTable(doc, {
@@ -624,7 +643,7 @@ export default function StudentControls() {
                                 <li>
                                     {fee?._id ? (
                                         <button
-                                            className="dropdown-item text-danger"
+                                            className="dropdown-item text-warning"
                                             onClick={handleRemoveFeeStructure}
                                         >
                                             Remove Fee Structure
