@@ -8,8 +8,10 @@ import Footer from "../components/Footer";
 import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
+import ModalFour from "../modals/ModalFour";
 import ModalFive from "../modals/ModalFive";
 import Popup from "../modals/Popup";
+import ExcelUpload from '../components/ExcelUpload';
 
 export default function Admin() {
     const navigate = useNavigate();
@@ -22,6 +24,7 @@ export default function Admin() {
     const [openModalOne, setOpenModalOne] = useState(false);
     const [openModalTwo, setOpenModalTwo] = useState(false);
     const [openModalThree, setOpenModalThree] = useState(false);
+    const [openModalFour, setOpenModalFour] = useState(false);
     const [openModalFive, setOpenModalFive] = useState(false);
     const [openPopupModal, setOpenPopupModal] = useState(false);
     const [description, setDescription] = useState('');
@@ -323,8 +326,8 @@ export default function Admin() {
             <Navbar />
 
             <div className="main-content">
-                <div className="adminbar d-flex justify-content-between gap-4 m-5">
-                    <Link to="/FeeTracking" className="text-primary">Fee Tracking</Link>
+                <div className="adminbar d-flex justify-content-between gap-4 m-5 text-center">
+                    <Link to="/quickView" className="text-primary">Quick View</Link>
                     <a href="#batches" className="text-primary">All Batches</a>
                     <a href="#students" className="text-primary">All Students</a>
                     <a href="#teachers" className="text-primary">All Teachers</a>
@@ -332,6 +335,7 @@ export default function Admin() {
                     <a className="text-primary" onClick={() => setOpenModalTwo(true)}>Add a Student</a>
                     <a className="text-primary" onClick={() => setOpenModalThree(true)}>Add a Teacher</a>
                     <a className="text-primary" onClick={() => setOpenPopupModal(true)}>Update Popup</a>
+                    <a className="text-primary" onClick={() => setOpenModalFour(true)}>Quick Add (Excel)</a>
                     <a className="text-primary" onClick={() => setOpenModalFive(true)}>Archived Batches</a>
                 </div>
 
@@ -636,6 +640,14 @@ export default function Admin() {
                 </form>
             </Popup>
 
+            <ModalFive
+                isOpen={openModalFour}
+                onClose={() => setOpenModalFour(false)}
+            >
+                <h3>Upload Excel to Add Students</h3>
+                <ExcelUpload />
+            </ModalFive>
+            
             <ModalFive
                 isOpen={openModalFive}
                 onClose={() => setOpenModalFive(false)}

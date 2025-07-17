@@ -1147,6 +1147,30 @@ exports.getPaidInstallments = async (req, res) => {
   }
 };
 
+// today's classes
+exports.getTodaysClasses = async (req, res) => {
+  try {
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+
+    const classes = await Timetable.find({ weekday: today }).populate("batchId", "name code");
+
+    const formatted = classes.map(entry => ({
+      weekday: entry.weekday,
+      batch: {
+        id: entry.batchId._id,
+        name: entry.batchId.name,
+        code: entry.batchId.code,
+      },
+      classTimings: entry.classTimings,
+    }));
+
+    res.json({ today, classes: formatted });
+  } catch (err) {
+    console.error("Error fetching today's classes:", err);
+    res.status(500).json({ message: "Failed to fetch today's classes." });
+  }
+};
+
 // Upload excel
 exports.uploadExcelSheet = async (req, res) => {
   try {

@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import ExcelUpload from '../components/ExcelUpload';
 
-export default function FeeTracking() {
+export default function QuickView() {
 
     const [admin, setAdmin] = useState(null);
     const [unpaidInstallments, setUnpaidInstallments] = useState([]);
@@ -16,6 +15,7 @@ export default function FeeTracking() {
     const [selectedUnpaidClass, setSelectedUnpaidClass] = useState(null);
     const [selectedUpcomingClass, setSelectedUpcomingClass] = useState(null);
     const [selectedPaidClass, setSelectedPaidClass] = useState(null);
+    const [todaysClasses, setTodaysClasses] = useState([]);
 
     const [unpaidSortOrder, setUnpaidSortOrder] = useState("asc");
     const [upcomingSortOrder, setUpcomingSortOrder] = useState("asc");
@@ -75,6 +75,7 @@ export default function FeeTracking() {
     useEffect(() => {
         const storedAdmin = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
+        console.log(token);
 
         if (storedAdmin && token && storedAdmin !== "undefined") {
             try {
@@ -144,6 +145,19 @@ export default function FeeTracking() {
                     setTotalPaidAmount(totalPaid);
                 })
                 .catch(err => console.error("Error loading paid installments:", err));
+
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/today/timetable`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Failed to fetch timetable");
+                    return res.json();
+                })
+                .then(data => setTodaysClasses(data.classes))
+                .catch(err => console.error("Error loading timetable", err));
+
+
+
         }
     }, []);
 
@@ -152,7 +166,42 @@ export default function FeeTracking() {
         <Navbar />
 
         <div className="main-content">
-            <h2>Daily Fee Tracking</h2>
+
+            <div className="container mt-5 mb-5">
+                <h2 className=' text-center'>Today's Classes</h2>
+                {todaysClasses.length === 0 ? (
+                    <p className='text-center mt-3'>No classes scheduled today.</p>
+                ) : (
+                    <table className="table table-bordered mt-3">
+                        <thead>
+                            <tr>
+                                <th>Batch</th>
+                                <th>Code</th>
+                                <th>Timings</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {todaysClasses.map((entry, index) => (
+                                <tr key={index}>
+                                    <td>{entry.batch.name}<Link to={`/batch/${entry.batch.id}`} className="ms-1 text-primary"><i className="bi bi-box-arrow-up-right"></i></Link></td>
+                                    <td>{entry.batch.code}</td>
+                                    <td>
+                                        {entry.classTimings.map((slot, i) => (
+                                            <div key={i}>
+                                                {slot.startTime} - {slot.endTime}
+                                            </div>
+                                        ))}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
+
+
+
+            <h2>Fee Tracking</h2>
 
             <div className="container mt-4">
                 <div className="row justify-content-start gx-4 gy-3">
@@ -245,8 +294,8 @@ export default function FeeTracking() {
                                                 </Link>
                                             </div>
                                         );
-                                    })}
-
+                                    })
+                                }
                             </div>
                         </div>
                     </div>
@@ -316,30 +365,30 @@ export default function FeeTracking() {
                                 </div>
 
                                 {upcomingInstallments
-                                .filter(inst => !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass)
-                                .map((inst) => {
-                                    const student = inst.studentId; // directly populated
-                                    const name = student?.name || "Unknown";
-                                    const className = student?.class || "--";
-                                    const amount = inst.amount || 0;
-                                    const num = inst.installmentNo || 0;
+                                    .filter(inst => !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass)
+                                    .map((inst) => {
+                                        const student = inst.studentId; // directly populated
+                                        const name = student?.name || "Unknown";
+                                        const className = student?.class || "--";
+                                        const amount = inst.amount || 0;
+                                        const num = inst.installmentNo || 0;
 
-                                    return (
-                                        <div key={inst._id} className="student-box width-100 border border-2 border-secondary rounded mt-2">
-                                            <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
-                                                <div className="d-flex justify-content-between align-items-start pt-1 ps-2 pe-2">
-                                                    <h5>{name}</h5>
-                                                    <span>₹ {amount}/-</span>
-                                                </div>
-                                                <div className="d-flex justify-content-between align-items-start pb-1 ps-2 pe-2">
-                                                    <span>Class: {className}</span>
-                                                    <span>Installment #: {num}</span>
-                                                    <span className="text-primary">{getDaysLeft(inst.dueDate)}</span>
-                                                </div>
-                                            </Link>
-                                        </div>
-                                    );
-                                })}
+                                        return (
+                                            <div key={inst._id} className="student-box width-100 border border-2 border-secondary rounded mt-2">
+                                                <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
+                                                    <div className="d-flex justify-content-between align-items-start pt-1 ps-2 pe-2">
+                                                        <h5>{name}</h5>
+                                                        <span>₹ {amount}/-</span>
+                                                    </div>
+                                                    <div className="d-flex justify-content-between align-items-start pb-1 ps-2 pe-2">
+                                                        <span>Class: {className}</span>
+                                                        <span>Installment #: {num}</span>
+                                                        <span className="text-primary">{getDaysLeft(inst.dueDate)}</span>
+                                                    </div>
+                                                </Link>
+                                            </div>
+                                        );
+                                    })}
 
                             </div>
                         </div>
@@ -410,30 +459,30 @@ export default function FeeTracking() {
                                 </div>
 
                                 {paidInstallments
-                                .filter(inst => !selectedPaidClass || inst.studentId?.class === selectedPaidClass)
-                                .map((inst) => {
-                                    const student = inst.studentId; // directly populated
-                                    const name = student?.name || "Unknown";
-                                    const className = student?.class || "--";
-                                    const amount = inst.amount || 0;
-                                    const num = inst.installmentNo || 0;
+                                    .filter(inst => !selectedPaidClass || inst.studentId?.class === selectedPaidClass)
+                                    .map((inst) => {
+                                        const student = inst.studentId; // directly populated
+                                        const name = student?.name || "Unknown";
+                                        const className = student?.class || "--";
+                                        const amount = inst.amount || 0;
+                                        const num = inst.installmentNo || 0;
 
-                                    return (
-                                        <div key={inst._id} className="student-box width-100 border border-2 border-secondary rounded mt-2">
-                                            <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
-                                                <div className="d-flex justify-content-between align-items-start pt-1 ps-2 pe-2">
-                                                    <h5>{name}</h5>
-                                                    <span>₹ {amount}/-</span>
-                                                </div>
-                                                <div className="d-flex justify-content-between align-items-start pb-1 ps-2 pe-2">
-                                                    <span>Class: {className}</span>
-                                                    <span>Installment #: {num}</span>
-                                                    <span className="text-success">{getDaysSincePaid(inst.paidDate)}</span>
-                                                </div>
-                                            </Link>
-                                        </div>
-                                    );
-                                })}
+                                        return (
+                                            <div key={inst._id} className="student-box width-100 border border-2 border-secondary rounded mt-2">
+                                                <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
+                                                    <div className="d-flex justify-content-between align-items-start pt-1 ps-2 pe-2">
+                                                        <h5>{name}</h5>
+                                                        <span>₹ {amount}/-</span>
+                                                    </div>
+                                                    <div className="d-flex justify-content-between align-items-start pb-1 ps-2 pe-2">
+                                                        <span>Class: {className}</span>
+                                                        <span>Installment #: {num}</span>
+                                                        <span className="text-success">{getDaysSincePaid(inst.paidDate)}</span>
+                                                    </div>
+                                                </Link>
+                                            </div>
+                                        );
+                                    })}
 
                             </div>
                         </div>
@@ -444,10 +493,7 @@ export default function FeeTracking() {
             </div>
         </div>
 
-
-        <ExcelUpload />
-
-
         <Footer />
+
     </>)
 }

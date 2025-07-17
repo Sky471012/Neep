@@ -19,20 +19,26 @@ const ExcelUpload = () => {
         try {
             const token = localStorage.getItem("authToken");
 
-            const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/admin/upload`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const res = await axios.post(
+                `${import.meta.env.VITE_BACKEND_URL}/api/admin/upload`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
 
-            setMessage("Upload successful!");
-            console.log(res.data);
+            setMessage(res.data.message); // success case
         } catch (err) {
-            setMessage("Upload failed.");
+            const errorMessage =
+                err.response?.data?.message || "Upload failed.";
+            setMessage(errorMessage);
             console.error(err.response?.data || err.message);
         }
     };
+
 
     return (
         <div className="container mt-5 mb-5">
@@ -48,7 +54,7 @@ const ExcelUpload = () => {
             >
                 Download Sample Template
             </a>
-            {message && <p className="mt-2">{message}</p>}
+            {message && <p className="mt-2 text-primary">{message}</p>}
         </div>
     );
 };

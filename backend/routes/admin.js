@@ -56,6 +56,9 @@ router.get('/fee/installments/unpaid', adminController.getUnpaidInstallments);
 router.get('/fee/installments/upcoming', adminController.getUpcomingInstallments);
 router.get('/fee/installments/paid', adminController.getPaidInstallments);
 
+// Today's timetable
+router.get('/today/timetable', adminController.getTodaysClasses);
+
 // Upload excel
 router.post('/upload', upload.single("file"), adminController.uploadExcelSheet);
 

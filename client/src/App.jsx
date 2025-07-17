@@ -11,7 +11,7 @@ import DownloadApp from './pages/DownloadApp';
 import Student from './pages/Student';
 import Teacher from './pages/Teacher';
 import Admin from './pages/Admin';
-import FeeTracking from './pages/FeeTracking';
+import QuickView from './pages/QuickView';
 import BatchControls from './pages/BatchControls';
 import TeacherControls from './pages/TeacherControls';
 import StudentControls from './pages/StudentControls';
@@ -44,7 +44,7 @@ function App() {
             <Route exact path='/student' element={<Student/>} />
             <Route exact path='/teacher' element={<Teacher/>} />
             <Route exact path='/admin' element={<Admin/>} />
-            <Route exact path='/FeeTracking' element={<FeeTracking/>} />
+            <Route exact path='/quickView' element={<QuickView/>} />
             <Route path="/batch/:batchId" element={<BatchControls />} />
             <Route path="/teacher/:teacherId" element={<TeacherControls />} />
             <Route path="/student/:studentId" element={<StudentControls />} />
