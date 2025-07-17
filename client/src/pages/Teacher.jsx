@@ -34,6 +34,7 @@ export default function Teacher() {
     // Changed: Single student attendance tracking instead of multiple
     const [activeStudentAttendance, setActiveStudentAttendance] = useState(null);
     const [batchSearch, setBatchSearch] = useState("");
+    const [todaysClasses, setTodaysClasses] = useState([]);
 
 
     const allMonths = [
@@ -80,7 +81,20 @@ export default function Teacher() {
                 })
                 .then(setBatchesRecords)
                 .catch((err) => console.error("Batches fetch error:", err));
+
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/today/timetable`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((res) => {
+                    if (!res.ok) throw new Error("Failed to fetch schedule");
+                    return res.json();
+                })
+                .then((data) => setTodaysClasses(Array.isArray(data.classes) ? data.classes : []))
+                .catch((err) => console.error("Batches fetch error:", err));
+
         }
+
+
     }, []); // Only on initial mount
 
     // Fetch students and tests AFTER batches are loaded
@@ -328,6 +342,42 @@ export default function Teacher() {
                         <span>Phone : <strong>{teacher.phone}</strong></span>
                         <br />
                         <span>Role : <strong>{teacher.role}</strong></span>
+                    </div>
+                </div>
+
+                <div className="batches-container">
+                    <div className="container">
+                        <h2>Today's Schedule</h2>
+
+                        {todaysClasses.length === 0 ? (
+                            <p>No classes scheduled today.</p>
+                        ) : (
+                            <table className="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Batch</th>
+                                        <th>Code</th>
+                                        <th>Timings</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {todaysClasses.map((entry, index) => (
+                                        <tr key={index}>
+                                            <td>{entry.batch.name}</td>
+                                            <td>{entry.batch.code}</td>
+                                            <td>
+                                                {entry.classTimings.map((slot, i) => (
+                                                    <div key={i}>
+                                                        {slot.startTime} - {slot.endTime}
+                                                    </div>
+                                                ))}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+
                     </div>
                 </div>
 

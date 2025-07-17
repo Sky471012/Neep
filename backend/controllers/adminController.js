@@ -10,6 +10,17 @@ const Teacher = require("../models/Admins_teachers");
 const BatchTeacher = require("../models/Batch_teachers");
 const XLSX = require("xlsx");
 
+function convertTo24Hour(time12h) {
+  const [time, modifier] = time12h.split(" ");
+  let [hours, minutes] = time.split(":").map(Number);
+
+  if (modifier === "PM" && hours !== 12) hours += 12;
+  if (modifier === "AM" && hours === 12) hours = 0;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
+}
 
 // Batch Management
 exports.getBatches = async (req, res) => {
@@ -67,7 +78,23 @@ exports.getBatchTimetable = async (req, res) => {
 
     const timetable = await Timetable.find({ batchId });
 
-    res.json({ timetable });
+    const sortedTimetable = timetable.map((entry) => {
+      const sortedClassTimings = [...entry.classTimings].sort((a, b) => {
+        const parseTime = (timeStr) =>
+          new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);
+        return parseTime(a.startTime) - parseTime(b.startTime);
+      });
+
+      return {
+        _id: entry._id,
+        weekday: entry.weekday,
+        batchId: entry.batchId,
+        classTimings: sortedClassTimings,
+        __v: entry.__v,
+      };
+    });
+
+    res.json({ timetable: sortedTimetable });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -396,7 +423,6 @@ exports.toggleArchiveStatus = async (req, res) => {
   }
 };
 
-
 // Student Management
 exports.getStudents = async (req, res) => {
   try {
@@ -430,7 +456,7 @@ exports.getStudentBatches = async (req, res) => {
     // Step 2: Fetch only unarchived batch details
     const batches = await Batch.find({
       _id: { $in: batchIds },
-      archive: false
+      archive: false,
     }).select("name");
 
     res.json({ batches });
@@ -1001,7 +1027,7 @@ exports.getTeacherBatches = async (req, res) => {
     // Step 2: Fetch batch details
     const batches = await Batch.find({
       _id: { $in: batchIds },
-      archive: false
+      archive: false,
     }).select("name");
 
     res.json({ batches });
@@ -1152,17 +1178,29 @@ exports.getTodaysClasses = async (req, res) => {
   try {
     const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
-    const classes = await Timetable.find({ weekday: today }).populate("batchId", "name code");
+    const classes = await Timetable.find({ weekday: today }).populate(
+      "batchId",
+      "name code"
+    );
 
-    const formatted = classes.map(entry => ({
-      weekday: entry.weekday,
-      batch: {
-        id: entry.batchId._id,
-        name: entry.batchId.name,
-        code: entry.batchId.code,
-      },
-      classTimings: entry.classTimings,
-    }));
+    const formatted = classes.map((cls) => {
+      // Sort classTimings by startTime (morning to evening)
+      const sortedTimings = [...cls.classTimings].sort((a, b) => {
+        const parseTime = (timeStr) =>
+          new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);
+        return parseTime(a.startTime) - parseTime(b.startTime);
+      });
+
+      return {
+        weekday: cls.weekday,
+        batch: {
+          id: cls.batchId._id,
+          name: cls.batchId.name,
+          code: cls.batchId.code,
+        },
+        classTimings: sortedTimings,
+      };
+    });
 
     res.json({ today, classes: formatted });
   } catch (err) {
