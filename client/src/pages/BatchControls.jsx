@@ -44,6 +44,8 @@ export default function BatchControls() {
     class: "Kids",
     dateOfJoining: format(new Date(), "dd-MM-yyyy"),
   });
+  const [studentSearch, setStudentSearch] = useState("");
+
 
   const academicYearStart = new Date().getMonth() < 3 ? new Date().getFullYear() - 1 : new Date().getFullYear();
 
@@ -471,20 +473,49 @@ export default function BatchControls() {
 
         {/* Students List Section */}
         <div className="mt-4">
-          <h2>All Students</h2>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h2>All Students</h2>
+            <input
+              type="search"
+              placeholder="Search students with name and contact number..."
+              className="form-control w-50"
+              onChange={(e) => setStudentSearch(e.target.value)}
+            />
+          </div>
+
           <table className="table table-borderless align-middle">
             <tbody>
-              {students.map((s) => (
-                <tr key={s._id}>
-                  <td style={{ width: "40%" }}>{s.name} ({s.phone})<Link className="ms-1 text-primary" to={`/student/${s._id}`}><i className="bi bi-box-arrow-up-right"></i></Link></td>
-                  <td style={{ width: "30%" }}>
-                    <button className="btn btn-outline-primary btn-sm" onClick={() => showStudentAttendance(s)}>Show Attendance</button>
-                  </td>
-                  <td style={{ width: "30%" }}>
-                    <button className="btn btn-outline-danger btn-sm" onClick={() => removeStudent(batchId, s._id)}>Remove</button>
-                  </td>
-                </tr>
-              ))}
+              {students
+                .filter((s) =>
+                  s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                  s.phone.includes(studentSearch)
+                )
+                .map((s) => (
+                  <tr key={s._id}>
+                    <td style={{ width: "40%" }}>
+                      {s.name} ({s.phone})
+                      <Link className="ms-1 text-primary" to={`/student/${s._id}`}>
+                        <i className="bi bi-box-arrow-up-right"></i>
+                      </Link>
+                    </td>
+                    <td style={{ width: "30%" }}>
+                      <button
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => showStudentAttendance(s)}
+                      >
+                        Show Attendance
+                      </button>
+                    </td>
+                    <td style={{ width: "30%" }}>
+                      <button
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => removeStudent(batchId, s._id)}
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

@@ -12,6 +12,7 @@ export default function TeacherControls() {
 
     const [teacher, setTeacher] = useState({});
     const [batches, setBatches] = useState([]);
+    const [batchSearch, setBatchSearch] = useState("");
 
 
     useEffect(() => {
@@ -131,20 +132,43 @@ export default function TeacherControls() {
 
 
                 <div className="mt-4">
-                    <h2>All Batches</h2>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h2>All Batches</h2>
+                        <input
+                            type="search"
+                            placeholder="Search batches with name..."
+                            className="form-control w-50"
+                            onChange={(e) => setBatchSearch(e.target.value)}
+                        />
+                    </div>
+
                     <table className="table table-borderless align-middle">
                         <tbody>
-                            {batches.map((b) => (
-                                <tr key={b._id}>
-                                    <td style={{ width: "40%" }}>{b.name}</td>
-                                    <td style={{ width: "30%" }}>
-                                        <Link to={`/batch/${b._id}`} className="btn btn-outline-primary btn-sm">Open Batch</Link>
-                                    </td>
-                                    <td style={{ width: "30%" }}>
-                                        <button className="btn btn-outline-danger btn-sm" onClick={() => removeTeacher(b._id, teacherId)}>Remove</button>
-                                    </td>
-                                </tr>
-                            ))}
+                            {batches
+                                .filter((b) =>
+                                    b.name.toLowerCase().includes(batchSearch.toLowerCase())
+                                )
+                                .map((b) => (
+                                    <tr key={b._id}>
+                                        <td style={{ width: "40%" }}>{b.name}</td>
+                                        <td style={{ width: "30%" }}>
+                                            <Link
+                                                to={`/batch/${b._id}`}
+                                                className="btn btn-outline-primary btn-sm"
+                                            >
+                                                Open Batch
+                                            </Link>
+                                        </td>
+                                        <td style={{ width: "30%" }}>
+                                            <button
+                                                className="btn btn-outline-danger btn-sm"
+                                                onClick={() => removeTeacher(b._id, teacherId)}
+                                            >
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
                         </tbody>
                     </table>
                 </div>

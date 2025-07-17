@@ -38,6 +38,9 @@ export default function Admin() {
         teacherEmail: "",
         teacherPhone: "",
     });
+    const [batchSearchQuery, setBatchSearchQuery] = useState("");
+    const [studentSearchQuery, setStudentSearchQuery] = useState("");
+    const [teacherSearchQuery, setTeacherSearchQuery] = useState("");
 
     useEffect(() => {
         const storedAdmin = localStorage.getItem("user");
@@ -62,7 +65,7 @@ export default function Admin() {
                 })
                 .then(setBatchesRecords)
                 .catch((err) => console.error("Batches fetch error:", err));
-           
+
             // Fetch archived batches
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/archivedBatches`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -320,7 +323,7 @@ export default function Admin() {
             <Navbar />
 
             <div className="main-content">
-                <div className="adminbar d-flex gap-5 m-5">
+                <div className="adminbar d-flex justify-content-between gap-4 m-5">
                     <Link to="/FeeTracking" className="text-primary">Fee Tracking</Link>
                     <a href="#batches" className="text-primary">All Batches</a>
                     <a href="#students" className="text-primary">All Students</a>
@@ -333,11 +336,22 @@ export default function Admin() {
                 </div>
 
                 <div id="batches" className="batches-container">
-                    <h1>Batches({batchesRecords.length})</h1>
+                    <div className="container d-flex justify-content-between align-items-center mb-3">
+                        <h1>Batches({batchesRecords.length})</h1>
+                        <input
+                            type="search"
+                            placeholder="Search batches with name and code..."
+                            className="form-control w-50"
+                            onChange={(e) => setBatchSearchQuery(e.target.value)}
+                        />
+                    </div>
                     <div className="container">
                         <div className="row">
                             {batchesRecords.length > 0 ? (
                                 batchesRecords
+                                    .filter(batch => batch.name.toLowerCase().includes(batchSearchQuery.toLowerCase()) ||
+                                        batch.code.toLowerCase().includes(batchSearchQuery)
+                                    )
                                     .map((batch, index) => (
                                         <div className="col-12 col-sm-6 col-lg-4" key={index}>
                                             <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
@@ -357,20 +371,32 @@ export default function Admin() {
 
 
                 <div id="students" className="batches-container">
-                    <h1>Students({studentsRecords.length})</h1>
+                    <div className="container d-flex justify-content-between align-items-center mb-3">
+                        <h1>Students({studentsRecords.length})</h1>
+                        <input
+                            type="search"
+                            placeholder="Search students with name and contact number..."
+                            className="form-control w-50"
+                            onChange={(e) => setStudentSearchQuery(e.target.value)}
+                        />
+                    </div>
                     <div className="container">
                         <div className="row">
                             {studentsRecords.length > 0 ? (
-                                studentsRecords.map((student, index) => (
-                                    <div className="col-12 col-sm-6 col-lg-4" key={index}>
-                                        <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
-                                            <div className="card batch-card mb-3">
-                                                <h5 className="card-title">{student.name}</h5>
-                                                <span>Phone: {student.phone}</span>
-                                            </div>
-                                        </Link>
-                                    </div>
-                                ))
+                                studentsRecords
+                                    .filter(student => student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
+                                        student.phone.includes(studentSearchQuery)
+                                    )
+                                    .map((student, index) => (
+                                        <div className="col-12 col-sm-6 col-lg-4" key={index}>
+                                            <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
+                                                <div className="card batch-card mb-3">
+                                                    <h5 className="card-title">{student.name}</h5>
+                                                    <span>Phone: {student.phone}</span>
+                                                </div>
+                                            </Link>
+                                        </div>
+                                    ))
                             ) : (
                                 <p>No student found.</p>
                             )}
@@ -380,20 +406,32 @@ export default function Admin() {
 
 
                 <div id="teachers" className="batches-container">
-                    <h1>Teachers({teachersRecords.length})</h1>
+                    <div className="container d-flex justify-content-between align-items-center mb-3">
+                        <h1>Teachers({teachersRecords.length})</h1>
+                        <input
+                            type="search"
+                            placeholder="Search teachers with name and contact number..."
+                            className="form-control w-50"
+                            onChange={(e) => setTeacherSearchQuery(e.target.value)}
+                        />
+                    </div>
                     <div className="container">
                         <div className="row">
                             {teachersRecords.length > 0 ? (
-                                teachersRecords.map((teacher, index) => (
-                                    <div className="col-12 col-sm-6 col-lg-4" key={index}>
-                                        <Link to={`/teacher/${teacher._id}`} className="text-decoration-none text-dark">
-                                            <div className="card batch-card mb-3">
-                                                <h5 className="card-title">{teacher.name}</h5>
-                                                <span>Phone: {teacher.phone}</span>
-                                            </div>
-                                        </Link>
-                                    </div>
-                                ))
+                                teachersRecords
+                                    .filter(teacher => teacher.name.toLowerCase().includes(teacherSearchQuery.toLowerCase()) ||
+                                        teacher.phone.includes(teacherSearchQuery)
+                                    )
+                                    .map((teacher, index) => (
+                                        <div className="col-12 col-sm-6 col-lg-4" key={index}>
+                                            <Link to={`/teacher/${teacher._id}`} className="text-decoration-none text-dark">
+                                                <div className="card batch-card mb-3">
+                                                    <h5 className="card-title">{teacher.name}</h5>
+                                                    <span>Phone: {teacher.phone}</span>
+                                                </div>
+                                            </Link>
+                                        </div>
+                                    ))
                             ) : (
                                 <p>No teacher found.</p>
                             )}
@@ -608,12 +646,12 @@ export default function Admin() {
                     {archivedBatchesRecords.length > 0 ? (
                         archivedBatchesRecords
                             .map((batch, index) => (
-                                    <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
-                                        <div className="card batch-card mb-3">
-                                            <h5 className="card-title">{batch.name}</h5>
-                                            <span>Code: {batch.code}</span>
-                                        </div>
-                                    </Link>
+                                <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
+                                    <div className="card batch-card mb-3">
+                                        <h5 className="card-title">{batch.name}</h5>
+                                        <span>Code: {batch.code}</span>
+                                    </div>
+                                </Link>
                             ))
                     ) : (
                         <p>No archived batches found.</p>
