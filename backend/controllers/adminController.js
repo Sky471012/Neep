@@ -195,6 +195,7 @@ exports.createBatch = async (req, res) => {
     const name = req.body.name?.trim();
     const startDate = req.body.startDate?.trim();
     let code = req.body.code?.trim();
+    const batchClass = req.body.batchClass?.trim();
 
     if (!name || !startDate) {
       return res
@@ -202,12 +203,12 @@ exports.createBatch = async (req, res) => {
         .json({ message: "Name and startDate are required." });
     }
 
-    const existingBatch = await Batch.findOne({ name });
+    const existingBatch = await Batch.findOne({ name, class: batchClass });
 
     if (existingBatch) {
       return res
         .status(400)
-        .json({ message: "Batch with same name already exists." });
+        .json({ message: "Batch with same name and class already exists." });
     }
 
     // Generate code if not provided
@@ -218,6 +219,7 @@ exports.createBatch = async (req, res) => {
     const batch = await Batch.create({
       name,
       code,
+      class: batchClass,
       startDate,
     });
 

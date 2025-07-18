@@ -519,7 +519,8 @@ export default function BatchControls() {
             </div>
           </div>
           <p className="mt-3">
-            Batch code: <strong>{batch.code}<br /></strong>
+            Class: <strong>{batch.class}<br /></strong>
+            Code: <strong>{batch.code}<br /></strong>
             Started on: <strong>{batch.startDate}<br /></strong>
             Teacher:
             <strong>

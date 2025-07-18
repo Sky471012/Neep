@@ -133,7 +133,7 @@ export default function Admin() {
 
     }, [batchesRecords]);
 
-    const createBatch = async (batchName, batchStartDate) => {
+    const createBatch = async (batchName, batchClass, batchStartDate) => {
         if (!batchName.trim()) {
             alert("Please enter a batch name.");
             return;
@@ -149,7 +149,7 @@ export default function Admin() {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
-                body: JSON.stringify({ name: batchName, code, startDate: formattedDate }),
+                body: JSON.stringify({ name: batchName, code, batchClass, startDate: formattedDate }),
             });
 
             const data = await res.json();
@@ -292,7 +292,7 @@ export default function Admin() {
 
     const handleBatchFormSubmit = (e) => {
         e.preventDefault();
-        createBatch(credentials.batch, startDate);
+        createBatch(credentials.batch, credentials.batchClass, startDate);
     };
 
     const handleStudentFormSubmit = (e) => {
@@ -344,7 +344,7 @@ export default function Admin() {
                         <h1>Batches({batchesRecords.length})</h1>
                         <input
                             type="search"
-                            placeholder="Search batches with name and code..."
+                            placeholder="Search batches with name and class..."
                             className="form-control w-50"
                             onChange={(e) => setBatchSearchQuery(e.target.value)}
                         />
@@ -354,14 +354,14 @@ export default function Admin() {
                             {batchesRecords.length > 0 ? (
                                 batchesRecords
                                     .filter(batch => batch.name.toLowerCase().includes(batchSearchQuery.toLowerCase()) ||
-                                        batch.code.toLowerCase().includes(batchSearchQuery)
+                                        batch.class.toLowerCase().includes(batchSearchQuery)
                                     )
                                     .map((batch, index) => (
                                         <div className="col-12 col-sm-6 col-lg-4" key={index}>
                                             <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
                                                 <div className="card batch-card mb-3">
                                                     <h5 className="card-title">{batch.name}</h5>
-                                                    <span>Code: {batch.code}</span>
+                                                    <span>Class: {batch.class}</span>
                                                 </div>
                                             </Link>
                                         </div>
@@ -465,6 +465,22 @@ export default function Admin() {
                             required
                             placeholder='Write Batch Name...'
                         />
+                    </div>
+
+                    <div className="input-group flex gap-1 mb-2">
+                        <label className="class">Class:</label>
+                        <select
+                            name="batchClass"
+                            value={credentials.batchClass}
+                            onChange={handleInputChange}
+                            required
+                            placeholder='Select Class...'
+                        >
+                            <option value="">Select Class</option>
+                            {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
+                                <option key={cls} value={cls}>{cls}</option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="input-group flex gap-1">

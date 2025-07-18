@@ -10,6 +10,11 @@ const batchSchema = new Schema({
     type: String,
     required: true
   },
+  class: {
+    type: String,
+    enum: ["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"],
+    required: true,
+  },
   startDate: {
     type: String,
     required: true
