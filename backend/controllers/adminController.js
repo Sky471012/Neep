@@ -1109,7 +1109,7 @@ exports.createTeacher = async (req, res) => {
       name: name.trim(),
       email: trimmedEmail,
       phone: phone.trim(),
-      role: "teacher",
+      role: "Teacher",
     });
 
     res.json(teacher);
@@ -1153,6 +1153,68 @@ exports.removeTeacherFromBatch = async (req, res) => {
     console.error("Remove teacher error:", err);
     res.status(500).json({ error: err.message });
   }
+};
+
+exports.editTeacher = async (req, res) => {
+    try {
+        const { teacherId } = req.params;
+        const { name, email, phone } = req.body;
+
+        // Validate input
+        if (!name || !email || !phone) {
+            return res.status(400).json({ 
+                error: 'Name, email, and phone are required' 
+            });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ 
+                error: 'Please provide a valid email address' 
+            });
+        }
+
+        // Check if email already exists for another teacher
+        const existingTeacher = await Teacher.findOne({ 
+            email: email,
+            _id: { $ne: teacherId }
+        });
+
+        if (existingTeacher) {
+            return res.status(400).json({ 
+                error: 'Email already exists for another teacher' 
+            });
+        }
+
+        // Update teacher (only editable fields)
+        const updatedTeacher = await Teacher.findByIdAndUpdate(
+            teacherId,
+            {
+                name: name.trim(),
+                email: email.trim().toLowerCase(),
+                phone: phone.trim()
+            },
+            { 
+                new: true, // Return updated document
+                runValidators: true // Run schema validators
+            }
+        );
+
+        if (!updatedTeacher) {
+            return res.status(404).json({ 
+                error: 'Teacher not found' 
+            });
+        }
+
+        res.json(updatedTeacher);
+
+    } catch (error) {
+        console.error('Error updating teacher:', error);
+        res.status(500).json({ 
+            error: 'Internal server error' 
+        });
+    }
 };
 
 // Fee tracking

@@ -101,11 +101,11 @@ export default function LoginAdmin() {
             } else {
                 console.log("Logined");
 
-                if (json.user.role === "teacher") {
+                if (json.user.role === "Teacher") {
                     localStorage.setItem("role", "teacher");
                     localStorage.setItem("user", JSON.stringify(json.user));
                     navigate("/teacher"); // ✅ navigate to teacher dashboard
-                } else if (json.user.role === "admin") {
+                } else if (json.user.role === "Admin") {
                     localStorage.setItem("role", "admin");
                     localStorage.setItem("user", JSON.stringify(json.user));
                     navigate("/admin"); // ✅ optionally change route to /admin

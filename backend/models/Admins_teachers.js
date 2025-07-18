@@ -17,7 +17,7 @@ const adminTeacherSchema = new Schema({
   role: {
     type: String,
     required: true 
-  }, // "admin" or "teacher"
+  }, // "Admin" or "Teacher"
 });
 
 module.exports = model("AdminTeacher", adminTeacherSchema);

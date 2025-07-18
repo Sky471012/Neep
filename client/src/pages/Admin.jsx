@@ -226,7 +226,6 @@ export default function Admin() {
                     name: teacherName,
                     email: teacherEmail,
                     phone: teacherPhone,
-                    role: "teacher"
                 }),
             });
 

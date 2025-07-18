@@ -14,8 +14,8 @@ router.get('/batchStudents/:batchId', adminController.getBatchStudents);
 router.get('/batchTimetable/:batchId', adminController.getBatchTimetable);
 router.get('/findTeacher/:batchId', adminController.getBatchTeacher);
 router.get('/attendance/:studentId', adminController.getStudentsAttendance);
-router.post('/attendance/mark', adminController.markAttendance);
 router.get('/tests/:studentId', adminController.getStudentstests);
+router.post('/attendance/mark', adminController.markAttendance);
 router.post('/test/addEdit', adminController.addEditTest);
 router.post('/batchCreate', adminController.createBatch);
 router.post('/updateTimetable/:batchId', adminController.updateTimetable);
@@ -49,8 +49,10 @@ router.post('/addBatches', adminController.addStudentToBatches);
 router.get('/teachers', adminController.getTeachers);
 router.get('/getTeacherDetails/:teacherId', adminController.getTeacher);
 router.get('/teacherBatches/:teacherId', adminController.getTeacherBatches);
+router.post('/teacherCreate', adminController.createTeacher);
 router.delete('/teacherDelete/:teacherId', adminController.deleteTeacher);
 router.delete('/removeTeacher', adminController.removeTeacherFromBatch);
+router.put('/editTeacherProfile/:teacherId', adminController.editTeacher);
 
 
 // Fee tracking
