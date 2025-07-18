@@ -38,6 +38,17 @@ export default function StudentControls() {
     const [editedPaidDate, setEditedPaidDate] = useState(null);
     const [editedMethod, setEditedMethod] = useState("Cash");
     const [batchSearch, setBatchSearch] = useState("");
+    const [isEditing, setIsEditing] = useState(false);
+    const [editForm, setEditForm] = useState({
+        name: '',
+        phone: '',
+        dob: '',
+        address: '',
+        class: '',
+        dateOfJoining: ''
+    });
+
+    const classOptions = ["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"];
 
     const formatDateToDDMMYYYY = (dateString) => {
         if (!dateString) return "--";
@@ -90,6 +101,19 @@ export default function StudentControls() {
 
         fetchData();
     }, [studentId]);
+
+    useEffect(() => {
+        if (student) {
+            setEditForm({
+                name: student.name || '',
+                phone: student.phone || '',
+                dob: student.dob || '',
+                address: student.address || '',
+                class: student.class || '',
+                dateOfJoining: student.dateOfJoining || ''
+            });
+        }
+    }, [student]);
 
 
     function generatePDFReceipt(student, record) {
@@ -605,12 +629,81 @@ export default function StudentControls() {
     };
 
     // Add this function to handle canceling edit
-    const handleCancelEdit = () => {
+    const handleCancelEditInstallment = () => {
         setEditingInstallmentData(null);
         setEditedAmount(0);
         setEditedDueDate(null);
         setEditedPaidDate(null);
         setEditedMethod("Cash");
+    };
+
+    const handleEditClick = () => {
+        setIsEditing(true);
+    };
+
+    const handleCancelEditStudent = () => {
+        setIsEditing(false);
+        // Reset form to original values
+        setEditForm({
+            name: student.name || '',
+            phone: student.phone || '',
+            dob: student.dob || '',
+            address: student.address || '',
+            class: student.class || '',
+            dateOfJoining: student.dateOfJoining || ''
+        });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const validateForm = () => {
+        if (!editForm.name || !editForm.phone || !editForm.dob || !editForm.address || !editForm.class || !editForm.dateOfJoining) {
+            alert('All fields are required');
+            return false;
+        }
+
+        // Validate DOB format (DD-MM-YYYY)
+        const dobRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
+        if (!dobRegex.test(editForm.dob)) {
+            alert('Date of birth must be in DD-MM-YYYY format');
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleSaveEdit = async () => {
+        if (!validateForm()) return;
+
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editStudntProfile/${studentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(editForm)
+            });
+
+            if (response.ok) {
+                const updatedStudent = await response.json();
+                setStudent(updatedStudent);
+                setIsEditing(false);
+                alert('Profile updated successfully!');
+            } else {
+                const errorData = await response.json();
+                alert(errorData.error || 'Failed to update profile');
+            }
+        } catch (error) {
+            console.error('Error updating student:', error);
+            alert('Error updating profile');
+        }
     };
 
     return (<>
@@ -642,6 +735,15 @@ export default function StudentControls() {
                                     </button>
                                 </li>
                                 <li>
+                                    <button
+                                        className="dropdown-item"
+                                        onClick={handleEditClick}
+                                        disabled={isEditing}
+                                    >
+                                        Edit Profile
+                                    </button>
+                                </li>
+                                <li>
                                     {fee?._id ? (
                                         <button
                                             className="dropdown-item text-warning"
@@ -670,13 +772,134 @@ export default function StudentControls() {
                         </div>
                     </div>
 
-                    <p className="mt-3">Contact Number:<strong> {student.phone}<br /></strong>
-                        DOB:<strong> {student.dob}<br /></strong>
-                        Class:<strong> {student.class}<br /></strong>
-                        Address:<strong> {student.address}<br /></strong>
-                        Date of Joining:<strong> {student.dateOfJoining}<br /></strong>
-                        Student ID:<strong> {student._id}<br /></strong>
-                        Number of batches:<strong> {batches.length}</strong></p>
+                    {isEditing ? (
+                        // Edit Mode
+                        <div className="mt-3">
+                            <div className="row">
+                                <div className="col-md-6 mb-3">
+                                    <label className="form-label">Name:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="name"
+                                        value={editForm.name}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                <div className="col-md-6 mb-3">
+                                    <label className="form-label">Contact Number:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="phone"
+                                        value={editForm.phone}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="row">
+                                <div className="col-md-6 mb-3">
+                                    <label className="form-label">Date of Birth:</label>
+                                    <DatePicker
+                                        selected={editForm.dob ? new Date(editForm.dob.split('-').reverse().join('-')) : null}
+                                        onChange={(date) => {
+                                            const formattedDate = date ?
+                                                `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`
+                                                : '';
+                                            setEditForm(prev => ({ ...prev, dob: formattedDate }));
+                                        }}
+                                        dateFormat="dd-MM-yyyy"
+                                        className="form-control"
+                                        placeholderText="Select date of birth"
+                                        showYearDropdown
+                                        yearDropdownItemNumber={100}
+                                        scrollableYearDropdown
+                                    />
+                                </div>
+
+                                <div className="col-md-6 mb-3">
+                                    <label className="form-label">Class:</label>
+                                    <select
+                                        className="form-control"
+                                        name="class"
+                                        value={editForm.class}
+                                        onChange={handleInputChange}
+                                    >
+                                        <option value="">Select Class</option>
+                                        {classOptions.map(option => (
+                                            <option key={option} value={option}>{option}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="mb-3">
+                                <label className="form-label">Address:</label>
+                                <input
+                                    className="form-control"
+                                    name="address"
+                                    value={editForm.address}
+                                    onChange={handleInputChange}
+                                    rows="3"
+                                />
+                            </div>
+
+                            <div className="mb-3">
+                                <label className="form-label">Date of Joining:</label>
+                                <DatePicker
+                                    selected={editForm.dateOfJoining ? new Date(editForm.dateOfJoining) : null}
+                                    onChange={(date) => {
+                                        const formattedDate = date ? date.toISOString().split('T')[0] : '';
+                                        setEditForm(prev => ({ ...prev, dateOfJoining: formattedDate }));
+                                    }}
+                                    dateFormat="dd-MM-yyyy"
+                                    className="form-control"
+                                    placeholderText="Select date of joining"
+                                    showYearDropdown
+                                    yearDropdownItemNumber={10}
+                                    scrollableYearDropdown
+                                />
+                            </div>
+
+                            {/* Non-editable fields */}
+                            <div className="mb-3">
+                                <label className="form-label">Number of batches:</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={batches.length}
+                                    disabled
+                                />
+                            </div>
+
+                            <div className="d-flex gap-2">
+                                <button
+                                    className="btn btn-success"
+                                    onClick={handleSaveEdit}
+                                >
+                                    Save Changes
+                                </button>
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={handleCancelEditStudent}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        // View Mode - unchanged
+                        <p className="mt-3">
+                            Contact Number:<strong> {student.phone}<br /></strong>
+                            DOB:<strong> {student.dob}<br /></strong>
+                            Class:<strong> {student.class}<br /></strong>
+                            Address:<strong> {student.address}<br /></strong>
+                            Date of Joining:<strong> {student.dateOfJoining}<br /></strong>
+                            Number of batches:<strong> {batches.length}</strong>
+                        </p>
+                    )}
                 </div>
 
 
@@ -910,7 +1133,7 @@ export default function StudentControls() {
                                                             </button>
                                                             <button
                                                                 className="btn btn-outline-secondary btn-sm"
-                                                                onClick={handleCancelEdit}
+                                                                onClick={handleCancelEditInstallment}
                                                             >
                                                                 Cancel
                                                             </button>

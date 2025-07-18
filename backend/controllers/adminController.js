@@ -1042,6 +1042,113 @@ exports.addStudentToBatches = async (req, res) => {
   }
 };
 
+exports.editStudent = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const {
+      name,
+      phone,
+      dob,
+      address,
+      class: studentClass,
+      dateOfJoining,
+    } = req.body;
+
+    // Validate required fields
+    if (
+      !name ||
+      !phone ||
+      !dob ||
+      !address ||
+      !studentClass ||
+      !dateOfJoining
+    ) {
+      return res.status(400).json({
+        error: "All fields are required",
+      });
+    }
+
+    // Validate DOB format (DD-MM-YYYY)
+    const dobRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
+    if (!dobRegex.test(dob)) {
+      return res.status(400).json({
+        error: "Date of birth must be in DD-MM-YYYY format",
+      });
+    }
+
+    // Validate class enum
+    const validClasses = [
+      "Kids",
+      "English Spoken",
+      "9",
+      "10",
+      "11",
+      "12",
+      "Entrance Exams",
+      "Graduation",
+    ];
+    if (!validClasses.includes(studentClass)) {
+      return res.status(400).json({
+        error: "Invalid class selection",
+      });
+    }
+
+    // Check if phone already exists for another student
+    const existingStudent = await Student.findOne({
+      phone: phone,
+      name: name,
+      _id: { $ne: studentId },
+    });
+
+    if (existingStudent) {
+      return res.status(400).json({
+        error: "Student with same name and phone number already exists",
+      });
+    }
+
+    // Update student
+    const updatedStudent = await Student.findByIdAndUpdate(
+      studentId,
+      {
+        name: name.trim(),
+        phone: phone.trim(),
+        dob: dob.trim(),
+        address: address.trim(),
+        class: studentClass,
+        dateOfJoining: dateOfJoining.trim(),
+      },
+      {
+        new: true, // Return updated document
+        runValidators: true, // Run schema validators
+      }
+    );
+
+    if (!updatedStudent) {
+      return res.status(404).json({
+        error: "Student not found",
+      });
+    }
+
+    res.json(updatedStudent);
+  } catch (error) {
+    console.error("Error updating student:", error);
+
+    // Handle validation errors
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res.status(400).json({
+        error: validationErrors.join(", "),
+      });
+    }
+
+    res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+
 // Teacher Management
 exports.getTeachers = async (req, res) => {
   try {
@@ -1156,65 +1263,64 @@ exports.removeTeacherFromBatch = async (req, res) => {
 };
 
 exports.editTeacher = async (req, res) => {
-    try {
-        const { teacherId } = req.params;
-        const { name, email, phone } = req.body;
+  try {
+    const { teacherId } = req.params;
+    const { name, email, phone } = req.body;
 
-        // Validate input
-        if (!name || !email || !phone) {
-            return res.status(400).json({ 
-                error: 'Name, email, and phone are required' 
-            });
-        }
-
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({ 
-                error: 'Please provide a valid email address' 
-            });
-        }
-
-        // Check if email already exists for another teacher
-        const existingTeacher = await Teacher.findOne({ 
-            email: email,
-            _id: { $ne: teacherId }
-        });
-
-        if (existingTeacher) {
-            return res.status(400).json({ 
-                error: 'Email already exists for another teacher' 
-            });
-        }
-
-        // Update teacher (only editable fields)
-        const updatedTeacher = await Teacher.findByIdAndUpdate(
-            teacherId,
-            {
-                name: name.trim(),
-                email: email.trim().toLowerCase(),
-                phone: phone.trim()
-            },
-            { 
-                new: true, // Return updated document
-                runValidators: true // Run schema validators
-            }
-        );
-
-        if (!updatedTeacher) {
-            return res.status(404).json({ 
-                error: 'Teacher not found' 
-            });
-        }
-
-        res.json(updatedTeacher);
-
-    } catch (error) {
-        console.error('Error updating teacher:', error);
-        res.status(500).json({ 
-            error: 'Internal server error' 
-        });
+    // Validate input
+    if (!name || !email || !phone) {
+      return res.status(400).json({
+        error: "Name, email, and phone are required",
+      });
     }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        error: "Please provide a valid email address",
+      });
+    }
+
+    // Check if email already exists for another teacher
+    const existingTeacher = await Teacher.findOne({
+      email: email,
+      _id: { $ne: teacherId },
+    });
+
+    if (existingTeacher) {
+      return res.status(400).json({
+        error: "Email already exists for another teacher",
+      });
+    }
+
+    // Update teacher (only editable fields)
+    const updatedTeacher = await Teacher.findByIdAndUpdate(
+      teacherId,
+      {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: phone.trim(),
+      },
+      {
+        new: true, // Return updated document
+        runValidators: true, // Run schema validators
+      }
+    );
+
+    if (!updatedTeacher) {
+      return res.status(404).json({
+        error: "Teacher not found",
+      });
+    }
+
+    res.json(updatedTeacher);
+  } catch (error) {
+    console.error("Error updating teacher:", error);
+    res.status(500).json({
+      error: "Internal server error",
+    });
+  }
 };
 
 // Fee tracking

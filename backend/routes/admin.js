@@ -44,6 +44,7 @@ router.delete('/fee/deleteFeeStructure/:studentId', adminController.deleteFeeStr
 router.patch("/fee/mark-paid/:id", adminController.markInstallmentPaid);
 router.patch("/fee/updateInstallment/:id", adminController.updateInstallment);
 router.post('/addBatches', adminController.addStudentToBatches);
+router.put('/editStudntProfile/:studentId', adminController.editStudent);
 
 // Teacher Management
 router.get('/teachers', adminController.getTeachers);
