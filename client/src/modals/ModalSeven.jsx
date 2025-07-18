@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export default function Teacher({ isOpen, onClose, children }) {
+export default function ModalSeven({ isOpen, onClose, children }) {
   if (!isOpen) return null; // ✅ Use isOpen here — but DO NOT pass it to <div>
 
   return ReactDOM.createPortal(
@@ -11,6 +11,6 @@ export default function Teacher({ isOpen, onClose, children }) {
         {children}
       </div>
     </div>,
-    document.getElementById('teacher-root')
+    document.getElementById('modal-seven-root')
   );
 }

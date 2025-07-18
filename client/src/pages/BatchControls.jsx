@@ -11,6 +11,8 @@ import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
 import ModalFour from "../modals/ModalFour";
 import ModalFive from "../modals/ModalFive";
+import ModalSix from "../modals/ModalSix";
+import ModalSeven from "../modals/ModalSeven";
 
 export default function BatchControls() {
   const { batchId } = useParams();
@@ -28,6 +30,9 @@ export default function BatchControls() {
   const [modalThree, setModalThree] = useState(false);
   const [modalFour, setModalFour] = useState(false);
   const [modalFive, setModalFive] = useState(false);
+  const [modalSix, setModalSix] = useState(false);
+  const [modalSeven, setModalSeven] = useState(false);
+  const [studentTests, setStudentTests] = useState([]);
   const [allStudents, setAllStudents] = useState({});
   const [markedStatus, setMarkedStatus] = useState({});
   const [selectedTeacher, setSelectedTeacher] = useState({});
@@ -36,6 +41,11 @@ export default function BatchControls() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedToAdd, setSelectedToAdd] = useState([]);
   const [mode, setMode] = useState("select"); // "select" or "create"
+  const [testDetails, setTestDetails] = useState({
+    testName: "",
+    maxMarks: "",
+    testDate: null
+  });
   const [newStudentData, setNewStudentData] = useState({
     name: "",
     phone: "",
@@ -45,7 +55,9 @@ export default function BatchControls() {
     dateOfJoining: format(new Date(), "dd-MM-yyyy"),
   });
   const [studentSearch, setStudentSearch] = useState("");
-
+  const [testFormData, setTestFormData] = useState({});
+  const [tests, setTests] = useState({});
+  
 
   const academicYearStart = new Date().getMonth() < 3 ? new Date().getFullYear() - 1 : new Date().getFullYear();
 
@@ -130,6 +142,28 @@ export default function BatchControls() {
     } catch (err) {
       console.error("Failed to fetch student attendance:", err);
       alert("Error fetching attendance");
+    }
+  };
+
+  const showStudentAllTests = async (student) => {
+    setActiveStudent(student);
+    setModalSix(true);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/tests/${student._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Failed to load tests");
+
+      // ✅ Only keep tests for the opened batch
+      const filteredTests = (data.tests || []).filter(test => test.batchId === batchId);
+
+      setStudentTests(filteredTests);
+    } catch (err) {
+      console.error("Failed to fetch student tests:", err);
+      alert("Error fetching tests");
     }
   };
 
@@ -358,6 +392,71 @@ export default function BatchControls() {
     }
   };
 
+  const addTest = async (studentId, batchId, name, maxMarks, marksScored, date) => {
+    if (!studentId || !batchId || !name || !maxMarks || marksScored === undefined || marksScored === null || isNaN(date.getTime())) {
+      return alert("All fields are required.");
+    }
+
+
+    console.log("DEBUG:", { studentId, batchId, name, maxMarks, marksScored, date });
+
+    // ✅ Format date to dd-mm-yyyy
+    const dd = ("0" + date.getDate()).slice(-2);
+    const mm = ("0" + (date.getMonth() + 1)).slice(-2);
+    const yyyy = date.getFullYear();
+    const formattedDate = `${dd}-${mm}-${yyyy}`;
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/test/addEdit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          studentId,
+          batchId,
+          name,
+          maxMarks,
+          marksScored,
+          date: formattedDate // ✅ dd-mm-yyyy
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to add test");
+
+      setTests((prev) => ({
+        ...prev,
+        [batchId]: [
+          ...(prev[batchId] || []).filter(
+            t => !(t.name === name && t.date === formattedDate && t.studentId === studentId)
+          ), // remove old entry if exists
+          {
+            _id: data.test._id, // if returned by backend
+            studentId,
+            batchId,
+            name,
+            maxMarks,
+            marksScored,
+            date: formattedDate
+          }
+        ]
+      }));
+    } catch (err) {
+      console.error("Test error:", err);
+      alert("Failed to add test.");
+    }
+  };
+
+  const openTestModal = (batchId) => {
+    setModalSeven((prev) => ({ ...prev, [batchId]: true }));
+  };
+
+  const closeTestModal = (batchId) => {
+    setModalSeven((prev) => ({ ...prev, [batchId]: false }));
+  };
+
   return (<>
     <Navbar />
 
@@ -379,8 +478,13 @@ export default function BatchControls() {
               </button>
               <ul className="dropdown-menu dropdown-menu-end shadow">
                 <li>
-                  <button className="dropdown-item" onClick={openModalOneHandler}>
-                    Mark / Change Attendance
+                  <button className="dropdown-item" onClick={() => setModalFour(true)}>
+                    Add / Edit Timetable
+                  </button>
+                </li>
+                <li>
+                  <button className="dropdown-item" onClick={() => setModalFive(true)}>
+                    Add Students
                   </button>
                 </li>
                 <li>
@@ -389,13 +493,13 @@ export default function BatchControls() {
                   </button>
                 </li>
                 <li>
-                  <button className="dropdown-item" onClick={() => setModalFour(true)}>
-                    Add / Edit Timetable
+                  <button className="dropdown-item" onClick={openModalOneHandler}>
+                    Mark / Change Attendance
                   </button>
                 </li>
                 <li>
-                  <button className="dropdown-item" onClick={() => setModalFive(true)}>
-                    Add Students
+                  <button className="dropdown-item" onClick={() => openTestModal(batch.batchId)}>
+                    Add / Change Test Scores
                   </button>
                 </li>
                 <li>
@@ -498,7 +602,7 @@ export default function BatchControls() {
                         <i className="bi bi-box-arrow-up-right"></i>
                       </Link>
                     </td>
-                    <td style={{ width: "30%" }}>
+                    <td style={{ width: "20%" }}>
                       <button
                         className="btn btn-outline-primary btn-sm"
                         onClick={() => showStudentAttendance(s)}
@@ -506,7 +610,15 @@ export default function BatchControls() {
                         Show Attendance
                       </button>
                     </td>
-                    <td style={{ width: "30%" }}>
+                    <td style={{ width: "20%" }}>
+                      <button
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => showStudentAllTests(s)}
+                      >
+                        Show All Tests
+                      </button>
+                    </td>
+                    <td style={{ width: "20%" }}>
                       <button
                         className="btn btn-outline-danger btn-sm"
                         onClick={() => removeStudent(batchId, s._id)}
@@ -832,6 +944,151 @@ export default function BatchControls() {
           )}
         </ModalFive>
 
+        <ModalSix
+          isOpen={modalSix}
+          onClose={() => {
+            setModalSix(false);
+            setActiveStudent(null);
+          }}
+        >
+          <div className="p-3">
+            <h3>Tests for {activeStudent?.name}</h3>
+
+            {studentTests.length === 0 ? (
+              <p>No test records found for this batch.</p>
+            ) : (
+              <table className="table table-bordered mt-3">
+                <thead>
+                  <tr>
+                    <th>Test Name</th>
+                    <th>Date</th>
+                    <th>Marks Scored</th>
+                    <th>Max Marks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {studentTests
+                    .sort((a, b) => {
+                      const parseDate = (d) => new Date(d.split("-").reverse().join("-"));
+                      return parseDate(b.date) - parseDate(a.date); // latest first
+                    })
+                    .map((test) => (
+                      <tr key={test._id}>
+                        <td>{test.name}</td>
+                        <td>{test.date}</td>
+                        <td>{test.marksScored}</td>
+                        <td>{test.maxMarks}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </ModalSix>
+
+        <ModalSeven
+          isOpen={modalSeven[batch.batchId]}
+          onClose={() => closeTestModal(batch.batchId)}
+        >
+          <div>
+            <h3>Add Test for {batch.batchName}</h3>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const { testName, maxMarks, testDate } = testDetails;
+                if (!testName || !maxMarks || !testDate) {
+                  return alert("Please fill test name, max marks, and date.");
+                }
+
+                const date = new Date(testDate);
+                for (const student of students || []) {
+                  const marksScored = testFormData[student._id];
+                  if (marksScored !== undefined && marksScored !== "") {
+                    await addTest(
+                      student._id,
+                      batch._id,
+                      testName,
+                      Number(maxMarks),
+                      Number(marksScored),
+                      date
+                    );
+                  }
+                }
+
+                setTestDetails({ testName: "", maxMarks: "", testDate: null });
+                setTestFormData({});
+                closeTestModal(batch.batchId);
+              }}
+            >
+              <div className="mb-2">
+                <DatePicker
+                  selected={testDetails.testDate}
+                  onChange={(date) =>
+                    setTestDetails((prev) => ({ ...prev, testDate: date }))
+                  }
+                  className="form-control mb-2"
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select test date"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Test Name"
+                  value={testDetails.testName}
+                  onChange={(e) =>
+                    setTestDetails((prev) => ({ ...prev, testName: e.target.value }))
+                  }
+                  className="form-control mb-1"
+                  required
+                />
+                <input
+                  type="number"
+                  placeholder="Max Marks"
+                  value={testDetails.maxMarks}
+                  onChange={(e) =>
+                    setTestDetails((prev) => ({ ...prev, maxMarks: e.target.value }))
+                  }
+                  className="form-control mb-1"
+                  required
+                />
+              </div>
+
+              <table className="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Marks Scored</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((student) => (
+                    <tr key={student._id}>
+                      <td>{student.name}</td>
+                      <td>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={testFormData[student._id] || ""}
+                          onChange={(e) =>
+                            setTestFormData((prev) => ({
+                              ...prev,
+                              [student._id]: e.target.value
+                            }))
+                          }
+                          placeholder="Enter marks"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <button type="submit" className="button">
+                Add
+              </button>
+            </form>
+          </div>
+        </ModalSeven>
 
       </div>
     </div>

@@ -130,6 +130,18 @@ exports.getStudentsAttendance = async (req, res) => {
   }
 };
 
+exports.getStudentstests = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const tests = await Test.find({ studentId });
+
+    res.json({ tests });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.markAttendance = async (req, res) => {
   const { studentId, batchId, date, status } = req.body;
   try {
@@ -140,6 +152,40 @@ exports.markAttendance = async (req, res) => {
     );
     res.json(record);
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.addEditTest = async (req, res) => {
+  const { studentId, batchId, name, maxMarks, marksScored, date } = req.body;
+
+  try {
+    const updatedTest = await Test.findOneAndUpdate(
+      {
+        studentId,
+        batchId,
+        name,
+        date, // match these four fields for uniqueness
+      },
+      {
+        $set: {
+          maxMarks,
+          marksScored,
+        },
+      },
+      {
+        new: true, // return the updated document
+        upsert: true, // create if not found
+        setDefaultsOnInsert: true,
+      }
+    );
+
+    res.status(201).json({
+      message: "Test added or updated successfully",
+      test: updatedTest,
+    });
+  } catch (err) {
+    console.error("Error adding/updating test:", err);
     res.status(500).json({ error: err.message });
   }
 };
