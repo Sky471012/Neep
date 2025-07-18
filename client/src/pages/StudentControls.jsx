@@ -695,7 +695,6 @@ export default function StudentControls() {
                 const updatedStudent = await response.json();
                 setStudent(updatedStudent);
                 setIsEditing(false);
-                alert('Profile updated successfully!');
             } else {
                 const errorData = await response.json();
                 alert(errorData.error || 'Failed to update profile');
@@ -849,9 +848,11 @@ export default function StudentControls() {
                             <div className="mb-3">
                                 <label className="form-label">Date of Joining:</label>
                                 <DatePicker
-                                    selected={editForm.dateOfJoining ? new Date(editForm.dateOfJoining) : null}
+                                    selected={editForm.dateOfJoining ? new Date(editForm.dateOfJoining.split('-').reverse().join('-')) : null}
                                     onChange={(date) => {
-                                        const formattedDate = date ? date.toISOString().split('T')[0] : '';
+                                        const formattedDate = date ?
+                                            `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`
+                                            : '';
                                         setEditForm(prev => ({ ...prev, dateOfJoining: formattedDate }));
                                     }}
                                     dateFormat="dd-MM-yyyy"

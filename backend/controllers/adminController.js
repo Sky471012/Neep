@@ -471,6 +471,100 @@ exports.toggleArchiveStatus = async (req, res) => {
   }
 };
 
+exports.editBatch = async (req, res) => {
+  try {
+    const { batchId } = req.params;
+    const {
+      name,
+      class: batchClass,
+      startDate,
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !batchClass || !startDate) {
+      return res.status(400).json({
+        error: "All fields are required",
+      });
+    }
+
+    // Validate startDate format (DD-MM-YYYY)
+    const startDateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
+    if (!startDateRegex.test(startDate)) {
+      return res.status(400).json({
+        error: "Start date must be in DD-MM-YYYY format",
+      });
+    }
+
+    // Validate class enum
+    const validClasses = [
+      "Kids",
+      "English Spoken",
+      "9",
+      "10",
+      "11",
+      "12",
+      "Entrance Exams",
+      "Graduation",
+    ];
+    if (!validClasses.includes(batchClass)) {
+      return res.status(400).json({
+        error: "Invalid class selection",
+      });
+    }
+
+    // Check if another batch exists with same name and class
+    const existingBatch = await Batch.findOne({
+      name: name.trim(),
+      class: batchClass,
+      _id: { $ne: batchId },
+    });
+
+    if (existingBatch) {
+      return res.status(400).json({
+        error: "Another batch with the same name and class already exists",
+      });
+    }
+
+    // Update batch
+    const updatedBatch = await Batch.findByIdAndUpdate(
+      batchId,
+      {
+        name: name.trim(),
+        class: batchClass,
+        startDate: startDate.trim(),
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedBatch) {
+      return res.status(404).json({
+        error: "Batch not found",
+      });
+    }
+
+    res.json(updatedBatch);
+  } catch (error) {
+    console.error("Error updating batch:", error);
+
+    // Handle validation errors
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res.status(400).json({
+        error: validationErrors.join(", "),
+      });
+    }
+
+    res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+
 // Student Management
 exports.getStudents = async (req, res) => {
   try {

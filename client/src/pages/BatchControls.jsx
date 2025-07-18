@@ -57,7 +57,15 @@ export default function BatchControls() {
   const [studentSearch, setStudentSearch] = useState("");
   const [testFormData, setTestFormData] = useState({});
   const [tests, setTests] = useState({});
-  
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    startDate: '',
+    class: '',
+  });
+
+  const classOptions = ["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"];
+
 
   const academicYearStart = new Date().getMonth() < 3 ? new Date().getFullYear() - 1 : new Date().getFullYear();
 
@@ -119,6 +127,16 @@ export default function BatchControls() {
 
     fetchData();
   }, [batchId]);
+
+  useEffect(() => {
+    if (batch) {
+      setEditForm({
+        name: batch.name || '',
+        startDate: batch.startDate || '',
+        class: batch.class || '',
+      });
+    }
+  }, [batch]);
 
   const showStudentAttendance = async (student) => {
     setActiveStudent(student);
@@ -457,6 +475,71 @@ export default function BatchControls() {
     setModalSeven((prev) => ({ ...prev, [batchId]: false }));
   };
 
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEditStudent = () => {
+    setIsEditing(false);
+    // Reset form to original values
+    setEditForm({
+      name: batch.name || '',
+      startDate: batch.startDate || '',
+      class: batch.class || '',
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const validateForm = () => {
+    if (!editForm.name || !editForm.startDate || !editForm.class) {
+      alert('All fields are required');
+      return false;
+    }
+
+    // Validate DOB format (DD-MM-YYYY)
+    const startDateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
+    if (!startDateRegex.test(editForm.startDate)) {
+      alert('Date of birth must be in DD-MM-YYYY format');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSaveEdit = async () => {
+    if (!validateForm()) return;
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editBatchProfile/${batchId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editForm)
+      });
+
+      if (response.ok) {
+        const updatedBatch = await response.json();
+        setBatch(updatedBatch);
+        setIsEditing(false);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to update details');
+      }
+    } catch (error) {
+      console.error('Error updating batch:', error);
+      alert('Error updating profile');
+    }
+  };
+
   return (<>
     <Navbar />
 
@@ -503,6 +586,11 @@ export default function BatchControls() {
                   </button>
                 </li>
                 <li>
+                  <button className="dropdown-item" onClick={handleEditClick} disabled={isEditing}>
+                    Edit Batch Details
+                  </button>
+                </li>
+                <li>
                   <button
                     className={`dropdown-item ${batch.archive ? 'text-success' : 'text-danger'}`}
                     onClick={() => handleArchiveToggle(batch._id, !batch.archive)}
@@ -518,23 +606,113 @@ export default function BatchControls() {
               </ul>
             </div>
           </div>
-          <p className="mt-3">
-            Class: <strong>{batch.class}<br /></strong>
-            Code: <strong>{batch.code}<br /></strong>
-            Started on: <strong>{batch.startDate}<br /></strong>
-            Teacher:
-            <strong>
-              {teacher?.name || "Not assigned"}
-              {teacher && (
-                <Link to={`/teacher/${teacher._id}`} className="ms-1 text-primary">
-                  <i className="bi bi-box-arrow-up-right"></i>
-                </Link>
-              )}
-              <br />
-            </strong>
-            Number of students: <strong>{students.length}</strong>
-          </p>
+
+
+          {isEditing ? (
+            // Edit Mode
+            <div className="mt-3">
+              <div className="row">
+                <div className="col-md-6 mb-3">
+                  <label className="form-label">Name:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="name"
+                    value={editForm.name}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="col-md-6 mb-3">
+                  <label className="form-label">Started On:</label>
+                  <DatePicker
+                    selected={
+                      editForm.startDate
+                        ? new Date(editForm.startDate.split('-').reverse().join('-'))
+                        : null
+                    }
+                    onChange={(startDate) => {
+                      const formattedDate = startDate
+                        ? `${startDate.getDate().toString().padStart(2, '0')}-${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${startDate.getFullYear()}`
+                        : '';
+                      setEditForm((prev) => ({ ...prev, startDate: formattedDate }));
+                    }}
+                    dateFormat="dd-MM-yyyy"
+                    className="form-control"
+                    placeholderText="Select Start Date"
+                    showYearDropdown
+                    yearDropdownItemNumber={100}
+                    scrollableYearDropdown
+                  />
+                </div>
+
+                <div className="col-md-6 mb-3">
+                  <label className="form-label">Class:</label>
+                  <select
+                    className="form-control"
+                    name="class"
+                    value={editForm.class}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select Class</option>
+                    {classOptions.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+
+              {/* Non-editable fields */}
+              <div className="mb-3">
+                <label className="form-label">Number of students:</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={students.length}
+                  disabled
+                />
+              </div>
+
+              <div className="d-flex gap-2">
+                <button
+                  className="btn btn-success"
+                  onClick={handleSaveEdit}
+                >
+                  Save Changes
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={handleCancelEditStudent}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            // View Mode - unchanged
+            <p className="mt-3">
+              Class: <strong>{batch.class}<br /></strong>
+              Code: <strong>{batch.code}<br /></strong>
+              Started on: <strong>{batch.startDate}<br /></strong>
+              Teacher:
+              <strong>
+                {teacher?.name || "Not assigned"}
+                {teacher && (
+                  <Link to={`/teacher/${teacher._id}`} className="ms-1 text-primary">
+                    <i className="bi bi-box-arrow-up-right"></i>
+                  </Link>
+                )}
+                <br />
+              </strong>
+              Number of students: <strong>{students.length}</strong>
+            </p>
+          )}
         </div>
+
+
 
         {/* Timetable */}
         <div className="timetable-details">
