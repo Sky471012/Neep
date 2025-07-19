@@ -1488,13 +1488,16 @@ exports.getTodaysClasses = async (req, res) => {
   try {
     const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
+    // Populate batchId with archive field to filter after
     const classes = await Timetable.find({ weekday: today }).populate(
       "batchId",
-      "name code"
+      "name code archive"
     );
 
-    const formatted = classes.map((cls) => {
-      // Sort classTimings by startTime (morning to evening)
+    // Filter out archived batches
+    const activeClasses = classes.filter((cls) => !cls.batchId?.archive);
+
+    const formatted = activeClasses.map((cls) => {
       const sortedTimings = [...cls.classTimings].sort((a, b) => {
         const parseTime = (timeStr) =>
           new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);

@@ -171,21 +171,31 @@ exports.getTodaysClassesForTeacher = async (req, res) => {
 
     // Get all batches this teacher is assigned to
     const assigned = await BatchesTeacher.find({ teacherId });
+    const assignedBatchIds = assigned.map((b) => b.batchId);
 
-    const batchIds = assigned.map((b) => b.batchId);
-
-    if (batchIds.length === 0) {
+    if (assignedBatchIds.length === 0) {
       return res.json({ message: "No assigned batches", classes: [] });
     }
 
-    // Find today's classes from those batches
+    // Get only non-archived batch IDs
+    const activeBatches = await Batch.find({
+      _id: { $in: assignedBatchIds },
+      archive: false,
+    });
+
+    const activeBatchIds = activeBatches.map((b) => b._id);
+
+    if (activeBatchIds.length === 0) {
+      return res.json({ message: "All assigned batches are archived", classes: [] });
+    }
+
+    // Find today's classes for active batches
     const classes = await Timetable.find({
       weekday: today,
-      batchId: { $in: batchIds },
+      batchId: { $in: activeBatchIds },
     }).populate("batchId", "name code");
 
     const formatted = classes.map((cls) => {
-      // Sort classTimings by startTime (morning to evening)
       const sortedTimings = [...cls.classTimings].sort((a, b) => {
         const parseTime = (timeStr) =>
           new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);
