@@ -482,17 +482,13 @@ exports.editBatch = async (req, res) => {
 
     // Validate required fields
     if (!name || !batchClass || !startDate) {
-      return res.status(400).json({
-        error: "All fields are required",
-      });
+      return res.status(400).json({ error: "All fields are required" });
     }
 
     // Validate startDate format (DD-MM-YYYY)
     const startDateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
     if (!startDateRegex.test(startDate)) {
-      return res.status(400).json({
-        error: "Start date must be in DD-MM-YYYY format",
-      });
+      return res.status(400).json({ error: "Start date must be in DD-MM-YYYY format" });
     }
 
     // Validate class enum
@@ -507,9 +503,7 @@ exports.editBatch = async (req, res) => {
       "Graduation",
     ];
     if (!validClasses.includes(batchClass)) {
-      return res.status(400).json({
-        error: "Invalid class selection",
-      });
+      return res.status(400).json({ error: "Invalid class selection" });
     }
 
     // Check if another batch exists with same name and class
@@ -533,35 +527,37 @@ exports.editBatch = async (req, res) => {
         class: batchClass,
         startDate: startDate.trim(),
       },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
 
     if (!updatedBatch) {
-      return res.status(404).json({
-        error: "Batch not found",
-      });
+      return res.status(404).json({ error: "Batch not found" });
     }
+
+    // Also update batchName in Batch_teachers and Batch_students
+    await Promise.all([
+      BatchTeacher.updateMany(
+        { batchId },
+        { batchName: name.trim() }
+      ),
+      BatchStudent.updateMany(
+        { batchId },
+        { batchName: name.trim() }
+      )
+    ]);
 
     res.json(updatedBatch);
   } catch (error) {
     console.error("Error updating batch:", error);
 
-    // Handle validation errors
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
-      return res.status(400).json({
-        error: validationErrors.join(", "),
-      });
+      return res.status(400).json({ error: validationErrors.join(", ") });
     }
 
-    res.status(500).json({
-      error: "Internal server error",
-    });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -724,6 +720,12 @@ exports.deleteStudent = async (req, res) => {
     await Fee.deleteMany({
       studentId: studentId,
     });
+    
+    // delete from Installment
+    await Installment.deleteMany({
+      studentId: studentId,
+    });
+
     res.json({ message: "Student removed from database" });
   } catch (err) {
     res.status(500).json({ error: err.message });
