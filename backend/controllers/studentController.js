@@ -6,6 +6,18 @@ const Batch = require('../models/Batch');
 const Test = require('../models/Test');
 const Timetable = require('../models/TimeTable');
 
+function convertTo24Hour(time12h) {
+  const [time, modifier] = time12h.split(" ");
+  let [hours, minutes] = time.split(":").map(Number);
+
+  if (modifier === "PM" && hours !== 12) hours += 12;
+  if (modifier === "AM" && hours === 12) hours = 0;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
+}
+
 exports.getAttendance = async (req, res) => {
   try {
     const records = await Attendance.find({ studentId: req.user.id });
@@ -25,10 +37,31 @@ exports.getTest = async (req, res) => {
 };
 
 exports.getTimetable = async (req, res) => {
-  const {batchId} = req.body;
+  const { batchId } = req.body;
+
   try {
-    const timetable = await Timetable.find({ batchId });
-    res.json(timetable);
+    const timetable = await Timetable.find({ batchId }).populate("batchId");
+
+    const formatted = timetable.map((cls) => {
+      // Sort classTimings by startTime
+      const sortedTimings = [...cls.classTimings].sort((a, b) => {
+        const parseTime = (timeStr) =>
+          new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);
+        return parseTime(a.startTime) - parseTime(b.startTime);
+      });
+
+      return {
+        weekday: cls.weekday,
+        batch: {
+          id: cls.batchId._id,
+          name: cls.batchId.name,
+          code: cls.batchId.code,
+        },
+        timetable: sortedTimings,
+      };
+    });
+
+    res.json(formatted); // Corrected
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

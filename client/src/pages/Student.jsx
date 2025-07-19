@@ -487,7 +487,7 @@ export default function Student() {
                                                                                 <tr key={index}>
                                                                                     <td>{entry.weekday}</td>
                                                                                     <td>
-                                                                                        {entry.classTimings.map((slot, idx) => (
+                                                                                        {entry.timetable.map((slot, idx) => (
                                                                                             <div key={idx}>
                                                                                                 {slot.startTime} - {slot.endTime}
                                                                                             </div>
@@ -502,6 +502,7 @@ export default function Student() {
                                                             )}
                                                         </div>
                                                     </ModalThree>
+
                                                 </div>
                                             </div>
                                         </div>
