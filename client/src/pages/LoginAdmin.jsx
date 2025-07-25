@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import './login.css';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Whatsapp from '../components/Whatsapp';
 import Call from '../components/Call';
+import Instagram from '../components/Instagram';
 
 export default function LoginAdmin() {
     const [email, setEmail] = useState('');
@@ -52,7 +54,6 @@ export default function LoginAdmin() {
                 alert(json.message || "Failed to send OTP.");
                 return;
             }
-
 
             if (isResend) {
                 setOtp(''); // Clear previous OTP
@@ -104,13 +105,12 @@ export default function LoginAdmin() {
                 if (json.user.role === "Teacher") {
                     localStorage.setItem("role", "teacher");
                     localStorage.setItem("user", JSON.stringify(json.user));
-                    navigate("/teacher"); // ✅ navigate to teacher dashboard
+                    navigate("/teacher");
                 } else if (json.user.role === "Admin") {
                     localStorage.setItem("role", "admin");
                     localStorage.setItem("user", JSON.stringify(json.user));
-                    navigate("/admin"); // ✅ optionally change route to /admin
+                    navigate("/admin");
                 } else {
-                    // 🚨 Safety fallback for unknown role
                     alert("Unknown role. Login aborted.");
                     return;
                 }
@@ -137,13 +137,16 @@ export default function LoginAdmin() {
         <>
             <Navbar />
 
-            <div className='login-container main-content'>
-                <div className="card login-card">
-                    <div className="login-box">
-                        <h3>New Era Education Point</h3>
+            <div className='login-page-container main-content'>
+                <div className="card login-page-card">
+                    <div className="login-page-box">
+                        <h3 className="login-heading">
+                     <span className="heading-main">New Era Education</span><br />
+                      <span className="heading-sub">Point</span>
+                    </h3>
 
                         {!showOtpSection ? (
-                            <form className='login-form' onSubmit={handleSendOtp}>
+                            <form className='login-page-form' onSubmit={handleSendOtp}>
                                 <div className="input-group">
                                     <input
                                         type="email"
@@ -153,12 +156,12 @@ export default function LoginAdmin() {
                                         onChange={(e) => setEmail(e.target.value)}
                                     />
                                 </div>
-                                <button className='button' type="submit" disabled={isLoading}>
+                                <button className='login-page-button' type="submit" disabled={isLoading}>
                                     {isLoading ? "Sending..." : "Send OTP"}
                                 </button>
                             </form>
                         ) : (
-                            <form className='login-form' onSubmit={handleVerifyOtp}>
+                            <form className='login-page-form' onSubmit={handleVerifyOtp}>
                                 <div className="input-group">
                                     <input
                                         type="email"
@@ -177,7 +180,7 @@ export default function LoginAdmin() {
                                         maxLength="6"
                                     />
                                 </div>
-                                <button className='button' type="submit" disabled={isLoading}>
+                                <button className='login-page-button' type="submit" disabled={isLoading}>
                                     {isLoading ? "Verifying..." : "Verify OTP & Login"}
                                 </button>
 
@@ -186,12 +189,10 @@ export default function LoginAdmin() {
                                         type="button"
                                         onClick={handleResendOtp}
                                         disabled={!canResend || isLoading}
+                                        className="login-page-text-button"
                                         style={{
-                                            background: 'none',
-                                            border: 'none',
                                             color: canResend ? '#3498db' : '#6c757d',
                                             cursor: canResend ? 'pointer' : 'not-allowed',
-                                            fontSize: '14px'
                                         }}
                                     >
                                         {resendTimer > 0 ? `Resend OTP (${resendTimer}s)` : 'Resend OTP'}
@@ -201,13 +202,7 @@ export default function LoginAdmin() {
                                         type="button"
                                         onClick={handleChangeEmail}
                                         disabled={isLoading}
-                                        style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            color: '#3498db',
-                                            cursor: 'pointer',
-                                            fontSize: '14px'
-                                        }}
+                                        className="login-page-text-button"
                                     >
                                         Change Email
                                     </button>
@@ -215,24 +210,27 @@ export default function LoginAdmin() {
                             </form>
                         )}
 
-                        <div className="divider">
+                        <div className="login-page-divider">
                             <hr />
                             <span>OR</span>
                             <hr />
                         </div>
 
-                        <Link to="/login" style={{ padding: "10px", border: "1px solid #3498db", borderRadius: "7px", color: "#3498db" }}>
-                            <span style={{ display: "flex", gap: "5px" }}>
-                                <i className="bi bi-person-fill"></i>
-                                Login as Student
-                            </span>
-                        </Link>
+                        <div className="login-role-switch">
+                                           <Link to="/login" className="login-page-link">
+                                           <span style={{ display: "flex", gap: "5px" }}>
+                                           <i className="bi bi-person-fill-lock"></i>
+                                                Login as student
+                                              </span>
+                                             </Link>
+                                            </div>
                     </div>
                 </div>
             </div>
 
             <Whatsapp />
             <Call />
+            <Instagram />
             <Footer />
         </>
     );

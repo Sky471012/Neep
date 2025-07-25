@@ -7,7 +7,7 @@ export default function Instagram() {
                 href="https://www.instagram.com/neweraeducationpoint"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="instagram-link"
+                className=" instagram-link"
             >
                 <i className="bi bi-instagram"></i>
             </a>

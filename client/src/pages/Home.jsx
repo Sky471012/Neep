@@ -1,17 +1,27 @@
 import React from 'react'
-import MovingBanner from '../components/MovingBanner'
+import BannerSection from '../components/MovingBanner'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import OurCourses from '../components/ourcourses'
 import Whatsapp from '../components/Whatsapp'
+import MessageFromFounder from '../components/messagefoun.jsx'
+import ToppersList from '../components/topperslist'
 import Call from '../components/Call'
 import Popup from '../components/Popup'
 import Instagram from '../components/Instagram'
+import DownloadApp from '../components/download.jsx'
+import StudentsReviews from '../components/studentsreview.jsx'
 
 export default function Home() {
   return (<>
     <Navbar />
     <Popup />
-    <MovingBanner />
+    <BannerSection />
+    <OurCourses />
+    <MessageFromFounder />
+    <ToppersList/>
+    <StudentsReviews />
+    <DownloadApp />
     <Call />
     <Whatsapp />
     <Instagram />

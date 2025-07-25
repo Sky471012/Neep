@@ -10,7 +10,7 @@ import app from "../assets/images/app.png";
 
 export default function DownloadApp() {
   return (<>
-    <Navbar />
+    
 
     <div className="main-content download-app">
       <h1>Download Our App</h1>
@@ -70,7 +70,6 @@ export default function DownloadApp() {
     <Whatsapp />
     <Call />
 
-    {/* <Footer /> */}
-    <Footer />
+    
   </>)
 }
