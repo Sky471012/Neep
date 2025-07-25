@@ -1,71 +1,64 @@
-/**
-* Professional Coaching Login Page CSS
-*/
+
 
 /* Global page styling */
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
-  height: 100%;
-  font-family: 'Roboto', 'Inter', 'Segoe UI', 'Arial', sans-serif;
-  background-color: #edf2f7;
+  min-height: 100vh;
+  font-family: "Roboto", "Inter", "Segoe UI", "Arial", sans-serif;
+  background-color: #e6f2ff; /* Light blue background per your spec */
+  color: #1a365d;
 }
 
-/* Login container — full viewport, centered card */
+/* Main container — flex, responsive, clean */
 .login-page-container {
   width: 100%;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f8fbfe; /* Soft blue-white base (edgier than pure white) */
-  overflow: hidden;
+  padding: 20px;
+  box-sizing: border-box;
   position: relative;
+  z-index: 0;
 }
 
 /* Branded heading (center, stacked, crisp) */
 .login-heading {
   text-align: center;
-  margin-bottom: 2rem;
+  font-weight: 700 !important;
+  margin: 0 0 1.5rem 0;
   line-height: 1.2;
+  color: #0a2342; /* Deep indigo for seriousness */
 }
-
-.heading-main,
+.heading-main {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: "Poppins", "Inter", sans-serif;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
 .heading-sub {
   display: block;
-  font-family: 'Poppins', 'Inter', sans-serif;
-  font-weight: 600;
-  color: #0a2342; /* Deep indigo for seriousness */
-  line-height: 1.2;
-  letter-spacing: -0.5px;
-  text-align: center;
-}
-
-.heading-main {
-  font-size: 2.2rem;
-}
-
-.heading-sub {
-  font-size: 1.8rem;
-  margin-top: 0.2rem;
+  font-size: 1.5rem;
   font-weight: 500;
   opacity: 0.85;
+  margin: 0.2rem 0 0 0;
 }
 
-/* Main card — premium, clean, spacious */
+/* Card — clean, premium, responsive */
 .login-page-card {
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(52, 152, 219, 0.18);
-  padding: 3rem 2.5rem 2.5rem;
+  padding: 2.5rem 2rem;
   width: min(420px, 90%);
-  margin: 2rem auto;
-  position: relative;
-  z-index: 100;
+  margin: 0 auto;
   border: 1px solid rgba(52, 152, 219, 0.07);
+  animation: fadeInUp 0.6s ease-out forwards;
 }
-
-/* Animate entrance (subtle) */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -76,76 +69,98 @@ body, html {
     transform: translateY(0);
   }
 }
-.login-page-card {
-  animation: fadeInUp 0.6s ease-out forwards;
-}
 
-/* Input fields — clear, accessible, professional */
+/* Login form — flex, clean, accessible */
 .login-page-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
   width: 100%;
-  align-items: center;
 }
 
-.login-page-container .input-group {
+.input-group {
   width: 100%;
+  margin-bottom: 0.5rem;
 }
 
 .login-page-form input,
-.login-page-container .datePicker {
+.datePicker {
   border: 1px solid #cce3f8;
   background: #f8fbfe;
-  border-radius: 12px;
-  font-size: 1.05rem;
-  padding: 0.8rem 1.1rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  padding: 0.8rem 1rem;
   color: #1a365d;
   outline: none;
   transition: all 0.25s ease;
   width: 100%;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .login-page-form input:focus,
-.login-page-container .datePicker:focus {
+.datePicker:focus {
   border-color: #3498db;
   background: #f1f8ff;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
-/* Placeholder text — subtle, friendly */
 .login-page-form input::placeholder,
-.login-page-container .datePicker::placeholder {
+.datePicker::placeholder {
   color: #8eb3d6;
   opacity: 1;
+  font-family: "Inter", sans-serif;
 }
 
-/* Primary button — rich blue, polished */
+/* Buttons — polished, responsive, accessible */
 .login-page-button {
   background: #2176b8;
   color: #fff;
   border: none;
-  border-radius: 10px;
-  padding: 0.9rem 1.8rem;
-  font-size: 1.1rem;
+  border-radius: 8px;
+  padding: 0.85rem 1.8rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
   cursor: pointer;
   width: 100%;
-  max-width: 320px;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   box-shadow: 0 3px 20px rgba(33, 118, 184, 0.2);
   transition: all 0.25s ease;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
-
-.login-page-button:hover {
+.login-page-button:hover:not(:disabled) {
   background: #1a5f93;
   transform: translateY(-2px);
   box-shadow: 0 5px 24px rgba(33, 118, 184, 0.25);
+}
+.login-page-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+/* Role switcher (Student/Admin) */
+.role-switch-container {
+  display: flex;
+  background: rgba(52, 152, 219, 0.1);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+}
+.role-switch-button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background: transparent;
+  color: #7f8c8d;
+  transition: all 0.2s ease;
+}
+.role-switch-button.active {
+  background: #fff;
+  color: #2c3e50;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* Text buttons (resend/change email) — discreet, clear */
@@ -154,59 +169,43 @@ body, html {
   border: none;
   color: #3498db;
   cursor: pointer;
-  font-size: 0.95rem;
-  transition: color 0.18s ease;
-  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+  font-family: "Inter", sans-serif;
+  text-decoration: underline;
+  padding: 0;
+  margin: 0 0.5rem;
 }
-
 .login-page-text-button:not(:disabled):hover {
   color: #1a5f93;
-  text-decoration: underline;
+}
+.login-page-text-button:disabled {
+  color: #bdc3c7;
+  cursor: not-allowed;
+  text-decoration: none;
 }
 
-/* Divider — subtle, branded */
-.login-page-divider {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  margin: 2rem 0 2.2rem;
-  gap: 1rem;
-}
-
-.login-page-divider hr {
-  flex: 1;
-  height: 1px;
-  background: #e2e8f0;
-  border: none;
-}
-
-.login-page-divider span {
-  color: #718096;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-/* Alternate login button (admin/student switch) — professional accent */
+/* Switch/Alternate login link (for stacked admin/student alternatives) */
 .login-page-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.75rem 1.8rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
   border: 1.5px solid #3498db;
-  border-radius: 10px;
+  border-radius: 8px;
   color: #3498db;
   background: #fff;
   font-weight: 600;
-  font-size: 1rem;
-  box-shadow: 0 1px 12px rgba(52, 152, 219, 0.1);
-  transition: all 0.22s ease;
+  font-size: 0.95rem;
+  box-shadow: 0 1px 12px rgba(52, 152, 219, 0.08);
+  transition: all 0.2s ease;
   text-decoration: none;
   width: 100%;
   max-width: 320px;
-  margin: 0.3rem auto 0;
-  font-family: 'Inter', sans-serif;
+  margin: 0.5rem auto 0;
+  font-family: "Inter", sans-serif;
 }
-
 .login-page-link:hover {
   border-color: #2176b8;
   background: #f0f7ff;
@@ -214,91 +213,59 @@ body, html {
   text-decoration: none;
 }
 
-/* Role switch container (for stacked admin/student alternatives) */
-.login-role-switch {
+/* Divider — subtle, branded */
+.login-page-divider {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  width: 100%;
-  gap: 0.8rem;
-  margin-top: 1.5rem;
-  padding: 0.6rem 0;
+  margin: 1.5rem 0;
+  color: #718096;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
 }
-
-/* Cloud animations (optional, for premium look) */
-.login-page-container::before,
-.login-page-container::after {
+.login-page-divider::before,
+.login-page-divider::after {
   content: "";
-  position: absolute;
-  z-index: 0;
-  background: radial-gradient(ellipse at center, rgba(52, 152, 219, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
-  filter: blur(20px);
-  border-radius: 50%;
-  animation: floatCloud 24s ease-in-out infinite alternate;
-  opacity: 0.65;
-}
-.login-page-container::before {
-  top: -14vh;
-  left: -10vw;
-  width: 36vw;
-  height: 36vw;
-}
-.login-page-container::after {
-  bottom: -14vh;
-  right: -10vw;
-  width: 32vw;
-  height: 32vw;
-  animation-delay: -8s;
-}
-@keyframes floatCloud {
-  0% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-40px) rotate(6deg); }
-  100% { transform: translateY(0) rotate(0deg); }
-}
-
-/* Subtle feedback animations */
-.login-page-form:active {
-  animation: pulseSubmit 0.12s linear;
-}
-@keyframes pulseSubmit {
-  0% { transform: scale(1); }
-  60% { transform: scale(1.02); }
-  100% { transform: scale(1); }
-}
-
-/* Focus states (accessibility) */
-.login-page-button:focus-visible,
-.login-page-link:focus-visible,
-.login-page-form input:focus-visible,
-.login-page-container .datePicker:focus-visible {
-  outline: 3px solid rgba(33, 118, 184, 0.3);
-  outline-offset: 2px;
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+  margin: 0 1rem;
 }
 
 /* Error states (subtle, informative) */
-.login-page-form input.error,
-.login-page-container .datePicker.error {
-  border-color: #e74c3c;
-  background: #ffefef;
+.error {
+  border-color: #e74c3c !important;
+  background: #ffefef !important;
+}
+
+/* Focus states (accessibility) */
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(33, 118, 184, 0.3);
+  outline-offset: 2px;
 }
 
 /* Mobile responsiveness */
 @media (max-width: 600px) {
   .login-page-card {
-    padding: 2.2rem 1.8rem 2rem;
-    margin: 0.8rem auto;
+    padding: 2rem 1.5rem;
   }
   .heading-main {
-    font-size: 1.9rem;
+    font-size: 1.8rem;
   }
   .heading-sub {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+  }
+  .role-switch-button {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
   }
 }
 
-/* Ensure WA/call buttons always visible */
+/* Ensure WA/call/insta buttons always on top */
 .whatsapp-link,
 .make-a-call,
 .instagram-link {
-  z-index: 99999 !important;
+  z-index: 10000 !important;
 }

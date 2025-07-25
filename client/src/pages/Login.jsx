@@ -1,108 +1,439 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './login.css';
-import { Link, useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
-import Whatsapp from '../components/Whatsapp'
-import Call from '../components/Call'
-import Instagram from '../components/Instagram'
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import Whatsapp from '../components/Whatsapp';
+import Call from '../components/Call';
+import Instagram from '../components/Instagram';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 export default function Login() {
-    const [dob, setdob] = useState();
-    const [credentials, setCredentials] = useState({ phone: "", dob: "" });
-    const navigate = useNavigate();
+  // Generic login management
+  const [loginType, setLoginType] = useState('student');
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  // Student state
+  const [dob, setDob] = useState();
+  const [studentCredentials, setStudentCredentials] = useState({ phone: "", dob: "" });
 
-        const formattedDob =
-            ("0" + dob.getDate()).slice(-2) +
-            "-" +
-            ("0" + (dob.getMonth() + 1)).slice(-2) +
-            "-" +
-            dob.getFullYear();
+  // Admin state
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [showOtpSection, setShowOtpSection] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const [canResend, setCanResend] = useState(true);
 
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login/student`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ phone: credentials.phone, dob: formattedDob })
+  // Timer for resend cooldown
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => {
+          if (prev <= 1) {
+            setCanResend(true);
+            return 0;
+          }
+          return prev - 1;
         });
-        const json = await response.json();
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
 
-        if (!json.success) {
-            alert("Student not found!");
-        } else {
-            console.log("Logined");
-            localStorage.setItem("role", "student");
-            localStorage.setItem("authToken", json.authToken);
-            localStorage.setItem("user", JSON.stringify(json.student));
-            console.log(json.authToken);
-            navigate("/student")
+  // Reset login form when switching
+  const switchLoginType = (type) => {
+    setLoginType(type);
+    setShowOtpSection(false);
+    setOtp('');
+    setEmail('');
+    setStudentCredentials({ phone: "", dob: "" });
+    setDob(null);
+    setCanResend(true);
+    setResendTimer(0);
+    setIsLoading(false);
+  };
+
+  // Student login handler
+  const handleStudentSubmit = async (e) => {
+    e.preventDefault();
+    if (!dob) {
+      alert("Please select your date of birth");
+      return;
+    }
+
+    const formattedDob =
+      ("0" + dob.getDate()).slice(-2) +
+      "-" +
+      ("0" + (dob.getMonth() + 1)).slice(-2) +
+      "-" +
+      dob.getFullYear();
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/student`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: studentCredentials.phone,
+            dob: formattedDob,
+          }),
         }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Failed to login");
+        setIsLoading(false);
+        return;
+      }
+
+      localStorage.setItem("role", "student");
+      localStorage.setItem("authToken", data.authToken);
+      localStorage.setItem("user", JSON.stringify(data.student));
+      navigate("/student");
+    } catch (err) {
+      setIsLoading(false);
+      console.error(err);
+      alert("Something went wrong");
     }
+  };
 
-    const onChange = (event) => {
-        setCredentials({ ...credentials, [event.target.name]: event.target.value })
+  const onStudentChange = (e) => {
+    setStudentCredentials({ ...studentCredentials, [e.target.name]: e.target.value });
+  };
+
+  const handleDateChange = (date) => {
+    setDob(date);
+    setStudentCredentials((prev) => ({
+      ...prev,
+      dob: date.toISOString(),
+    }));
+  };
+
+  // Admin login handlers
+  const sendOtp = async (isResend = false) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/send-otp`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        }
+      );
+      const data = await response.json();
+
+      if (response.status === 404) {
+        alert("User not found.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!response.ok) {
+        alert(data.message || "Failed to send OTP.");
+        setIsLoading(false);
+        return;
+      }
+
+      alert("OTP sent to your email!");
+      if (isResend) {
+        setOtp("");
+      }
+      setShowOtpSection(true);
+      setCanResend(false);
+      setResendTimer(30);
+      setIsLoading(false);
+    } catch (err) {
+      setIsLoading(false);
+      console.error(err);
+      alert("Something went wrong while sending OTP.");
     }
+  };
 
-    const handleDateChange = (date) => {
-        setdob(date);
-        setCredentials(prev => ({
-            ...prev,
-            dob: date.toISOString()
-        }));
-    };
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return alert("Please enter your email");
+    await sendOtp(false);
+  };
 
-    return (<>
-        <Navbar />
+  const handleResendOtp = async () => {
+    if (!canResend || isLoading) return;
+    await sendOtp(true);
+  };
 
-        <div className='login-page-container main-content'>
-            <div className="card login-page-card">
-                <div className="login-page-box">
-                    <h3 className="login-heading">
-                     <span className="heading-main">New Era Education</span><br />
-                      <span className="heading-sub">Point</span>
-                    </h3>
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!otp.trim()) return alert("Please enter the OTP");
 
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/verify-otp`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp }),
+        }
+      );
+      const data = await response.json();
 
+      if (!response.ok) {
+        alert(data.message || "OTP verification failed.");
+      } else {
+        if (data.user.role === "Teacher") {
+          localStorage.setItem("role", "teacher");
+          navigate("/teacher");
+        } else if (data.user.role === "Admin") {
+          localStorage.setItem("role", "admin");
+          navigate("/admin");
+        } else {
+          alert("Unknown role. Contact support.");
+        }
+        localStorage.setItem("authToken", data.authToken);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+      setIsLoading(false);
+    } catch (err) {
+      setIsLoading(false);
+      console.error(err);
+      alert("Something went wrong during OTP verification.");
+    }
+  };
 
-                    <form className='login-page-form' onSubmit={handleSubmit}>
-                        <div className="input-group">
-                            <input type="tel" id="phone" name="phone" value={credentials.phone} onChange={onChange} required placeholder='Phone number' />
-                        </div>
-                        <div className="input-group">
-                            <DatePicker className='datePicker' selected={dob} dateFormat="dd-MM-yyyy" onChange={handleDateChange} name='dob' required placeholderText='Date of Birth(dd-mm-yyyy)' />
-                        </div>
-                        <button className='login-page-button' type="submit">Login</button>
-                    </form>
+  const handleChangeEmail = () => {
+    setShowOtpSection(false);
+    setOtp('');
+    setCanResend(true);
+    setResendTimer(0);
+  };
 
-                    <div className="login-page-divider">
-                        <hr />
-                        <span>OR</span>
-                        <hr />
-                    </div>
+  // Light blue background style for the main container
+  const pageStyle = {
+    minHeight: '100vh',
+    background: '#e6f2ff',
+  };
 
-                    <div className="login-role-switch">
-                   <Link to="/loginAdmin" className="login-page-link">
-                   <span style={{ display: "flex", gap: "5px" }}>
-                   <i className="bi bi-person-fill-lock"></i>
-                        Login as Admin
-                      </span>
-                     </Link>
-                    </div>
+  return (
+    <div style={pageStyle}>
+      <Navbar />
+      <div
+        className="login-page-container"
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px 0 40px',
+          minHeight: 'calc(100vh - 140px)',
+        }}
+      >
+        <div
+          className="card login-page-card"
+          style={{ width: 'min(500px, 90%)' }}
+        >
+          <div className="login-page-box">
+            <h3
+              className="login-heading"
+              style={{
+                fontWeight: 700,
+                fontSize: '2rem',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                margin: '0 0 1.5rem',
+              }}
+            >
+              New Era Education Point
+            </h3>
 
-                </div>
+            {/* Role Switcher */}
+            <div
+              style={{
+                display: 'flex',
+                background: 'rgba(255, 255, 255, 0.8)',
+                borderRadius: '8px',
+                padding: '4px',
+                marginBottom: '20px',
+              }}
+            >
+              <button
+                onClick={() => switchLoginType('student')}
+                className={`role-switch-button ${
+                  loginType === 'student' ? 'active' : ''
+                }`}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: loginType === 'student' ? 'white' : 'transparent',
+                  color: loginType === 'student' ? '#2c3e50' : '#7f8c8d',
+                }}
+              >
+                Student
+              </button>
+              <button
+                onClick={() => switchLoginType('admin')}
+                className={`role-switch-button ${
+                  loginType === 'admin' ? 'active' : ''
+                }`}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: loginType === 'admin' ? 'white' : 'transparent',
+                  color: loginType === 'admin' ? '#2c3e50' : '#7f8c8d',
+                }}
+              >
+                Admin/Teacher
+              </button>
             </div>
+
+            {/* Student Login Form */}
+            {loginType === 'student' && (
+              <form className="login-page-form" onSubmit={handleStudentSubmit}>
+                <div className="input-group">
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={studentCredentials.phone}
+                    onChange={onStudentChange}
+                    required
+                    placeholder="Phone number"
+                  />
+                </div>
+                <div className="input-group">
+                  <DatePicker
+                    selected={dob}
+                    onChange={handleDateChange}
+                    dateFormat="dd-MM-yyyy"
+                    placeholderText="Date of birth (dd-mm-yyyy)"
+                    className="datePicker"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="login-page-button"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Logging in...' : 'Login as Student'}
+                </button>
+              </form>
+            )}
+
+            {/* Admin Login Form */}
+            {loginType === 'admin' && !showOtpSection && (
+              <form className="login-page-form" onSubmit={handleSendOtp}>
+                <div className="input-group">
+                  <input
+                    type="email"
+                    required
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="login-page-button"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Sending...' : 'Send OTP'}
+                </button>
+              </form>
+            )}
+
+            {/* OTP Verification Form */}
+            {loginType === 'admin' && showOtpSection && (
+              <form className="login-page-form" onSubmit={handleVerifyOtp}>
+                <div className="input-group">
+                  <input
+                    type="email"
+                    value={email}
+                    disabled
+                    style={{ backgroundColor: '#f8f9fa', color: '#6c757d' }}
+                    placeholder="Email"
+                  />
+                </div>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter 6-digit OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    maxLength="6"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="login-page-button"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Verifying...' : 'Verify & Login'}
+                </button>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginTop: '16px',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={!canResend || isLoading}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: canResend ? '#3498db' : '#bdc3c7',
+                      cursor: canResend ? 'pointer' : 'not-allowed',
+                      textDecoration: 'underline',
+                      fontSize: '14px',
+                    }}
+                  >
+                    {resendTimer > 0
+                      ? `Resend OTP (${resendTimer}s)`
+                      : 'Resend OTP'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleChangeEmail}
+                    disabled={isLoading}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#e74c3c',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      fontSize: '14px',
+                    }}
+                  >
+                    Change Email
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
+      </div>
 
-        <Whatsapp />
-        <Call />
-        <Instagram />
-
-        <Footer />
-    </>)
+      <Whatsapp />
+      <Call />
+      <Instagram />
+      <Footer />
+    </div>
+  );
 }
