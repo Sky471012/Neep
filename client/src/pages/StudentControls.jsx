@@ -115,8 +115,27 @@ export default function StudentControls() {
         }
     }, [student]);
 
+    function getBase64FromImagePath(path) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                const base64 = canvas.toDataURL("image/png");
+                resolve({ base64, width: img.width, height: img.height });
+            };
+            img.onerror = (e) => reject(e);
+            img.src = path;
+        });
+    }
 
-    function generatePDFReceipt(student, record) {
+    async function generatePDFReceipt(student, record) {
+        const { base64: logoBase64, width: originalWidth, height: originalHeight } = await getBase64FromImagePath("/logo.png");
+
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -150,6 +169,11 @@ export default function StudentControls() {
         doc.text("Phone: +91 9313214643", 20, 32);
         doc.text("+91 9891214643", 34, 37);
         doc.text("Email: neep.md@gmail.com", 20, 42);
+
+        const imgHeight = 25;
+        const scale = imgHeight / originalHeight;
+        const imgWidth = originalWidth * scale;
+        doc.addImage(logoBase64, "PNG", pageWidth - imgWidth - 20, 15, imgWidth, imgHeight);
 
         doc.setFontSize(16);
         doc.setFont("Inter", "bold");
@@ -315,7 +339,7 @@ export default function StudentControls() {
             }
 
             setBatches((prev) => [...prev, ...data.addedBatches]);
-            setModalOne(false); // ✅ correct modal
+            setModalOne(false);
             setSelectedToAdd([]);
             setSearchTerm("");
         } catch (err) {

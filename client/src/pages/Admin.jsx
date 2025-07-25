@@ -58,49 +58,40 @@ export default function Admin() {
                 return;
             }
 
-            // Fetch batches
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then((res) => {
+            const headers = { Authorization: `Bearer ${token}` };
+
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, { headers })
+                .then(res => {
                     if (!res.ok) throw new Error("Failed to fetch all batches");
                     return res.json();
                 })
                 .then(setBatchesRecords)
-                .catch((err) => console.error("Batches fetch error:", err));
+                .catch(err => console.error("Batches fetch error:", err));
 
-            // Fetch archived batches
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/archivedBatches`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then((res) => {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/archivedBatches`, { headers })
+                .then(res => {
                     if (!res.ok) throw new Error("Failed to fetch all archived batches");
                     return res.json();
                 })
                 .then(setArchivedBatchesRecords)
-                .catch((err) => console.error("Archived Batches fetch error:", err));
+                .catch(err => console.error("Archived Batches fetch error:", err));
 
-            // Fetch students
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then((res) => {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, { headers })
+                .then(res => {
                     if (!res.ok) throw new Error("Failed to fetch all students");
                     return res.json();
                 })
                 .then(setStudentsRecords)
-                .catch((err) => console.error("Students fetch error:", err));
+                .catch(err => console.error("Students fetch error:", err));
 
-            // Fetch teachers
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then((res) => {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, { headers })
+                .then(res => {
                     if (!res.ok) throw new Error("Failed to fetch all teachers");
                     return res.json();
                 })
                 .then(setTeachersRecords)
-                .catch((err) => console.error("Teachers fetch error:", err));
+                .catch(err => console.error("Teachers fetch error:", err));
+
         }
     }, []);
 
@@ -655,14 +646,14 @@ export default function Admin() {
                 </form>
             </Popup>
 
-            <ModalFive
+            <ModalFour
                 isOpen={openModalFour}
                 onClose={() => setOpenModalFour(false)}
             >
                 <h3>Upload Excel to Add Students</h3>
                 <ExcelUpload />
-            </ModalFive>
-            
+            </ModalFour>
+
             <ModalFive
                 isOpen={openModalFive}
                 onClose={() => setOpenModalFive(false)}

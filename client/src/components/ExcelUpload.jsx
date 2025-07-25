@@ -30,7 +30,7 @@ const ExcelUpload = () => {
                 }
             );
 
-            setMessage(res.data.message); // success case
+            setMessage(res.data.message);
         } catch (err) {
             const errorMessage =
                 err.response?.data?.message || "Upload failed.";
@@ -42,7 +42,6 @@ const ExcelUpload = () => {
 
     return (
         <div className="container mt-5 mb-5">
-            <h3>Upload Student Excel File</h3>
             <form onSubmit={handleUpload}>
                 <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
                 <button type="submit" className="btn btn-primary mt-2">Upload</button>
