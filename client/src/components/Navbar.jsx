@@ -74,7 +74,7 @@ export default function Navbar() {
           <li><Link to="/#home" className={isRouteActive("/") && !activeSection ? "active" : ""}>Home</Link></li>
           <li><Link to="/all-courses" className={isRouteActive("/all-courses") ? "active" : ""}>Courses</Link></li>
           <li><Link to="/#reviews" className={isAnchorActive("reviews") ? "active" : ""} onClick={() => handleAnchorClick("reviews")}>Student Reviews</Link></li>
-          <li><Link to="/downloadapp" className={isRouteActive("/downloadapp") ? "active" : ""}>Download App</Link></li>
+          <li><Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link></li>
           <li><Link to="/contactus" className={isRouteActive("/contactus") ? "active" : ""}>Contact Us</Link></li>
 
           {authToken && role === "student" && (
@@ -118,7 +118,7 @@ export default function Navbar() {
         <Link to="/#home" className={isRouteActive("/") && !activeSection ? "active" : ""} onClick={() => setSidebarOpen(false)}>Home</Link>
         <Link to="/all-courses" className={isRouteActive("/all-courses") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Courses</Link>
         <Link to="/#reviews" className={isAnchorActive("reviews") ? "active" : ""} onClick={() => handleAnchorClick("reviews")}>Student Reviews</Link>
-        <Link to="/downloadapp" className={isRouteActive("/downloadapp") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Download App</Link>
+        <Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link>
         <Link to="/contactus" className={isRouteActive("/contactus") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Contact Us</Link>
 
         {authToken && role === "student" && (
@@ -188,7 +188,7 @@ export default function Navbar() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 0.75rem 2rem;
+          padding: ${scrolled ? "0.4rem 2rem" : "0.75rem 2rem"};
           background: var(--bg-cream);
           box-shadow: ${scrolled ? "0 2px 12px rgba(0, 0, 0, 0.08)" : "none"};
           position: sticky;
@@ -219,7 +219,7 @@ export default function Navbar() {
         .nav-links li a {
           text-decoration: none;
           color: var(--gray-800);
-          font-weight: 800;
+          font-weight: 700;
           padding: 0.5rem 1rem;
           border-radius: var(--radius-sm);
           transition: var(--transition);
@@ -236,7 +236,7 @@ export default function Navbar() {
           color: var(--primary);
           box-shadow: none;
           position: relative;
-          font-weight: 600;
+          font-weight: 700;
         }
 
         .nav-links li a.active:after {
@@ -296,12 +296,11 @@ export default function Navbar() {
         .sidebar a {
           text-decoration: none;
           color: var(--gray-800);
-          font-weight: 800;
+          font-weight: 700;
           padding: 0.75rem 1rem;
           border-radius: var(--radius-sm);
           transition: var(--transition);
           border: 1px solid transparent;
-          background: var(--bg-cream);
           display: block;
           position: relative;
         }
@@ -314,7 +313,7 @@ export default function Navbar() {
         .sidebar a.active {
           background: none;
           color: var(--primary)!important;
-          font-weight: 600;
+          font-weight: 700;
           box-shadow: none;
         }
 

@@ -23,18 +23,18 @@ export default function Footer() {
 
                 <div className="contactus">
                     <div className="heading">Contact Us</div>
-                    <a href="tel:+918929676776">
+                    <div href="tel:+918929676776">
                         <i className="bi bi-telephone-fill"></i>
                         <span>+91 8929676776</span>
-                    </a>
-                    <a href="tel:+918929676776">
+                    </div>
+                    <div href="tel:+918929676776">
                         <i className="bi bi-telephone-fill"></i>
                         <span>+91 8929676776</span>
-                    </a>
-                    <a href="mailto:sharma.aakash1012@gmail.com">
+                    </div>
+                    <div href="mailto:sharma.aakash1012@gmail.com">
                         <i className="bi bi-envelope-at-fill"></i>
                         <span>sharma.aakash1012@gmail.com</span>
-                    </a>
+                    </div>
                 </div>
 
                 <div className="findus">

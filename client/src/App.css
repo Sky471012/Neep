@@ -341,126 +341,6 @@ ul, li {
   resize: vertical;
 }
 
-
-/* Download App */
-.download-app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.features {
-  display: flex;
-  flex-direction: row;
-  align-items: end;
-  margin: 30px auto;
-  width: 90%;
-  justify-content: space-between;
-  padding: 30px;
-}
-
-.features-box {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  width: 70%;
-  gap: 20px;
-  padding-left: 40px;
-}
-
-.features-box h5 {
-  color: #3498db;
-}
-
-.features-box p {
-  text-align: left;
-  width: 80%;
-}
-
-.app-image {
-  width: 30%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.app-image img {
-  height: 400px;
-  max-width: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.575));
-}
-
-.download-app-container {
-  width: 85%;
-  display: flex;
-  flex-direction: row;
-  text-align: center;
-  box-shadow: 0 4px 7px rgba(0, 0, 0, 0.1);
-  margin: 30px auto;
-  padding: 50px 20px 0;
-  background: linear-gradient(0deg, #3498db42, #ffffff);
-  border-radius: 10px;
-  align-items: end;
-  border: 5px solid #3498db99;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  width: 50%;
-  text-align: right;
-  gap: 20px;
-  padding: 30px;
-  align-self: center;
-}
-
-.content p {
-  text-align: right;
-  width: 100%;
-}
-
-.app-box {
-  display: flex;
-  flex-direction: row-reverse;
-  gap: 20px;
-}
-
-.googleplay {
-  height: 60px;
-  transition: transform 0.3s ease-in-out;
-  margin: 0;
-  max-width: 100%;
-  object-fit: contain;
-  border-radius: 7px;
-  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.575));
-}
-
-.googleplay:hover {
-  transform: scale(1.05);
-}
-
-.qr-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 50%;
-}
-
-.qr {
-  height: 450px;
-  max-width: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.575));
-
-}
-
-
-
-
 /* Footer - dark gradient, classic Bootstrap 5+ dark theme */
 .footer {
   padding: 2.5rem 0;
@@ -489,13 +369,38 @@ ul, li {
   text-decoration: none;
 }
 
-.footer-container a:hover {
-  color: #fff !important;
+.contactus div{
+  display: flex;
+  gap: 5px;
+  color: #a0a0a0;
+  align-content: flex-end;
+}
+
+.contactus div span{
+  font-size: 1rem;
+}
+
+.contactus div:hover i{
+  color: #ffffff !important;
+}
+
+.contactus div:hover span{
+  color: #ffffff !important;
+}
+
+.contactus div i{
+  font-size: 1.2rem!important;
+  padding: 0;
+  margin: 0;
+}
+
+.findus a:hover p{
+  color: #ffffff !important;
 }
 
 .footer-container a i {
   margin-right: 0.5rem;
-  color: inherit !important;
+  font-size: 1.6rem;
 }
 
 .logo {
@@ -508,7 +413,7 @@ ul, li {
 
 .social-media {
   display: flex;
-  gap: 1rem;
+  gap: 0.6rem;
   margin-top: 1rem;
 }
 
@@ -519,15 +424,13 @@ ul, li {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  font-size: 1.2rem;
-  color: #fff !important;
+  font-size: 1.5rem;
+  color: #a0a0a0 !important;
   transition: all 0.25s ease;
 }
 
 .social-media a:hover {
-  background: var(--bs-primary) !important;
-  transform: scale(1.1);
+  color: white !important;
 }
 
 .heading {
@@ -544,7 +447,7 @@ ul, li {
   margin-bottom: 1.5rem;
 }
 
-.contactus a {
+.contactus div {
   display: flex;
   align-items: center;
   margin: 0.5rem 0;
@@ -552,10 +455,10 @@ ul, li {
 
 .footer hr {
   border: none;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  height: 1.5px;
+  background: rgb(255, 255, 255);
   margin: 2rem auto;
-  width: 80%;
+  width: 85%;
 }
 
 .footer span {
@@ -563,7 +466,6 @@ ul, li {
   text-align: center;
   color: rgba(255, 255, 255, 0.6) !important;
   font-size: 0.9rem;
-  margin: 1rem 0 0;
 }
 
 /* Responsive */
@@ -657,53 +559,8 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Print styles */
-@media print {
-  .navbar,
-  .whatsapp-link,
-  .make-a-call,
-  .preloader {
-    display: none !important;
-  }
-
-  body {
-    background: white !important;
-    color: black !important;
-  }
-}
 
 @media screen and (max-width: 769px) {
-  .nav-links {
-    display: none;
-  }
-
-  .hamburger {
-    display: block;
-  }
-
-  .navbar {
-    padding: 12px 20px;
-  }
-
-  .sidebar a.active {
-    background-color: #2980b9;
-    margin: 0 -20px;
-    padding: 12px 40px;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-  }
-
-  .sidebar .button.active {
-    background-color: #3498db;
-    text-decoration: none;
-    font-size: 18px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    margin-right: 30px;
-    margin-left: 20px;
-  }
-
   .slider {
     width: 250%;
   }
@@ -727,61 +584,6 @@ html {
     padding: 30px 20px;
   }
 
-  .features {
-    flex-direction: column;
-    width: 100%;
-    padding: 15px;
-    margin: 20px auto;
-  }
-
-  .features-box {
-    width: 95%;
-    gap: 15px;
-    padding-left: 0;
-    margin-bottom: 20px;
-  }
-
-  .app-image {
-    width: 100%;
-  }
-
-  .app-image img {
-    height: 350px;
-  }
-
-  .download-app-container {
-    flex-direction: column;
-    padding: 0;
-    gap: 20px;
-    background: none;
-  }
-
-  .content {
-    width: 100%;
-    padding: 15px;
-    text-align: center;
-  }
-
-  .content p {
-    text-align: center;
-  }
-
-  .qr-box {
-    width: 100%;
-    padding: 20px 0 0;
-    background: linear-gradient(0deg, #3498db42, #ffffff);
-  }
-
-  .qr {
-    height: 300px;
-  }
-
-  .app-box {
-    flex-direction: column;
-    align-items: center;
-    padding-bottom: 20px;
-  }
-
   .social-media{
     justify-content: center;
   }
@@ -790,54 +592,5 @@ html {
 @media (min-width: 770px) and (max-width: 1100px) {
   .slider {
     width: 200%;
-  }
-
-  .download-app {
-    padding-top: 120px;
-  }
-
-  .features {
-    gap: 30px;
-    width: 95%;
-    padding: 20px;
-  }
-
-  .features-box {
-    padding-left: 50px;
-    width: 60%;
-  }
-
-  .app-image {
-    width: 40%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .app-image img {
-    margin: 0;
-  }
-
-  .download-app-container {
-    width: 95%;
-    padding: 30px 15px 0;
-  }
-
-  .content {
-    padding: 20px;
-    text-align: center;
-  }
-
-  .content h1 {
-    text-align: right;
-  }
-
-  .content p {
-    text-align: right;
-  }
-
-  .qr {
-    height: 350px;
   }
 }

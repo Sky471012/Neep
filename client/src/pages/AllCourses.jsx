@@ -184,7 +184,7 @@ const AllCourses = () => {
         }
 
         .courses-section {
-          padding: 80px 20px;
+          padding: 20px 20px;
           background: linear-gradient(
             135deg,
             var(--bs-light-bg-subtle) 0%,
