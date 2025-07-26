@@ -6,6 +6,7 @@ export default function Navbar() {
   const role = localStorage.getItem("role");
   const [scrolled, setScrolled] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -17,6 +18,18 @@ export default function Navbar() {
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+      
+      // Check if reviews section is in view
+      const reviewsSection = document.getElementById("reviews");
+      if (reviewsSection) {
+        const rect = reviewsSection.getBoundingClientRect();
+        const isInView = rect.top <= 100 && rect.bottom >= 100;
+        if (isInView && location.pathname === "/") {
+          setActiveSection("reviews");
+        } else if (!isInView && activeSection === "reviews") {
+          setActiveSection("");
+        }
+      }
     };
 
     const handleEscape = (e) => {
@@ -30,18 +43,37 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, []);
+  }, [activeSection, location.pathname]);
+
+  // Reset active section when route changes
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      setActiveSection("");
+    }
+  }, [location.pathname]);
 
   const isRouteActive = (path) => location.pathname === path;
+  const isAnchorActive = (anchor) => activeSection === anchor && location.pathname === "/";
+
+  const handleAnchorClick = (anchor) => {
+    setActiveSection(anchor);
+    setSidebarOpen(false);
+    
+    // Smooth scroll to section
+    const element = document.getElementById(anchor);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <>
       <nav className={`navbar ${scrolled ? "navbar-scrolled" : ""}`}>
         <div className="logo">MySite</div>
         <ul className="nav-links">
-          <li><Link to="/" className={isRouteActive("/") ? "active" : ""}>Home</Link></li>
-          {/* <li><Link to="/courses-title" className={isRouteActive("/courses") ? "active" : ""}>Courses</Link></li> */}
-          <li><a href="#courses" className="nav-link">Courses</a></li>
+          <li><Link to="/#home" className={isRouteActive("/") && !activeSection ? "active" : ""}>Home</Link></li>
+          <li><Link to="/all-courses" className={isRouteActive("/all-courses") ? "active" : ""}>Courses</Link></li>
+          <li><Link to="/#reviews" className={isAnchorActive("reviews") ? "active" : ""} onClick={() => handleAnchorClick("reviews")}>Student Reviews</Link></li>
           <li><Link to="/downloadapp" className={isRouteActive("/downloadapp") ? "active" : ""}>Download App</Link></li>
           <li><Link to="/contactus" className={isRouteActive("/contactus") ? "active" : ""}>Contact Us</Link></li>
 
@@ -83,35 +115,36 @@ export default function Navbar() {
           &times;
         </button>
 
-        <Link to="/" onClick={() => setSidebarOpen(false)}>Home</Link>
-        <Link to="/courses" onClick={() => setSidebarOpen(false)}>Courses</Link>
-        <Link to="/downloadapp" onClick={() => setSidebarOpen(false)}>Download App</Link>
-        <Link to="/contactus" onClick={() => setSidebarOpen(false)}>Contact Us</Link>
+        <Link to="/#home" className={isRouteActive("/") && !activeSection ? "active" : ""} onClick={() => setSidebarOpen(false)}>Home</Link>
+        <Link to="/all-courses" className={isRouteActive("/all-courses") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Courses</Link>
+        <Link to="/#reviews" className={isAnchorActive("reviews") ? "active" : ""} onClick={() => handleAnchorClick("reviews")}>Student Reviews</Link>
+        <Link to="/downloadapp" className={isRouteActive("/downloadapp") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Download App</Link>
+        <Link to="/contactus" className={isRouteActive("/contactus") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Contact Us</Link>
 
         {authToken && role === "student" && (
           <>
-            <Link to="/student" onClick={() => setSidebarOpen(false)}>Student</Link>
+            <Link to="/student" className={isRouteActive("/student") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Student</Link>
             <Link to="/" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
         {authToken && role === "teacher" && (
           <>
-            <Link to="/teacher" onClick={() => setSidebarOpen(false)}>Teacher</Link>
+            <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Teacher</Link>
             <Link to="/" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
         {authToken && role === "admin" && (
           <>
-            <Link to="/teacher" onClick={() => setSidebarOpen(false)}>Teacher</Link>
-            <Link to="/admin" onClick={() => setSidebarOpen(false)}>Admin</Link>
+            <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Teacher</Link>
+            <Link to="/admin" className={isRouteActive("/admin") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Admin</Link>
             <Link to="/" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
         {!authToken && (
-          <Link to="/login" onClick={() => setSidebarOpen(false)}>Login</Link>
+          <Link to="/login" className={isRouteActive("/login") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Login</Link>
         )}
       </div>
 
@@ -162,7 +195,7 @@ export default function Navbar() {
           top: 0;
           z-index: 1000;
           transition: var(--transition);
-          margin: 0; /* Remove any margin */
+          margin: 0;
           border-bottom: 1px solid rgba(0, 0, 0, 0.04);
         }
 
@@ -186,7 +219,7 @@ export default function Navbar() {
         .nav-links li a {
           text-decoration: none;
           color: var(--gray-800);
-          font-weight: 500;
+          font-weight: 800;
           padding: 0.5rem 1rem;
           border-radius: var(--radius-sm);
           transition: var(--transition);
@@ -263,13 +296,14 @@ export default function Navbar() {
         .sidebar a {
           text-decoration: none;
           color: var(--gray-800);
-          font-weight: 500;
+          font-weight: 800;
           padding: 0.75rem 1rem;
           border-radius: var(--radius-sm);
           transition: var(--transition);
           border: 1px solid transparent;
           background: var(--bg-cream);
           display: block;
+          position: relative;
         }
 
         .sidebar a:hover {
@@ -277,18 +311,36 @@ export default function Navbar() {
           color: var(--primary);
         }
 
-        .sidebar a:active, .sidebar a.active {
+        .sidebar a.active {
           background: none;
-          color: var(--primary);
+          color: var(--primary)!important;
           font-weight: 600;
           box-shadow: none;
+        }
+
+        .sidebar a.active:after {
+          content: "";
+          display: block;
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 3px;
+          height: 60%;
+          background: var(--primary);
+          border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar a:active {
+          background: none;
+          transform: none;
         }
 
         .close-btn {
           position: absolute;
           top: 1rem;
-          right: 1rem;
-          font-size: 2rem;
+          right: 2rem;
+          font-size: 2.5rem;
           background: none;
           border: none;
           color: var(--gray-800);

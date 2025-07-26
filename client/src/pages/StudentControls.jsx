@@ -134,7 +134,7 @@ export default function StudentControls() {
     }
 
     async function generatePDFReceipt(student, record) {
-        const { base64: logoBase64, width: originalWidth, height: originalHeight } = await getBase64FromImagePath("/logo.png");
+        const { base64: logoBase64, width: originalWidth, height: originalHeight } = await getBase64FromImagePath("/logo_rectagle.jpg");
 
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
@@ -170,7 +170,7 @@ export default function StudentControls() {
         doc.text("+91 9891214643", 34, 37);
         doc.text("Email: neep.md@gmail.com", 20, 42);
 
-        const imgHeight = 25;
+        const imgHeight = 17;
         const scale = imgHeight / originalHeight;
         const imgWidth = originalWidth * scale;
         doc.addImage(logoBase64, "PNG", pageWidth - imgWidth - 20, 15, imgWidth, imgHeight);

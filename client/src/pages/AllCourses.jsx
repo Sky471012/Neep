@@ -1,8 +1,12 @@
 "use client";
-import { Link, useNavigate, useLocation } from "react-router-dom";
 
+import Navbar from "../components/Navbar";
+import Call from '../components/Call'
+import Whatsapp from '../components/Whatsapp'
+import Instagram from '../components/Instagram'
+import Footer from '../components/Footer'
 
-const OurCourses = () => {
+const AllCourses = () => {
   const courses = [
     {
       id: 1,
@@ -373,76 +377,6 @@ const OurCourses = () => {
           transform: translateY(0);
         }
 
-        /* View All Courses Button Styles */
-        .view-all-card {
-          background: linear-gradient(
-            135deg,
-            var(--bs-primary) 0%,
-            var(--bs-info) 100%
-          );
-          border-radius: var(--bs-border-radius-lg);
-          padding: 30px;
-          box-shadow: var(--bs-box-shadow-sm);
-          border: 1px solid var(--bs-primary);
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-          cursor: pointer;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
-          min-height: 300px;
-        }
-
-        .view-all-card:hover {
-          transform: translateY(-8px);
-          box-shadow: var(--bs-box-shadow-lg);
-          background: linear-gradient(
-            135deg,
-            var(--bs-link-hover-color) 0%,
-            var(--bs-primary) 100%
-          );
-        }
-
-        .view-all-icon {
-          width: 60px;
-          height: 60px;
-          border: 3px solid var(--bs-white);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 20px;
-          transition: all 0.3s ease;
-          padding: 10px;
-        }
-
-        .view-all-card:hover .view-all-icon {
-          transform: scale(1.1);
-          border-width: 4px;
-        }
-
-        .view-all-arrow {
-          color: var(--bs-white);
-          font-size: 30px;
-        }
-
-        .view-all-title {
-          color: var(--bs-white);
-          font-size: 1.5rem;
-          font-weight: 700;
-          margin-bottom: 10px;
-        }
-
-        .view-all-subtitle {
-          color: rgba(255, 255, 255, 0.9);
-          font-size: 1rem;
-          font-weight: 400;
-          line-height: 1.4;
-        }
-
         /* Responsive Design */
         @media (max-width: 768px) {
           .courses-section {
@@ -470,14 +404,6 @@ const OurCourses = () => {
           .course-title {
             font-size: 1.3rem;
           }
-
-          .view-all-card {
-            padding: 25px;
-          }
-
-          .view-all-title {
-            font-size: 1.3rem;
-          }
         }
 
         @media (max-width: 480px) {
@@ -501,23 +427,6 @@ const OurCourses = () => {
             padding: 10px 16px;
             font-size: 0.9rem;
           }
-
-          .view-all-card {
-            padding: 20px;
-          }
-
-          .view-all-title {
-            font-size: 1.2rem;
-          }
-
-          .view-all-icon {
-            width: 50px;
-            height: 50px;
-          }
-
-          .view-all-arrow {
-            font-size: 20px;
-          }
         }
 
         /* Animation for cards appearing */
@@ -532,39 +441,33 @@ const OurCourses = () => {
           }
         }
 
-        .course-card, .view-all-card {
+        .course-card {
           animation: fadeInUp 0.6s ease forwards;
         }
 
-        .course-card:nth-child(1), .view-all-card:nth-child(1) {
+        .course-card:nth-child(1) {
           animation-delay: 0.1s;
         }
-        .course-card:nth-child(2), .view-all-card:nth-child(2) {
+        .course-card:nth-child(2) {
           animation-delay: 0.2s;
         }
-        .course-card:nth-child(3), .view-all-card:nth-child(3) {
+        .course-card:nth-child(3) {
           animation-delay: 0.3s;
         }
-        .course-card:nth-child(4), .view-all-card:nth-child(4) {
+        .course-card:nth-child(4) {
           animation-delay: 0.4s;
         }
-        .course-card:nth-child(5), .view-all-card:nth-child(5) {
+        .course-card:nth-child(5) {
           animation-delay: 0.5s;
-        }
-        .course-card:nth-child(6), .view-all-card:nth-child(6) {
-          animation-delay: 0.6s;
         }
       `}</style>
 
-      <section className="courses-section">
+      <Navbar />
+
+      <section id="courses" className="courses-section">
         <div className="courses-container">
           <div className="courses-header">
-            <h2 className="courses-title">Courses We Provide</h2>
-            <p className="courses-subtitle">
-              Discover our comprehensive range of courses designed to help you
-              excel in your academic and professional journey. Expert faculty,
-              proven methodologies, and personalized attention.
-            </p>
+            <h2 className="courses-title">Our Courses</h2>
           </div>
 
           <div className="courses-grid">
@@ -606,25 +509,16 @@ const OurCourses = () => {
                 </button> */}
               </div>
             ))}
-
-            {/* View All Courses Button Card */}
-            <Link
-              to='/all-courses'
-              className="view-all-card"
-            >
-              <div className="view-all-icon">
-                <span className="view-all-arrow"><i className="bi bi-chevron-right"></i></span>
-              </div>
-              <h3 className="view-all-title">See more</h3>
-              <p className="view-all-subtitle">
-                Explore our complete course catalog and find the perfect program for your goals
-              </p>
-            </Link>
           </div>
         </div>
       </section>
+
+      <Call />
+      <Whatsapp />
+      <Instagram />
+      <Footer />
     </>
   );
 };
 
-export default OurCourses;
+export default AllCourses;

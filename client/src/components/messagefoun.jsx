@@ -44,9 +44,6 @@ const MessageFromFounder = () => {
         }
 
         .founder-section {
-          padding: 0;
-          margin: 0;
-          height: 100vh;
           min-height: 600px;
           background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 25%, #ffffff 50%, #f1f5f9 75%, #e2e8f0 100%);
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -88,9 +85,7 @@ const MessageFromFounder = () => {
         }
 
         .founder-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 2rem;
+          padding: 30px 90px;
           position: relative;
           z-index: 2;
           width: 100%;
@@ -100,25 +95,21 @@ const MessageFromFounder = () => {
         .founder-content {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 6rem;
           align-items: center;
-          height: 100%;
-          min-height: 600px;
         }
 
         .message-block {
-          padding-right: 2rem;
+          padding-right: 1rem;          
         }
 
         .section-badge {
           display: inline-flex;
           align-items: center;
-          gap: 0.5rem;
           background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
           border: 1px solid rgba(59, 130, 246, 0.2);
           border-radius: 50px;
-          padding: 0.4rem 1.2rem;
-          font-size: 0.75rem;
+          padding: 10px 25px;
+          font-size: 0.9rem;
           font-weight: 600;
           color: #3b82f6;
           text-transform: uppercase;
@@ -144,10 +135,10 @@ const MessageFromFounder = () => {
 
         .founder-heading {
           font-family: 'Playfair Display', Georgia, serif;
-          font-size: 2.75rem;
+          font-size: 2.8rem;
           font-weight: 700;
           margin-bottom: 1.5rem;
-          line-height: 1.2;
+          line-height: 1;
           background: linear-gradient(135deg, #1e293b 0%, #475569 25%, #3b82f6 50%, #10b981 75%, #8b5cf6 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -168,11 +159,11 @@ const MessageFromFounder = () => {
 
         .founder-quote {
           font-family: 'Playfair Display', Georgia, serif;
-          font-size: 1.25rem;
+          font-size: 1.2rem;
           font-style: italic;
           font-weight: 400;
           color: #64748b;
-          margin-bottom: 2rem;
+          margin-bottom: 1rem;
           line-height: 1.6;
           position: relative;
           padding: 1.5rem 2rem;
@@ -209,18 +200,18 @@ const MessageFromFounder = () => {
 
         .founder-message {
           font-family: 'Inter', sans-serif;
-          font-size: 1rem;
+          font-size: 0.9rem;
           font-weight: 400;
-          line-height: 1.7;
+          line-height: 1.5;
           color: #475569;
-          margin-bottom: 2rem;
+          margin-bottom: 1rem;
           text-align: justify;
         }
 
         .founder-signature {
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
           border-radius: 16px;
-          padding: 2rem;
+          padding: 12px 2rem;
           border: 1px solid rgba(255, 255, 255, 0.4);
           backdrop-filter: blur(20px);
           box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
@@ -237,13 +228,23 @@ const MessageFromFounder = () => {
           height: 3px;
           background: linear-gradient(135deg, #3b82f6 0%, #10b981 50%, #8b5cf6 100%);
         }
+        
+        .founder-signature::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(135deg, #8b5cf6 0%, #10b981 50%, #3b82f6 100%);
+        }
 
         .founder-name {
           font-family: 'Playfair Display', Georgia, serif;
           font-size: 1.5rem;
           font-weight: 600;
           color: #1e293b;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0px;
           letter-spacing: -0.025em;
         }
 
@@ -260,29 +261,21 @@ const MessageFromFounder = () => {
           display: flex;
           justify-content: center;
           align-items: center;
-          padding-left: 2rem;
         }
 
         .founder-image-container {
           position: relative;
-          width: 380px;
-          height: 380px;
+          width: 80%;
         }
 
         .founder-image {
           width: 100%;
-          height: 100%;
           border-radius: 20px;
           object-fit: cover;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
           border: 3px solid rgba(255, 255, 255, 0.8);
           backdrop-filter: blur(10px);
-        }
-
-        .founder-image:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 32px 64px -12px rgba(59, 130, 246, 0.3);
         }
 
         .founder-image-container::before {
@@ -464,20 +457,14 @@ const MessageFromFounder = () => {
                 Leadership Message
               </div>
 
-              <h2 className="founder-heading">Message from the Founder</h2>
+              <h2 className="founder-heading">Words from the Founder</h2>
 
               <p className="founder-quote">
                 Education is the most powerful weapon which you can use to change the world, and excellence is never an accident.
               </p>
 
               <p className="founder-message">
-                I embarked on my educational journey in Economics and maths back in 2009, starting modestly with just 5 chairs in my home. Over the years, the exceptional results achieved by my students not only fueled my passion but also carved my path into the teaching profession.
-
-I hold a B.Com, M.com degree and an MA in Economics, complemented by a certification in GNIIT.
-
-
-
-
+                I embarked on my educational journey in Economics and maths back in 2009, starting modestly with just 5 chairs in my home. Over the years, the exceptional results achieved by my students not only fueled my passion but also carved my path into the teaching profession.I hold a B.Com, M.com degree and an MA in Economics, complemented by a certification in GNIIT.
               </p>
 
               <div className="founder-signature">

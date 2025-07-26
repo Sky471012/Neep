@@ -270,7 +270,7 @@ const BannerSection = () => {
           border: 2px solid var(--bs-white);
           color: var(--bs-primary);
           font-size: 1.5rem;
-          padding: 15px;
+          padding: 0px 15px;
           border-radius: 50%;
           cursor: pointer;
           transition: all 0.3s ease;
@@ -281,7 +281,7 @@ const BannerSection = () => {
         .banner-arrows:hover {
           background-color: var(--bs-primary);
           color: var(--bs-white);
-          transform: translateY(-50%) scale(1.1);
+          transform: translateY(-50%) scale(1.03);
           box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
@@ -338,7 +338,7 @@ const BannerSection = () => {
         }
       `}</style>
       
-      <section className="banner-section">
+      <section id="home" className="banner-section">
         <div 
           className="banner-container" 
           style={{ transform: `translateX(-${currentSlide * 33.333}%)` }}
