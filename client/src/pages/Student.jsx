@@ -9,6 +9,7 @@ import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
 import ModalFour from "../modals/ModalFour";
+import '../components/student.css'; // Add this CSS file
 
 export default function Student() {
 
@@ -283,7 +284,14 @@ export default function Student() {
         return words + ' only';
     }
 
-    if (!student) return <p>Loading student data...</p>;
+    if (!student) return (
+        <div className="loading-container">
+            <div className="loading-content">
+                <div className="loading-spinner"></div>
+                <p className="loading-text">Loading student data...</p>
+            </div>
+        </div>
+    );
 
     const totalPaid = Array.isArray(installments)
         ? installments.reduce((sum, inst) => sum + (inst.paidDate ? inst.amount || 0 : 0), 0)
@@ -296,308 +304,386 @@ export default function Student() {
 
         <Navbar />
 
+        <div className="app-container">
+            <div className="main-layout">
+                {/* Sidebar */}
+                <div className="student-sidebar">
+                    {/* Profile Header */}
+                    <div className="profile-header">
+                        <div className="profile-avatar">
+                            <svg className="w-10 h-10 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h2 className="profile-title">Student Portal</h2>
+                    </div>
 
-        <div className="main-content student-container">
+                    {/* Student Details */}
+                    <div className="student-details-card">
+                        <h3 className="details-header">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Personal Details
+                        </h3>
 
-            {/* Student Details */}
-            <div className="student-details container card mb-5 p-3">
-                <h1>Student details</h1>
-                <div className="container">
-                    <span>Name : <strong>{student.name}</strong></span><br />
-                    <span>Phone : <strong>{student.phone}</strong></span><br />
-                    <span>DOB : <strong>{student.dob}</strong></span><br />
-                    <span>Class : <strong>{student.class}</strong></span><br />
-                    <span>Address : <strong>{student.address}</strong></span><br />
-                    <span>Date of Joining : <strong>{student.dateOfJoining}</strong></span><br />
+                        <div className="detail-item">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <div>
+                                <div className="detail-label">Name:</div>
+                                <div className="detail-value">{student.name}</div>
+                            </div>
+                        </div>
+
+                        <div className="detail-item">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <div>
+                                <div className="detail-label">Phone:</div>
+                                <div className="detail-value">{student.phone}</div>
+                            </div>
+                        </div>
+
+                        <div className="detail-item">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v8a1 1 0 01-1 1h-3v2a1 1 0 01-1 1H9a1 1 0 01-1-1v-2H5a1 1 0 01-1-1V8a1 1 0 011-1h3z" />
+                            </svg>
+                            <div>
+                                <div className="detail-label">DOB:</div>
+                                <div className="detail-value">{student.dob}</div>
+                            </div>
+                        </div>
+
+                        <div className="detail-item">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                            </svg>
+                            <div>
+                                <div className="detail-label">Class:</div>
+                                <div className="detail-value">{student.class}</div>
+                            </div>
+                        </div>
+
+                        <div className="detail-item">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <div>
+                                <div className="detail-label">Address:</div>
+                                <div className="detail-value">{student.address}</div>
+                            </div>
+                        </div>
+
+                        <div className="detail-item">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <div className="detail-label">Joining Date:</div>
+                                <div className="detail-value">{student.dateOfJoining}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Fee Details Button */}
+                    <button className="fee-button" onClick={() => setShowModalFour(student._id)}>
+                        Show Fee Details
+                    </button>
                 </div>
-                <button className="button" onClick={() => setShowModalFour(student._id)}>
-                    Show Fee details
-                </button>
-            </div>
 
-            {/* Batches with Attendance Calendar */}
-            <div className="batches-container">
-                <div className="container d-flex justify-content-between align-items-center mb-3">
-                    <h2>All Batches</h2>
-                    <input
-                        type="search"
-                        placeholder="Search batches with name..."
-                        className="form-control w-50"
-                        onChange={(e) => setBatchSearch(e.target.value)}
-                    />
-                </div>
+                {/* Main Content Area */}
+                <div className="content-area">
+                    {/* Welcome Card */}
+                    <div className="welcome-card">
+                        <h1 className="welcome-title">Welcome back, {student.name}!</h1>
+                        <p className="welcome-subtitle">Manage your academic journey with ease</p>
+                    </div>
 
-                <div className="container">
-                    <div className="row">
-                        {batchesRecords.length > 0 ? (
-                            batchesRecords
-                                .filter((b) =>
-                                    b.batchName.toLowerCase().includes(batchSearch.toLowerCase())
-                                )
-                                .map((batch, index) => (
-                                    <div className="col-12 col-sm-6 col-lg-4" key={index}>
-                                        <div className="card batch-card mb-3">
-                                            <div className="d-flex justify-content-between align-items-start">
-                                                <h5 className="card-title mt-1">{batch.batchName}</h5>
+                    {/* Batches Section */}
+                    <div className="batches-section">
+                        <div className="batches-header">
+                            <h2 className="batches-title">All Batches</h2>
+                            <div className="search-container">
+                                <svg className="search-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <input
+                                    type="search"
+                                    placeholder="Search batches with name..."
+                                    className="search-input"
+                                    onChange={(e) => setBatchSearch(e.target.value)}
+                                />
+                            </div>
+                        </div>
 
-                                                <div className="dropdown ms-auto">
-                                                    <button
-                                                        className="btn btn-sm"
-                                                        type="button"
-                                                        data-bs-toggle="dropdown"
-                                                        aria-expanded="false"
-                                                    >
-                                                        <h5>⋮</h5>
-                                                    </button>
-                                                    <ul className="dropdown-menu dropdown-menu-end shadow">
-                                                        <li>
-                                                            <button
-                                                                className="dropdown-item"
-                                                                onClick={() => {
-                                                                    setShowModalThree(batch.batchId);
-                                                                    fetchTimetable(batch.batchId);
-                                                                }}
-                                                            >
-                                                                Show Timetable
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button
-                                                                className="dropdown-item"
-                                                                onClick={() => setShowModalOne(batch.batchId)}
-                                                            >
-                                                                Show Attendance
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button
-                                                                className="dropdown-item"
-                                                                onClick={() => setShowModalTwo(batch.batchId)}
-                                                            >
-                                                                Show All Tests
-                                                            </button>
-                                                        </li>
-                                                    </ul>
+                        <div className="batches-grid">
+                            {batchesRecords.length > 0 ? (
+                                batchesRecords
+                                    .filter((b) =>
+                                        b.batchName.toLowerCase().includes(batchSearch.toLowerCase())
+                                    )
+                                    .map((batch, index) => (
+                                        <div className="batch-card" key={index}>
+                                            <div className="batch-header">
+                                                <h5 className="batch-name">{batch.batchName}</h5>
+                                            </div>
 
-                                                    {/* Attendance Modal */}
-                                                    <ModalOne
-                                                        isOpen={showModalOne === batch.batchId}
-                                                        onClose={() => setShowModalOne(null)}
-                                                    >
-                                                        {showModalOne && (
-                                                            <div id={`carousel-${batch.batchId}`} className="carousel slide">
-                                                                <h5 className="card-title">{batch.batchName}</h5>
-                                                                <div className="carousel-inner">
-                                                                    {allMonths.map((month, idx) => {
-                                                                        let calendarMonth, calendarYear;
-                                                                        if (idx <= 8) {
-                                                                            calendarMonth = idx + 3;
-                                                                            calendarYear = academicYearStart;
-                                                                        } else {
-                                                                            calendarMonth = idx - 9;
-                                                                            calendarYear = academicYearStart + 1;
-                                                                        }
-                                                                        const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                                            <div className="batch-actions">
+                                                <button
+                                                    className="action-button timetable"
+                                                    onClick={() => {
+                                                        setShowModalThree(batch.batchId);
+                                                        fetchTimetable(batch.batchId);
+                                                    }}
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                                    </svg>
+                                                    Timetable
+                                                </button>
 
-                                                                        return (
-                                                                            <div
-                                                                                className={`carousel-item ${idx === activeMonthIndex ? "active" : ""}`}
-                                                                                key={month}
-                                                                            >
-                                                                                <h6>{month} {calendarYear}</h6>
-                                                                                <div className="calendar-grid">
-                                                                                    {[...Array(daysInMonth)].map((_, dateIdx) => {
-                                                                                        const date = new Date(calendarYear, calendarMonth, dateIdx + 1);
-                                                                                        const fullDate = date.toISOString().split('T')[0];
-                                                                                        const key = `${batch.batchId}_${fullDate}`;
-                                                                                        const status = attendanceMap[key];
+                                                <button 
+                                                    className="action-button attendance" 
+                                                    onClick={() => setShowModalOne(batch.batchId)}
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v8a1 1 0 01-1 1h-3v2a1 1 0 01-1-1H9a1 1 0 01-1-1v-2H5a1 1 0 01-1-1V8a1 1 0 011-1h3z" />
+                                                    </svg>
+                                                    Attendance
+                                                </button>
 
-                                                                                        return (
-                                                                                            <div
-                                                                                                key={dateIdx}
-                                                                                                className={`date-box ${status === "present"
-                                                                                                    ? "present"
-                                                                                                    : status === "absent"
-                                                                                                        ? "absent"
-                                                                                                        : ""
-                                                                                                    }`}
-                                                                                                title={`${month} ${dateIdx + 1}, ${calendarYear} - ${status || 'No record'}`}
-                                                                                            >
-                                                                                                {dateIdx + 1}
-                                                                                            </div>
-                                                                                        );
-                                                                                    })}
-                                                                                </div>
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </div>
-
-                                                                <div className="calendar-controls d-flex justify-content-between mt-2">
-                                                                    <button
-                                                                        className="btn btn-outline-secondary btn-sm"
-                                                                        type="button"
-                                                                        data-bs-target={`#carousel-${batch.batchId}`}
-                                                                        data-bs-slide="prev"
-                                                                    >
-                                                                        ‹ Previous
-                                                                    </button>
-                                                                    <button
-                                                                        className="btn btn-outline-secondary btn-sm"
-                                                                        type="button"
-                                                                        data-bs-target={`#carousel-${batch.batchId}`}
-                                                                        data-bs-slide="next"
-                                                                    >
-                                                                        Next ›
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </ModalOne>
-
-                                                    {/* Tests Modal */}
-                                                    <ModalTwo
-                                                        isOpen={showModalTwo === batch.batchId}
-                                                        onClose={() => setShowModalTwo(null)}
-                                                    >
-                                                        <div className="test-details">
-                                                            <h3>All Tests of {batch.batchName}</h3>
-                                                            <table className="table table-bordered table-striped text-center mt-3">
-                                                                <thead className="table-dark">
-                                                                    <tr>
-                                                                        <th>Test Name</th>
-                                                                        <th>Date</th>
-                                                                        <th>Max Marks</th>
-                                                                        <th>Marks Scored</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {testRecords
-                                                                        .filter(test => test.batchId === batch.batchId)
-                                                                        .map((test, index) => (
-                                                                            <tr key={index}>
-                                                                                <td>{test.name}</td>
-                                                                                <td>{test.date}</td>
-                                                                                <td>{test.maxMarks}</td>
-                                                                                <td>{test.marksScored}</td>
-                                                                            </tr>
-                                                                        ))}
-                                                                </tbody>
-                                                            </table>
-                                                            {testRecords.filter(test => test.batchId === batch.batchId).length === 0 && (
-                                                                <p>No tests found for this batch.</p>
-                                                            )}
-                                                        </div>
-                                                    </ModalTwo>
-
-                                                    {/* Timetable Modal */}
-                                                    <ModalThree
-                                                        isOpen={showModalThree === batch.batchId}
-                                                        onClose={() => setShowModalThree(null)}
-                                                    >
-                                                        <div className="timetable-details">
-                                                            <h3>Timetable for {batch.batchName}</h3>
-                                                            {timetableRecords[batch.batchId]?.length > 0 ? (
-                                                                <table className="table table-bordered text-center mt-3">
-                                                                    <thead className="table-dark">
-                                                                        <tr>
-                                                                            <th>Weekday</th>
-                                                                            <th>Time Slots</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        {[...timetableRecords[batch.batchId]]
-                                                                            .sort((a, b) => weekdayOrder[a.weekday] - weekdayOrder[b.weekday])
-                                                                            .map((entry, index) => (
-                                                                                <tr key={index}>
-                                                                                    <td>{entry.weekday}</td>
-                                                                                    <td>
-                                                                                        {entry.timetable.map((slot, idx) => (
-                                                                                            <div key={idx}>
-                                                                                                {slot.startTime} - {slot.endTime}
-                                                                                            </div>
-                                                                                        ))}
-                                                                                    </td>
-                                                                                </tr>
-                                                                            ))}
-                                                                    </tbody>
-                                                                </table>
-                                                            ) : (
-                                                                <p>No timetable found for this batch.</p>
-                                                            )}
-                                                        </div>
-                                                    </ModalThree>
-
-                                                </div>
+                                                <button 
+                                                    className="action-button tests" 
+                                                    onClick={() => setShowModalTwo(batch.batchId)}
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                                    </svg>
+                                                    Tests
+                                                </button>
                                             </div>
                                         </div>
-                                    </div>
-                                ))
-                        ) : (
-                            <p>No batches assigned.</p>
-                        )}
+                                    ))
+                            ) : (
+                                <div className="no-batches">
+                                    <p>No batches assigned.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
+        {/* Attendance Modal */}
+        <ModalOne
+            isOpen={showModalOne !== null}
+            onClose={() => setShowModalOne(null)}
+        >
+            {showModalOne && (
+                <div id={`carousel-${showModalOne}`} className="carousel slide">
+                    <h5 className="modal-title">{batchesRecords.find((b) => b.batchId === showModalOne)?.batchName}</h5>
+                    <div className="carousel-inner">
+                        {allMonths.map((month, idx) => {
+                            let calendarMonth, calendarYear;
+                            if (idx <= 8) {
+                                calendarMonth = idx + 3;
+                                calendarYear = academicYearStart;
+                            } else {
+                                calendarMonth = idx - 9;
+                                calendarYear = academicYearStart + 1;
+                            }
+                            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
 
-            {/* Fee Table */}
-            <ModalFour isOpen={showModalFour === student._id} onClose={() => setShowModalFour(null)}>
-                <div className="fee-details">
-                    <h1>Fee Details</h1>
-                    <table className="table table-bordered table-striped text-center">
-                        <thead className="table-dark">
+                            return (
+                                <div
+                                    className={`carousel-item ${idx === activeMonthIndex ? "active" : ""}`}
+                                    key={month}
+                                >
+                                    <h6 className="month-title">{month} {calendarYear}</h6>
+                                    <div className="calendar-grid">
+                                        {[...Array(daysInMonth)].map((_, dateIdx) => {
+                                            const date = new Date(calendarYear, calendarMonth, dateIdx + 1);
+                                            const fullDate = date.toISOString().split('T')[0];
+                                            const key = `${showModalOne}_${fullDate}`;
+                                            const status = attendanceMap[key];
+
+                                            return (
+                                                <div
+                                                    key={dateIdx}
+                                                    className={`date-box ${status === "present"
+                                                        ? "present"
+                                                        : status === "absent"
+                                                            ? "absent"
+                                                            : ""
+                                                        }`}
+                                                    title={`${month} ${dateIdx + 1}, ${calendarYear} - ${status || 'No record'}`}
+                                                >
+                                                    {dateIdx + 1}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="calendar-controls">
+                        <button
+                            className="calendar-button"
+                            type="button"
+                            data-bs-target={`#carousel-${showModalOne}`}
+                            data-bs-slide="prev"
+                        >
+                            ‹ Previous
+                        </button>
+                        <button
+                            className="calendar-button"
+                            type="button"
+                            data-bs-target={`#carousel-${showModalOne}`}
+                            data-bs-slide="next"
+                        >
+                            Next ›
+                        </button>
+                    </div>
+                </div>
+            )}
+        </ModalOne>
+
+        {/* Tests Modal */}
+        <ModalTwo
+            isOpen={showModalTwo !== null}
+            onClose={() => setShowModalTwo(null)}
+        >
+            <div className="test-details">
+                <h3 className="modal-title">All Tests of {batchesRecords.find((b) => b.batchId === showModalTwo)?.batchName}</h3>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>Test Name</th>
+                            <th>Date</th>
+                            <th>Max Marks</th>
+                            <th>Marks Scored</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {testRecords
+                            .filter(test => test.batchId === showModalTwo)
+                            .map((test, index) => (
+                                <tr key={index}>
+                                    <td>{test.name}</td>
+                                    <td>{test.date}</td>
+                                    <td>{test.maxMarks}</td>
+                                    <td>{test.marksScored}</td>
+                                </tr>
+                            ))}
+                    </tbody>
+                </table>
+                {testRecords.filter(test => test.batchId === showModalTwo).length === 0 && (
+                    <p style={{ color: "#6b7280", textAlign: "center", padding: "2rem" }}>No tests found for this batch.</p>
+                )}
+            </div>
+        </ModalTwo>
+
+        {/* Timetable Modal */}
+        <ModalThree
+            isOpen={showModalThree !== null}
+            onClose={() => setShowModalThree(null)}
+        >
+            <div className="timetable-details">
+                <h3 className="modal-title">Timetable for {batchesRecords.find((b) => b.batchId === showModalThree)?.batchName}</h3>
+                {timetableRecords[showModalThree]?.length > 0 ? (
+                    <table className="table">
+                        <thead>
                             <tr>
-                                <th>Installment</th>
-                                <th>Amount</th>
-                                <th>Due Date</th>
-                                <th>Paid Date</th>
-                                <th>Method</th>
-                                <th>Status</th>
-                                <th>Receipt</th>
+                                <th>Weekday</th>
+                                <th>Time Slots</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {Array.isArray(installments) && installments.map((record, index) => {
-                                const status = record.paidDate ? "Paid" : "Due";
-                                return (
+                            {[...timetableRecords[showModalThree]]
+                                .sort((a, b) => weekdayOrder[a.weekday] - weekdayOrder[b.weekday])
+                                .map((entry, index) => (
                                     <tr key={index}>
-                                        <td>Installment {record.installmentNo}</td>
-                                        <td>{record.amount || "--"}</td>
-                                        <td>{formatDate(record.dueDate)}</td>
-                                        <td>{formatDate(record.paidDate)}</td>
-                                        <td>{record.method || "--"}</td>
-                                        <td className={record.paidDate ? "text-success fw-bold" : "text-danger fw-bold"}>
-                                            {status}
-                                        </td>
+                                        <td>{entry.weekday}</td>
                                         <td>
-                                            {record.paidDate ? (
-                                                <button
-                                                    className="button"
-                                                    onClick={() => generatePDFReceipt(student, record)}
-                                                >
-                                                    Download
-                                                </button>
-                                            ) : "--"}
+                                            {entry.timetable.map((slot, idx) => (
+                                                <span key={idx} className="time-slot">
+                                                    {slot.startTime} - {slot.endTime}
+                                                </span>
+                                            ))}
                                         </td>
                                     </tr>
-                                );
-                            })}
+                                ))}
                         </tbody>
                     </table>
-                    <div className="d-flex gap-4 mt-3" style={{ fontSize: "1.5rem" }}>
-                        <span><strong>Total Fee:</strong> ₹ {totalFee}</span>
-                        <span><strong>Paid:</strong> ₹ {totalPaid}</span>
-                        <span><strong>Balance:</strong> ₹ {balance}</span>
-                    </div>
+                ) : (
+                    <p style={{ color: "#6b7280", textAlign: "center", padding: "2rem" }}>
+                        No timetable found for this batch.
+                    </p>
+                )}
+            </div>
+        </ModalThree>
+
+        {/* Fee Table */}
+        <ModalFour isOpen={showModalFour === student._id} onClose={() => setShowModalFour(null)}>
+            <div className="fee-details">
+                <h1 className="modal-title">Fee Details</h1>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>Installment</th>
+                            <th>Amount</th>
+                            <th>Due Date</th>
+                            <th>Paid Date</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Receipt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Array.isArray(installments) && installments.map((record, index) => {
+                            const status = record.paidDate ? "Paid" : "Due";
+                            return (
+                                <tr key={index}>
+                                    <td>Installment {record.installmentNo}</td>
+                                    <td>{record.amount || "--"}</td>
+                                    <td>{formatDate(record.dueDate)}</td>
+                                    <td>{formatDate(record.paidDate)}</td>
+                                    <td>{record.method || "--"}</td>
+                                    <td className={record.paidDate ? "text-success" : "text-danger"}>
+                                        {status}
+                                    </td>
+                                    <td>
+                                        {record.paidDate ? (
+                                            <button
+                                                className="download-button"
+                                                onClick={() => generatePDFReceipt(student, record)}
+                                            >
+                                                Download
+                                            </button>
+                                        ) : "--"}
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+                <div className="fee-summary">
+                    <span><strong>Total Fee:</strong> ₹ {totalFee}</span>
+                    <span><strong>Paid:</strong> ₹ {totalPaid}</span>
+                    <span><strong>Balance:</strong> ₹ {balance}</span>
                 </div>
-            </ModalFour>
-
-        </div>
-
+            </div>
+        </ModalFour>
 
         <Footer />
-
 
     </>);
 }
