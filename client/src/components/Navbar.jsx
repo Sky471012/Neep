@@ -12,13 +12,13 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/");
+    navigate("/#home");
   };
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
-      
+
       // Check if reviews section is in view
       const reviewsSection = document.getElementById("reviews");
       if (reviewsSection) {
@@ -58,7 +58,7 @@ export default function Navbar() {
   const handleAnchorClick = (anchor) => {
     setActiveSection(anchor);
     setSidebarOpen(false);
-    
+
     // Smooth scroll to section
     const element = document.getElementById(anchor);
     if (element) {
@@ -80,14 +80,14 @@ export default function Navbar() {
           {authToken && role === "student" && (
             <>
               <li><Link to="/student" className={isRouteActive("/student") ? "active" : ""}>Student</Link></li>
-              <li><Link to="/" onClick={handleLogout}>Logout</Link></li>
+              <li><Link to="/#home" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
           {authToken && role === "teacher" && (
             <>
               <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}>Teacher</Link></li>
-              <li><Link to="/" onClick={handleLogout}>Logout</Link></li>
+              <li><Link to="/#home" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
@@ -95,12 +95,12 @@ export default function Navbar() {
             <>
               <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}>Teacher</Link></li>
               <li><Link to="/admin" className={isRouteActive("/admin") ? "active" : ""}>Admin</Link></li>
-              <li><Link to="/" onClick={handleLogout}>Logout</Link></li>
+              <li><Link to="/#home" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
           {!authToken && (
-            <li><Link to="/login" className={isRouteActive("/login") ? "active" : ""}>Login</Link></li>
+            <li><Link to="/login" className="login-button">Login</Link></li>
           )}
         </ul>
 
@@ -144,7 +144,7 @@ export default function Navbar() {
         )}
 
         {!authToken && (
-          <Link to="/login" className={isRouteActive("/login") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Login</Link>
+          <Link to="/login" className="login-button" onClick={() => setSidebarOpen(false)}>Login</Link>
         )}
       </div>
 
@@ -207,6 +207,34 @@ export default function Navbar() {
           margin-right: var(--space-lg);
         }
 
+        .login-button{
+          background: linear-gradient(
+            135deg,
+            var(--bs-primary) 0%,
+            var(--bs-info) 100%
+          ) !important;
+          color: var(--bs-white) !important;
+          border: none !important;
+          border-radius: var(--bs-border-radius)!important;
+          padding: 0.5rem 1.5rem !important;
+          font-size: 1.1rem !important;
+          font-weight: 600 !important;
+          cursor: pointer !important;
+          box-shadow: 0 3px 20px rgba(33, 118, 184, 0.2) !important;
+          transition: all 0.25s ease !important;
+          font-family: "Inter", sans-serif !important;
+          margin-right: auto;
+          margin-left: 1rem;
+        }
+
+        .login-button:hover{
+          background: linear-gradient(
+            135deg,
+            var(--bs-link-hover-color) 0%,
+            var(--bs-primary) 100%
+          ) !important;
+          box-shadow: 0 5px 24px rgba(33, 118, 184, 0.25) !important;
+        }
         .nav-links {
           display: flex;
           gap: var(--space-sm);

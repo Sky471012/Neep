@@ -269,13 +269,14 @@ const BannerSection = () => {
           background-color: var(--bs-white);
           border: 2px solid var(--bs-white);
           color: var(--bs-primary);
-          font-size: 1.5rem;
-          padding: 0px 15px;
+          font-size: 2rem;
+          padding: 0px 16px 10px;
           border-radius: 50%;
           cursor: pointer;
           transition: all 0.3s ease;
           z-index: 3;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          line-height: 1;
         }
 
         .banner-arrows:hover {

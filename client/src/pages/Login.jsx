@@ -213,41 +213,18 @@ export default function Login() {
     setResendTimer(0);
   };
 
-  // Light blue background style for the main container
-  const pageStyle = {
-    minHeight: '100vh',
-    background: '#e6f2ff',
-  };
-
   return (
-    <div style={pageStyle}>
+    <div>
       <Navbar />
       <div
         className="login-page-container"
-        style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px 0 40px',
-          minHeight: 'calc(100vh - 140px)',
-        }}
       >
         <div
-          className="card login-page-card"
-          style={{ width: 'min(500px, 90%)' }}
+          className="login-page-card"
         >
           <div className="login-page-box">
             <h3
               className="login-heading"
-              style={{
-                fontWeight: 700,
-                fontSize: '2rem',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                margin: '0 0 1.5rem',
-              }}
             >
               New Era Education Point
             </h3>
@@ -256,45 +233,23 @@ export default function Login() {
             <div
               style={{
                 display: 'flex',
-                background: 'rgba(255, 255, 255, 0.8)',
-                borderRadius: '8px',
+                background: 'rgba(220, 220, 220, 0.8)',
+                borderRadius: '12px',
                 padding: '4px',
                 marginBottom: '20px',
               }}
             >
               <button
                 onClick={() => switchLoginType('student')}
-                className={`role-switch-button ${
-                  loginType === 'student' ? 'active' : ''
-                }`}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  background: loginType === 'student' ? 'white' : 'transparent',
-                  color: loginType === 'student' ? '#2c3e50' : '#7f8c8d',
-                }}
+                className={`role-switch-button ${loginType === 'student' ? 'active' : ''
+                  }`}
               >
                 Student
               </button>
               <button
                 onClick={() => switchLoginType('admin')}
-                className={`role-switch-button ${
-                  loginType === 'admin' ? 'active' : ''
-                }`}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  background: loginType === 'admin' ? 'white' : 'transparent',
-                  color: loginType === 'admin' ? '#2c3e50' : '#7f8c8d',
-                }}
+                className={`role-switch-button ${loginType === 'admin' ? 'active' : ''
+                  }`}
               >
                 Admin/Teacher
               </button>
@@ -321,6 +276,13 @@ export default function Login() {
                     placeholderText="Date of birth (dd-mm-yyyy)"
                     className="datePicker"
                     required
+                    showYearDropdown
+                    dropdownMode="select"
+                    yearDropdownItemNumber={100}
+                    scrollableYearDropdown
+                    maxDate={new Date()}
+                    openToDate={new Date('2005-01-01')}
+                    minDate={new Date("1995-01-01")}
                   />
                 </div>
                 <button
@@ -328,7 +290,7 @@ export default function Login() {
                   className="login-page-button"
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Logging in...' : 'Login as Student'}
+                  {isLoading ? 'Logging in...' : 'Login'}
                 </button>
               </form>
             )}

@@ -314,19 +314,19 @@ export default function DownloadApp() {
           animation: floatIcon 4s ease-in-out infinite;
         }
 
-        .floating-element:nth-child(2) {
-          top: 10%;
+        .floating-element:nth-child(1) {
+          top: -10%;
           right: 10%;
           animation-delay: -1s;
         }
 
-        .floating-element:nth-child(3) {
+        .floating-element:nth-child(2) {
           bottom: 20%;
           left: -10%;
           animation-delay: -2s;
         }
 
-        .floating-element:nth-child(4) {
+        .floating-element:nth-child(3) {
           top: 50%;
           right: -15%;
           animation-delay: -3s;
