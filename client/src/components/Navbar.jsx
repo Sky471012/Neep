@@ -81,22 +81,22 @@ export default function Navbar() {
 
           {authToken && role === "student" && (
             <>
-              <li><Link to="/student" className={isRouteActive("/student") ? "active" : ""}>Student Portal</Link></li>
+              <li><Link to="/student" className={isRouteActive("/student") ? "active" : ""}><i className="bi bi-person-fill me-1"></i>Student Portal</Link></li>
               <li><Link to="/#home" className="login-button" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
           {authToken && role === "teacher" && (
             <>
-              <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}>Faculty Panel</Link></li>
+              <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link></li>
               <li><Link to="/#home" className="login-button" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
           {authToken && role === "admin" && (
             <>
-              <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}>Faculty Panel</Link></li>
-              <li><Link to="/admin" className={isRouteActive("/admin") ? "active" : ""}>Control Room</Link></li>
+              <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link></li>
+              <li><Link to="/admin" className={isRouteActive("/admin") ? "active" : ""}><i className="bi bi-controller me-1"></i>Control Room</Link></li>
               <li><Link to="/#home" className="login-button" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
@@ -125,22 +125,22 @@ export default function Navbar() {
 
         {authToken && role === "student" && (
           <>
-            <Link to="/student" className={isRouteActive("/student") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Student Portal</Link>
+            <Link to="/student" className={isRouteActive("/student") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Student Portal</Link>
             <Link to="/" className="login-button" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
         {authToken && role === "teacher" && (
           <>
-            <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Faculty Panel</Link>
+            <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link>
             <Link to="/" className="login-button" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
         {authToken && role === "admin" && (
           <>
-            <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Faculty Panel</Link>
-            <Link to="/admin" className={isRouteActive("/admin") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Control Room</Link>
+            <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link>
+            <Link to="/admin" className={isRouteActive("/admin") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-controller me-1"></i>Control Room</Link>
             <Link to="/" className="login-button" onClick={handleLogout}>Logout</Link>
           </>
         )}

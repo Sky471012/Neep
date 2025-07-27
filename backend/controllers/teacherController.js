@@ -214,6 +214,16 @@ exports.getTodaysClassesForTeacher = async (req, res) => {
       };
     });
 
+    // 🧠 Sort all classes by earliest startTime in classTimings
+    formatted.sort((a, b) => {
+      const parseTime = (timeStr) =>
+        new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);
+      return (
+        parseTime(a.classTimings[0]?.startTime) -
+        parseTime(b.classTimings[0]?.startTime)
+      );
+    });
+
     res.json({ today, classes: formatted });
   } catch (err) {
     console.error("Teacher timetable error:", err);
