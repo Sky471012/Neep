@@ -193,7 +193,7 @@ exports.getTodaysClassesForTeacher = async (req, res) => {
     const classes = await Timetable.find({
       weekday: today,
       batchId: { $in: activeBatchIds },
-    }).populate("batchId", "name code");
+    }).populate("batchId", "name class code");
 
     const formatted = classes.map((cls) => {
       const sortedTimings = [...cls.classTimings].sort((a, b) => {
@@ -207,6 +207,7 @@ exports.getTodaysClassesForTeacher = async (req, res) => {
         batch: {
           id: cls.batchId._id,
           name: cls.batchId.name,
+          class: cls.batchId.class,
           code: cls.batchId.code,
         },
         classTimings: sortedTimings,

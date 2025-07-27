@@ -1,4 +1,3 @@
-
 * {
   margin: 0;
   padding: 0;
@@ -6,86 +5,183 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", sans-serif;
   line-height: 1.6;
   color: #1f2937;
-  background-color: #f8fafc; 
-}
-
-
-.teacher-dashboard-layout {
-  display: flex;
-  min-height: calc(100vh - 120px); 
   background-color: #f8fafc;
 }
 
-.teacher-sidebar {
-  width: 320px;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
+/* Loading States */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.loading-content {
+  text-align: center;
   padding: 2rem;
-  box-shadow: 4px 0 15px rgba(0,0,0,0.1);
-  z-index: 1;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.loading-text {
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Main Layout - Override global styles */
+.app-container {
+  min-height: calc(100vh - 60px - 60px); /* adjust heights if needed */
+  background-color: #fcf8f8 !important;
+  padding: 0 !important;
   display: flex;
   flex-direction: column;
 }
 
-/* The existing .student-details card from your JSX will now be the sidebar card */
-.teacher-sidebar .student-details {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  padding: 1.5rem !important; /* Override bootstrap padding */
-  margin-bottom: 0 !important; /* Override bootstrap margin */
+.main-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  position: relative;
 }
 
-.teacher-sidebar .student-details h1 {
+/* Student Sidebar - Fixed position for laptop screens */
+.teacher-sidebar {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+  color: white;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  padding: 1rem 1.5rem;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  margin-top: 10px;
+  margin-left: 10px;
+  border-radius: 10px;
+  gap: 10px;
+  justify-content: space-around;
+  width: 330px;
+  min-height: 85vh;
+}
+
+/* Profile Header */
+.profile-header {
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  backdrop-filter: blur(10px);
+}
+
+.profile-avatar svg {
+  width: 40px;
+  height: 40px;
+  color: white;
+}
+
+.profile-title {
   font-size: 1.5rem;
   font-weight: 600;
+  margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   color: #f8fafc;
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.teacher-sidebar .student-details span {
-  display: block;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
+/* Student Details Card */
+.teacher-details-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem 0.8rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.details-header svg {
+  width: 20px;
+  height: 20px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.detail-item:last-child {
+  margin-bottom: 0;
+}
+
+.detail-item svg {
+  color: #cbd5e1;
+  margin-top: 0px;
+  flex-shrink: 0;
+}
+
+.detail-label {
+  font-size: 0.95rem;
   color: #e2e8f0;
-}
-
-.teacher-sidebar .student-details strong {
-  color: #ffffff;
   font-weight: 500;
-  word-break: break-word;
 }
 
-
-.teacher-content-area {
+/* Content Area - Adjusted for fixed sidebar */
+.content-area {
   flex: 1;
+  min-width: 0;
   padding: 2rem;
-  overflow-y: auto; /* Allows content to scroll if it overflows */
+  margin-left: 330px; /* Match sidebar width */
+  background: transparent;
+  min-height: 100%;
+  width: calc(100% - 320px); /* Ensure proper width calculation */
+  padding-bottom: 2rem;
 }
 
-
+/* Welcome Card */
 .schedule-card {
   background: rgba(199, 226, 218, 0.763);
-  border-radius: 16px;
+  color: white;
   padding: 2rem;
+  border-radius: 16px;
   margin-bottom: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e5e7eb;
 }
 
-.schedule-card h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
+.schedule-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .schedule-card .table {
@@ -114,6 +210,7 @@ body {
   background-color: #f8fafc;
 }
 
+/* Batches Section */
 .batches-section {
   background: white;
   border-radius: 16px;
@@ -131,93 +228,160 @@ body {
   gap: 1rem;
 }
 
-.batches-header h2 {
+.batches-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: #1f2937;
   margin: 0;
 }
 
-.batches-header .form-control {
-  max-width: 400px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+/* Search Container */
+.search-container {
+  position: relative;
+  max-width: 300px;
+  width: 100%;
 }
-.batches-header .form-control:focus {
-  border-color: #3b82f6;
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  background: #f9fafb;
+  border-radius: 30px !important;
+}
+
+.search-input:focus {
+  outline: none !important;
+  background: white;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Batches Grid */
+.batches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
 
-.batch-card-teacher {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+.batch-card {
+  background: white;
+  border: 2px solid #e5e7eb;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 0;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  height: 100%; /* Make cards in a row equal height */
 }
 
-.batch-card-teacher:hover {
-  border-color: #9ca3af;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+.batch-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
-.batch-card-teacher .card-title {
+.batch-header {
+  padding: 1rem;
+}
+
+.batch-name {
   font-size: 1.25rem;
   font-weight: 600;
   color: #1f2937;
   margin: 0;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #dde1e6;
-  padding-bottom: 1rem;
 }
 
-
-.batch-actions-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns */
-  gap: 0.75rem;
-  margin-top: auto; 
+/* Batch Actions */
+.batch-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
 }
 
-.action-btn {
+.action-button-t {
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 0.5rem;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  justify-content: center;
 }
 
-.action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.action-button-t svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* Individual button styles for clarity */
-.action-btn.students { background: #e0e7ff; color: #3730a3; }
-.action-btn.attendance { background: #dcfce7; color: #166534; }
-.action-btn.timetable { background: #dbeafe; color: #1e40af; }
-.action-btn.add-test { background: #fef3c7; color: #92400e; }
-.action-btn.show-tests { background: #fee2e2; color: #991b1b; }
-/* Add a 6th style if needed, e.g., for "View All Tests" */
-.action-btn.view-all-tests { background: #e5e5e5; color: #404040; }
+.action-button-t.students {
+  background: #e0e7ff;
+  color: #3730a3;
+}
 
+.action-button-t.attendance {
+  background: #dcfce7;
+  color: #166534;
+}
 
+.action-button-t.timetable {
+  background: #fee2fc;
+  color: #991b8c;
+}
 
-.datePicker { 
+.action-button-t.add-test {
+  background: #fef3c7;
+  color: #92400e;
+  border-bottom-left-radius: 10px;
+}
+
+.action-button-t.show-tests {
+  background: #dbeafe;
+  color: #1e40af;
+  border-bottom-right-radius: 10px;
+}
+
+.action-button-t.show-tests:hover {
+  background: #bfdbfe;
+}
+
+.action-button-t.attendance:hover {
+  background: #bbf7d0;
+}
+
+.action-button-t.add-test:hover {
+  background: #fde68a;
+}
+
+.action-button-t.timetable:hover {
+  background: #fccbf8;;
+}
+
+.action-button-t.students:hover {
+  background: #c7d4fe;
+}
+
+/* No Batches */
+.no-batches {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.datePicker {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ccc;
@@ -257,47 +421,152 @@ body {
   border-color: #ef4444;
 }
 
-
-@media (max-width: 1200px) {
+/* Responsive Design */
+@media (max-width: 1024px) {
   .teacher-sidebar {
-    width: 280px;
+    position: relative;
+    width: 330px;
+    top: auto;
+    left: auto;
+    bottom: auto;
+    padding: auto 15px;
+    z-index: 1;
+    position: fixed;
+    padding: 30px 20px;
+    min-height: 37vh;
+  }
+
+  .main-layout {
+    flex-direction: row;
+  }
+
+  .batches-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 }
 
-@media (max-width: 992px) {
-  .teacher-dashboard-layout {
+@media (max-width: 769px) {
+  .teacher-sidebar {
+    position: relative;
+    top: 0;
+    height: auto;
+    box-shadow: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    margin-right: 0px;
+    padding: 20px;
+  }
+
+  .teacher-details-card {
+    padding: 20px;
+  }
+
+  .content-area {
+    margin-left: 0;
+    margin-top: 0;
+    padding: 1rem;
+    width: 100%;
+  }
+
+  .main-layout {
     flex-direction: column;
   }
-  .teacher-sidebar {
-    width: 100%;
-    height: auto;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  }
-}
 
-@media (max-width: 768px) {
+  .schedule-title {
+    font-size: 1.5rem;
+  }
+
   .batches-header {
     flex-direction: column;
     align-items: stretch;
   }
-  .batches-header .form-control {
+
+  .search-container {
     max-width: none;
   }
-  .batch-actions-grid {
-    grid-template-columns: 1fr; 
+
+  .batches-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-button-t {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  
 }
 
-@media (max-width: 576px) {
-    .teacher-sidebar, .teacher-content-area, .schedule-card, .batches-section {
-        padding: 1rem;
-    }
-     .batch-card-teacher {
-        padding: 1.5rem 1rem;
-    }
-    .teacher-sidebar .student-details h1, .schedule-card h2, .batches-header h2 {
-        font-size: 1.25rem;
-    }
-    .action-btn {
-        padding: 0.8rem 0.5rem;
-    }
+@media (max-width: 480px) {
+  .teacher-sidebar {
+    padding: 1rem;
+    margin-left: 1px;
+    width: auto;
+    min-height: 45vh;
+  }
+
+  .content-area {
+    padding: 0.75rem;
+  }
+
+  .welcome-card {
+    padding: 1.5rem;
+  }
+
+  .batches-section {
+    padding: 1.5rem;
+  }
+
+  .batch-actions {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+  }
+
+  .action-button-t {
+    min-width: auto;
+  }
+}
+
+/* Utility Classes */
+.w-4 {
+  width: 1rem;
+}
+.h-4 {
+  height: 1rem;
+}
+.w-5 {
+  width: 1.25rem;
+}
+.h-5 {
+  height: 1.25rem;
+}
+.w-10 {
+  width: 2.5rem;
+}
+.h-10 {
+  height: 2.5rem;
+}
+
+/* Animation for smooth transitions */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+  }
+}
+
+/* Focus styles for accessibility */
+
+/* Print styles */
+@media print {
+  .student-sidebar {
+    display: none;
+  }
+
+  .content-area {
+    margin-left: 0;
+  }
+
+  .batch-actions {
+    display: none;
+  }
 }

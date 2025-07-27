@@ -180,6 +180,8 @@ html {
   right: 0;
   height: 5px;
   background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-info) 100%);
+  border-top-left-radius: var(--bs-border-radius-lg);
+  border-top-right-radius: var(--bs-border-radius-lg);
 }
 
 .login-page-card::after {
@@ -190,6 +192,8 @@ html {
   right: 0;
   height: 5px;
   background: linear-gradient(90deg, var(--bs-info) 0%, var(--bs-primary) 100%);
+  border-bottom-left-radius: var(--bs-border-radius-lg);
+  border-bottom-right-radius: var(--bs-border-radius-lg);
 }
 
 /* Branded heading (center, stacked, crisp) */
