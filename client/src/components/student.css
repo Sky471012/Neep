@@ -1,4 +1,3 @@
-
 * {
   margin: 0;
   padding: 0;
@@ -6,7 +5,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", sans-serif;
   line-height: 1.6;
   color: #1f2937;
   background-color: #f8fafc;
@@ -53,7 +53,7 @@ body {
 /* Main Layout - Override global styles */
 .app-container {
   min-height: calc(100vh - 60px - 60px); /* adjust heights if needed */
-  background-color: #f8fafc !important;
+  background-color: #fcf8f8 !important;
   padding: 0 !important;
   display: flex;
   flex-direction: column;
@@ -63,48 +63,32 @@ body {
   display: flex;
   flex: 1;
   min-height: 0;
+  position: relative;
 }
 
-/* Student Sidebar - Renamed to avoid conflicts with navbar sidebar */
+/* Student Sidebar - Fixed position for laptop screens */
 .student-sidebar {
-  width: 320px;
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
   color: white;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-  position: relative;
-  min-height: 100%;
-  height: auto;
-  padding: 1.5rem;
-  box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+  padding: 1rem 1.5rem;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
   z-index: 1;
   display: flex;
   flex-direction: column;
-}
-
-.student-sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.student-sidebar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.student-sidebar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
-}
-
-.student-sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+  position: fixed;
+  margin-top: 10px;
+  margin-left: 10px;
+  border-radius: 10px;
+  gap: 10px;
+  justify-content: space-around;
+  width: 330px;
+  min-height: 85vh;
 }
 
 /* Profile Header */
 .profile-header {
   text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .profile-avatar {
@@ -138,19 +122,8 @@ body {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.details-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #f1f5f9;
 }
 
 .details-header svg {
@@ -160,9 +133,8 @@ body {
 
 .detail-item {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  align-items: center;
+  gap: 1rem;
   padding: 0.5rem 0;
 }
 
@@ -171,15 +143,13 @@ body {
 }
 
 .detail-item svg {
-  width: 16px;
-  height: 16px;
   color: #cbd5e1;
-  margin-top: 2px;
+  margin-top: 0px;
   flex-shrink: 0;
 }
 
 .detail-label {
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   color: #e2e8f0;
   font-weight: 500;
 }
@@ -212,16 +182,15 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-/* Content Area */
+/* Content Area - Adjusted for fixed sidebar */
 .content-area {
   flex: 1;
   min-width: 0;
   padding: 2rem;
-  margin-left: 0;
+  margin-left: 330px; /* Match sidebar width */
   background: transparent;
   min-height: 100%;
-}
-.content-area {
+  width: calc(100% - 320px); /* Ensure proper width calculation */
   padding-bottom: 2rem;
 }
 
@@ -292,16 +261,14 @@ body {
 .search-input {
   width: 100%;
   padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
   font-size: 0.875rem;
   transition: all 0.3s ease;
   background: #f9fafb;
+  border-radius: 30px !important;
 }
 
 .search-input:focus {
-  outline: none;
-  border-color: #3b82f6;
+  outline: none !important;
   background: white;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
@@ -317,19 +284,18 @@ body {
   background: white;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 0;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .batch-card:hover {
   border-color: #3b82f6;
-  transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .batch-header {
-  margin-bottom: 1.5rem;
+  padding: 1rem;
 }
 
 .batch-name {
@@ -342,17 +308,17 @@ body {
 /* Batch Actions */
 .batch-actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  flex-direction: row;
+  gap: 0;
 }
 
 .action-button {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border: none;
-  border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -369,21 +335,21 @@ body {
 .action-button.timetable {
   background: #dbeafe;
   color: #1e40af;
+  border-bottom-right-radius: 10px;
 }
 
 .action-button.timetable:hover {
   background: #bfdbfe;
-  transform: translateY(-1px);
 }
 
 .action-button.attendance {
   background: #dcfce7;
   color: #166534;
+  border-bottom-left-radius: 10px;
 }
 
 .action-button.attendance:hover {
   background: #bbf7d0;
-  transform: translateY(-1px);
 }
 
 .action-button.tests {
@@ -393,7 +359,6 @@ body {
 
 .action-button.tests:hover {
   background: #fde68a;
-  transform: translateY(-1px);
 }
 
 /* No Batches */
@@ -613,13 +578,20 @@ body {
 /* Responsive Design */
 @media (max-width: 1024px) {
   .student-sidebar {
-    width: 280px;
+    position: relative;
+    width: 330px;
+    top: auto;
+    left: auto;
+    bottom: auto;
+    padding: auto 15px;
+    z-index: 1;
+    position: fixed;
+    padding: 30px 20px;
+    min-height: 43vh;
   }
 
-  .content-area {
-    margin-left: 280px;
-    padding: 1.5rem;
-    width: calc(100% - 280px);
+  .main-layout {
+    flex-direction: row;
   }
 
   .batches-grid {
@@ -627,14 +599,19 @@ body {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 769px) {
   .student-sidebar {
-    width: 100%;
     position: relative;
     top: 0;
     height: auto;
     box-shadow: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    margin-right: 0px;
+    padding: 20px;
+  }
+
+  .student-details-card {
+    padding: 20px;
   }
 
   .content-area {
@@ -669,11 +646,6 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .batch-actions {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
   .action-button {
     flex: 1;
     min-width: 120px;
@@ -706,6 +678,9 @@ body {
 @media (max-width: 480px) {
   .student-sidebar {
     padding: 1rem;
+    margin-left: 1px;
+    width: auto;
+    min-height: 55vh;
   }
 
   .content-area {
@@ -720,12 +695,9 @@ body {
     padding: 1.5rem;
   }
 
-  .batch-card {
-    padding: 1rem;
-  }
-
   .batch-actions {
-    flex-direction: column;
+    flex-direction: row !important;
+    flex-wrap: wrap;
   }
 
   .action-button {
@@ -783,12 +755,6 @@ body {
 }
 
 /* Focus styles for accessibility */
-button:focus,
-input:focus,
-.action-button:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
 
 /* Print styles */
 @media print {

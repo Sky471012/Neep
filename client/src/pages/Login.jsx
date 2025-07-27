@@ -141,7 +141,6 @@ export default function Login() {
         return;
       }
 
-      alert("OTP sent to your email!");
       if (isResend) {
         setOtp("");
       }

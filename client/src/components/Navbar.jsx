@@ -66,9 +66,11 @@ export default function Navbar() {
     }
   };
 
+  const isDashboardRoute = ["/student", "/teacher", "/admin"].includes(location.pathname);
+
   return (
     <>
-      <nav className={`navbar ${scrolled ? "navbar-scrolled" : ""}`}>
+      <nav className={`navbar ${scrolled || isDashboardRoute ? "navbar-scrolled" : ""}`}>
         <div className="logo">MySite</div>
         <ul className="nav-links">
           <li><Link to="/#home" className={isRouteActive("/") && !activeSection ? "active" : ""}>Home</Link></li>
@@ -79,23 +81,23 @@ export default function Navbar() {
 
           {authToken && role === "student" && (
             <>
-              <li><Link to="/student" className={isRouteActive("/student") ? "active" : ""}>Student</Link></li>
-              <li><Link to="/#home" onClick={handleLogout}>Logout</Link></li>
+              <li><Link to="/student" className={isRouteActive("/student") ? "active" : ""}>Student Portal</Link></li>
+              <li><Link to="/#home" className="login-button" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
           {authToken && role === "teacher" && (
             <>
-              <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}>Teacher</Link></li>
-              <li><Link to="/#home" onClick={handleLogout}>Logout</Link></li>
+              <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}>Faculty Panel</Link></li>
+              <li><Link to="/#home" className="login-button" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
           {authToken && role === "admin" && (
             <>
-              <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}>Teacher</Link></li>
-              <li><Link to="/admin" className={isRouteActive("/admin") ? "active" : ""}>Admin</Link></li>
-              <li><Link to="/#home" onClick={handleLogout}>Logout</Link></li>
+              <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}>Faculty Panel</Link></li>
+              <li><Link to="/admin" className={isRouteActive("/admin") ? "active" : ""}>Control Room</Link></li>
+              <li><Link to="/#home" className="login-button" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
@@ -123,23 +125,23 @@ export default function Navbar() {
 
         {authToken && role === "student" && (
           <>
-            <Link to="/student" className={isRouteActive("/student") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Student</Link>
-            <Link to="/" onClick={handleLogout}>Logout</Link>
+            <Link to="/student" className={isRouteActive("/student") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Student Portal</Link>
+            <Link to="/" className="login-button" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
         {authToken && role === "teacher" && (
           <>
-            <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Teacher</Link>
-            <Link to="/" onClick={handleLogout}>Logout</Link>
+            <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Faculty Panel</Link>
+            <Link to="/" className="login-button" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
         {authToken && role === "admin" && (
           <>
-            <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Teacher</Link>
-            <Link to="/admin" className={isRouteActive("/admin") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Admin</Link>
-            <Link to="/" onClick={handleLogout}>Logout</Link>
+            <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Faculty Panel</Link>
+            <Link to="/admin" className={isRouteActive("/admin") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Control Room</Link>
+            <Link to="/" className="login-button" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
@@ -188,7 +190,7 @@ export default function Navbar() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: ${scrolled ? "0.4rem 2rem" : "0.75rem 2rem"};
+          padding: 0.75rem 2rem;;
           background: var(--bg-cream);
           box-shadow: ${scrolled ? "0 2px 12px rgba(0, 0, 0, 0.08)" : "none"};
           position: sticky;
@@ -282,6 +284,11 @@ export default function Navbar() {
         .nav-links li a:active {
           background: none;
           transform: none;
+        }
+
+        .navbar-scrolled {
+          padding: 0.4rem 2rem;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         }
 
         .hamburger {

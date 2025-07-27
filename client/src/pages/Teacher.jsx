@@ -557,7 +557,6 @@ export default function Teacher() {
                     </div>
                 </div>
             </div>
-            <Footer />
         </>
     );
 }
