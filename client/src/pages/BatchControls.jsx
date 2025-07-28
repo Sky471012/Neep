@@ -479,7 +479,7 @@ export default function BatchControls() {
     setIsEditing(true);
   };
 
-  const handleCancelEditStudent = () => {
+  const handleCancelEditBatch = () => {
     setIsEditing(false);
     // Reset form to original values
     setEditForm({
@@ -544,272 +544,369 @@ export default function BatchControls() {
     <Navbar />
 
 
-    <div className="main-content">
-      <div className="container mt-4">
-        <div className="card mb-5 p-3">
-          <div className="d-flex justify-content-between align-items-start">
-            <h2>{batch?.name || "No name"}</h2>
-
-            <div className="dropdown">
-              <button
-                className="btn btn-sm"
-                type="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <h3>⋮</h3>
-              </button>
-              <ul className="dropdown-menu dropdown-menu-end shadow">
-                <li>
-                  <button className="dropdown-item" onClick={() => setModalFour(true)}>
-                    Add / Edit Timetable
-                  </button>
-                </li>
-                <li>
-                  <button className="dropdown-item" onClick={() => setModalFive(true)}>
-                    Add Students
-                  </button>
-                </li>
-                <li>
-                  <button className="dropdown-item" onClick={() => setModalTwo(true)}>
-                    Assign / Change Teacher
-                  </button>
-                </li>
-                <li>
-                  <button className="dropdown-item" onClick={openModalOneHandler}>
-                    Mark / Change Attendance
-                  </button>
-                </li>
-                <li>
-                  <button className="dropdown-item" onClick={() => openTestModal(batch.batchId)}>
-                    Add / Change Test Scores
-                  </button>
-                </li>
-                <li>
-                  <button className="dropdown-item" onClick={handleEditClick} disabled={isEditing}>
-                    Edit Batch Details
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`dropdown-item ${batch.archive ? 'text-success' : 'text-danger'}`}
-                    onClick={() => handleArchiveToggle(batch._id, !batch.archive)}
-                  >
-                    {batch.archive ? 'Unarchive Batch' : 'Archive Batch'}
-                  </button>
-                </li>
-                <li>
-                  <button className="dropdown-item text-danger" onClick={() => deleteBatch(batch._id)}>
-                    Delete Batch
-                  </button>
-                </li>
-              </ul>
+    <div className="app-container">
+      <div className="main-layout">
+        <div className="student-sidebar">
+          <div className="d-flex">
+            <div style={{ margin: "0", padding: "0", width: "100%" }}>
+              <div style={{ position: "absolute", top: "10px", right: "10px" }} className="dropdown">
+                <button
+                  className="btn btn-sm"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <h4 style={{ color: 'white', padding: "0px" }}>⋮</h4>
+                </button>
+                <ul className="dropdown-menu dropdown-menu-end shadow">
+                  <li>
+                    <button className="dropdown-item" onClick={() => setModalFour(true)}>
+                      Add / Edit Timetable
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={() => setModalFive(true)}>
+                      Add Students
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={() => setModalTwo(true)}>
+                      Assign / Change Teacher
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={openModalOneHandler}>
+                      Mark / Change Attendance
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={() => openTestModal(batch.batchId)}>
+                      Add / Change Test Scores
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={handleEditClick} disabled={isEditing}>
+                      Edit Batch Details
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      className={`dropdown-item ${batch.archive ? 'text-warning' : 'text-warning'}`}
+                      onClick={() => handleArchiveToggle(batch._id, !batch.archive)}
+                    >
+                      {batch.archive ? 'Unarchive Batch' : 'Archive Batch'}
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item text-danger" onClick={() => deleteBatch(batch._id)}>
+                      Delete Batch
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 
 
           {isEditing ? (
-            // Edit Mode
-            <div className="mt-3">
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Name:</label>
+            <>
+              <div className="profile-header">
+                <div className="profile-avatar">
+                  <svg className="w-10 h-10 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <h2 className="profile-title mb-2" style={{ margin: "0 auto" }}>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-control text-center"
                     name="name"
                     value={editForm.name}
                     onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Started On:</label>
-                  <DatePicker
-                    selected={
-                      editForm.startDate
-                        ? new Date(editForm.startDate.split('-').reverse().join('-'))
-                        : null
-                    }
-                    onChange={(startDate) => {
-                      const formattedDate = startDate
-                        ? `${startDate.getDate().toString().padStart(2, '0')}-${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${startDate.getFullYear()}`
-                        : '';
-                      setEditForm((prev) => ({ ...prev, startDate: formattedDate }));
+                    placeholder="Enter name"
+                    style={{
+                      border: '1px solid #ffffffff',
+                      fontSize: 'inherit',
+                      fontWeight: 'inherit',
+                      background: 'transparent',
+                      padding: "0",
+                      boxShadow: "none",
+                      color: "inherit"
                     }}
-                    dateFormat="dd-MM-yyyy"
-                    className="form-control"
-                    placeholderText="Select Start Date"
-                    showYearDropdown
-                    yearDropdownItemNumber={100}
-                    scrollableYearDropdown
                   />
+                </h2>
+              </div>
+
+              <div className="student-details-card" style={{ padding: "0.5rem 1.5rem" }}>
+                <div className="detail-item p-1">
+                  <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+                  </svg>
+                  <div className="detail-label">Code: {batch.code}</div>
                 </div>
 
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Class:</label>
-                  <select
-                    className="form-control"
-                    name="class"
-                    value={editForm.class}
-                    onChange={handleInputChange}
+                <div className="detail-item">
+                  <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                  </svg>
+                  <div className="detail-label">
+                    Class:
+                    <select
+                      className="form-control d-inline-block ms-2"
+                      name="class"
+                      value={editForm.class}
+                      onChange={handleInputChange}
+                      style={{
+                        width: '73%',
+                        fontSize: 'inherit',
+                        fontWeight: 'inherit',
+                        background: 'transparent',
+                        padding: "0px 8px",
+                        boxShadow: "none",
+                        color: "inherit"
+                      }}
+                    >
+                      <option value="">Select Class</option>
+                      {classOptions.map(option => (
+                        <option key={option} value={option} className="text-dark">{option}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="detail-item p-1">
+                  <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                  </svg>
+                  <div className="detail-label">Teacher Asssigned: <br/>{teacher?.name || "Not assigned"}</div>
+                </div>
+
+                <div className="detail-item">
+                  <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                  </svg>
+                  <div className="detail-label d-flex flex-nowrap">
+                    <label className="mb-0 white-space-nowrap">Started On:</label>
+                    <DatePicker
+                      selected={
+                        editForm.startDate
+                          ? new Date(editForm.startDate.split('-').reverse().join('-'))
+                          : null
+                      }
+                      onChange={(startDate) => {
+                        const formattedDate = startDate
+                          ? `${startDate.getDate().toString().padStart(2, '0')}-${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${startDate.getFullYear()}`
+                          : '';
+                        setEditForm((prev) => ({ ...prev, startDate: formattedDate }));
+                      }}
+                      dateFormat="dd-MM-yyyy"
+                      className="form-control d-inline-block ms-2"
+                      placeholderText="Select Start Date"
+                      showYearDropdown
+                      yearDropdownItemNumber={10}
+                      scrollableYearDropdown
+                      dropdownMode="select"
+                    />
+                  </div>
+                </div>
+
+                <div className="detail-item p-1">
+                  <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5-3.9 19.5m-2.1-19.5-3.9 19.5" />
+                  </svg>
+                  <div className="detail-label">Enrolled Students	: {students.length}</div>
+                </div>
+
+                <div className="d-flex mt-2 justify-content-around">
+                  <button
+                    className="green-button"
+                    onClick={handleSaveEdit}
                   >
-                    <option value="">Select Class</option>
-                    {classOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
+                    Save Changes
+                  </button>
+                  <button
+                    className="yellow-button"
+                    onClick={handleCancelEditBatch}
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
-
-
-              {/* Non-editable fields */}
-              <div className="mb-3">
-                <label className="form-label">Number of students:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={students.length}
-                  disabled
-                />
-              </div>
-
-              <div className="d-flex gap-2">
-                <button
-                  className="btn btn-success"
-                  onClick={handleSaveEdit}
-                >
-                  Save Changes
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  onClick={handleCancelEditStudent}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+            </>
           ) : (
             // View Mode - unchanged
-            <p className="mt-3">
-              Class: <strong>{batch.class}<br /></strong>
-              Code: <strong>{batch.code}<br /></strong>
-              Started on: <strong>{batch.startDate}<br /></strong>
-              Teacher:
-              <strong>
-                {teacher?.name || "Not assigned"}
-                {teacher && (
-                  <Link to={`/teacher/${teacher._id}`} className="ms-1 text-primary">
-                    <i className="bi bi-box-arrow-up-right"></i>
-                  </Link>
-                )}
-                <br />
-              </strong>
-              Number of students: <strong>{students.length}</strong>
-            </p>
+            <>
+              <div className="profile-header">
+                <div className="profile-avatar">
+                  <svg className="w-10 h-10 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                  </svg>
+                </div>
+                <h2 className="profile-title mb-2" style={{ margin: "0 auto" }}>{batch?.name || "No name"}</h2>
+              </div>
+
+              <div className="student-details-card">
+                <div className="detail-item p-1">
+                  <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+                  </svg>
+                  <div className="detail-label">Code: {batch.code}</div>
+                </div>
+
+                <div className="detail-item p-1">
+                  <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                  </svg>
+                  <div className="detail-label">Class: {batch.class}</div>
+                </div>
+
+                <div className="detail-item p-1">
+                  <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                  </svg>
+                  <div className="detail-label">Teacher Asssigned: <br/>{teacher?.name || "Not assigned"}
+                    {teacher && (
+                      <Link to={`/teacher/${teacher._id}`} className="ms-1 text-light">
+                        <i className="bi bi-box-arrow-up-right"></i>
+                      </Link>
+                    )}</div>
+                </div>
+
+                <div className="detail-item p-1">
+                  <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                  </svg>
+                  <div className="detail-label">Started on: {batch.startDate}</div>
+                </div>
+
+                <div className="detail-item p-1">
+                  <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5-3.9 19.5m-2.1-19.5-3.9 19.5" />
+                  </svg>
+                  <div className="detail-label">Enrolled Students	: {students.length}</div>
+                </div>
+              </div>
+            </>
           )}
         </div>
 
 
 
         {/* Timetable */}
-        <div className="timetable-details">
-          <h2>Timetable</h2>
-          {timetable && timetable.length > 0 ? (
-            <table className="table table-bordered text-center mt-3">
-              <thead className="table-dark">
-                <tr>
-                  <th>Weekday</th>
-                  <th>Time Slots</th>
-                </tr>
-              </thead>
-              <tbody>
-                {timetable
-                  .sort((a, b) => weekdayOrder[a.weekday] - weekdayOrder[b.weekday])
-                  .map((entry, index) => (
-                    <tr key={index}>
-                      <td>{entry.weekday}</td>
-                      <td>
-                        {entry.classTimings.map((slot, idx) => {
-                          const parsedStart = parse(slot.startTime, 'hh:mm a', new Date());
-                          const parsedEnd = parse(slot.endTime, 'hh:mm a', new Date());
-                          const displayStart = isNaN(parsedStart) ? slot.startTime : format(parsedStart, 'hh:mm a');
-                          const displayEnd = isNaN(parsedEnd) ? slot.endTime : format(parsedEnd, 'hh:mm a');
+        <div className="content-area">
+          <div className="welcome-card">
+            <div className="batches-header">
+              <h2 className="batches-title">Timetable</h2>
+              {timetable && timetable.length > 0 ? (
+                <table className="table table-bordered text-center mt-3">
+                  <thead className="table">
+                    <tr>
+                      <th>Weekday</th>
+                      <th style={{ textAlign: "right" }}>Time Slots</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {timetable
+                      .sort((a, b) => weekdayOrder[a.weekday] - weekdayOrder[b.weekday])
+                      .map((entry, index) => (
+                        <tr key={index}>
+                          <td>{entry.weekday}</td>
+                          <td style={{ textAlign: "right" }}>
+                            {entry.classTimings.map((slot, idx) => {
+                              const parsedStart = parse(slot.startTime, 'hh:mm a', new Date());
+                              const parsedEnd = parse(slot.endTime, 'hh:mm a', new Date());
+                              const displayStart = isNaN(parsedStart) ? slot.startTime : format(parsedStart, 'hh:mm a');
+                              const displayEnd = isNaN(parsedEnd) ? slot.endTime : format(parsedEnd, 'hh:mm a');
 
-                          return (
-                            <div key={idx}>
-                              {displayStart} - {displayEnd}
-                            </div>
-                          );
-                        })}
+                              return (
+                                <div key={idx}>
+                                  {displayStart} - {displayEnd}
+                                </div>
+                              );
+                            })}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>No timetable made.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Students List Section */}
+          <div className="batches-section">
+            <div className="flex justify-content-between">
+              <div className="batches-header">
+                <h2 className="batches-title">All Students</h2>
+                <div className="search-container">
+                  <svg className="search-icon w-4 h-4 ms-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="search"
+                    placeholder="Search students with name and contact number..."
+                    className="search-input"
+                    onChange={(e) => setStudentSearch(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <table className="table table-borderless align-middle">
+              <tbody>
+                {students
+                  .filter((s) =>
+                    s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                    s.phone.includes(studentSearch)
+                  )
+                  .map((s) => (
+                    <tr key={s._id}>
+                      <td style={{ width: "60%" }}>
+                        {s.name} ({s.phone})
+                        <Link className="ms-1 text-primary" to={`/student/${s._id}`}>
+                          <i className="bi bi-box-arrow-up-right"></i>
+                        </Link>
+                      </td>
+                      <td style={{ width: "40%" }}>
+                        {/* For medium+ screens: all buttons in a row */}
+                        <div className="d-none d-sm-flex justify-content-end gap-2">
+                          <button className="btn btn-outline-primary btn-sm" onClick={() => showStudentAttendance(s)}>
+                            Attendance
+                          </button>
+                          <button className="btn btn-outline-primary btn-sm" onClick={() => showStudentAllTests(s)}>
+                            Tests
+                          </button>
+                          <button className="btn btn-outline-danger btn-sm" onClick={() => removeStudent(batchId, s._id)}>
+                            Remove
+                          </button>
+                        </div>
+
+                        {/* For small screens: 2 in one row, 1 below */}
+                        <div className="d-sm-none">
+                          <div className="d-flex gap-2 mb-2">
+                            <button className="btn btn-outline-primary btn-sm flex-fill" onClick={() => showStudentAttendance(s)}>
+                              Attendance
+                            </button>
+                            <button className="btn btn-outline-primary btn-sm flex-fill" onClick={() => showStudentAllTests(s)}>
+                              Tests
+                            </button>
+                          </div>
+                          <button className="btn btn-outline-danger btn-sm w-100" onClick={() => removeStudent(batchId, s._id)}>
+                            Remove
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
               </tbody>
             </table>
-          ) : (
-            <p>No timetable made.</p>
-          )}
-        </div>
-
-        {/* Students List Section */}
-        <div className="mt-4">
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h2>All Students</h2>
-            <input
-              type="search"
-              placeholder="Search students with name and contact number..."
-              className="form-control w-50"
-              onChange={(e) => setStudentSearch(e.target.value)}
-            />
           </div>
-
-          <table className="table table-borderless align-middle">
-            <tbody>
-              {students
-                .filter((s) =>
-                  s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-                  s.phone.includes(studentSearch)
-                )
-                .map((s) => (
-                  <tr key={s._id}>
-                    <td style={{ width: "40%" }}>
-                      {s.name} ({s.phone})
-                      <Link className="ms-1 text-primary" to={`/student/${s._id}`}>
-                        <i className="bi bi-box-arrow-up-right"></i>
-                      </Link>
-                    </td>
-                    <td style={{ width: "20%" }}>
-                      <button
-                        className="btn btn-outline-primary btn-sm"
-                        onClick={() => showStudentAttendance(s)}
-                      >
-                        Show Attendance
-                      </button>
-                    </td>
-                    <td style={{ width: "20%" }}>
-                      <button
-                        className="btn btn-outline-primary btn-sm"
-                        onClick={() => showStudentAllTests(s)}
-                      >
-                        Show All Tests
-                      </button>
-                    </td>
-                    <td style={{ width: "20%" }}>
-                      <button
-                        className="btn btn-outline-danger btn-sm"
-                        onClick={() => removeStudent(batchId, s._id)}
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
         </div>
+
 
         {/* Attendance Modal */}
         <ModalOne isOpen={openModalOne} onClose={closeAttendanceModalHandler}>
@@ -1272,7 +1369,5 @@ export default function BatchControls() {
       </div>
     </div>
 
-
-    <Footer />
   </>);
 }
