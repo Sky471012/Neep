@@ -982,8 +982,6 @@ export default function StudentControls() {
                     ) : (
                         // View Mode - unchanged
                         <>
-
-
                             <div className="profile-header">
                                 <div className="profile-avatar">
                                     <svg className="w-10 h-10 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">

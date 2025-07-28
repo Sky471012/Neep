@@ -68,7 +68,9 @@ export default function Navbar() {
 
   const isDashboardRoute =
     ["/student", "/teacher", "/admin"].includes(location.pathname) ||
-    matchPath("/student/:studentId", location.pathname);
+    matchPath("/batch/:batchId", location.pathname) ||
+    matchPath("/student/:studentId", location.pathname) ||
+    matchPath("/teacher/:teacherId", location.pathname);
 
   return (
     <>
