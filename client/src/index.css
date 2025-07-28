@@ -231,6 +231,13 @@ td {
   color: inherit;
 }
 
+.react-datepicker__triangle,
+.react-datepicker-popper {
+  transition: opacity 0.5s ease-in-out !important;
+  opacity: 1 !important;
+}
+
+
 .green-button{
   background: #dcfce7;
   color: #166534;

@@ -825,7 +825,7 @@ export default function StudentControls() {
                             </div>
 
 
-                            <div className="student-details-card"  style={{padding:"0.5rem 1.5rem"}}>
+                            <div className="student-details-card" style={{ padding: "0.5rem 1.5rem" }}>
                                 <div className="detail-item">
                                     <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -955,6 +955,14 @@ export default function StudentControls() {
                                         />
                                     </div>
                                 </div>
+
+                                <div className="detail-item p-1">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5-3.9 19.5m-2.1-19.5-3.9 19.5" />
+                                    </svg>
+                                    <div className="detail-label">Batches Enrolled: {batches.length}</div>
+                                </div>
+
                                 <div className="d-flex mt-2 justify-content-around">
                                     <button
                                         className="green-button"
@@ -1027,7 +1035,7 @@ export default function StudentControls() {
                                     <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5-3.9 19.5m-2.1-19.5-3.9 19.5" />
                                     </svg>
-                                    <div className="detail-label">Number of batches: {batches.length}</div>
+                                    <div className="detail-label">Batches Enrolled: {batches.length}</div>
                                 </div>
                             </div>
                         </>
