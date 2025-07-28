@@ -1,682 +1,1000 @@
-import React, { useEffect, useState } from "react";
-import { format } from "date-fns";
-import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom'
-import DatePicker from "react-datepicker";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import ModalOne from "../modals/ModalOne";
-import ModalTwo from "../modals/ModalTwo";
-import ModalThree from "../modals/ModalThree";
-import ModalFour from "../modals/ModalFour";
-import ModalFive from "../modals/ModalFive";
-import Popup from "../modals/Popup";
-import ExcelUpload from '../components/ExcelUpload';
+"use client"
+
+import { useEffect, useState } from "react"
+import { format } from "date-fns"
+import axios from "axios"
+import { Link, useNavigate } from "react-router-dom"
+import DatePicker from "react-datepicker"
+import Navbar from "../components/Navbar"
+import ModalOne from "../modals/ModalOne"
+import ModalTwo from "../modals/ModalTwo"
+import ModalThree from "../modals/ModalThree"
+import ModalFour from "../modals/ModalFour"
+import ModalFive from "../modals/ModalFive"
+import Popup from "../modals/Popup"
+import ExcelUpload from "../components/ExcelUpload"
 
 export default function Admin() {
-    const navigate = useNavigate();
-    const [admin, setAdmin] = useState(null);
-    const [batchesRecords, setBatchesRecords] = useState([]);
-    const [archivedBatchesRecords, setArchivedBatchesRecords] = useState([]);
-    const [studentsRecords, setStudentsRecords] = useState([]);
-    const [teachersRecords, setTeachersRecords] = useState([]);
-    const [teacher, setTeacher] = useState({});
-    const [openModalOne, setOpenModalOne] = useState(false);
-    const [openModalTwo, setOpenModalTwo] = useState(false);
-    const [openModalThree, setOpenModalThree] = useState(false);
-    const [openModalFour, setOpenModalFour] = useState(false);
-    const [openModalFive, setOpenModalFive] = useState(false);
-    const [openPopupModal, setOpenPopupModal] = useState(false);
-    const [description, setDescription] = useState('');
-    const [image, setImage] = useState(null);
-    const [dob, setDob] = useState(new Date());
-    const [dateOfJoining, setDateOfJoining] = useState(new Date());
-    const [startDate, setStartDate] = useState(new Date());
-    const [credentials, setCredentials] = useState({
+  const navigate = useNavigate()
+  const [admin, setAdmin] = useState(null)
+  const [batchesRecords, setBatchesRecords] = useState([])
+  const [archivedBatchesRecords, setArchivedBatchesRecords] = useState([])
+  const [studentsRecords, setStudentsRecords] = useState([])
+  const [teachersRecords, setTeachersRecords] = useState([])
+  const [teacher, setTeacher] = useState({})
+  const [openModalOne, setOpenModalOne] = useState(false)
+  const [openModalTwo, setOpenModalTwo] = useState(false)
+  const [openModalThree, setOpenModalThree] = useState(false)
+  const [openModalFour, setOpenModalFour] = useState(false)
+  const [openModalFive, setOpenModalFive] = useState(false)
+  const [openPopupModal, setOpenPopupModal] = useState(false)
+  const [description, setDescription] = useState("")
+  const [image, setImage] = useState(null)
+  const [dob, setDob] = useState(new Date())
+  const [dateOfJoining, setDateOfJoining] = useState(new Date())
+  const [startDate, setStartDate] = useState(new Date())
+  const [showFeeTracking, setShowFeeTracking] = useState(false)
+  const [todaysClasses, setTodaysClasses] = useState([])
+  const [credentials, setCredentials] = useState({
+    studentName: "",
+    studentPhone: "",
+    studentAddress: "",
+    studentClass: "",
+    teacherName: "",
+    teacherEmail: "",
+    teacherPhone: "",
+  })
+
+  const [showBatches, setShowBatches] = useState(false)
+  const [showStudents, setShowStudents] = useState(false)
+  const [showTeachers, setShowTeachers] = useState(false)
+  const [batchSearchQuery, setBatchSearchQuery] = useState("")
+  const [studentSearchQuery, setStudentSearchQuery] = useState("")
+  const [teacherSearchQuery, setTeacherSearchQuery] = useState("")
+
+  // Fee tracking states (from QuickView)
+  const [unpaidInstallments, setUnpaidInstallments] = useState([])
+  const [totalUnpaidAmount, setTotalUnpaidAmount] = useState([])
+  const [upcomingInstallments, setUpcomingInstallments] = useState([])
+  const [totalUpcomingAmount, setTotalUpcomingAmount] = useState([])
+  const [paidInstallments, setPaidInstallments] = useState([])
+  const [totalPaidAmount, setTotalPaidAmount] = useState([])
+  const [selectedUnpaidClass, setSelectedUnpaidClass] = useState(null)
+  const [selectedUpcomingClass, setSelectedUpcomingClass] = useState(null)
+  const [selectedPaidClass, setSelectedPaidClass] = useState(null)
+  const [unpaidSortOrder, setUnpaidSortOrder] = useState("asc")
+  const [upcomingSortOrder, setUpcomingSortOrder] = useState("asc")
+  const [paidSortOrder, setPaidSortOrder] = useState("asc")
+
+  const getDaysOverdue = (dueDate) => {
+    const due = new Date(dueDate)
+    const now = new Date()
+    const diff = Math.floor((now - due) / (1000 * 60 * 60 * 24))
+    return diff > 0 ? `${diff} days ago` : "Due today"
+  }
+
+  function getDaysLeft(dueDate) {
+    const now = new Date()
+    const due = new Date(dueDate)
+    now.setHours(0, 0, 0, 0)
+    due.setHours(0, 0, 0, 0)
+    const diffInMs = due - now
+    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24))
+    if (diffInDays === 0) return "Due today"
+    if (diffInDays === 1) return "Due tomorrow"
+    return `${diffInDays} days left`
+  }
+
+  function getDaysSincePaid(paidDate) {
+    if (!paidDate) return "Not Paid"
+    const paid = new Date(paidDate)
+    const today = new Date()
+    paid.setHours(0, 0, 0, 0)
+    today.setHours(0, 0, 0, 0)
+    const diffInMs = today - paid
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+    return diffInDays === 0 ? "Paid today" : `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`
+  }
+
+  const sortInstallments = (data, order) => {
+    return [...data].sort((a, b) =>
+      order === "asc" ? new Date(a.dueDate) - new Date(b.dueDate) : new Date(b.dueDate) - new Date(a.dueDate),
+    )
+  }
+
+  useEffect(() => {
+    const storedAdmin = localStorage.getItem("user")
+    const token = localStorage.getItem("authToken")
+    if (storedAdmin && token && storedAdmin !== "undefined") {
+      try {
+        setAdmin(JSON.parse(storedAdmin))
+      } catch (err) {
+        console.error("Failed to parse admin JSON:", err)
+        localStorage.removeItem("admin")
+        return
+      }
+      const headers = { Authorization: `Bearer ${token}` }
+
+      // Fetch today's classes
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/today/timetable`, { headers })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch timetable")
+          return res.json()
+        })
+        .then((data) => setTodaysClasses(data.classes))
+        .catch((err) => console.error("Error loading timetable", err))
+
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, { headers })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch all batches")
+          return res.json()
+        })
+        .then(setBatchesRecords)
+        .catch((err) => console.error("Batches fetch error:", err))
+
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/archivedBatches`, { headers })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch all archived batches")
+          return res.json()
+        })
+        .then(setArchivedBatchesRecords)
+        .catch((err) => console.error("Archived Batches fetch error:", err))
+
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, { headers })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch all students")
+          return res.json()
+        })
+        .then(setStudentsRecords)
+        .catch((err) => console.error("Students fetch error:", err))
+
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, { headers })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch all teachers")
+          return res.json()
+        })
+        .then(setTeachersRecords)
+        .catch((err) => console.error("Teachers fetch error:", err))
+    }
+  }, [])
+
+  const loadFeeTrackingData = () => {
+    const token = localStorage.getItem("authToken")
+    const headers = { Authorization: `Bearer ${token}` }
+
+    // Fetch unpaid installments
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/unpaid`, { headers })
+      .then((res) => res.json())
+      .then((data) => {
+        const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+        const totalOutstanding = sorted.reduce((sum, inst) => sum + (inst.amount || 0), 0)
+        setUnpaidInstallments(sorted)
+        setTotalUnpaidAmount(totalOutstanding)
+      })
+      .catch((err) => console.error("Error loading unpaid installments:", err))
+
+    // Fetch upcoming installments
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/upcoming`, { headers })
+      .then((res) => res.json())
+      .then((data) => {
+        const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+        const totalUpcoming = sorted.reduce((sum, inst) => sum + (inst.amount || 0), 0)
+        setUpcomingInstallments(sorted)
+        setTotalUpcomingAmount(totalUpcoming)
+      })
+      .catch((err) => console.error("Error loading upcoming installments:", err))
+
+    // Fetch paid installments
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/paid`, { headers })
+      .then((res) => res.json())
+      .then((data) => {
+        const sorted = data.installments.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
+        const totalPaid = sorted.reduce((sum, inst) => sum + (inst.amount || 0), 0)
+        setPaidInstallments(sorted)
+        setTotalPaidAmount(totalPaid)
+      })
+      .catch((err) => console.error("Error loading paid installments:", err))
+  }
+
+  const handleFeeTrackingClick = () => {
+    if (!showFeeTracking) {
+      loadFeeTrackingData()
+    }
+    setShowFeeTracking(!showFeeTracking)
+  }
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken")
+    const findTeacher = async (batchId) => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const teacherGet = await res.json()
+        if (!res.ok) throw new Error(teacherGet.message || "Error fetching teacher")
+        setTeacher((prev) => ({
+          ...prev,
+          [batchId]: teacherGet.teacher[0],
+        }))
+      } catch (err) {
+        console.error("Failed to fetch assigned teacher:", err)
+        alert("Error fetching assigned teacher.")
+      }
+    }
+
+    batchesRecords.forEach((batch) => {
+      findTeacher(batch._id)
+    })
+  }, [batchesRecords])
+
+  const createBatch = async (batchName, batchClass, batchStartDate) => {
+    if (!batchName.trim()) {
+      alert("Please enter a batch name.")
+      return
+    }
+    const formattedDate = format(batchStartDate, "dd-MM-yyyy")
+    const code = `B-${Date.now().toString().slice(-6)}`
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchCreate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify({ name: batchName, code, batchClass, startDate: formattedDate }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(data.message || "Error creating batch.")
+        return
+      }
+      setOpenModalOne(false)
+      setBatchesRecords((prev) => [...prev, data])
+      setCredentials({ batch: "" })
+      setStartDate(new Date())
+      navigate(`/batch/${data._id}`)
+    } catch (error) {
+      console.error("Error creating batch:", error)
+      alert("Something went wrong.")
+    }
+  }
+
+  const createStudent = async (name, phone, dob, address, className, dateOfJoining) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentCreate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify({
+          name,
+          phone,
+          dob,
+          address,
+          class: className,
+          dateOfJoining,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(data.message)
+        return
+      }
+      setOpenModalTwo(false)
+      setStudentsRecords((prev) => [...prev, data])
+      setCredentials({
         studentName: "",
         studentPhone: "",
         studentAddress: "",
         studentClass: "",
+      })
+      setDob(new Date())
+      setDateOfJoining(new Date())
+      navigate(`/student/${data._id}`)
+    } catch (err) {
+      console.error("Create student error:", err)
+      alert("Error creating student.")
+    }
+  }
+
+  const createTeacher = async (teacherName, teacherEmail, teacherPhone) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherCreate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify({
+          name: teacherName,
+          email: teacherEmail,
+          phone: teacherPhone,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(data.message)
+        return
+      }
+      setOpenModalThree(false)
+      setTeachersRecords((prev) => [...prev, data])
+      setCredentials((prev) => ({
+        ...prev,
         teacherName: "",
         teacherEmail: "",
         teacherPhone: "",
-    });
-    const [batchSearchQuery, setBatchSearchQuery] = useState("");
-    const [studentSearchQuery, setStudentSearchQuery] = useState("");
-    const [teacherSearchQuery, setTeacherSearchQuery] = useState("");
+      }))
+    } catch (error) {
+      console.error("Error creating teacher:", error)
+      alert("Something went wrong.")
+    }
+  }
 
-    useEffect(() => {
-        const storedAdmin = localStorage.getItem("user");
-        const token = localStorage.getItem("authToken");
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const formData = new FormData()
+    formData.append("description", description)
+    formData.append("image", image)
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/uploadPopup`, formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      if (res.status === 200) {
+        alert("Popup updated successfully!")
+        setOpenPopupModal(false)
+      }
+    } catch (error) {
+      console.error("Popup upload error:", error.response?.data || error.message)
+      alert("Failed to upload popup. Unauthorized or server error.")
+    }
+  }
 
-        if (storedAdmin && token && storedAdmin !== "undefined") {
-            try {
-                setAdmin(JSON.parse(storedAdmin));
-            } catch (err) {
-                console.error("Failed to parse admin JSON:", err);
-                localStorage.removeItem("admin");
-                return;
-            }
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setCredentials((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
 
-            const headers = { Authorization: `Bearer ${token}` };
+  const handleBatchFormSubmit = (e) => {
+    e.preventDefault()
+    createBatch(credentials.batch, credentials.batchClass, startDate)
+  }
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, { headers })
-                .then(res => {
-                    if (!res.ok) throw new Error("Failed to fetch all batches");
-                    return res.json();
-                })
-                .then(setBatchesRecords)
-                .catch(err => console.error("Batches fetch error:", err));
+  const handleStudentFormSubmit = (e) => {
+    e.preventDefault()
+    const formattedDob = dob ? format(dob, "dd-MM-yyyy") : ""
+    const formattedJoining = dateOfJoining ? format(dateOfJoining, "dd-MM-yyyy") : ""
+    createStudent(
+      credentials.studentName,
+      credentials.studentPhone,
+      formattedDob,
+      credentials.studentAddress,
+      credentials.studentClass,
+      formattedJoining,
+    )
+  }
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/archivedBatches`, { headers })
-                .then(res => {
-                    if (!res.ok) throw new Error("Failed to fetch all archived batches");
-                    return res.json();
-                })
-                .then(setArchivedBatchesRecords)
-                .catch(err => console.error("Archived Batches fetch error:", err));
+  const handleTeacherFormSubmit = (e) => {
+    e.preventDefault()
+    createTeacher(credentials.teacherName, credentials.teacherEmail, credentials.teacherPhone)
+  }
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, { headers })
-                .then(res => {
-                    if (!res.ok) throw new Error("Failed to fetch all students");
-                    return res.json();
-                })
-                .then(setStudentsRecords)
-                .catch(err => console.error("Students fetch error:", err));
-
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, { headers })
-                .then(res => {
-                    if (!res.ok) throw new Error("Failed to fetch all teachers");
-                    return res.json();
-                })
-                .then(setTeachersRecords)
-                .catch(err => console.error("Teachers fetch error:", err));
-
-        }
-    }, []);
-
-    useEffect(() => {
-        const token = localStorage.getItem("authToken");
-
-        // finding assigned teacher of batch
-        const findTeacher = async (batchId) => {
-            try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const teacherGet = await res.json();
-                if (!res.ok) throw new Error(teacherGet.message || "Error fetching teacher");
-
-                setTeacher(prev => ({
-                    ...prev,
-                    [batchId]: teacherGet.teacher[0],
-                }));
-
-            } catch (err) {
-                console.error("Failed to fetch assigned teacher:", err);
-                alert("Error fetching assigned teacher.");
-            }
-        };
-
-        batchesRecords.forEach((batch) => {
-            findTeacher(batch._id);
-        });
-
-    }, [batchesRecords]);
-
-    const createBatch = async (batchName, batchClass, batchStartDate) => {
-        if (!batchName.trim()) {
-            alert("Please enter a batch name.");
-            return;
-        }
-
-        const formattedDate = format(batchStartDate, "dd-MM-yyyy");
-        const code = `B-${Date.now().toString().slice(-6)}`; // or any code generator logic
-
-        try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchCreate`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-                },
-                body: JSON.stringify({ name: batchName, code, batchClass, startDate: formattedDate }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                alert(data.message || "Error creating batch.");
-                return;
-            }
-
-            setOpenModalOne(false);
-            setBatchesRecords((prev) => [...prev, data]);
-            setCredentials({ batch: "" });
-            setStartDate(new Date());
-            navigate(`/batch/${data._id}`);
-        } catch (error) {
-            console.error("Error creating batch:", error);
-            alert("Something went wrong.");
-        }
-    };
-
-    const createStudent = async (name, phone, dob, address, className, dateOfJoining) => {
-        try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentCreate`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-                },
-                body: JSON.stringify({
-                    name,
-                    phone,
-                    dob,
-                    address,
-                    class: className,
-                    dateOfJoining
-                }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                alert(data.message);
-                return;
-            }
-
-            setOpenModalTwo(false);
-            setStudentsRecords((prev) => [...prev, data]);
-
-            // reset
-            setCredentials({
-                studentName: "",
-                studentPhone: "",
-                studentAddress: "",
-                studentClass: "",
-            });
-            setDob(new Date());
-            setDateOfJoining(new Date());
-            navigate(`/student/${data._id}`);
-        } catch (err) {
-            console.error("Create student error:", err);
-            alert("Error creating student.");
-        }
-    };
-
-    const createTeacher = async (teacherName, teacherEmail, teacherPhone) => {
-        try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherCreate`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-                },
-                body: JSON.stringify({
-                    name: teacherName,
-                    email: teacherEmail,
-                    phone: teacherPhone,
-                }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                alert(data.message);
-                return;
-            }
-
-            setOpenModalThree(false);
-            setTeachersRecords((prev) => [...prev, data]);
-
-            // Reset form
-            setCredentials((prev) => ({
-                ...prev,
-                teacherName: "",
-                teacherEmail: "",
-                teacherPhone: ""
-            }));
-        } catch (error) {
-            console.error("Error creating teacher:", error);
-            alert("Something went wrong.");
-        }
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        const formData = new FormData();
-        formData.append('description', description);
-        formData.append('image', image);
-
-        try {
-            const res = await axios.post(
-                `${import.meta.env.VITE_BACKEND_URL}/api/uploadPopup`,
-                formData,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
-
-            if (res.status === 200) {
-                alert('Popup updated successfully!');
-                setOpenPopupModal(false);
-            }
-        } catch (error) {
-            console.error('Popup upload error:', error.response?.data || error.message);
-            alert('Failed to upload popup. Unauthorized or server error.');
-        }
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setCredentials((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    const handleBatchFormSubmit = (e) => {
-        e.preventDefault();
-        createBatch(credentials.batch, credentials.batchClass, startDate);
-    };
-
-    const handleStudentFormSubmit = (e) => {
-        e.preventDefault();
-
-        const formattedDob = dob ? format(dob, "dd-MM-yyyy") : "";
-        const formattedJoining = dateOfJoining ? format(dateOfJoining, "dd-MM-yyyy") : "";
-
-        createStudent(
-            credentials.studentName,
-            credentials.studentPhone,
-            formattedDob,
-            credentials.studentAddress,
-            credentials.studentClass,
-            formattedJoining
-        );
-    };
-
-    const handleTeacherFormSubmit = (e) => {
-        e.preventDefault();
-        createTeacher(
-            credentials.teacherName,
-            credentials.teacherEmail,
-            credentials.teacherPhone
-        );
-    };
-
-
-    return (
-        <>
-            <Navbar />
-
-            <div className="main-content">
-                <div className="adminbar d-flex justify-content-between gap-4 m-5 text-center">
-                    <Link to="/quickView" className="text-primary">Quick View</Link>
-                    <a href="#batches" className="text-primary">All Batches</a>
-                    <a href="#students" className="text-primary">All Students</a>
-                    <a href="#teachers" className="text-primary">All Teachers</a>
-                    <a className="text-primary" onClick={() => setOpenModalOne(true)}>Add a Batch</a>
-                    <a className="text-primary" onClick={() => setOpenModalTwo(true)}>Add a Student</a>
-                    <a className="text-primary" onClick={() => setOpenModalThree(true)}>Add a Teacher</a>
-                    <a className="text-primary" onClick={() => setOpenPopupModal(true)}>Update Popup</a>
-                    <a className="text-primary" onClick={() => setOpenModalFour(true)}>Quick Add (Excel)</a>
-                    <a className="text-primary" onClick={() => setOpenModalFive(true)}>Archived Batches</a>
+  return (
+    <>
+      <Navbar />
+      <div className="admin-container">
+        {/* Fixed Sidebar */}
+        <div className="admin-sidebar">
+          {/* Today's Classes Section */}
+          <div className="sidebar-section">
+            <h3 className="sidebar-title">Today's Classes</h3>
+            <div className="classes-container">
+              {todaysClasses.length === 0 ? (
+                <p className="no-classes">No classes scheduled today.</p>
+              ) : (
+                <div className="classes-list">
+                  {todaysClasses.map((entry, index) => (
+                    <div key={index} className="class-item">
+                      <div className="class-header">
+                        <h4 className="class-name">{entry.batch.name}</h4>
+                        <span className="class-code">{entry.batch.code}</span>
+                      </div>
+                      <div className="class-timings">
+                        {entry.classTimings.map((slot, i) => (
+                          <div key={i} className="timing-slot">
+                            {slot.startTime} - {slot.endTime}
+                          </div>
+                        ))}
+                      </div>
+                      <Link to={`/batch/${entry.batch.id}`} className="class-link">
+                        View Batch →
+                      </Link>
+                    </div>
+                  ))}
                 </div>
-
-                <div id="batches" className="batches-container">
-                    <div className="container d-flex justify-content-between align-items-center mb-3">
-                        <h1>Batches({batchesRecords.length})</h1>
-                        <input
-                            type="search"
-                            placeholder="Search batches with name and class..."
-                            className="form-control w-50"
-                            onChange={(e) => setBatchSearchQuery(e.target.value)}
-                        />
-                    </div>
-                    <div className="container">
-                        <div className="row">
-                            {batchesRecords.length > 0 ? (
-                                batchesRecords
-                                    .filter(batch => batch.name.toLowerCase().includes(batchSearchQuery.toLowerCase()) ||
-                                        batch.class.toLowerCase().includes(batchSearchQuery)
-                                    )
-                                    .map((batch, index) => (
-                                        <div className="col-12 col-sm-6 col-lg-4" key={index}>
-                                            <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
-                                                <div className="card batch-card mb-3">
-                                                    <h5 className="card-title">{batch.name}</h5>
-                                                    <span>Class: {batch.class}</span>
-                                                </div>
-                                            </Link>
-                                        </div>
-                                    ))
-                            ) : (
-                                <p>No batches found.</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-
-                <div id="students" className="batches-container">
-                    <div className="container d-flex justify-content-between align-items-center mb-3">
-                        <h1>Students({studentsRecords.length})</h1>
-                        <input
-                            type="search"
-                            placeholder="Search students with name and contact number..."
-                            className="form-control w-50"
-                            onChange={(e) => setStudentSearchQuery(e.target.value)}
-                        />
-                    </div>
-                    <div className="container">
-                        <div className="row">
-                            {studentsRecords.length > 0 ? (
-                                studentsRecords
-                                    .filter(student => student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
-                                        student.phone.includes(studentSearchQuery)
-                                    )
-                                    .map((student, index) => (
-                                        <div className="col-12 col-sm-6 col-lg-4" key={index}>
-                                            <Link to={`/student/${student._id}`} className="text-decoration-none text-dark">
-                                                <div className="card batch-card mb-3">
-                                                    <h5 className="card-title">{student.name}</h5>
-                                                    <span>Phone: {student.phone}</span>
-                                                </div>
-                                            </Link>
-                                        </div>
-                                    ))
-                            ) : (
-                                <p>No student found.</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-
-                <div id="teachers" className="batches-container">
-                    <div className="container d-flex justify-content-between align-items-center mb-3">
-                        <h1>Teachers({teachersRecords.length})</h1>
-                        <input
-                            type="search"
-                            placeholder="Search teachers with name and contact number..."
-                            className="form-control w-50"
-                            onChange={(e) => setTeacherSearchQuery(e.target.value)}
-                        />
-                    </div>
-                    <div className="container">
-                        <div className="row">
-                            {teachersRecords.length > 0 ? (
-                                teachersRecords
-                                    .filter(teacher => teacher.name.toLowerCase().includes(teacherSearchQuery.toLowerCase()) ||
-                                        teacher.phone.includes(teacherSearchQuery)
-                                    )
-                                    .map((teacher, index) => (
-                                        <div className="col-12 col-sm-6 col-lg-4" key={index}>
-                                            <Link to={`/teacher/${teacher._id}`} className="text-decoration-none text-dark">
-                                                <div className="card batch-card mb-3">
-                                                    <h5 className="card-title">{teacher.name}</h5>
-                                                    <span>Phone: {teacher.phone}</span>
-                                                </div>
-                                            </Link>
-                                        </div>
-                                    ))
-                            ) : (
-                                <p>No teacher found.</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
+              )}
             </div>
+          </div>
 
-            <Footer />
+          {/* Fee Tracking Button */}
+          <button className="fee-tracking-btn" onClick={handleFeeTrackingClick}>
+            {showFeeTracking ? "Hide Fee Tracking" : "Show Fee Tracking"}
+          </button>
+        </div>
 
+        {/* Main Content Area */}
+        <div className="main-content">
+          {!showFeeTracking && !showBatches && !showStudents && !showTeachers ? (
+            <div className="dashboard-grid">
+              <button className="dashboard-card all-batches" onClick={() => setShowBatches(true)}>
+                <div className="card-icon">👥</div>
+                <h3>All Batches</h3>
+                <p>View all batches ({batchesRecords.length})</p>
+              </button>
 
-            <ModalOne
-                isOpen={openModalOne}
-                onClose={() => setOpenModalOne(false)}
-                onCreate={createBatch}
-            >
-                <h3>Batch Creation</h3>
-                <form className='login-form mt-3' onSubmit={handleBatchFormSubmit}>
-                    <div className="input-group flex gap-1 mb-2">
-                        <label htmlFor="batch">Batch Name</label>
-                        <input
-                            type="text"
-                            id="batch"
-                            name="batch"
-                            value={credentials.batch}
-                            onChange={handleInputChange}
-                            required
-                            placeholder='Write Batch Name...'
-                        />
-                    </div>
+              <button className="dashboard-card all-students" onClick={() => setShowStudents(true)}>
+                <div className="card-icon">🎓</div>
+                <h3>All Students</h3>
+                <p>View all students ({studentsRecords.length})</p>
+              </button>
 
-                    <div className="input-group flex gap-1 mb-2">
-                        <label className="class">Class:</label>
-                        <select
-                            name="batchClass"
-                            value={credentials.batchClass}
-                            onChange={handleInputChange}
-                            required
-                            placeholder='Select Class...'
-                        >
-                            <option value="">Select Class</option>
-                            {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
-                                <option key={cls} value={cls}>{cls}</option>
-                            ))}
-                        </select>
-                    </div>
+              <button className="dashboard-card all-teachers" onClick={() => setShowTeachers(true)}>
+                <div className="card-icon">👨‍🏫</div>
+                <h3>All Teachers</h3>
+                <p>View all teachers ({teachersRecords.length})</p>
+              </button>
 
-                    <div className="input-group flex gap-1">
-                        <label htmlFor="startDate">Start Date</label>
-                        <DatePicker
-                            className="form-control"
-                            dateFormat="dd-MM-yyyy"
-                            selected={startDate}
-                            onChange={(date) => setStartDate(date)}
-                            placeholderText="Select Start Date"
-                            required
-                        />
-                    </div>
+              <button className="dashboard-card add-batch" onClick={() => setOpenModalOne(true)}>
+                <div className="card-icon">➕</div>
+                <h3>Add a Batch</h3>
+                <p>Create new batch</p>
+              </button>
 
-                    <button className='btn btn-success mt-2' type="submit">Create Batch</button>
-                </form>
-            </ModalOne>
+              <button className="dashboard-card add-student" onClick={() => setOpenModalTwo(true)}>
+                <div className="card-icon">👤</div>
+                <h3>Add a Student</h3>
+                <p>Register new student</p>
+              </button>
 
+              <button className="dashboard-card add-teacher" onClick={() => setOpenModalThree(true)}>
+                <div className="card-icon">👩‍🏫</div>
+                <h3>Add a Teacher</h3>
+                <p>Register new teacher</p>
+              </button>
 
-            <ModalTwo
-                isOpen={openModalTwo}
-                onClose={() => setOpenModalTwo(false)}
-                onCreate={createStudent}
-            >
-                <h3>Adding a Student</h3>
-                <form className='login-form mt-3' onSubmit={handleStudentFormSubmit}>
-                    <div className="mb-2 d-flex gap-3 w-75">
-                        <label className="form-label">Name:</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            name="studentName"
-                            value={credentials.studentName}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
+              <button className="dashboard-card update-popup" onClick={() => setOpenPopupModal(true)}>
+                <div className="card-icon">📢</div>
+                <h3>Update Popup</h3>
+                <p>Manage notifications</p>
+              </button>
 
-                    <div className="d-flex gap-3 w-75">
-                        <label className="form-label">Phone:</label>
-                        <input
-                            type="tel"
-                            className="form-control"
-                            name="studentPhone"
-                            value={credentials.studentPhone}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
+              <button className="dashboard-card quick-add" onClick={() => setOpenModalFour(true)}>
+                <div className="card-icon">📊</div>
+                <h3>Quick Add (Excel)</h3>
+                <p>Bulk upload students</p>
+              </button>
 
-                    <div className="d-flex gap-3 w-75">
-                        <label className="form-label">DOB (dd-mm-yyyy):</label>
-                        <DatePicker
-                            className="form-control"
-                            dateFormat="dd-MM-yyyy"
-                            selected={dob}
-                            onChange={(date) => setDob(date)}
-                            placeholderText="Select DOB"
-                            required
-                            maxDate={new Date()}
-                        />
-                    </div>
-
-                    <div className="d-flex gap-3 w-75">
-                        <label className="form-label">Address:</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            name="studentAddress"
-                            value={credentials.studentAddress}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="d-flex gap-3 w-75">
-                        <label className="form-label">Class:</label>
-                        <select
-                            className="form-select"
-                            name="studentClass"
-                            value={credentials.studentClass}
-                            onChange={handleInputChange}
-                            required
-                        >
-                            <option value="">Select Class</option>
-                            {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
-                                <option key={cls} value={cls}>{cls}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="d-flex gap-3 w-75">
-                        <label className="form-label">Date of Joining (dd-mm-yyyy):</label>
-                        <DatePicker
-                            className="form-control"
-                            dateFormat="dd-MM-yyyy"
-                            selected={dateOfJoining}
-                            onChange={(date) => setDateOfJoining(date)}
-                            placeholderText="Select Joining Date"
-                            required
-                        />
-                    </div>
-
-                    <button className="btn btn-success mt-3" type="submit">Add Student</button>
-                </form>
-            </ModalTwo>
-
-            <ModalThree
-                isOpen={openModalThree}
-                onClose={() => setOpenModalThree(false)}
-                onCreate={createTeacher}
-            >
-                <h3>Adding a Teacher</h3>
-                <form className='login-form mt-3' onSubmit={handleTeacherFormSubmit}>
-                    <div className="input-group flex gap-1">
-                        <label htmlFor="teacherName">Teacher Name</label>
-                        <input
-                            type="text"
-                            id="teacherName"
-                            name="teacherName"
-                            value={credentials.teacherName}
-                            onChange={handleInputChange}
-                            required
-                            placeholder='Write Teacher Name...'
-                        />
-                        <label htmlFor="teacherEmail">Teacher Email</label>
-                        <input
-                            type="email"
-                            id="teacherEmail"
-                            name="teacherEmail"
-                            value={credentials.teacherEmail}
-                            onChange={handleInputChange}
-                            required
-                            placeholder='Write Teacher Email...'
-                        />
-                        <label htmlFor="teacherPhone">Teacher Phone</label>
-                        <input
-                            type="tel"
-                            id="teacherPhone"
-                            name="teacherPhone"
-                            value={credentials.teacherPhone}
-                            onChange={handleInputChange}
-                            required
-                            placeholder='Write Teacher Phone...'
-                        />
-                    </div>
-                    <button className='btn btn-success mt-2' type="submit">Add Teacher</button>
-                </form>
-            </ModalThree>
-
-            <Popup
-                isOpen={openPopupModal}
-                onClose={() => setOpenPopupModal(false)}
-            >
-                <h3>Updating Popup</h3>
-                <form onSubmit={handleSubmit} encType="multipart/form-data">
-                    <input
-                        type="file"
-                        onChange={(e) => setImage(e.target.files[0])}
-                        accept="image/*"
-                        required
-                    />
-                    <br />
-                    <textarea
-                        rows={4}
-                        placeholder="Enter popup description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                    />
-                    <br />
-                    <button type="submit">Upload</button>
-                </form>
-            </Popup>
-
-            <ModalFour
-                isOpen={openModalFour}
-                onClose={() => setOpenModalFour(false)}
-            >
-                <h3>Upload Excel to Add Students</h3>
-                <ExcelUpload />
-            </ModalFour>
-
-            <ModalFive
-                isOpen={openModalFive}
-                onClose={() => setOpenModalFive(false)}
-            >
+              <button className="dashboard-card archived-batches" onClick={() => setOpenModalFive(true)}>
+                <div className="card-icon">📦</div>
                 <h3>Archived Batches</h3>
-                <div className="flex align-items-center">
-
-                    {archivedBatchesRecords.length > 0 ? (
-                        archivedBatchesRecords
-                            .map((batch, index) => (
-                                <Link to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
-                                    <div className="card batch-card mb-3">
-                                        <h5 className="card-title">{batch.name}</h5>
-                                        <span>Code: {batch.code}</span>
-                                    </div>
-                                </Link>
-                            ))
-                    ) : (
-                        <p>No archived batches found.</p>
-                    )}
-
+                <p>View archived batches ({archivedBatchesRecords.length})</p>
+              </button>
+            </div>
+          ) : showBatches ? (
+            <div className="data-section">
+              <div className="section-header">
+                <h2>All Batches ({batchesRecords.length})</h2>
+                <button className="back-btn" onClick={() => setShowBatches(false)}>
+                  ← Back to Dashboard
+                </button>
+              </div>
+              <div className="search-container">
+                <input
+                  type="search"
+                  placeholder="Search batches with name and class..."
+                  className="search-input"
+                  value={batchSearchQuery}
+                  onChange={(e) => setBatchSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="data-grid">
+                {batchesRecords.length > 0 ? (
+                  batchesRecords
+                    .filter(
+                      (batch) =>
+                        batch.name.toLowerCase().includes(batchSearchQuery.toLowerCase()) ||
+                        batch.class.toLowerCase().includes(batchSearchQuery.toLowerCase()),
+                    )
+                    .map((batch, index) => (
+                      <Link key={index} to={`/batch/${batch._id}`} className="data-card">
+                        <h5 className="card-title">{batch.name}</h5>
+                        <span className="card-subtitle">Class: {batch.class}</span>
+                        <span className="card-code">Code: {batch.code}</span>
+                      </Link>
+                    ))
+                ) : (
+                  <p className="no-data">No batches found.</p>
+                )}
+              </div>
+            </div>
+          ) : showStudents ? (
+            <div className="data-section">
+              <div className="section-header">
+                <h2>All Students ({studentsRecords.length})</h2>
+                <button className="back-btn" onClick={() => setShowStudents(false)}>
+                  ← Back to Dashboard
+                </button>
+              </div>
+              <div className="search-container">
+                <input
+                  type="search"
+                  placeholder="Search students with name and contact number..."
+                  className="search-input"
+                  value={studentSearchQuery}
+                  onChange={(e) => setStudentSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="data-grid">
+                {studentsRecords.length > 0 ? (
+                  studentsRecords
+                    .filter(
+                      (student) =>
+                        student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
+                        student.phone.includes(studentSearchQuery),
+                    )
+                    .map((student, index) => (
+                      <Link key={index} to={`/student/${student._id}`} className="data-card">
+                        <h5 className="card-title">{student.name}</h5>
+                        <span className="card-subtitle">Phone: {student.phone}</span>
+                        <span className="card-code">Class: {student.class}</span>
+                      </Link>
+                    ))
+                ) : (
+                  <p className="no-data">No students found.</p>
+                )}
+              </div>
+            </div>
+          ) : showTeachers ? (
+            <div className="data-section">
+              <div className="section-header">
+                <h2>All Teachers ({teachersRecords.length})</h2>
+                <button className="back-btn" onClick={() => setShowTeachers(false)}>
+                  ← Back to Dashboard
+                </button>
+              </div>
+              <div className="search-container">
+                <input
+                  type="search"
+                  placeholder="Search teachers with name and contact number..."
+                  className="search-input"
+                  value={teacherSearchQuery}
+                  onChange={(e) => setTeacherSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="data-grid">
+                {teachersRecords.length > 0 ? (
+                  teachersRecords
+                    .filter(
+                      (teacher) =>
+                        teacher.name.toLowerCase().includes(teacherSearchQuery.toLowerCase()) ||
+                        teacher.phone.includes(teacherSearchQuery),
+                    )
+                    .map((teacher, index) => (
+                      <Link key={index} to={`/teacher/${teacher._id}`} className="data-card">
+                        <h5 className="card-title">{teacher.name}</h5>
+                        <span className="card-subtitle">Phone: {teacher.phone}</span>
+                        <span className="card-code">Email: {teacher.email}</span>
+                      </Link>
+                    ))
+                ) : (
+                  <p className="no-data">No teachers found.</p>
+                )}
+              </div>
+            </div>
+          ) : (
+            // Fee tracking content remains the same
+            <div className="fee-tracking-content">
+              <div className="section-header">
+                <h2 className="fee-title">Fee Tracking</h2>
+                <button className="back-btn" onClick={() => setShowFeeTracking(false)}>
+                  ← Back to Dashboard
+                </button>
+              </div>
+              <div className="fee-cards-container">
+                <div className="fee-card unpaid">
+                  <h4>Unpaid</h4>
+                  <div className="fee-amount">₹ {totalUnpaidAmount}</div>
+                  <div className="installments-section">
+                    <div className="installments-header">
+                      <span>Installments</span>
+                      <div className="filter-dropdown">
+                        <button className="filter-btn">Filter ⚙️</button>
+                        <div className="dropdown-content">
+                          <button
+                            onClick={() => {
+                              const sorted = sortInstallments(unpaidInstallments, "asc")
+                              setUnpaidInstallments(sorted)
+                              setUnpaidSortOrder("asc")
+                            }}
+                          >
+                            Oldest First
+                          </button>
+                          <button
+                            onClick={() => {
+                              const sorted = sortInstallments(unpaidInstallments, "desc")
+                              setUnpaidInstallments(sorted)
+                              setUnpaidSortOrder("desc")
+                            }}
+                          >
+                            Newest First
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="installments-list">
+                      {unpaidInstallments
+                        .filter((inst) => !selectedUnpaidClass || inst.studentId?.class === selectedUnpaidClass)
+                        .map((inst) => {
+                          const student = inst.studentId
+                          const name = student?.name || "Unknown"
+                          const className = student?.class || "--"
+                          const amount = inst.amount || 0
+                          const num = inst.installmentNo || 0
+                          return (
+                            <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                              <div className="installment-header">
+                                <h5>{name}</h5>
+                                <span className="amount">₹ {amount}/-</span>
+                              </div>
+                              <div className="installment-details">
+                                <span>Class: {className}</span>
+                                <span>Installment #: {num}</span>
+                                <span className="overdue">{getDaysOverdue(inst.dueDate)}</span>
+                              </div>
+                            </Link>
+                          )
+                        })}
+                    </div>
+                  </div>
                 </div>
-            </ModalFive>
-        </>
-    );
+
+                <div className="fee-card upcoming">
+                  <h4>Upcoming</h4>
+                  <div className="fee-amount">₹ {totalUpcomingAmount}</div>
+                  <div className="installments-section">
+                    <div className="installments-header">
+                      <span>Installments</span>
+                      <div className="filter-dropdown">
+                        <button className="filter-btn">Filter ⚙️</button>
+                        <div className="dropdown-content">
+                          <button
+                            onClick={() => {
+                              const sorted = sortInstallments(upcomingInstallments, "asc")
+                              setUpcomingInstallments(sorted)
+                              setUpcomingSortOrder("asc")
+                            }}
+                          >
+                            Oldest First
+                          </button>
+                          <button
+                            onClick={() => {
+                              const sorted = sortInstallments(upcomingInstallments, "desc")
+                              setUpcomingInstallments(sorted)
+                              setUpcomingSortOrder("desc")
+                            }}
+                          >
+                            Newest First
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="installments-list">
+                      {upcomingInstallments
+                        .filter((inst) => !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass)
+                        .map((inst) => {
+                          const student = inst.studentId
+                          const name = student?.name || "Unknown"
+                          const className = student?.class || "--"
+                          const amount = inst.amount || 0
+                          const num = inst.installmentNo || 0
+                          return (
+                            <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                              <div className="installment-header">
+                                <h5>{name}</h5>
+                                <span className="amount">₹ {amount}/-</span>
+                              </div>
+                              <div className="installment-details">
+                                <span>Class: {className}</span>
+                                <span>Installment #: {num}</span>
+                                <span className="upcoming-date">{getDaysLeft(inst.dueDate)}</span>
+                              </div>
+                            </Link>
+                          )
+                        })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="fee-card paid">
+                  <h4>Paid</h4>
+                  <div className="fee-amount">₹ {totalPaidAmount}</div>
+                  <div className="installments-section">
+                    <div className="installments-header">
+                      <span>Installments</span>
+                      <div className="filter-dropdown">
+                        <button className="filter-btn">Filter ⚙️</button>
+                        <div className="dropdown-content">
+                          <button
+                            onClick={() => {
+                              const sorted = sortInstallments(paidInstallments, "asc")
+                              setPaidInstallments(sorted)
+                              setPaidSortOrder("asc")
+                            }}
+                          >
+                            Oldest First
+                          </button>
+                          <button
+                            onClick={() => {
+                              const sorted = sortInstallments(paidInstallments, "desc")
+                              setPaidInstallments(sorted)
+                              setPaidSortOrder("desc")
+                            }}
+                          >
+                            Newest First
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="installments-list">
+                      {paidInstallments
+                        .filter((inst) => !selectedPaidClass || inst.studentId?.class === selectedPaidClass)
+                        .map((inst) => {
+                          const student = inst.studentId
+                          const name = student?.name || "Unknown"
+                          const className = student?.class || "--"
+                          const amount = inst.amount || 0
+                          const num = inst.installmentNo || 0
+                          return (
+                            <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                              <div className="installment-header">
+                                <h5>{name}</h5>
+                                <span className="amount">₹ {amount}/-</span>
+                              </div>
+                              <div className="installment-details">
+                                <span>Class: {className}</span>
+                                <span>Installment #: {num}</span>
+                                <span className="paid-date">{getDaysSincePaid(inst.paidDate)}</span>
+                              </div>
+                            </Link>
+                          )
+                        })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* All Modals */}
+      <ModalOne isOpen={openModalOne} onClose={() => setOpenModalOne(false)} onCreate={createBatch}>
+        <h3>Batch Creation</h3>
+        <form className="login-form mt-3" onSubmit={handleBatchFormSubmit}>
+          <div className="input-group flex gap-1 mb-2">
+            <label htmlFor="batch">Batch Name</label>
+            <input
+              type="text"
+              id="batch"
+              name="batch"
+              value={credentials.batch}
+              onChange={handleInputChange}
+              required
+              placeholder="Write Batch Name..."
+            />
+          </div>
+          <div className="input-group flex gap-1 mb-2">
+            <label className="class">Class:</label>
+            <select
+              name="batchClass"
+              value={credentials.batchClass}
+              onChange={handleInputChange}
+              required
+              placeholder="Select Class..."
+            >
+              <option value="">Select Class</option>
+              {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
+                <option key={cls} value={cls}>
+                  {cls}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="input-group flex gap-1">
+            <label htmlFor="startDate">Start Date</label>
+            <DatePicker
+              className="form-control"
+              dateFormat="dd-MM-yyyy"
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              placeholderText="Select Start Date"
+              required
+            />
+          </div>
+          <button className="btn btn-success mt-2" type="submit">
+            Create Batch
+          </button>
+        </form>
+      </ModalOne>
+
+      <ModalTwo isOpen={openModalTwo} onClose={() => setOpenModalTwo(false)} onCreate={createStudent}>
+        <h3>Adding a Student</h3>
+        <form className="login-form mt-3" onSubmit={handleStudentFormSubmit}>
+          <div className="mb-2 d-flex gap-3 w-75">
+            <label className="form-label">Name:</label>
+            <input
+              type="text"
+              className="form-control"
+              name="studentName"
+              value={credentials.studentName}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div className="d-flex gap-3 w-75">
+            <label className="form-label">Phone:</label>
+            <input
+              type="tel"
+              className="form-control"
+              name="studentPhone"
+              value={credentials.studentPhone}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div className="d-flex gap-3 w-75">
+            <label className="form-label">DOB (dd-mm-yyyy):</label>
+            <DatePicker
+              className="form-control"
+              dateFormat="dd-MM-yyyy"
+              selected={dob}
+              onChange={(date) => setDob(date)}
+              placeholderText="Select DOB"
+              required
+              maxDate={new Date()}
+            />
+          </div>
+          <div className="d-flex gap-3 w-75">
+            <label className="form-label">Address:</label>
+            <input
+              type="text"
+              className="form-control"
+              name="studentAddress"
+              value={credentials.studentAddress}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div className="d-flex gap-3 w-75">
+            <label className="form-label">Class:</label>
+            <select
+              className="form-select"
+              name="studentClass"
+              value={credentials.studentClass}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Select Class</option>
+              {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
+                <option key={cls} value={cls}>
+                  {cls}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="d-flex gap-3 w-75">
+            <label className="form-label">Date of Joining (dd-mm-yyyy):</label>
+            <DatePicker
+              className="form-control"
+              dateFormat="dd-MM-yyyy"
+              selected={dateOfJoining}
+              onChange={(date) => setDateOfJoining(date)}
+              placeholderText="Select Joining Date"
+              required
+            />
+          </div>
+          <button className="btn btn-success mt-3" type="submit">
+            Add Student
+          </button>
+        </form>
+      </ModalTwo>
+
+      <ModalThree isOpen={openModalThree} onClose={() => setOpenModalThree(false)} onCreate={createTeacher}>
+        <h3>Adding a Teacher</h3>
+        <form className="login-form mt-3" onSubmit={handleTeacherFormSubmit}>
+          <div className="input-group flex gap-1">
+            <label htmlFor="teacherName">Teacher Name</label>
+            <input
+              type="text"
+              id="teacherName"
+              name="teacherName"
+              value={credentials.teacherName}
+              onChange={handleInputChange}
+              required
+              placeholder="Write Teacher Name..."
+            />
+            <label htmlFor="teacherEmail">Teacher Email</label>
+            <input
+              type="email"
+              id="teacherEmail"
+              name="teacherEmail"
+              value={credentials.teacherEmail}
+              onChange={handleInputChange}
+              required
+              placeholder="Write Teacher Email..."
+            />
+            <label htmlFor="teacherPhone">Teacher Phone</label>
+            <input
+              type="tel"
+              id="teacherPhone"
+              name="teacherPhone"
+              value={credentials.teacherPhone}
+              onChange={handleInputChange}
+              required
+              placeholder="Write Teacher Phone..."
+            />
+          </div>
+          <button className="btn btn-success mt-2" type="submit">
+            Add Teacher
+          </button>
+        </form>
+      </ModalThree>
+
+      <Popup isOpen={openPopupModal} onClose={() => setOpenPopupModal(false)}>
+        <h3>Updating Popup</h3>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
+          <input type="file" onChange={(e) => setImage(e.target.files[0])} accept="image/*" required />
+          <br />
+          <textarea
+            rows={4}
+            placeholder="Enter popup description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+          <br />
+          <button type="submit">Upload</button>
+        </form>
+      </Popup>
+
+      <ModalFour isOpen={openModalFour} onClose={() => setOpenModalFour(false)}>
+        <h3>Upload Excel to Add Students</h3>
+        <ExcelUpload />
+      </ModalFour>
+
+      <ModalFive isOpen={openModalFive} onClose={() => setOpenModalFive(false)}>
+        <h3>Archived Batches</h3>
+        <div className="flex align-items-center">
+          {archivedBatchesRecords.length > 0 ? (
+            archivedBatchesRecords.map((batch, index) => (
+              <Link key={index} to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
+                <div className="card batch-card mb-3">
+                  <h5 className="card-title">{batch.name}</h5>
+                  <span>Code: {batch.code}</span>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <p>No archived batches found.</p>
+          )}
+        </div>
+      </ModalFive>
+    </>
+  )
 }
