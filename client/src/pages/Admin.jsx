@@ -13,6 +13,7 @@ import ModalFour from "../modals/ModalFour"
 import ModalFive from "../modals/ModalFive"
 import Popup from "../modals/Popup"
 import ExcelUpload from "../components/ExcelUpload"
+import "../css/adminstyle.css"
 
 export default function Admin() {
   const navigate = useNavigate()
