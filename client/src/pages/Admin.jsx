@@ -407,11 +407,9 @@ export default function Admin() {
                         <span className="class-code">{entry.batch.code}</span>
                       </div>
                       <div className="class-timings">
-                        {entry.classTimings.map((slot, i) => (
-                          <div key={i} className="timing-slot">
-                            {slot.startTime} - {slot.endTime}
-                          </div>
-                        ))}
+                        <div className="timing-slot">
+                          {entry.timing.startTime} - {entry.timing.endTime}
+                        </div>
                       </div>
                       <Link to={`/batch/${entry.batch.id}`} className="class-link">
                         View Batch →
@@ -419,6 +417,7 @@ export default function Admin() {
                     </div>
                   ))}
                 </div>
+
               )}
             </div>
           </div>

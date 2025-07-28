@@ -1490,7 +1490,7 @@ exports.getTodaysClasses = async (req, res) => {
   try {
     const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
-    // Populate batchId with archive field to filter after
+    // Fetch and populate batch details
     const classes = await Timetable.find({ weekday: today }).populate(
       "batchId",
       "name code archive"
@@ -1499,25 +1499,33 @@ exports.getTodaysClasses = async (req, res) => {
     // Filter out archived batches
     const activeClasses = classes.filter((cls) => !cls.batchId?.archive);
 
-    const formatted = activeClasses.map((cls) => {
-      const sortedTimings = [...cls.classTimings].sort((a, b) => {
-        const parseTime = (timeStr) =>
-          new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);
-        return parseTime(a.startTime) - parseTime(b.startTime);
+    const flattenedTimings = activeClasses.flatMap((cls) => {
+      return cls.classTimings.map((slot) => {
+        return {
+          weekday: cls.weekday,
+          batch: {
+            id: cls.batchId._id,
+            name: cls.batchId.name,
+            code: cls.batchId.code,
+          },
+          timing: {
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+          },
+        };
       });
-
-      return {
-        weekday: cls.weekday,
-        batch: {
-          id: cls.batchId._id,
-          name: cls.batchId.name,
-          code: cls.batchId.code,
-        },
-        classTimings: sortedTimings,
-      };
     });
 
-    res.json({ today, classes: formatted });
+    // Sort all class timings by time (individually)
+    const parseTime = (timeStr) =>
+      new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);
+
+    flattenedTimings.sort(
+      (a, b) =>
+        parseTime(a.timing.startTime) - parseTime(b.timing.startTime)
+    );
+
+    res.json({ today, classes: flattenedTimings });
   } catch (err) {
     console.error("Error fetching today's classes:", err);
     res.status(500).json({ message: "Failed to fetch today's classes." });

@@ -156,8 +156,6 @@ export default function QuickView() {
                 .then(data => setTodaysClasses(data.classes))
                 .catch(err => console.error("Error loading timetable", err));
 
-
-
         }
     }, []);
 
