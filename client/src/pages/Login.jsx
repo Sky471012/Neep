@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './login.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Whatsapp from '../components/Whatsapp';
@@ -8,6 +7,7 @@ import Call from '../components/Call';
 import Instagram from '../components/Instagram';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import '../css/login.css';
 
 export default function Login() {
   // Generic login management

@@ -67,7 +67,7 @@ body {
 }
 
 /* Student Sidebar - Fixed position for laptop screens */
-.teacher-sidebar {
+.student-sidebar {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
   color: white;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
@@ -118,10 +118,10 @@ body {
 }
 
 /* Student Details Card */
-.teacher-details-card {
+.student-details-card {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 1.5rem 0.8rem;
+  padding: 1.5rem;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -154,11 +154,48 @@ body {
   font-weight: 500;
 }
 
+.detail-value {
+  font-size: 0.875rem;
+  color: #f8fafc;
+  font-weight: 400;
+  word-break: break-word;
+}
+
+.balance-header{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Fee Button */
+.fee-button {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.fee-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
 /* Content Area - Adjusted for fixed sidebar */
 .content-area {
   flex: 1;
   min-width: 0;
-  padding: 2rem;
+  padding: 1rem 2rem 10rem;
   margin-left: 330px; /* Match sidebar width */
   background: transparent;
   min-height: 100%;
@@ -167,7 +204,7 @@ body {
 }
 
 /* Welcome Card */
-.schedule-card {
+.welcome-card {
   background: rgba(199, 226, 218, 0.763);
   color: white;
   padding: 2rem;
@@ -177,37 +214,19 @@ body {
   border: 1px solid #e5e7eb;
 }
 
-.schedule-title {
+.welcome-title {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #006aff;
 }
 
-.schedule-card .table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-.schedule-card .table th,
-.schedule-card .table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.schedule-card .table th {
-  background-color: #f9fafb;
-  font-weight: 600;
-  color: #374151;
-}
-
-.schedule-card .table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.schedule-card .table tbody tr:hover {
-  background-color: #f8fafc;
+.welcome-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+  color: #1f2937;
 }
 
 /* Batches Section */
@@ -305,12 +324,12 @@ body {
   gap: 0;
 }
 
-.action-button-t {
+.action-button {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   border: none;
   font-size: 0.875rem;
   font-weight: 500;
@@ -320,57 +339,38 @@ body {
   justify-content: center;
 }
 
-.action-button-t svg {
+.action-button svg {
   width: 16px;
   height: 16px;
 }
 
-/* Individual button styles for clarity */
-.action-button-t.students {
-  background: #e0e7ff;
-  color: #3730a3;
-}
-
-.action-button-t.attendance {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.action-button-t.timetable {
-  background: #fee2fc;
-  color: #991b8c;
-}
-
-.action-button-t.add-test {
-  background: #fef3c7;
-  color: #92400e;
-  border-bottom-left-radius: 10px;
-}
-
-.action-button-t.show-tests {
+.action-button.timetable {
   background: #dbeafe;
   color: #1e40af;
   border-bottom-right-radius: 10px;
 }
 
-.action-button-t.show-tests:hover {
+.action-button.timetable:hover {
   background: #bfdbfe;
 }
 
-.action-button-t.attendance:hover {
+.action-button.attendance {
+  background: #dcfce7;
+  color: #166534;
+  border-bottom-left-radius: 10px;
+}
+
+.action-button.attendance:hover {
   background: #bbf7d0;
 }
 
-.action-button-t.add-test:hover {
+.action-button.tests {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.action-button.tests:hover {
   background: #fde68a;
-}
-
-.action-button-t.timetable:hover {
-  background: #fccbf8;;
-}
-
-.action-button-t.students:hover {
-  background: #c7d4fe;
 }
 
 /* No Batches */
@@ -381,18 +381,47 @@ body {
   font-size: 1.1rem;
 }
 
-.datePicker {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+/* Modal Styles */
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Calendar Styles */
+.carousel {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.carousel-inner {
   margin-bottom: 1rem;
+}
+
+.carousel-item {
+  display: none;
+}
+
+.carousel-item.active {
+  display: block;
+}
+
+.month-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
+  margin-bottom: 1rem;
 }
 
 .date-box {
@@ -400,30 +429,167 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  font-size: 0.8rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
   font-weight: 500;
-  cursor: default;
+  cursor: pointer;
+  transition: all 0.2s ease;
   background: #f3f4f6;
   color: #374151;
-  border: 2px solid transparent;
 }
 
 .date-box.present {
   background: #dcfce7;
   color: #166534;
-  border-color: #22c55e;
+  border: 2px solid #22c55e;
 }
 
 .date-box.absent {
   background: #fee2e2;
   color: #dc2626;
-  border-color: #ef4444;
+  border: 2px solid #ef4444;
+}
+
+.date-box:hover {
+  transform: scale(1.05);
+}
+
+.calendar-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.calendar-button {
+  padding: 0.5rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.calendar-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Table Styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table thead {
+  background: #f8fafc;
+}
+
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+
+.table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Time Slot Styles */
+.time-slot {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Fee Details */
+.fee-details {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.fee-summary {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.fee-summary span {
+  font-size: 1rem;
+  color: #374151;
+}
+
+.text-success {
+  color: #059669 !important;
+  font-weight: 600;
+}
+
+.text-danger {
+  color: #dc2626 !important;
+  font-weight: 600;
+}
+
+.download-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.download-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Test Details */
+.test-details {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.timetable-details {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .teacher-sidebar {
+  .student-sidebar {
     position: relative;
     width: 330px;
     top: auto;
@@ -433,7 +599,7 @@ body {
     z-index: 1;
     position: fixed;
     padding: 30px 20px;
-    min-height: 37vh;
+    min-height: 43vh;
   }
 
   .main-layout {
@@ -446,7 +612,7 @@ body {
 }
 
 @media (max-width: 769px) {
-  .teacher-sidebar {
+  .student-sidebar {
     position: relative;
     top: 0;
     height: auto;
@@ -456,7 +622,7 @@ body {
     padding: 20px;
   }
 
-  .teacher-details-card {
+  .student-details-card {
     padding: 20px;
   }
 
@@ -471,11 +637,19 @@ body {
     flex-direction: column;
   }
 
-  .schedule-title {
+  .welcome-title {
     font-size: 1.5rem;
   }
 
+  .welcome-subtitle {
+    font-size: 1rem;
+  }
+
   .batches-header {
+    flex-direction: column;
+  }
+  
+  .balance-header{
     flex-direction: column;
     align-items: stretch;
   }
@@ -488,28 +662,49 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .action-button-t {
+  .action-button {
     flex: 1;
     min-width: 120px;
   }
 
-  
+  .calendar-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .date-box {
+    font-size: 0.75rem;
+  }
+
+  .fee-summary {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .table {
+    font-size: 0.875rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.75rem 0.5rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .teacher-sidebar {
+  .student-sidebar {
     padding: 1rem;
     margin-left: 1px;
     width: auto;
-    min-height: 45vh;
+    min-height: 55vh;
   }
 
   .content-area {
     padding: 0.75rem;
   }
 
-  .schedule-card {
-    padding: 1rem;
+  .welcome-card {
+    padding: 1.5rem;
   }
 
   .batches-section {
@@ -521,8 +716,29 @@ body {
     flex-wrap: wrap;
   }
 
-  .action-button-t {
+  .action-button {
     min-width: auto;
+  }
+
+  .calendar-controls {
+    flex-direction: column;
+  }
+
+  .calendar-button {
+    width: 100%;
+  }
+
+  .table {
+    font-size: 0.75rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
   }
 }
 

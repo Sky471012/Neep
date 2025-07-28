@@ -8,8 +8,8 @@ import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
 import ModalFour from "../modals/ModalFour";
 import ModalFive from "../modals/ModalFive";
-import '../components/teacher.css';
 import "react-datepicker/dist/react-datepicker.css";
+import '../css/teacher.css';
 
 
 export default function Teacher() {

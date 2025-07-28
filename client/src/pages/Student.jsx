@@ -8,7 +8,7 @@ import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
 import ModalFour from "../modals/ModalFour";
-import '../components/student.css'; // Add this CSS file
+import '../css/student.css';
 
 export default function Student() {
 

@@ -27,6 +27,7 @@
 td {
   text-align: left;
   padding: 10px 20px !important;
+  align-content: center;
 }
 
 .date-box {
@@ -79,8 +80,8 @@ td {
   position: relative;
   width: 89%;
   min-height: 60vh;
-  max-height: 90vh;       /* 👈 Restrict height */
-  overflow-y: auto;        /* 👈 Enable vertical scrolling */
+  max-height: 90vh; /* 👈 Restrict height */
+  overflow-y: auto; /* 👈 Enable vertical scrolling */
 }
 
 .modal-box::-webkit-scrollbar {
@@ -91,7 +92,6 @@ td {
   background-color: #ccc;
   border-radius: 4px;
 }
-
 
 .modal-close {
   position: absolute;
@@ -110,7 +110,7 @@ td {
 .btn.active {
   background-color: #3498db;
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.575));
-  border-color:  #3498db;
+  border-color: #3498db;
 }
 
 .popup-overlay {
@@ -160,15 +160,23 @@ td {
   font-size: 1rem;
   border: None;
   padding: 10px;
+  background: #ebf4fe;
 }
 
-.dropdown-menu button{
+.dropdown-menu button {
   padding: 7px;
+}
+
+.dropdown .btn:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none;
+  background-color: transparent;
 }
 
 /* Main wrapper */
 .react-time-picker {
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
 
 /* Input container */
@@ -204,4 +212,67 @@ td {
 .react-time-picker__clear-button,
 .react-time-picker__clock-button {
   display: none;
+}
+
+.react-datepicker__input-container input {
+  width: 105px;
+  font-size: inherit;
+  font-weight: inherit;
+  background: transparent;
+  padding: 0px 8px;
+  box-shadow: none;
+  color: inherit;
+}
+
+.react-datepicker__input-container input:focus {
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
+  color: inherit;
+}
+
+.green-button{
+  background: #dcfce7;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 1rem;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.green-button:hover{
+  background: #bbf7d0;
+}
+
+.yellow-button{
+  background: #fef3c7;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 1rem;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.yellow-button:hover{
+  background: #fde68a;
+}
+
+.white-space-nowrap {
+  white-space: nowrap;
 }

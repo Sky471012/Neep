@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
+import 'react-datepicker/dist/react-datepicker.css';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Inter28ptRegular } from "../assets/fonts/Inter_28pt-Regular";
 import { Inter18ptBold } from "../assets/fonts/Inter_18pt-Bold-bold";
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
 
@@ -733,378 +733,525 @@ export default function StudentControls() {
 
         <Navbar />
 
-        <div className="main-content">
-            <div className="container mt-4">
-                <div className="card mb-5 p-3">
-                    <div className="d-flex justify-content-between align-items-start">
-                        <h2>{student?.name || "No name"}</h2>
-
-                        <div className="dropdown">
-                            <button
-                                className="btn btn-sm"
-                                type="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                            >
-                                <h3>⋮</h3>
-                            </button>
-                            <ul className="dropdown-menu dropdown-menu-end shadow">
-                                <li>
-                                    <button
-                                        className="dropdown-item"
-                                        onClick={() => setModalOne(true)}
-                                    >
-                                        Add to Batches
-                                    </button>
-                                </li>
-                                <li>
-                                    <button
-                                        className="dropdown-item"
-                                        onClick={handleEditClick}
-                                        disabled={isEditing}
-                                    >
-                                        Edit Profile
-                                    </button>
-                                </li>
-                                <li>
-                                    {fee?._id ? (
-                                        <button
-                                            className="dropdown-item text-warning"
-                                            onClick={handleRemoveFeeStructure}
-                                        >
-                                            Remove Fee Structure
-                                        </button>
-                                    ) : (
+        <div className="app-container">
+            <div className="main-layout">
+                <div className="student-sidebar">
+                    <div className="d-flex">
+                        <div style={{ margin: "0", padding: "0", width: "100%" }}>
+                            <div style={{ position: "absolute", top: "10px", right: "10px" }} className="dropdown">
+                                <button
+                                    className="btn btn-sm"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <h4 style={{ color: 'white', padding: "0px" }}>⋮</h4>
+                                </button>
+                                <ul className="dropdown-menu dropdown-menu-end shadow">
+                                    <li>
                                         <button
                                             className="dropdown-item"
-                                            onClick={() => setModalTwo(true)}
+                                            onClick={() => setModalOne(true)}
                                         >
-                                            Add Fee Structure
+                                            Add to Batches
                                         </button>
-                                    )}
-                                </li>
-                                <li>
-                                    <button
-                                        className="dropdown-item text-danger"
-                                        onClick={() => deleteStudent(student._id)}
-                                    >
-                                        Delete Student
-                                    </button>
-                                </li>
-                            </ul>
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="dropdown-item"
+                                            onClick={handleEditClick}
+                                            disabled={isEditing}
+                                        >
+                                            Edit Profile
+                                        </button>
+                                    </li>
+                                    <li>
+                                        {fee?._id ? (
+                                            <button
+                                                className="dropdown-item text-warning"
+                                                onClick={handleRemoveFeeStructure}
+                                            >
+                                                Remove Fee Structure
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="dropdown-item"
+                                                onClick={() => setModalTwo(true)}
+                                            >
+                                                Add Fee Structure
+                                            </button>
+                                        )}
+                                    </li>
+                                    <li>
+                                        <button
+                                            className="dropdown-item text-danger"
+                                            onClick={() => deleteStudent(student._id)}
+                                        >
+                                            Delete Student
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
                     {isEditing ? (
-                        // Edit Mode
-                        <div className="mt-3">
-                            <div className="row">
-                                <div className="col-md-6 mb-3">
-                                    <label className="form-label">Name:</label>
+                        <>
+                            <div className="profile-header">
+                                <div className="profile-avatar">
+                                    <svg className="w-10 h-10 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <h2 className="profile-title mb-2" style={{ margin: "0 auto" }}>
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className="form-control text-center"
                                         name="name"
                                         value={editForm.name}
                                         onChange={handleInputChange}
-                                    />
-                                </div>
-
-                                <div className="col-md-6 mb-3">
-                                    <label className="form-label">Contact Number:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="phone"
-                                        value={editForm.phone}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="row">
-                                <div className="col-md-6 mb-3">
-                                    <label className="form-label">Date of Birth:</label>
-                                    <DatePicker
-                                        selected={editForm.dob ? new Date(editForm.dob.split('-').reverse().join('-')) : null}
-                                        onChange={(date) => {
-                                            const formattedDate = date ?
-                                                `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`
-                                                : '';
-                                            setEditForm(prev => ({ ...prev, dob: formattedDate }));
+                                        placeholder="Enter name"
+                                        style={{
+                                            border: '1px solid #ffffffff',
+                                            fontSize: 'inherit',
+                                            fontWeight: 'inherit',
+                                            background: 'transparent',
+                                            padding: "0",
+                                            boxShadow: "none",
+                                            color: "inherit"
                                         }}
-                                        dateFormat="dd-MM-yyyy"
-                                        className="form-control"
-                                        placeholderText="Select date of birth"
-                                        showYearDropdown
-                                        yearDropdownItemNumber={100}
-                                        scrollableYearDropdown
                                     />
+                                </h2>
+                            </div>
+
+
+                            <div className="student-details-card"  style={{padding:"0.5rem 1.5rem"}}>
+                                <div className="detail-item">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    <div className="detail-label">
+                                        Phone:
+                                        <input
+                                            type="text"
+                                            className="form-control d-inline-block ms-2"
+                                            name="phone"
+                                            value={editForm.phone}
+                                            onChange={handleInputChange}
+                                            style={{
+                                                width: '70%',
+                                                fontSize: 'inherit',
+                                                fontWeight: 'inherit',
+                                                background: 'transparent',
+                                                padding: "0px 8px",
+                                                boxShadow: "none",
+                                                color: "inherit"
+                                            }}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="col-md-6 mb-3">
-                                    <label className="form-label">Class:</label>
-                                    <select
-                                        className="form-control"
-                                        name="class"
-                                        value={editForm.class}
-                                        onChange={handleInputChange}
+                                <div className="detail-item">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.871c1.355 0 2.697.056 4.024.166C17.155 8.51 18 9.473 18 10.608v2.513M15 8.25v-1.5m-6 1.5v-1.5m12 9.75-1.5.75a3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0L3 16.5m15-3.379a48.474 48.474 0 0 0-6-.371c-2.032 0-4.034.126-6 .371m12 0c.39.049.777.102 1.163.16 1.07.16 1.837 1.094 1.837 2.175v5.169c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 0 1 3 20.625v-5.17c0-1.08.768-2.014 1.837-2.174A47.78 47.78 0 0 1 6 13.12M12.265 3.11a.375.375 0 1 1-.53 0L12 2.845l.265.265Zm-3 0a.375.375 0 1 1-.53 0L9 2.845l.265.265Zm6 0a.375.375 0 1 1-.53 0L15 2.845l.265.265Z" />
+                                    </svg>
+                                    <div className="detail-label d-flex flex-nowrap">
+                                        <label className="mb-0 white-space-nowrap">Date of Birth:</label>
+                                        <DatePicker
+                                            selected={editForm.dob ? new Date(editForm.dob.split('-').reverse().join('-')) : null}
+                                            onChange={(date) => {
+                                                const formattedDate = date ?
+                                                    `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`
+                                                    : '';
+                                                setEditForm(prev => ({ ...prev, dob: formattedDate }));
+                                            }}
+                                            dateFormat="dd-MM-yyyy"
+                                            className="form-control d-inline-block ms-2"
+                                            placeholderText="Select date of birth"
+                                            showYearDropdown
+                                            yearDropdownItemNumber={10}
+                                            scrollableYearDropdown
+                                            dropdownMode="select"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="detail-item">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                                    </svg>
+                                    <div className="detail-label">
+                                        Class:
+                                        <select
+                                            className="form-control d-inline-block ms-2"
+                                            name="class"
+                                            value={editForm.class}
+                                            onChange={handleInputChange}
+                                            style={{
+                                                width: '73%',
+                                                fontSize: 'inherit',
+                                                fontWeight: 'inherit',
+                                                background: 'transparent',
+                                                padding: "0px 8px",
+                                                boxShadow: "none",
+                                                color: "inherit"
+                                            }}
+                                        >
+                                            <option value="">Select Class</option>
+                                            {classOptions.map(option => (
+                                                <option key={option} value={option}>{option}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="detail-item">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <div className="detail-value">
+                                        <input
+                                            className="form-control"
+                                            name="address"
+                                            value={editForm.address}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter address"
+                                            style={{
+                                                width: '103%',
+                                                fontSize: 'inherit',
+                                                fontWeight: 'inherit',
+                                                background: 'transparent',
+                                                padding: "0px 8px",
+                                                boxShadow: "none",
+                                                color: "inherit"
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="detail-item">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div className="detail-label d-flex flex-nowrap">
+                                        <label className="mb-0 white-space-nowrap">Joining Date:</label>
+                                        <DatePicker
+                                            selected={editForm.dateOfJoining ? new Date(editForm.dateOfJoining.split('-').reverse().join('-')) : null}
+                                            onChange={(date) => {
+                                                const formattedDate = date ?
+                                                    `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`
+                                                    : '';
+                                                setEditForm(prev => ({ ...prev, dateOfJoining: formattedDate }));
+                                            }}
+                                            dateFormat="dd-MM-yyyy"
+                                            className="form-control d-inline-block ms-2"
+                                            placeholderText="Select date of joining"
+                                            showYearDropdown
+                                            yearDropdownItemNumber={10}
+                                            scrollableYearDropdown
+                                            dropdownMode="select"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="d-flex mt-2 justify-content-around">
+                                    <button
+                                        className="green-button"
+                                        onClick={handleSaveEdit}
                                     >
-                                        <option value="">Select Class</option>
-                                        {classOptions.map(option => (
-                                            <option key={option} value={option}>{option}</option>
-                                        ))}
-                                    </select>
+                                        Save Changes
+                                    </button>
+                                    <button
+                                        className="yellow-button"
+                                        onClick={handleCancelEditStudent}
+                                    >
+                                        Cancel
+                                    </button>
                                 </div>
                             </div>
-
-                            <div className="mb-3">
-                                <label className="form-label">Address:</label>
-                                <input
-                                    className="form-control"
-                                    name="address"
-                                    value={editForm.address}
-                                    onChange={handleInputChange}
-                                    rows="3"
-                                />
-                            </div>
-
-                            <div className="mb-3">
-                                <label className="form-label">Date of Joining:</label>
-                                <DatePicker
-                                    selected={editForm.dateOfJoining ? new Date(editForm.dateOfJoining.split('-').reverse().join('-')) : null}
-                                    onChange={(date) => {
-                                        const formattedDate = date ?
-                                            `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`
-                                            : '';
-                                        setEditForm(prev => ({ ...prev, dateOfJoining: formattedDate }));
-                                    }}
-                                    dateFormat="dd-MM-yyyy"
-                                    className="form-control"
-                                    placeholderText="Select date of joining"
-                                    showYearDropdown
-                                    yearDropdownItemNumber={10}
-                                    scrollableYearDropdown
-                                />
-                            </div>
-
-                            {/* Non-editable fields */}
-                            <div className="mb-3">
-                                <label className="form-label">Number of batches:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={batches.length}
-                                    disabled
-                                />
-                            </div>
-
-                            <div className="d-flex gap-2">
-                                <button
-                                    className="btn btn-success"
-                                    onClick={handleSaveEdit}
-                                >
-                                    Save Changes
-                                </button>
-                                <button
-                                    className="btn btn-secondary"
-                                    onClick={handleCancelEditStudent}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
+                        </>
                     ) : (
                         // View Mode - unchanged
-                        <p className="mt-3">
-                            Contact Number:<strong> {student.phone}<br /></strong>
-                            DOB:<strong> {student.dob}<br /></strong>
-                            Class:<strong> {student.class}<br /></strong>
-                            Address:<strong> {student.address}<br /></strong>
-                            Date of Joining:<strong> {student.dateOfJoining}<br /></strong>
-                            Number of batches:<strong> {batches.length}</strong>
-                        </p>
+                        <>
+
+
+                            <div className="profile-header">
+                                <div className="profile-avatar">
+                                    <svg className="w-10 h-10 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <h2 className="profile-title mb-2" style={{ margin: "0 auto" }}>{student?.name || "No name"}</h2>
+                            </div>
+
+                            <div className="student-details-card">
+                                <div className="detail-item p-1">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    <div className="detail-label">Phone: {student.phone}</div>
+                                </div>
+
+                                <div className="detail-item p-1">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.871c1.355 0 2.697.056 4.024.166C17.155 8.51 18 9.473 18 10.608v2.513M15 8.25v-1.5m-6 1.5v-1.5m12 9.75-1.5.75a3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0L3 16.5m15-3.379a48.474 48.474 0 0 0-6-.371c-2.032 0-4.034.126-6 .371m12 0c.39.049.777.102 1.163.16 1.07.16 1.837 1.094 1.837 2.175v5.169c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 0 1 3 20.625v-5.17c0-1.08.768-2.014 1.837-2.174A47.78 47.78 0 0 1 6 13.12M12.265 3.11a.375.375 0 1 1-.53 0L12 2.845l.265.265Zm-3 0a.375.375 0 1 1-.53 0L9 2.845l.265.265Zm6 0a.375.375 0 1 1-.53 0L15 2.845l.265.265Z" />
+                                    </svg>
+                                    <div className="detail-label">DOB: {student.dob}</div>
+                                </div>
+
+                                <div className="detail-item p-1">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                                    </svg>
+                                    <div className="detail-label">Class: {student.class}</div>
+                                </div>
+
+                                <div className="detail-item p-1">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <div className="detail-value">{student.address}</div>
+                                </div>
+
+                                <div className="detail-item p-1">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div className="detail-label">Joining Date: {student.dateOfJoining}</div>
+                                </div>
+
+                                <div className="detail-item p-1">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5-3.9 19.5m-2.1-19.5-3.9 19.5" />
+                                    </svg>
+                                    <div className="detail-label">Number of batches: {batches.length}</div>
+                                </div>
+                            </div>
+                        </>
                     )}
                 </div>
 
 
-                <div className="mt-4">
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                        <h2>All Batches</h2>
-                        <input
-                            type="search"
-                            placeholder="Search batches with name..."
-                            className="form-control w-50"
-                            onChange={(e) => setBatchSearch(e.target.value)}
-                        />
+                <div className="content-area">
+                    <div className="welcome-card">
+                        <div className="batches-header">
+                            <h2 className="batches-title">All Batches</h2>
+                            <div className="search-container">
+                                <svg className="search-icon w-4 h-4 ms-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <input
+                                    type="search"
+                                    placeholder="Search batches with name..."
+                                    className="search-input"
+                                    onChange={(e) => setBatchSearch(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <table className="table table-borderless align-middle">
+                            <tbody>
+                                {batches
+                                    .filter((b) =>
+                                        b.name.toLowerCase().includes(batchSearch.toLowerCase())
+                                    )
+                                    .map((b) => (
+                                        <tr key={b._id}>
+                                            <td style={{ width: "70%" }}>
+                                                {b.name}
+                                                <Link className="ms-2 text-primary" to={`/batch/${b._id}`}>
+                                                    <i className="bi bi-box-arrow-up-right"></i>
+                                                </Link>
+                                            </td>
+                                            <td style={{ width: "30%", textAlign: "right" }}>
+                                                <button
+                                                    className="btn btn-outline-danger btn-sm"
+                                                    onClick={() => removeStudent(b._id, student._id)}
+                                                >
+                                                    Remove
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
                     </div>
 
-                    <table className="table table-borderless align-middle">
-                        <tbody>
-                            {batches
-                                .filter((b) =>
-                                    b.name.toLowerCase().includes(batchSearch.toLowerCase())
-                                )
-                                .map((b) => (
-                                    <tr key={b._id}>
-                                        <td style={{ width: "40%" }}>{b.name}</td>
-                                        <td style={{ width: "30%" }}>
-                                            <Link
-                                                to={`/batch/${b._id}`}
-                                                className="btn btn-outline-primary btn-sm"
-                                            >
-                                                Open Batch
-                                            </Link>
-                                        </td>
-                                        <td style={{ width: "30%" }}>
-                                            <button
-                                                className="btn btn-outline-danger btn-sm"
-                                                onClick={() => removeStudent(b._id, student._id)}
-                                            >
-                                                Remove
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
 
-                <div className="mt-5">
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                        <h2 className="card-title">Fee Status</h2>
-                        <button
-                            className="btn btn-outline-primary btn-sm"
-                            onClick={handleAddInstallment}
-                        >
-                            Add Installment
-                        </button>
-                    </div>
+                    <div className="batches-section">
+                        <div className="d-flex mb-2 justify-content-between">
+                            <h2 className="batches-title">Fee Status</h2>
+                            <button
+                                className="btn btn-outline-primary btn-sm"
+                                onClick={handleAddInstallment}
+                            >
+                                Add Installment
+                            </button>
+                        </div>
 
-                    <div className="d-flex gap-4 mt-3 mb-1" style={{ fontSize: "1.2rem" }}>
-                        {isEditingFee ? (
-                            <>
-                                <span><strong>Total Fee: </strong>₹
-                                    <input
-                                        type="number"
-                                        value={editedFee}
-                                        onChange={(e) => setEditedFee(e.target.value)}
-                                        style={{ width: "120px", padding: "2px 5px" }}
-                                    />
-                                    <button
-                                        className="btn btn-outline-success btn-sm"
-                                        onClick={() => editTotalAmount(editedFee)}
-                                    >
-                                        Done
-                                    </button>
-                                    <button
-                                        className="btn btn-outline-secondary btn-sm"
-                                        onClick={() => setIsEditingFee(false)}
-                                    >
-                                        Cancel
-                                    </button>
-                                </span>
-                            </>
-                        ) : (
-                            <>
-                                <span><strong>Total Fee:</strong> ₹ {totalFee}
-                                    <button className="btn btn-outline-secondary btn-sm" onClick={() => {
+                        <div className="balance-header m-0 ps-3 pe-3" style={{ fontSize: "1.2rem" }}>
+                            {isEditingFee ? (
+                                <>
+                                    <div className="d-flex gap-1">Total Fee:  ₹
+                                        <input
+                                            type="number"
+                                            value={editedFee}
+                                            onChange={(e) => setEditedFee(e.target.value)}
+                                            style={{
+                                                width: '74px',
+                                                fontSize: 'inherit',
+                                                fontWeight: 'inherit',
+                                                background: 'transparent',
+                                                padding: "0 4px",
+                                                boxShadow: "none",
+                                                color: "inherit"
+                                            }}
+                                        />
+                                        <button
+                                            className="btn btn-outline-success pt-1 pb-1"
+                                            onClick={() => editTotalAmount(editedFee)}
+                                        >
+                                            Done
+                                        </button>
+                                        <button
+                                            className="btn btn-outline-secondary pt-1 pb-1"
+                                            onClick={() => setIsEditingFee(false)}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="d-flex gap-3">
+                                    <span>Total Fee: ₹{totalFee}</span>
+                                    {totalFee ? <button className="btn btn-outline-secondary pt-1 pb-1" onClick={() => {
                                         setEditedFee(totalFee);
                                         setIsEditingFee(true);
                                     }}>
                                         Edit
-                                    </button>
-                                </span>
-                            </>
-                        )}
-                        <span><strong>Paid:</strong> ₹ {totalPaid}</span>
-                        <span><strong>Balance:</strong> ₹ {balance}</span>
-                    </div>
+                                    </button> : ("")
+                                    }
+                                </div>
+                            )}
+                            <span>Paid: ₹ {totalPaid}</span>
+                            <span>Balance: ₹ {balance}</span>
+                        </div>
 
-                    <div className="row row-cols-1 row-cols-md-2 g-4 mt-2">
-                        {installments.map((record, index) => {
-                            const status = record.paidDate ? "Paid" : "Due";
-                            const statusClass = record.paidDate ? "text-success" : "text-danger";
-                            const isEditing = editingInstallmentData === record._id;
-                            const isMarkingPaid = editingInstallmentId === record._id;
+                        <div className="row row-cols-1 row-cols-md-2 g-4 mt-2">
+                            {installments.map((record, index) => {
+                                const status = record.paidDate ? "Paid" : "Due";
+                                const statusClass = record.paidDate ? "text-success" : "text-danger";
+                                const isEditing = editingInstallmentData === record._id;
+                                const isMarkingPaid = editingInstallmentId === record._id;
 
-                            return (
-                                <div className="col" key={record._id}>
-                                    <div className="card h-100">
-                                        <div className="card-body">
-                                            <h5 className="card-title">Installment {record.installmentNo}</h5>
+                                return (
+                                    <div className="col" key={record._id}>
+                                        <div className="batch-card ps-3 pe-3 pb-3">
+                                            <div className="batch-header ps-0">
+                                                <h5 className="batch-name">Installment {record.installmentNo}</h5>
+                                            </div>
 
                                             {/* Amount Field */}
-                                            <p className="mb-1">
-                                                <strong>Amount:</strong>
+                                            <div className="mb-1 d-flex align-items-center">
+                                                Amount: ₹
                                                 {isEditing ? (
                                                     <input
                                                         type="number"
                                                         value={editedAmount}
                                                         onChange={(e) => setEditedAmount(Number(e.target.value))}
                                                         className="form-control d-inline-block ms-2"
-                                                        style={{ width: "120px" }}
+                                                        style={{
+                                                            width: '100px',
+                                                            fontSize: 'inherit',
+                                                            fontWeight: 'inherit',
+                                                            background: 'transparent',
+                                                            padding: "0px 8px",
+                                                            boxShadow: "none",
+                                                            color: "inherit"
+                                                        }}
                                                     />
                                                 ) : (
-                                                    ` ₹ ${record.amount || "--"}`
+                                                    ` ${record.amount || "--"}`
                                                 )}
-                                            </p>
+                                            </div>
 
                                             {/* Due Date Field */}
-                                            <p className="mb-1">
-                                                <strong>Due Date:</strong>
+                                            <div className="mb-1 d-flex align-items-center flex-nowrap">
+                                                <label className="me-2 mb-0 white-space-nowrap">Due Date:</label>
                                                 {isEditing ? (
                                                     <DatePicker
+                                                        scrollableYearDropdown
+                                                        maxDate={new Date()}
                                                         selected={editedDueDate}
                                                         onChange={(date) => setEditedDueDate(date)}
-                                                        dateFormat="yyyy-MM-dd"
+                                                        dateFormat="dd-MM-yyyy"
                                                         className="form-control d-inline-block ms-2"
-                                                        style={{ width: "150px" }}
+                                                        showYearDropdown
+                                                        yearDropdownItemNumber={10}
+                                                        dropdownMode="select"
                                                     />
                                                 ) : (
                                                     ` ${formatDateToDDMMYYYY(record.dueDate) || "--"}`
                                                 )}
-                                            </p>
+                                            </div>
 
                                             {/* Paid Date Field */}
                                             {isMarkingPaid ? (
-                                                <div className="mb-1 d-flex align-items-center">
-                                                    <strong className="me-2">Paid Date:</strong>
+                                                <div className="mb-1 d-flex align-items-center flex-nowrap">
+                                                    <label className="me-2 mb-0 white-space-nowrap">Paid Date:</label>
                                                     <DatePicker
+                                                        scrollableYearDropdown
+                                                        maxDate={new Date()}
                                                         selected={paidDateInput}
                                                         onChange={(date) => setPaidDateInput(date)}
-                                                        dateFormat="yyyy-MM-dd"
+                                                        dateFormat="dd-MM-yyyy"
                                                         className="form-control"
                                                         placeholderText="Select date"
+                                                        yearDropdownItemNumber={10}
+                                                        showYearDropdown
+                                                        dropdownMode="select"
                                                     />
                                                 </div>
                                             ) : (
-                                                <p className="mb-1">
-                                                    <strong>Paid Date:</strong>
+                                                <div className="mb-1 d-flex align-items-center flex-nowrap">
+                                                    <label className="me-2 mb-0 white-space-nowrap">Paid Date:</label>
                                                     {isEditing ? (
                                                         <DatePicker
                                                             selected={editedPaidDate}
                                                             onChange={(date) => setEditedPaidDate(date)}
-                                                            dateFormat="yyyy-MM-dd"
+                                                            dateFormat="dd-MM-yyyy"
                                                             className="form-control d-inline-block ms-2"
-                                                            style={{ width: "150px" }}
                                                             placeholderText="Select date"
-                                                            isClearable
+                                                            yearDropdownItemNumber={10}
+                                                            showYearDropdown
+                                                            dropdownMode="select"
                                                         />
                                                     ) : (
                                                         ` ${formatDateToDDMMYYYY(record.paidDate) || "--"}`
                                                     )}
-                                                </p>
+                                                </div>
                                             )}
 
                                             {/* Method Field */}
                                             {isMarkingPaid ? (
                                                 <div className="mb-1">
-                                                    <strong>Method:</strong>
+                                                    Method:
                                                     <select
                                                         className="form-select d-inline-block ms-2 w-auto"
                                                         value={methodInput}
                                                         onChange={(e) => setMethodInput(e.target.value)}
+                                                        style={{
+                                                            width: '103%',
+                                                            fontSize: 'inherit',
+                                                            fontWeight: 'inherit',
+                                                            background: 'transparent',
+                                                            padding: "0px 8px",
+                                                            boxShadow: "none",
+                                                            color: "inherit"
+                                                        }}
                                                     >
                                                         <option value="Cash">Cash</option>
                                                         <option value="Online">Online</option>
@@ -1112,13 +1259,22 @@ export default function StudentControls() {
                                                 </div>
                                             ) : (
                                                 <p className="mb-1">
-                                                    <strong>Method:</strong>
+                                                    Method:
                                                     {isEditing ? (
                                                         <select
                                                             className="form-select d-inline-block ms-2 w-auto"
                                                             value={editedMethod}
                                                             onChange={(e) => setEditedMethod(e.target.value)}
                                                             disabled={!editedPaidDate}
+                                                            style={{
+                                                                width: '103%',
+                                                                fontSize: 'inherit',
+                                                                fontWeight: 'inherit',
+                                                                background: 'transparent',
+                                                                padding: "0px 8px",
+                                                                boxShadow: "none",
+                                                                color: "inherit"
+                                                            }}
                                                         >
                                                             <option value="Cash">Cash</option>
                                                             <option value="Online">Online</option>
@@ -1137,7 +1293,7 @@ export default function StudentControls() {
                                                         // Edit mode buttons
                                                         <>
                                                             <button
-                                                                className="btn btn-outline-warning btn-sm"
+                                                                className="btn btn-outline-warning btn-sm pt-0 pb-0"
                                                                 onClick={() => {
                                                                     if (editedPaidDate) {
                                                                         setEditedPaidDate(null);
@@ -1151,13 +1307,13 @@ export default function StudentControls() {
                                                                 {editedPaidDate ? "Mark as Due" : "Mark as Paid"}
                                                             </button>
                                                             <button
-                                                                className="btn btn-outline-success btn-sm"
+                                                                className="btn btn-outline-success btn-sm pt-0 pb-0"
                                                                 onClick={() => handleSaveEditedInstallment(record._id)}
                                                             >
                                                                 Save
                                                             </button>
                                                             <button
-                                                                className="btn btn-outline-secondary btn-sm"
+                                                                className="btn btn-outline-secondary btn-sm pt-0 pb-0"
                                                                 onClick={handleCancelEditInstallment}
                                                             >
                                                                 Cancel
@@ -1167,13 +1323,13 @@ export default function StudentControls() {
                                                         // Mark as paid mode buttons
                                                         <>
                                                             <button
-                                                                className="btn btn-outline-success btn-sm"
+                                                                className="btn btn-outline-success btn-sm pt-0 pb-0"
                                                                 onClick={() => handleMarkPaid(record._id)}
                                                             >
                                                                 Mark Paid
                                                             </button>
                                                             <button
-                                                                className="btn btn-outline-secondary btn-sm"
+                                                                className="btn btn-outline-secondary btn-sm pt-0 pb-0"
                                                                 onClick={() => {
                                                                     setEditingInstallmentId(null);
                                                                     setPaidDateInput("");
@@ -1225,94 +1381,92 @@ export default function StudentControls() {
                                                     )}
                                                 </div>
                                             </div>
+
                                         </div>
                                     </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <ModalOne
+                        isOpen={modalOne}
+                        onClose={() => {
+                            setModalOne(false);
+                            setSearchTerm("");
+                        }}
+                    >
+                        <h3>Add Student to batches</h3>
+
+                        <input
+                            type="text"
+                            className="form-control mb-3"
+                            placeholder="Search by name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <div style={{ maxHeight: "300px", overflowY: "auto", margin: "10px" }}>
+                            {filteredBatches.map((batch) => (
+                                <div key={batch._id} className="form-check mt-1">
+                                    <input
+                                        type="checkbox"
+                                        className="form-check-input me-2"
+                                        id={batch._id}
+                                        checked={selectedToAdd.includes(batch._id)}
+                                        onChange={() => toggleSelectBatch(batch._id)}
+                                    />
+                                    <label className="form-check-label" htmlFor={batch._id}>
+                                        {batch.name}
+                                    </label>
                                 </div>
-                            );
-                        })}
-                    </div>
+                            ))}
+                        </div>
+                        <button className="button" onClick={handleAddToSelectedBatches}>
+                            Add to selected Batches
+                        </button>
+                    </ModalOne>
+
+                    <ModalTwo
+                        isOpen={modalTwo}
+                        onClose={() => {
+                            setModalTwo(false);
+                        }}
+                    >
+                        <h3 className="mb-3">Adding Fee Structure of {student.name}</h3>
+
+                        <div className="mb-3">
+                            <label className="form-label">Total Fee Amount</label>
+                            <input
+                                type="number"
+                                className="form-control"
+                                value={editedFee}
+                                onChange={(e) => setEditedFee(e.target.value)}
+                                min="1"
+                                placeholder="Enter total fee amount"
+                            />
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Number of Installments</label>
+                            <input
+                                type="number"
+                                className="form-control"
+                                value={numInstallments}
+                                onChange={(e) => setNumInstallments(e.target.value)}
+                                min="1"
+                                placeholder="Enter number of installments"
+                            />
+                        </div>
+
+                        <button className="btn btn-primary" onClick={handleAddFeeStructureSubmit}>
+                            Create Fee Structure
+                        </button>
+                    </ModalTwo>
+
                 </div>
-
-                <ModalOne
-                    isOpen={modalOne}
-                    onClose={() => {
-                        setModalOne(false);
-                        setSearchTerm("");
-                    }}
-                >
-                    <h3>Add Student to batches</h3>
-
-                    <input
-                        type="text"
-                        className="form-control mb-3"
-                        placeholder="Search by name..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <div style={{ maxHeight: "300px", overflowY: "auto", margin: "10px" }}>
-                        {filteredBatches.map((batch) => (
-                            <div key={batch._id} className="form-check mt-1">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input me-2"
-                                    id={batch._id}
-                                    checked={selectedToAdd.includes(batch._id)}
-                                    onChange={() => toggleSelectBatch(batch._id)}
-                                />
-                                <label className="form-check-label" htmlFor={batch._id}>
-                                    {batch.name}
-                                </label>
-                            </div>
-                        ))}
-                    </div>
-                    <button className="button" onClick={handleAddToSelectedBatches}>
-                        Add to selected Batches
-                    </button>
-                </ModalOne>
-
-                <ModalTwo
-                    isOpen={modalTwo}
-                    onClose={() => {
-                        setModalTwo(false);
-                    }}
-                >
-                    <h3 className="mb-3">Adding Fee Structure of {student.name}</h3>
-
-                    <div className="mb-3">
-                        <label className="form-label">Total Fee Amount</label>
-                        <input
-                            type="number"
-                            className="form-control"
-                            value={editedFee}
-                            onChange={(e) => setEditedFee(e.target.value)}
-                            min="1"
-                            placeholder="Enter total fee amount"
-                        />
-                    </div>
-
-                    <div className="mb-3">
-                        <label className="form-label">Number of Installments</label>
-                        <input
-                            type="number"
-                            className="form-control"
-                            value={numInstallments}
-                            onChange={(e) => setNumInstallments(e.target.value)}
-                            min="1"
-                            placeholder="Enter number of installments"
-                        />
-                    </div>
-
-                    <button className="btn btn-primary" onClick={handleAddFeeStructureSubmit}>
-                        Create Fee Structure
-                    </button>
-                </ModalTwo>
-
 
             </div>
         </div >
-
-
-        <Footer />
 
     </>)
 }

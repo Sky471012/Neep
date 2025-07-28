@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, matchPath } from "react-router-dom";
 
 export default function Navbar() {
   const authToken = localStorage.getItem("authToken");
@@ -66,7 +66,9 @@ export default function Navbar() {
     }
   };
 
-  const isDashboardRoute = ["/student", "/teacher", "/admin"].includes(location.pathname);
+  const isDashboardRoute =
+    ["/student", "/teacher", "/admin"].includes(location.pathname) ||
+    matchPath("/student/:studentId", location.pathname);
 
   return (
     <>
