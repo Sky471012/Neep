@@ -77,7 +77,7 @@ const StudentsReviews = () => {
   ];
 
   const scroll = (direction) => {
-    const amount = 350;
+    const amount = window.innerWidth <= 768 ? 276 : 350; // Adjust scroll amount for mobile
     scrollRef.current.scrollBy({
       left: direction === "next" ? amount : -amount,
       behavior: "smooth",
@@ -265,15 +265,15 @@ const StudentsReviews = () => {
         }
 
         .scroll-controls::before,
-.scroll-controls::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 60px;
-  z-index: 3;
-  pointer-events: none;
-}
+        .scroll-controls::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 60px;
+          z-index: 3;
+          pointer-events: none;
+        }
 
         .arrow-btn {
           background: linear-gradient(
@@ -323,8 +323,8 @@ const StudentsReviews = () => {
         }
 
         .review-card {
-        display:flex;
-        flex-direction: column;
+          display: flex;
+          flex-direction: column;
           flex: 0 0 320px;
           background: rgba(255, 255, 255, 0.95);
           border-radius: 20px;
@@ -510,22 +510,61 @@ const StudentsReviews = () => {
 
         @media (max-width: 768px) {
           .reviews-section {
-            padding: 40px 12px;
+            padding: 60px 0;
+
+          }
+            
+  
+
+          .reviews-container {
+            padding: 0;
           }
 
           .reviews-header {
             margin-bottom: 30px;
+            padding: 0 20px; 
           }
+
+          .section-title {
+            font-size: 1rem; 
+            width: 95%;
+
+          .section-subtitle {
+            font-size: 1rem;
+            width: 95%; 
+          }
+
+          .scroll-controls {
+            padding: 0 10px; 
+          }
+
+          .scroll-container {
+            max-width: calc(100vw - 80px); 
+            gap: 1rem; /* Reduce gap between cards */
+            padding: 0 10px; 
+            scroll-snap-type: x mandatory; 
+            }
 
           .review-card,
           .see-more-card {
-            width: 260px;
+            flex: 0 0 260px; 
+            min-width: 260px;
+            width: 260px; 
             padding: 18px;
+            scroll-snap-align: start; 
+            margin: 0; 
           }
-
+          
+          .review-card:first-child {
+          margin-left:0;
+      }
           .student-name {
             font-size: 1.2rem;
           }
+            .review-card:last-child,
+  .see-more-card {
+    margin-right: 10px; 
+  }
 
           .review-text {
             font-size: 0.85rem;
@@ -548,6 +587,36 @@ const StudentsReviews = () => {
 
           .see-more-arrow {
             font-size: 1.5rem;
+          }
+
+          .arrow-btn {
+            padding: 8px 12px; 
+            font-size: 1.2rem;
+          }
+        }
+
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+          .scroll-container {
+            max-width: calc(100vw - 90px); 
+            padding: 0 5px; 
+      }
+
+          .review-card,
+          .see-more-card {
+            flex: 0 0 250px;
+            min-width: 250px;
+            width: 250px;
+            padding: 16px;
+          }
+
+          .section-title {
+            font-size: 1.8rem;
+          }
+
+          .arrow-btn {
+            padding: 6px 10px;
+            font-size: 1.1rem;
           }
         }
 
