@@ -616,7 +616,7 @@ html {
   }
 
   .login-page-card {
-    width: 90%;
+    width: 65%;
     padding: 2.2rem 2rem;
   }
 
@@ -664,6 +664,7 @@ html {
 
   .login-page-card {
     padding: 2rem 1.5rem;
+    width: 90%;
   }
   .heading-main {
     font-size: 1.8rem;
