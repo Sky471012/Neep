@@ -7,6 +7,7 @@ import Preloader from './components/Preloader'
 import Login from './pages/Login';
 import AllCourses from './pages/AllCourses';
 // import LoginAdmin from './pages/LoginAdmin';
+
 import Contactus from './pages/Contactus';
 import Student from './pages/Student';
 import Teacher from './pages/Teacher';
