@@ -9,7 +9,6 @@ import ModalOne from "../modals/ModalOne"
 import ModalTwo from "../modals/ModalTwo"
 import ModalThree from "../modals/ModalThree"
 import ModalFour from "../modals/ModalFour"
-import ModalFive from "../modals/ModalFive"
 import Popup from "../modals/Popup"
 import ExcelUpload from "../components/ExcelUpload"
 import "@fortawesome/fontawesome-free/css/all.css"
@@ -27,7 +26,6 @@ export default function Admin() {
   const [openModalTwo, setOpenModalTwo] = useState(false)
   const [openModalThree, setOpenModalThree] = useState(false)
   const [openModalFour, setOpenModalFour] = useState(false)
-  const [openModalFive, setOpenModalFive] = useState(false)
   const [openPopupModal, setOpenPopupModal] = useState(false)
   const [description, setDescription] = useState("")
   const [image, setImage] = useState(null)
@@ -46,11 +44,14 @@ export default function Admin() {
     teacherPhone: "",
   })
   const [showBatches, setShowBatches] = useState(false)
+  const [showArchiveBatches, setShowArchiveBatches] = useState(false)
   const [showStudents, setShowStudents] = useState(false)
   const [showTeachers, setShowTeachers] = useState(false)
   const [batchSearchQuery, setBatchSearchQuery] = useState("")
+  const [archivedBatchSearchQuery, setArchivedBatchSearchQuery] = useState("")
   const [studentSearchQuery, setStudentSearchQuery] = useState("")
   const [teacherSearchQuery, setTeacherSearchQuery] = useState("")
+  const [activeFeeTab, setActiveFeeTab] = useState("unpaid");
 
   // Fee tracking states (from QuickView)
   const [unpaidInstallments, setUnpaidInstallments] = useState([])
@@ -405,9 +406,9 @@ export default function Admin() {
       <Navbar />
       <div className="admin-container">
         {/* Fixed Sidebar */}
-        <div className={`admin-sidebar ${showFeeTracking || showBatches || showStudents || showTeachers
-            ? 'hide-on-mobile'
-            : ''
+        <div className={`admin-sidebar ${showFeeTracking || showBatches || showArchiveBatches || showStudents || showTeachers
+          ? 'hide-on-mobile'
+          : ''
           }`}>
           {/* Today's Classes Section */}
           <h3 className="sidebar-title">
@@ -444,7 +445,7 @@ export default function Admin() {
 
         {/* Main Content Area */}
         <div className="main-content">
-          {!showFeeTracking && !showBatches && !showStudents && !showTeachers ? (
+          {!showFeeTracking && !showBatches && !showArchiveBatches && !showStudents && !showTeachers ? (
             <div className="dashboard-grid">
               <button className="dashboard-card all-batches" onClick={() => setShowBatches(true)}>
                 <div className="card-icon">
@@ -509,7 +510,7 @@ export default function Admin() {
                 <h3>Quick Add (Excel)</h3>
               </button>
 
-              <button className="dashboard-card archived-batches" onClick={() => setOpenModalFive(true)}>
+              <button className="dashboard-card archived-batches" onClick={() => setShowArchiveBatches(true)}>
                 <div className="card-icon">
                   <i className="fas fa-archive"></i>
                 </div>
@@ -540,23 +541,25 @@ export default function Admin() {
                 </div>
               </div>
 
-              <div className="data-grid">
-                {batchesRecords.length > 0 ? (
-                  batchesRecords
-                    .filter(
-                      (batch) =>
-                        batch.name.toLowerCase().includes(batchSearchQuery.toLowerCase()) ||
-                        batch.class.toLowerCase().includes(batchSearchQuery.toLowerCase()),
-                    )
-                    .map((batch, index) => (
-                      <Link key={index} to={`/batch/${batch._id}`} className="data-card">
-                        <h5 className="card-title">{batch.name}</h5>
-                        <span className="card-subtitle">Class: {batch.class}</span>
-                      </Link>
-                    ))
-                ) : (
-                  <p className="no-data">No batches found.</p>
-                )}
+              <div className='data-grid-container'>
+                <div className="data-grid">
+                  {batchesRecords.length > 0 ? (
+                    batchesRecords
+                      .filter(
+                        (batch) =>
+                          batch.name.toLowerCase().includes(batchSearchQuery.toLowerCase()) ||
+                          batch.class.toLowerCase().includes(batchSearchQuery.toLowerCase()),
+                      )
+                      .map((batch, index) => (
+                        <Link key={index} to={`/batch/${batch._id}`} className="data-card">
+                          <h5 className="card-title">{batch.name}</h5>
+                          <span className="card-subtitle">Class: {batch.class}</span>
+                        </Link>
+                      ))
+                  ) : (
+                    <p className="no-data">No batches found.</p>
+                  )}
+                </div>
               </div>
             </div>
           ) : showStudents ? (
@@ -581,24 +584,26 @@ export default function Admin() {
                   />
                 </div>
               </div>
-              <div className="data-grid">
-                {studentsRecords.length > 0 ? (
-                  studentsRecords
-                    .filter(
-                      (student) =>
-                        student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
-                        student.phone.includes(studentSearchQuery),
-                    )
-                    .map((student, index) => (
-                      <Link key={index} to={`/student/${student._id}`} className="data-card">
-                        <h5 className="card-title">{student.name}</h5>
-                        <span className="card-subtitle">Phone: {student.phone}</span>
-                        <span className="card-code">Class: {student.class}</span>
-                      </Link>
-                    ))
-                ) : (
-                  <p className="no-data">No students found.</p>
-                )}
+              <div className='data-grid-container'>
+                <div className="data-grid">
+                  {studentsRecords.length > 0 ? (
+                    studentsRecords
+                      .filter(
+                        (student) =>
+                          student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
+                          student.phone.includes(studentSearchQuery),
+                      )
+                      .map((student, index) => (
+                        <Link key={index} to={`/student/${student._id}`} className="data-card">
+                          <h5 className="card-title">{student.name}</h5>
+                          <span className="card-subtitle">Phone: {student.phone}</span>
+                          <span className="card-code">Class: {student.class}</span>
+                        </Link>
+                      ))
+                  ) : (
+                    <p className="no-data">No students found.</p>
+                  )}
+                </div>
               </div>
             </div>
           ) : showTeachers ? (
@@ -623,26 +628,73 @@ export default function Admin() {
                   />
                 </div>
               </div>
-              <div className="data-grid">
-                {teachersRecords.length > 0 ? (
-                  teachersRecords
-                    .filter(
-                      (teacher) =>
-                        teacher.name.toLowerCase().includes(teacherSearchQuery.toLowerCase()) ||
-                        teacher.phone.includes(teacherSearchQuery),
-                    )
-                    .map((teacher, index) => (
-                      <Link key={index} to={`/teacher/${teacher._id}`} className="data-card">
-                        <h5 className="card-title">{teacher.name}</h5>
-                        <span className="card-subtitle">Phone: {teacher.phone}</span>
-                      </Link>
-                    ))
-                ) : (
-                  <p className="no-data">No teachers found.</p>
-                )}
+              <div className='data-grid-container'>
+                <div className="data-grid">
+                  {teachersRecords.length > 0 ? (
+                    teachersRecords
+                      .filter(
+                        (teacher) =>
+                          teacher.name.toLowerCase().includes(teacherSearchQuery.toLowerCase()) ||
+                          teacher.phone.includes(teacherSearchQuery),
+                      )
+                      .map((teacher, index) => (
+                        <Link key={index} to={`/teacher/${teacher._id}`} className="data-card">
+                          <h5 className="card-title">{teacher.name}</h5>
+                          <span className="card-subtitle">Phone: {teacher.phone}</span>
+                        </Link>
+                      ))
+                  ) : (
+                    <p className="no-data">No teachers found.</p>
+                  )}
+                </div>
               </div>
             </div>
-          ) : (
+          ) : showArchiveBatches ? (
+            <div className="data-section">
+              <div className="section-header">
+                <div className="d-flex">
+                  <button className="back-btn" onClick={() => setShowArchiveBatches(false)}>
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <h2 className="batches-title">Archived Batches ({archivedBatchesRecords.length})</h2>
+                </div>
+
+                <div className="search-container">
+                  <svg className="search-icon w-4 h-4 ms-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="search"
+                    placeholder="Search batches with name..."
+                    className="search-input"
+                    value={archivedBatchSearchQuery}
+                    onChange={(e) => setArchivedBatchSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className='data-grid-container'>
+                <div className="data-grid">
+                  {archivedBatchesRecords.length > 0 ? (
+                    archivedBatchesRecords
+                      .filter(
+                        (batch) =>
+                          batch.name.toLowerCase().includes(archivedBatchSearchQuery.toLowerCase()) ||
+                          batch.class.toLowerCase().includes(archivedBatchSearchQuery.toLowerCase()),
+                      )
+                      .map((batch, index) => (
+                        <Link key={index} to={`/batch/${batch._id}`} className="data-card">
+                          <h5 className="card-title">{batch.name}</h5>
+                          <span className="card-subtitle">Class: {batch.class}</span>
+                        </Link>
+                      ))
+                  ) : (
+                    <p className="no-data">No archived batches found.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )  : (
             // Fee tracking content
             <div className="data-section">
               <div className="section-header">
@@ -652,187 +704,193 @@ export default function Admin() {
                   </button>
                   <h2 className="batches-title">Fee Tracking</h2>
                 </div>
-
-
               </div>
 
-              <div className="fee-cards-container">
-                <div className="fee-card unpaid">
-                  <h4>Unpaid</h4>
-                  <div className="fee-amount">₹ {totalUnpaidAmount}</div>
-                  <div className="installments-section">
-                    <div className="installments-header">
-                      <span>Installments</span>
-                      <div className="filter-dropdown">
-                        <button className="filter-btn">
-                          Filter <i className="fas fa-cog"></i>
-                        </button>
-                        <div className="dropdown-content">
-                          <button
-                            onClick={() => {
-                              const sorted = sortInstallments(unpaidInstallments, "asc")
-                              setUnpaidInstallments(sorted)
-                              setUnpaidSortOrder("asc")
-                            }}
-                          >
-                            Oldest First
+              <div className="fee-cards-container fee-card">
+                <div className="fee-controls">
+                  <button className={activeFeeTab === "unpaid" ? "unpaid-btn active" : "unpaid-btn"} onClick={() => setActiveFeeTab("unpaid")}>Unpaid</button>
+                  <button className={activeFeeTab === "upcoming" ? "upcoming-btn active" : "upcoming-btn"} onClick={() => setActiveFeeTab("upcoming")}>Upcoming</button>
+                  <button className={activeFeeTab === "paid" ? "paid-btn active" : "paid-btn"} onClick={() => setActiveFeeTab("paid")}>Paid</button>
+                </div>
+                {activeFeeTab === "unpaid" && (
+                  <div className="unpaid">
+                    <h4>Unpaid</h4>
+                    <div className="fee-amount">₹ {totalUnpaidAmount}</div>
+                    <div className="installments-section">
+                      <div className="installments-header">
+                        <span>Installments</span>
+                        <div className="filter-dropdown">
+                          <button className="filter-btn">
+                            Filter <i className="fas fa-cog"></i>
                           </button>
-                          <button
-                            onClick={() => {
-                              const sorted = sortInstallments(unpaidInstallments, "desc")
-                              setUnpaidInstallments(sorted)
-                              setUnpaidSortOrder("desc")
-                            }}
-                          >
-                            Newest First
-                          </button>
+                          <div className="dropdown-content">
+                            <button
+                              onClick={() => {
+                                const sorted = sortInstallments(unpaidInstallments, "asc")
+                                setUnpaidInstallments(sorted)
+                                setUnpaidSortOrder("asc")
+                              }}
+                            >
+                              Oldest First
+                            </button>
+                            <button
+                              onClick={() => {
+                                const sorted = sortInstallments(unpaidInstallments, "desc")
+                                setUnpaidInstallments(sorted)
+                                setUnpaidSortOrder("desc")
+                              }}
+                            >
+                              Newest First
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="installments-list">
-                      {unpaidInstallments
-                        .filter((inst) => !selectedUnpaidClass || inst.studentId?.class === selectedUnpaidClass)
-                        .map((inst) => {
-                          const student = inst.studentId
-                          const name = student?.name || "Unknown"
-                          const className = student?.class || "--"
-                          const amount = inst.amount || 0
-                          const num = inst.installmentNo || 0
-                          return (
-                            <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
-                              <div className="installment-header">
-                                <h5>{name}</h5>
-                                <span className="amount">₹ {amount}/-</span>
-                              </div>
-                              <div className="installment-details">
-                                <span>Class: {className}</span>
-                                <span>Installment #: {num}</span>
-                                <span className="overdue">{getDaysOverdue(inst.dueDate)}</span>
-                              </div>
-                            </Link>
-                          )
-                        })}
+                      <div className="installments-list">
+                        {unpaidInstallments
+                          .filter((inst) => !selectedUnpaidClass || inst.studentId?.class === selectedUnpaidClass)
+                          .map((inst) => {
+                            const student = inst.studentId
+                            const name = student?.name || "Unknown"
+                            const className = student?.class || "--"
+                            const amount = inst.amount || 0
+                            const num = inst.installmentNo || 0
+                            return (
+                              <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                                <div className="installment-header">
+                                  <h5>{name}</h5>
+                                  <span className="amount">₹ {amount}/-</span>
+                                </div>
+                                <div className="installment-details">
+                                  <div className="d-flex"><span>Class: {className}</span><div className="dot"></div><span>Installment #: {num}</span></div>
+                                  <span className="overdue">{getDaysOverdue(inst.dueDate)}</span>
+                                </div>
+                              </Link>
+                            )
+                          })}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
-                <div className="fee-card upcoming">
-                  <h4>Upcoming</h4>
-                  <div className="fee-amount">₹ {totalUpcomingAmount}</div>
-                  <div className="installments-section">
-                    <div className="installments-header">
-                      <span>Installments</span>
-                      <div className="filter-dropdown">
-                        <button className="filter-btn">
-                          Filter <i className="fas fa-cog"></i>
-                        </button>
-                        <div className="dropdown-content">
-                          <button
-                            onClick={() => {
-                              const sorted = sortInstallments(upcomingInstallments, "asc")
-                              setUpcomingInstallments(sorted)
-                              setUpcomingSortOrder("asc")
-                            }}
-                          >
-                            Oldest First
+                {activeFeeTab === "upcoming" && (
+                  <div className="upcoming">
+                    <h4>Upcoming</h4>
+                    <div className="fee-amount">₹ {totalUpcomingAmount}</div>
+                    <div className="installments-section">
+                      <div className="installments-header">
+                        <span>Installments</span>
+                        <div className="filter-dropdown">
+                          <button className="filter-btn">
+                            Filter <i className="fas fa-cog"></i>
                           </button>
-                          <button
-                            onClick={() => {
-                              const sorted = sortInstallments(upcomingInstallments, "desc")
-                              setUpcomingInstallments(sorted)
-                              setUpcomingSortOrder("desc")
-                            }}
-                          >
-                            Newest First
-                          </button>
+                          <div className="dropdown-content">
+                            <button
+                              onClick={() => {
+                                const sorted = sortInstallments(upcomingInstallments, "asc")
+                                setUpcomingInstallments(sorted)
+                                setUpcomingSortOrder("asc")
+                              }}
+                            >
+                              Oldest First
+                            </button>
+                            <button
+                              onClick={() => {
+                                const sorted = sortInstallments(upcomingInstallments, "desc")
+                                setUpcomingInstallments(sorted)
+                                setUpcomingSortOrder("desc")
+                              }}
+                            >
+                              Newest First
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="installments-list">
-                      {upcomingInstallments
-                        .filter((inst) => !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass)
-                        .map((inst) => {
-                          const student = inst.studentId
-                          const name = student?.name || "Unknown"
-                          const className = student?.class || "--"
-                          const amount = inst.amount || 0
-                          const num = inst.installmentNo || 0
-                          return (
-                            <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
-                              <div className="installment-header">
-                                <h5>{name}</h5>
-                                <span className="amount">₹ {amount}/-</span>
-                              </div>
-                              <div className="installment-details">
-                                <span>Class: {className}</span>
-                                <span>Installment #: {num}</span>
-                                <span className="upcoming-date">{getDaysLeft(inst.dueDate)}</span>
-                              </div>
-                            </Link>
-                          )
-                        })}
+                      <div className="installments-list">
+                        {upcomingInstallments
+                          .filter((inst) => !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass)
+                          .map((inst) => {
+                            const student = inst.studentId
+                            const name = student?.name || "Unknown"
+                            const className = student?.class || "--"
+                            const amount = inst.amount || 0
+                            const num = inst.installmentNo || 0
+                            return (
+                              <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                                <div className="installment-header">
+                                  <h5>{name}</h5>
+                                  <span className="amount">₹ {amount}/-</span>
+                                </div>
+                                <div className="installment-details">
+                                  <div className="d-flex"><span>Class: {className}</span><div className="dot"></div><span>Installment #: {num}</span></div>
+                                  <span className="upcoming-date">{getDaysLeft(inst.dueDate)}</span>
+                                </div>
+                              </Link>
+                            )
+                          })}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
-                <div className="fee-card paid">
-                  <h4>Paid</h4>
-                  <div className="fee-amount">₹ {totalPaidAmount}</div>
-                  <div className="installments-section">
-                    <div className="installments-header">
-                      <span>Installments</span>
-                      <div className="filter-dropdown">
-                        <button className="filter-btn">
-                          Filter <i className="fas fa-cog"></i>
-                        </button>
-                        <div className="dropdown-content">
-                          <button
-                            onClick={() => {
-                              const sorted = sortInstallments(paidInstallments, "asc")
-                              setPaidInstallments(sorted)
-                              setPaidSortOrder("asc")
-                            }}
-                          >
-                            Oldest First
+                {activeFeeTab === "paid" && (
+                  <div className="paid">
+                    <h4>Paid</h4>
+                    <div className="fee-amount">₹ {totalPaidAmount}</div>
+                    <div className="installments-section">
+                      <div className="installments-header">
+                        <span>Installments</span>
+                        <div className="filter-dropdown">
+                          <button className="filter-btn">
+                            Filter <i className="fas fa-cog"></i>
                           </button>
-                          <button
-                            onClick={() => {
-                              const sorted = sortInstallments(paidInstallments, "desc")
-                              setPaidInstallments(sorted)
-                              setPaidSortOrder("desc")
-                            }}
-                          >
-                            Newest First
-                          </button>
+                          <div className="dropdown-content">
+                            <button
+                              onClick={() => {
+                                const sorted = sortInstallments(paidInstallments, "asc")
+                                setPaidInstallments(sorted)
+                                setPaidSortOrder("asc")
+                              }}
+                            >
+                              Oldest First
+                            </button>
+                            <button
+                              onClick={() => {
+                                const sorted = sortInstallments(paidInstallments, "desc")
+                                setPaidInstallments(sorted)
+                                setPaidSortOrder("desc")
+                              }}
+                            >
+                              Newest First
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="installments-list">
-                      {paidInstallments
-                        .filter((inst) => !selectedPaidClass || inst.studentId?.class === selectedPaidClass)
-                        .map((inst) => {
-                          const student = inst.studentId
-                          const name = student?.name || "Unknown"
-                          const className = student?.class || "--"
-                          const amount = inst.amount || 0
-                          const num = inst.installmentNo || 0
-                          return (
-                            <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
-                              <div className="installment-header">
-                                <h5>{name}</h5>
-                                <span className="amount">₹ {amount}/-</span>
-                              </div>
-                              <div className="installment-details">
-                                <span>Class: {className}</span>
-                                <span>Installment #: {num}</span>
-                                <span className="paid-date">{getDaysSincePaid(inst.paidDate)}</span>
-                              </div>
-                            </Link>
-                          )
-                        })}
+                      <div className="installments-list">
+                        {paidInstallments
+                          .filter((inst) => !selectedPaidClass || inst.studentId?.class === selectedPaidClass)
+                          .map((inst) => {
+                            const student = inst.studentId
+                            const name = student?.name || "Unknown"
+                            const className = student?.class || "--"
+                            const amount = inst.amount || 0
+                            const num = inst.installmentNo || 0
+                            return (
+                              <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                                <div className="installment-header">
+                                  <h5>{name}</h5>
+                                  <span className="amount">₹ {amount}/-</span>
+                                </div>
+                                <div className="installment-details">
+                                  <div className="d-flex"><span>Class: {className}</span><div className="dot"></div><span>Installment #: {num}</span></div>
+                                  <span className="paid-date">{getDaysSincePaid(inst.paidDate)}</span>
+                                </div>
+                              </Link>
+                            )
+                          })}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           )}
@@ -1034,23 +1092,6 @@ export default function Admin() {
         <ExcelUpload />
       </ModalFour>
 
-      <ModalFive isOpen={openModalFive} onClose={() => setOpenModalFive(false)}>
-        <h3>Archived Batches</h3>
-        <div className="flex align-items-center">
-          {archivedBatchesRecords.length > 0 ? (
-            archivedBatchesRecords.map((batch, index) => (
-              <Link key={index} to={`/batch/${batch._id}`} className="text-decoration-none text-dark">
-                <div className="card batch-card mb-3">
-                  <h5 className="card-title">{batch.name}</h5>
-                  <span>Code: {batch.code}</span>
-                </div>
-              </Link>
-            ))
-          ) : (
-            <p>No archived batches found.</p>
-          )}
-        </div>
-      </ModalFive>
     </>
   )
 }

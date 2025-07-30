@@ -5,6 +5,14 @@
   box-sizing: border-box;
 }
 
+.dot{
+  background-color: grey;
+  height: 5px;
+  width: 5px;
+  border-radius: 50%;
+  margin: auto 0.5rem;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", sans-serif;
@@ -277,15 +285,21 @@ body {
   margin-right: 0.5rem;
 }
 
-.data-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.3rem;
-  overflow-y:scroll;
+.data-grid-container {
   height: 65vh;
   background-color: rgb(234, 234, 234);
   border-radius: 12px;
   padding: 0.3rem;
+  overflow-y:scroll;
+}
+
+.data-grid {
+  background-color: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.3rem;
+  padding: 0;
+  grid-auto-rows: 1fr;
 }
 
 .data-card {
@@ -297,7 +311,6 @@ body {
   color: inherit;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  height: max-content;
 }
 
 .data-card:hover {
@@ -349,59 +362,76 @@ body {
   text-align: center;
 }
 
+.fee-controls{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.fee-controls button{
+  width: 100%;
+  border: none;
+  padding: 10px;
+}
+
 .fee-cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+.paid-btn{
+  background: #dcfce7;
+  color: #166534;
+  border-top-right-radius: 3px;
+}
+
+.paid-btn:hover {
+  background: #bbf7d0;
+}
+
+.upcoming-btn {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.upcoming-btn:hover {
+  background: #c7d4fe;
+}
+
+.unpaid-btn {
+  background: #fedbdb;
+  color: #af1e1e;
+  border-top-left-radius: 3px;
+}
+
+.unpaid-btn:hover {
+  background: #ffc9c9;
 }
 
 .fee-card {
   background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
+  border-radius: 5px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 2px solid #e5e7eb;
+  width: 55%;
 }
 
 .fee-card h4 {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 1rem;
   text-align: center;
-}
-
-.fee-card.unpaid {
-  border-color: #ef4444;
-}
-.fee-card.unpaid h4 {
-  color: #dc2626;
-}
-
-.fee-card.upcoming {
-  border-color: #3b82f6;
-}
-.fee-card.upcoming h4 {
-  color: #2563eb;
-}
-
-.fee-card.paid {
-  border-color: #10b981;
-}
-.fee-card.paid h4 {
-  color: #059669;
 }
 
 .fee-amount {
-  font-size: 1.5rem;
+  font-size: 3rem;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 1.5rem;
-  color: #1f2937;
+  color: #484848;
 }
 
 .installments-section {
-  max-height: 400px;
-  overflow-y: auto;
+  padding: 0.5rem;
 }
 
 .installments-header {
@@ -528,6 +558,27 @@ body {
   font-weight: 500;
 }
 
+.unpaid, .upcoming, .paid{
+  padding-top: 2rem;
+}
+
+.unpaid .fee-amount{
+  color: #df3b3b;
+}
+
+.upcoming .fee-amount{
+  color: #4173df;
+}
+
+.paid .fee-amount{
+  color: #1aa579;
+}
+
+.fee-controls button.active {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .admin-sidebar {
@@ -539,9 +590,15 @@ body {
   .dashboard-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+  .data-grid-container{
+    height: 70vh;
+  }
+  .fee-card{
+    width: 80%;
+  }
   .data-grid {
     grid-template-columns: repeat(2, 1fr);
-    height: 68vh;
+    grid-auto-rows: 1fr;
   }
 }
 
@@ -592,9 +649,8 @@ body {
   .dashboard-card p {
     font-size: 0.75rem;
   }
-
+  
   .fee-cards-container {
-    grid-template-columns: 1fr;
     gap: 1rem;
   }
 
@@ -602,9 +658,12 @@ body {
     padding: 0.5rem;
   }
 
+  .data-grid-container{
+    height: 70vh;
+  }
+
   .data-grid {
     grid-template-columns: 1fr;
-    height: 73vh;
   }
 
   .section-header {
@@ -661,7 +720,8 @@ body {
   }
 
   .fee-card {
-    padding: 1rem;
+    padding: 0;
+    width: 100%;
   }
 
   .data-card {
