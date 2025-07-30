@@ -1493,7 +1493,7 @@ exports.getTodaysClasses = async (req, res) => {
     // Fetch and populate batch details
     const classes = await Timetable.find({ weekday: today }).populate(
       "batchId",
-      "name code archive"
+      "name code class archive"
     );
 
     // Filter out archived batches
@@ -1507,6 +1507,7 @@ exports.getTodaysClasses = async (req, res) => {
             id: cls.batchId._id,
             name: cls.batchId.name,
             code: cls.batchId.code,
+            class: cls.batchId.class,
           },
           timing: {
             startTime: slot.startTime,

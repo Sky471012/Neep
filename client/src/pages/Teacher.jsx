@@ -316,7 +316,7 @@ export default function Teacher() {
                                             const selectedDate = selectedDates[batchId] || new Date();
 
                                             return (
-                                                <div className="batch-card" style={{animation: "none"}}>
+                                                <div className="batch-card">
                                                     <div className="batch-header">
                                                         <h5 className="batch-name">{batch.batchName}</h5>
                                                     </div>

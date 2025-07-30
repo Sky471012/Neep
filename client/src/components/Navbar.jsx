@@ -75,9 +75,8 @@ export default function Navbar() {
   return (
     <>
       <nav className={`navbar ${scrolled || isDashboardRoute ? "navbar-scrolled" : ""}`}>
-        <div className="logo">MySite</div>
+        <Link to="/#home" className="logo">MySite</Link>
         <ul className="nav-links">
-          <li><Link to="/#home" className={isRouteActive("/") && !activeSection ? "active" : ""}>Home</Link></li>
           <li><Link to="/all-courses" className={isRouteActive("/all-courses") ? "active" : ""}>Courses</Link></li>
           <li><Link to="/#reviews" className={isAnchorActive("reviews") ? "active" : ""} onClick={() => handleAnchorClick("reviews")}>Student Reviews</Link></li>
           <li><Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link></li>
@@ -121,7 +120,6 @@ export default function Navbar() {
           &times;
         </button>
 
-        <Link to="/#home" className={isRouteActive("/") && !activeSection ? "active" : ""} onClick={() => setSidebarOpen(false)}>Home</Link>
         <Link to="/all-courses" className={isRouteActive("/all-courses") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Courses</Link>
         <Link to="/#reviews" className={isAnchorActive("reviews") ? "active" : ""} onClick={() => handleAnchorClick("reviews")}>Student Reviews</Link>
         <Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link>

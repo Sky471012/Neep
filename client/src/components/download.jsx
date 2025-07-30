@@ -74,6 +74,7 @@ export default function DownloadApp() {
           -webkit-text-fill-color: transparent;
           background-clip: text;
           position: relative;
+          text-align: center,
         }
 
         .download-heading::after {
@@ -291,7 +292,7 @@ export default function DownloadApp() {
         }
 
         .app-image img {
-          height: 450px;
+          height: 500px;
           max-width: 100%;
           object-fit: contain;
           filter: drop-shadow(0 25px 50px rgba(59, 130, 246, 0.3));
@@ -322,13 +323,13 @@ export default function DownloadApp() {
 
         .floating-element:nth-child(2) {
           bottom: 20%;
-          left: -10%;
+          left: -20%;
           animation-delay: -2s;
         }
 
         .floating-element:nth-child(3) {
           top: 50%;
-          right: -15%;
+          right: -21%;
           animation-delay: -3s;
         }
 
@@ -392,7 +393,7 @@ export default function DownloadApp() {
         }
 
         .app-image img {
-          height: 400px;
+          height: 450px;
           max-width: 100%;
           object-fit: contain;
         }
@@ -631,7 +632,7 @@ export default function DownloadApp() {
           }
 
           .app-image img {
-            height: clamp(320px, 40vw, 380px);
+            height: 380px;
           }
 
           .floating-element {
@@ -863,7 +864,7 @@ export default function DownloadApp() {
 `}</style>
 
       <div id="download" className="download-app">
-        <h2 className="download-heading">Download Our App</h2>
+        <h2 className="download-heading">Our App</h2>
 
         <div className="features">
           <div className="features-box">

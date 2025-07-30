@@ -599,7 +599,8 @@ const StudentsReviews = () => {
         @media (max-width: 480px) {
           .scroll-container {
             max-width: calc(100vw - 90px); 
-            padding: 0 5px; 
+            padding: 0 5px;
+            padding-left: 5%;
       }
 
           .review-card,

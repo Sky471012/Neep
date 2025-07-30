@@ -12,8 +12,8 @@ import ModalFour from "../modals/ModalFour"
 import ModalFive from "../modals/ModalFive"
 import Popup from "../modals/Popup"
 import ExcelUpload from "../components/ExcelUpload"
-import "../css/adminstyle.css"
 import "@fortawesome/fontawesome-free/css/all.css"
+import "../css/admin.css"
 
 export default function Admin() {
   const navigate = useNavigate()
@@ -405,12 +405,15 @@ export default function Admin() {
       <Navbar />
       <div className="admin-container">
         {/* Fixed Sidebar */}
-        <div className="admin-sidebar">
+        <div className={`admin-sidebar ${showFeeTracking || showBatches || showStudents || showTeachers
+            ? 'hide-on-mobile'
+            : ''
+          }`}>
           {/* Today's Classes Section */}
+          <h3 className="sidebar-title">
+            <i className="fas fa-clock"></i> Today's Classes
+          </h3>
           <div className="sidebar-section">
-            <h3 className="sidebar-title">
-              <i className="fas fa-clock"></i> Today's Classes
-            </h3>
             <div className="classes-container">
               {Object.keys(groupedClasses).length === 0 ? (
                 <p className="no-classes">No classes scheduled today.</p>
@@ -421,14 +424,14 @@ export default function Admin() {
                       <div className="timing-header">{timing}</div>
                       <div className="timing-classes">
                         {classes.map((entry, index) => (
-                          <div key={index} className="class-info">
-                            <span>
-                              {entry.batch.class} - {entry.batch.name}
-                            </span>
-                            <Link to={`/batch/${entry.batch.id}`} className="class-link">
-                              View →
-                            </Link>
-                          </div>
+                          <Link to={`/batch/${entry.batch.id}`} className="class-link">
+                            <div key={index} className="class-info">
+                              <span>
+                                {entry.batch.name}
+                              </span>
+                              Class: {entry.batch.class}
+                            </div>
+                          </Link>
                         ))}
                       </div>
                     </div>
@@ -445,10 +448,9 @@ export default function Admin() {
             <div className="dashboard-grid">
               <button className="dashboard-card all-batches" onClick={() => setShowBatches(true)}>
                 <div className="card-icon">
-                  <i className="fas fa-users"></i>
+                  <i className="fa-solid fa-book-open"></i>
                 </div>
                 <h3>All Batches</h3>
-                <p>View all batches ({batchesRecords.length})</p>
               </button>
 
               <button className="dashboard-card all-students" onClick={() => setShowStudents(true)}>
@@ -456,7 +458,6 @@ export default function Admin() {
                   <i className="fas fa-user-graduate"></i>
                 </div>
                 <h3>All Students</h3>
-                <p>View all students ({studentsRecords.length})</p>
               </button>
 
               <button className="dashboard-card all-teachers" onClick={() => setShowTeachers(true)}>
@@ -464,55 +465,6 @@ export default function Admin() {
                   <i className="fas fa-chalkboard-teacher"></i>
                 </div>
                 <h3>All Teachers</h3>
-                <p>View all teachers ({teachersRecords.length})</p>
-              </button>
-
-              <button className="dashboard-card add-batch" onClick={() => setOpenModalOne(true)}>
-                <div className="card-icon">
-                  <i className="fas fa-plus-circle"></i>
-                </div>
-                <h3>Add a Batch</h3>
-                <p>Create new batch</p>
-              </button>
-
-              <button className="dashboard-card add-student" onClick={() => setOpenModalTwo(true)}>
-                <div className="card-icon">
-                  <i className="fas fa-user-plus"></i>
-                </div>
-                <h3>Add a Student</h3>
-                <p>Register new student</p>
-              </button>
-
-              <button className="dashboard-card add-teacher" onClick={() => setOpenModalThree(true)}>
-                <div className="card-icon">
-                  <i className="fas fa-user-tie"></i>
-                </div>
-                <h3>Add a Teacher</h3>
-                <p>Register new teacher</p>
-              </button>
-
-              <button className="dashboard-card update-popup" onClick={() => setOpenPopupModal(true)}>
-                <div className="card-icon">
-                  <i className="fas fa-bullhorn"></i>
-                </div>
-                <h3>Update Popup</h3>
-                <p>Manage notifications</p>
-              </button>
-
-              <button className="dashboard-card quick-add" onClick={() => setOpenModalFour(true)}>
-                <div className="card-icon">
-                  <i className="fas fa-file-excel"></i>
-                </div>
-                <h3>Quick Add (Excel)</h3>
-                <p>Bulk upload students</p>
-              </button>
-
-              <button className="dashboard-card archived-batches" onClick={() => setOpenModalFive(true)}>
-                <div className="card-icon">
-                  <i className="fas fa-archive"></i>
-                </div>
-                <h3>Archived Batches</h3>
-                <p>View archived batches ({archivedBatchesRecords.length})</p>
               </button>
 
               <button className="dashboard-card fee-tracking" onClick={handleFeeTrackingClick}>
@@ -520,26 +472,74 @@ export default function Admin() {
                   <i className="fas fa-money-bill-wave"></i>
                 </div>
                 <h3>Fee Tracking</h3>
-                <p>Monitor fee payments</p>
+              </button>
+
+              <button className="dashboard-card add-batch" onClick={() => setOpenModalOne(true)}>
+                <div className="card-icon">
+                  <i className="fas fa-plus-circle"></i>
+                </div>
+                <h3>Add a Batch</h3>
+              </button>
+
+              <button className="dashboard-card add-student" onClick={() => setOpenModalTwo(true)}>
+                <div className="card-icon">
+                  <i className="fas fa-user-plus"></i>
+                </div>
+                <h3>Add a Student</h3>
+              </button>
+
+              <button className="dashboard-card add-teacher" onClick={() => setOpenModalThree(true)}>
+                <div className="card-icon">
+                  <i className="fas fa-user-tie"></i>
+                </div>
+                <h3>Add a Teacher</h3>
+              </button>
+
+              <button className="dashboard-card update-popup" onClick={() => setOpenPopupModal(true)}>
+                <div className="card-icon">
+                  <i className="fas fa-bullhorn"></i>
+                </div>
+                <h3>Update Popup</h3>
+              </button>
+
+              <button className="dashboard-card quick-add" onClick={() => setOpenModalFour(true)}>
+                <div className="card-icon">
+                  <i className="fas fa-file-excel"></i>
+                </div>
+                <h3>Quick Add (Excel)</h3>
+              </button>
+
+              <button className="dashboard-card archived-batches" onClick={() => setOpenModalFive(true)}>
+                <div className="card-icon">
+                  <i className="fas fa-archive"></i>
+                </div>
+                <h3>Archived Batches</h3>
               </button>
             </div>
           ) : showBatches ? (
             <div className="data-section">
-              <button className="back-btn" onClick={() => setShowBatches(false)}>
-                <i className="fas fa-arrow-left"></i> Back
-              </button>
               <div className="section-header">
-                <h2>All Batches ({batchesRecords.length})</h2>
+                <div className="d-flex">
+                  <button className="back-btn" onClick={() => setShowBatches(false)}>
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <h2 className="batches-title">All Batches ({batchesRecords.length})</h2>
+                </div>
+
+                <div className="search-container">
+                  <svg className="search-icon w-4 h-4 ms-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="search"
+                    placeholder="Search batches with name..."
+                    className="search-input"
+                    value={batchSearchQuery}
+                    onChange={(e) => setBatchSearchQuery(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="search-container">
-                <input
-                  type="search"
-                  placeholder="Search batches with name and class..."
-                  className="search-input"
-                  value={batchSearchQuery}
-                  onChange={(e) => setBatchSearchQuery(e.target.value)}
-                />
-              </div>
+
               <div className="data-grid">
                 {batchesRecords.length > 0 ? (
                   batchesRecords
@@ -552,7 +552,6 @@ export default function Admin() {
                       <Link key={index} to={`/batch/${batch._id}`} className="data-card">
                         <h5 className="card-title">{batch.name}</h5>
                         <span className="card-subtitle">Class: {batch.class}</span>
-                        <span className="card-code">Code: {batch.code}</span>
                       </Link>
                     ))
                 ) : (
@@ -562,20 +561,25 @@ export default function Admin() {
             </div>
           ) : showStudents ? (
             <div className="data-section">
-              <button className="back-btn" onClick={() => setShowStudents(false)}>
-                <i className="fas fa-arrow-left"></i> Back
-              </button>
               <div className="section-header">
-                <h2>All Students ({studentsRecords.length})</h2>
-              </div>
-              <div className="search-container">
-                <input
-                  type="search"
-                  placeholder="Search students with name and contact number..."
-                  className="search-input"
-                  value={studentSearchQuery}
-                  onChange={(e) => setStudentSearchQuery(e.target.value)}
-                />
+                <div className="d-flex">
+                  <button className="back-btn" onClick={() => setShowStudents(false)}>
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <h2 className="batches-title">All Students ({studentsRecords.length})</h2>
+                </div>
+                <div className="search-container">
+                  <svg className="search-icon w-4 h-4 ms-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="search"
+                    placeholder="Search students with name and contact number..."
+                    className="search-input"
+                    value={studentSearchQuery}
+                    onChange={(e) => setStudentSearchQuery(e.target.value)}
+                  />
+                </div>
               </div>
               <div className="data-grid">
                 {studentsRecords.length > 0 ? (
@@ -599,20 +603,25 @@ export default function Admin() {
             </div>
           ) : showTeachers ? (
             <div className="data-section">
-              <button className="back-btn" onClick={() => setShowTeachers(false)}>
-                <i className="fas fa-arrow-left"></i> Back
-              </button>
               <div className="section-header">
-                <h2>All Teachers ({teachersRecords.length})</h2>
-              </div>
-              <div className="search-container">
-                <input
-                  type="search"
-                  placeholder="Search teachers with name and contact number..."
-                  className="search-input"
-                  value={teacherSearchQuery}
-                  onChange={(e) => setTeacherSearchQuery(e.target.value)}
-                />
+                <div className="d-flex">
+                  <button className="back-btn" onClick={() => setShowTeachers(false)}>
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <h2 className="batches-title">All Teachers ({teachersRecords.length})</h2>
+                </div>
+                <div className="search-container">
+                  <svg className="search-icon w-4 h-4 ms-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="search"
+                    placeholder="Search teachers with name and contact number..."
+                    className="search-input"
+                    value={teacherSearchQuery}
+                    onChange={(e) => setTeacherSearchQuery(e.target.value)}
+                  />
+                </div>
               </div>
               <div className="data-grid">
                 {teachersRecords.length > 0 ? (
@@ -626,7 +635,6 @@ export default function Admin() {
                       <Link key={index} to={`/teacher/${teacher._id}`} className="data-card">
                         <h5 className="card-title">{teacher.name}</h5>
                         <span className="card-subtitle">Phone: {teacher.phone}</span>
-                        <span className="card-code">Email: {teacher.email}</span>
                       </Link>
                     ))
                 ) : (
@@ -636,13 +644,18 @@ export default function Admin() {
             </div>
           ) : (
             // Fee tracking content
-            <div className="fee-tracking-content">
-              <button className="back-btn" onClick={() => setShowFeeTracking(false)}>
-                <i className="fas fa-arrow-left"></i> Back
-              </button>
+            <div className="data-section">
               <div className="section-header">
-                <h2 className="fee-title">Fee Tracking</h2>
+                <div className="d-flex">
+                  <button className="back-btn" onClick={() => setShowFeeTracking(false)}>
+                    <i className="fas fa-arrow-left"></i>
+                  </button>
+                  <h2 className="batches-title">Fee Tracking</h2>
+                </div>
+
+
               </div>
+
               <div className="fee-cards-container">
                 <div className="fee-card unpaid">
                   <h4>Unpaid</h4>

@@ -612,8 +612,13 @@ export default function BatchControls() {
             <>
               <div className="profile-header">
                 <div className="profile-avatar">
-                  <svg className="w-10 h-10 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-10 h-10 text-blue-900"
+                    viewBox="0 0 640 640"
+                    fill="currentColor"
+                  >
+                    <path d="M320 205.3L320 514.6L320.5 514.4C375.1 491.7 433.7 480 492.8 480L512 480L512 160L492.8 160C450.6 160 408.7 168.4 369.7 184.6C352.9 191.6 336.3 198.5 320 205.3zM294.9 125.5L320 136L345.1 125.5C391.9 106 442.1 96 492.8 96L528 96C554.5 96 576 117.5 576 144L576 496C576 522.5 554.5 544 528 544L492.8 544C442.1 544 391.9 554 345.1 573.5L332.3 578.8C324.4 582.1 315.6 582.1 307.7 578.8L294.9 573.5C248.1 554 197.9 544 147.2 544L112 544C85.5 544 64 522.5 64 496L64 144C64 117.5 85.5 96 112 96L147.2 96C197.9 96 248.1 106 294.9 125.5z" />
                   </svg>
                 </div>
                 <h2 className="profile-title mb-2" style={{ margin: "0 auto" }}>
@@ -679,7 +684,7 @@ export default function BatchControls() {
                   <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                   </svg>
-                  <div className="detail-label">Teacher Asssigned: <br/>{teacher?.name || "Not assigned"}</div>
+                  <div className="detail-label">Teacher Asssigned: <br />{teacher?.name || "Not assigned"}</div>
                 </div>
 
                 <div className="detail-item">
@@ -739,8 +744,13 @@ export default function BatchControls() {
             <>
               <div className="profile-header">
                 <div className="profile-avatar">
-                  <svg className="w-10 h-10 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-10 h-10 text-blue-900"
+                    viewBox="0 0 640 640"
+                    fill="currentColor"
+                  >
+                    <path d="M320 205.3L320 514.6L320.5 514.4C375.1 491.7 433.7 480 492.8 480L512 480L512 160L492.8 160C450.6 160 408.7 168.4 369.7 184.6C352.9 191.6 336.3 198.5 320 205.3zM294.9 125.5L320 136L345.1 125.5C391.9 106 442.1 96 492.8 96L528 96C554.5 96 576 117.5 576 144L576 496C576 522.5 554.5 544 528 544L492.8 544C442.1 544 391.9 554 345.1 573.5L332.3 578.8C324.4 582.1 315.6 582.1 307.7 578.8L294.9 573.5C248.1 554 197.9 544 147.2 544L112 544C85.5 544 64 522.5 64 496L64 144C64 117.5 85.5 96 112 96L147.2 96C197.9 96 248.1 106 294.9 125.5z" />
                   </svg>
                 </div>
                 <h2 className="profile-title mb-2" style={{ margin: "0 auto" }}>{batch?.name || "No name"}</h2>
@@ -766,7 +776,7 @@ export default function BatchControls() {
                   <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                   </svg>
-                  <div className="detail-label">Teacher Asssigned: <br/>{teacher?.name || "Not assigned"}
+                  <div className="detail-label">Teacher Asssigned: <br />{teacher?.name || "Not assigned"}
                     {teacher && (
                       <Link to={`/teacher/${teacher._id}`} className="ms-1 text-light">
                         <i className="bi bi-box-arrow-up-right"></i>
