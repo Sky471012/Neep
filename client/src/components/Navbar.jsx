@@ -128,14 +128,14 @@ export default function Navbar() {
         {authToken && role === "student" && (
           <>
             <Link to="/student" className={isRouteActive("/student") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Student Portal</Link>
-            <Link to="/" className="login-button" onClick={handleLogout}>Logout</Link>
+            <Link to="/" className="login-button mt-3" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
         {authToken && role === "teacher" && (
           <>
             <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link>
-            <Link to="/" className="login-button" onClick={handleLogout}>Logout</Link>
+            <Link to="/" className="login-button mt-3" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
@@ -143,12 +143,12 @@ export default function Navbar() {
           <>
             <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link>
             <Link to="/admin" className={isRouteActive("/admin") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-controller me-1"></i>Control Room</Link>
-            <Link to="/" className="login-button" onClick={handleLogout}>Logout</Link>
+            <Link to="/" className="login-button mt-3" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
         {!authToken && (
-          <Link to="/login" className="login-button" onClick={() => setSidebarOpen(false)}>Login</Link>
+          <Link to="/login" className="login-button mt-3" onClick={() => setSidebarOpen(false)}>Login</Link>
         )}
       </div>
 
@@ -374,8 +374,8 @@ export default function Navbar() {
 
         .close-btn {
           position: absolute;
-          top: 1rem;
-          right: 2rem;
+          top: 0.8rem;
+          right: 1.65rem;
           font-size: 2.5rem;
           background: none;
           border: none;
@@ -416,7 +416,7 @@ export default function Navbar() {
           }
           .sidebar {
             width: 80%;
-            padding-top: 3rem;
+            padding-top: 4rem;
           }
         }
 

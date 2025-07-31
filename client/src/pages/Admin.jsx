@@ -66,7 +66,6 @@ export default function Admin() {
   const [unpaidSortOrder, setUnpaidSortOrder] = useState("asc")
   const [upcomingSortOrder, setUpcomingSortOrder] = useState("asc")
   const [paidSortOrder, setPaidSortOrder] = useState("asc")
-
   const getDaysOverdue = (dueDate) => {
     const due = new Date(dueDate)
     const now = new Date()
@@ -694,7 +693,7 @@ export default function Admin() {
                 </div>
               </div>
             </div>
-          )  : (
+          ) : (
             // Fee tracking content
             <div className="data-section">
               <div className="section-header">
@@ -719,30 +718,61 @@ export default function Admin() {
                     <div className="installments-section">
                       <div className="installments-header">
                         <span>Installments</span>
-                        <div className="filter-dropdown">
-                          <button className="filter-btn">
+                        <div className="dropdown">
+                          <button className="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Filter <i className="fas fa-cog"></i>
                           </button>
-                          <div className="dropdown-content">
-                            <button
-                              onClick={() => {
-                                const sorted = sortInstallments(unpaidInstallments, "asc")
-                                setUnpaidInstallments(sorted)
-                                setUnpaidSortOrder("asc")
-                              }}
-                            >
-                              Oldest First
-                            </button>
-                            <button
-                              onClick={() => {
-                                const sorted = sortInstallments(unpaidInstallments, "desc")
-                                setUnpaidInstallments(sorted)
-                                setUnpaidSortOrder("desc")
-                              }}
-                            >
-                              Newest First
-                            </button>
-                          </div>
+                          <ul className="dropdown-menu dropdown-menu-end shadow">
+                            <li>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => {
+                                  const sorted = sortInstallments(unpaidInstallments, "asc")
+                                  setUnpaidInstallments(sorted)
+                                  setUnpaidSortOrder("asc")
+                                }}
+                              >
+                                Oldest First
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => {
+                                  const sorted = sortInstallments(unpaidInstallments, "desc")
+                                  setUnpaidInstallments(sorted)
+                                  setUnpaidSortOrder("desc")
+                                }}
+                              >
+                                Newest First
+                              </button>
+                            </li>
+                            <li>
+                              <div className="dropdown-item p-2">
+                                Filter by Class:
+                                <ul className="list-unstyled border mt-1">
+                                  {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(cls => (
+                                    <li key={cls}>
+                                      <button
+                                        className="btn btn-sm text-start fw-normal pt-1 pb-0"
+                                        onClick={() => setSelectedUnpaidClass(cls)}
+                                      >
+                                        {cls}
+                                      </button>
+                                    </li>
+                                  ))}
+                                  <li>
+                                    <button
+                                      className="btn btn-sm text-start text-danger"
+                                      onClick={() => setSelectedUnpaidClass(null)}
+                                    >
+                                      Clear Filter
+                                    </button>
+                                  </li>
+                                </ul>
+                              </div>
+                            </li>
+                          </ul>
                         </div>
                       </div>
                       <div className="installments-list">
@@ -779,30 +809,61 @@ export default function Admin() {
                     <div className="installments-section">
                       <div className="installments-header">
                         <span>Installments</span>
-                        <div className="filter-dropdown">
-                          <button className="filter-btn">
+                        <div className="dropdown">
+                          <button className="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Filter <i className="fas fa-cog"></i>
                           </button>
-                          <div className="dropdown-content">
-                            <button
-                              onClick={() => {
-                                const sorted = sortInstallments(upcomingInstallments, "asc")
-                                setUpcomingInstallments(sorted)
-                                setUpcomingSortOrder("asc")
-                              }}
-                            >
-                              Oldest First
-                            </button>
-                            <button
-                              onClick={() => {
-                                const sorted = sortInstallments(upcomingInstallments, "desc")
-                                setUpcomingInstallments(sorted)
-                                setUpcomingSortOrder("desc")
-                              }}
-                            >
-                              Newest First
-                            </button>
-                          </div>
+                          <ul className="dropdown-menu dropdown-menu-end shadow">
+                            <li>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => {
+                                  const sorted = sortInstallments(upcomingInstallments, "asc")
+                                  setUpcomingInstallments(sorted)
+                                  setUpcomingSortOrder("asc")
+                                }}
+                              >
+                                Oldest First
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => {
+                                  const sorted = sortInstallments(upcomingInstallments, "desc")
+                                  setUpcomingInstallments(sorted)
+                                  setUpcomingSortOrder("desc")
+                                }}
+                              >
+                                Newest First
+                              </button>
+                            </li>
+                            <li>
+                              <div className="dropdown-item p-2">
+                                Filter by Class:
+                                <ul className="list-unstyled border mt-1">
+                                  {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(cls => (
+                                    <li key={cls}>
+                                      <button
+                                        className="btn btn-sm text-start fw-normal pt-1 pb-0"
+                                        onClick={() => setSelectedUpcomingClass(cls)}
+                                      >
+                                        {cls}
+                                      </button>
+                                    </li>
+                                  ))}
+                                  <li>
+                                    <button
+                                      className="btn btn-sm text-start text-danger"
+                                      onClick={() => setSelectedUpcomingClass(null)}
+                                    >
+                                      Clear Filter
+                                    </button>
+                                  </li>
+                                </ul>
+                              </div>
+                            </li>
+                          </ul>
                         </div>
                       </div>
                       <div className="installments-list">
@@ -839,30 +900,61 @@ export default function Admin() {
                     <div className="installments-section">
                       <div className="installments-header">
                         <span>Installments</span>
-                        <div className="filter-dropdown">
-                          <button className="filter-btn">
+                        <div className="dropdown">
+                          <button className="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Filter <i className="fas fa-cog"></i>
                           </button>
-                          <div className="dropdown-content">
-                            <button
-                              onClick={() => {
-                                const sorted = sortInstallments(paidInstallments, "asc")
-                                setPaidInstallments(sorted)
-                                setPaidSortOrder("asc")
-                              }}
-                            >
-                              Oldest First
-                            </button>
-                            <button
-                              onClick={() => {
-                                const sorted = sortInstallments(paidInstallments, "desc")
-                                setPaidInstallments(sorted)
-                                setPaidSortOrder("desc")
-                              }}
-                            >
-                              Newest First
-                            </button>
-                          </div>
+                          <ul className="dropdown-menu dropdown-menu-end shadow">
+                            <li>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => {
+                                  const sorted = sortInstallments(paidInstallments, "asc")
+                                  setPaidInstallments(sorted)
+                                  setPaidSortOrder("asc")
+                                }}
+                              >
+                                Oldest First
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => {
+                                  const sorted = sortInstallments(paidInstallments, "desc")
+                                  setPaidInstallments(sorted)
+                                  setPaidSortOrder("desc")
+                                }}
+                              >
+                                Newest First
+                              </button>
+                            </li>
+                            <li>
+                              <div className="dropdown-item p-2">
+                                Filter by Class:
+                                <ul className="list-unstyled border mt-1">
+                                  {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(cls => (
+                                    <li key={cls}>
+                                      <button
+                                        className="btn btn-sm text-start fw-normal pt-1 pb-0"
+                                        onClick={() => setSelectedPaidClass(cls)}
+                                      >
+                                        {cls}
+                                      </button>
+                                    </li>
+                                  ))}
+                                  <li>
+                                    <button
+                                      className="btn btn-sm text-start text-danger"
+                                      onClick={() => setSelectedPaidClass(null)}
+                                    >
+                                      Clear Filter
+                                    </button>
+                                  </li>
+                                </ul>
+                              </div>
+                            </li>
+                          </ul>
                         </div>
                       </div>
                       <div className="installments-list">

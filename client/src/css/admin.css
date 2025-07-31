@@ -5,7 +5,7 @@
   box-sizing: border-box;
 }
 
-.dot{
+.dot {
   background-color: grey;
   height: 5px;
   width: 5px;
@@ -290,7 +290,7 @@ body {
   background-color: rgb(234, 234, 234);
   border-radius: 12px;
   padding: 0.3rem;
-  overflow-y:scroll;
+  overflow-y: scroll;
 }
 
 .data-grid {
@@ -362,13 +362,13 @@ body {
   text-align: center;
 }
 
-.fee-controls{
+.fee-controls {
   display: flex;
   flex-direction: row;
   width: 100%;
 }
 
-.fee-controls button{
+.fee-controls button {
   width: 100%;
   border: none;
   padding: 10px;
@@ -380,7 +380,7 @@ body {
   margin: 0 auto;
 }
 
-.paid-btn{
+.paid-btn {
   background: #dcfce7;
   color: #166534;
   border-top-right-radius: 3px;
@@ -443,60 +443,11 @@ body {
   color: #374151;
 }
 
-.filter-dropdown {
-  position: relative;
-}
-
-.filter-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.filter-btn:hover {
-  background: #e5e7eb;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  right: 0;
-  top: 100%;
-  background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  min-width: 150px;
-}
-
-.filter-dropdown:hover .dropdown-content {
-  display: block;
-}
-
-.dropdown-content button {
-  display: block;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: none;
-  background: none;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.dropdown-content button:hover {
-  background: #f3f4f6;
-}
-
 .installments-list {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  overflow-y: auto;
 }
 
 .installment-item {
@@ -558,19 +509,21 @@ body {
   font-weight: 500;
 }
 
-.unpaid, .upcoming, .paid{
+.unpaid,
+.upcoming,
+.paid {
   padding-top: 2rem;
 }
 
-.unpaid .fee-amount{
+.unpaid .fee-amount {
   color: #df3b3b;
 }
 
-.upcoming .fee-amount{
+.upcoming .fee-amount {
   color: #4173df;
 }
 
-.paid .fee-amount{
+.paid .fee-amount {
   color: #1aa579;
 }
 
@@ -590,11 +543,15 @@ body {
   .dashboard-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  .data-grid-container{
+  .data-grid-container {
     height: 70vh;
   }
-  .fee-card{
+  .fee-card {
     width: 80%;
+  }
+  .installments-list {
+    height: 52vh;
+    overflow-y: scroll;
   }
   .data-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -619,7 +576,7 @@ body {
     order: 2;
     padding: 1rem;
   }
-  
+
   .main-content {
     margin-left: 0;
     padding: 1rem;
@@ -649,16 +606,21 @@ body {
   .dashboard-card p {
     font-size: 0.75rem;
   }
-  
+
   .fee-cards-container {
     gap: 1rem;
   }
+  
+  .installments-list {
+    height: 50vh;
+    overflow-y: scroll;
+  }
 
-  .data-section{
+  .data-section {
     padding: 0.5rem;
   }
 
-  .data-grid-container{
+  .data-grid-container {
     height: 70vh;
   }
 
@@ -687,6 +649,11 @@ body {
     margin-left: 0px;
     border-radius: 0;
     height: 100%;
+  }
+  
+  .installments-list {
+    height: 45vh;
+    overflow-y: scroll;
   }
 
   .main-content {

@@ -258,10 +258,11 @@ export default function Teacher() {
                                 </div>
                             </div>
                         </div>
-
-                        <Link className="fee-button" to="/admin" style={{textAlign:"center"}}>
-                            <i className="bi bi-controller me-1"></i>Control Room
-                        </Link>
+                        {teacher.role == 'Admin' &&
+                            <Link className="fee-button" to="/admin" style={{ textAlign: "center" }}>
+                                <i className="bi bi-controller me-1"></i>Control Room
+                            </Link>
+                        }
                     </div>
 
                     <div className="content-area">
