@@ -20,15 +20,19 @@ import StudentControls from './pages/StudentControls';
 function App() {
 
   const [loading, setLoading] = useState(true);
+  const [hidePreloader, setHidePreloader] = useState(false);
 
   useEffect(() => {
-    // Simulate loading
     const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2500); // 2 seconds
+      setHidePreloader(true); // start fade-out
+      setTimeout(() => {
+        setLoading(false); // remove it completely
+      }, 500); // wait for fade-out to finish
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
+
 
   function ScrollToHashElement() {
     const { hash } = useLocation();
@@ -51,7 +55,7 @@ function App() {
   return (
     <>
       {loading ? (
-        <Preloader />
+        <Preloader fadeOut={hidePreloader} />
       ) : (
         <BrowserRouter>
           <ScrollToHashElement />

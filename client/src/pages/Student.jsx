@@ -420,7 +420,7 @@ export default function Student() {
                                                     </svg>
                                                     Tests
                                                 </button>
-                                                
+
                                                 <button
                                                     className="action-button timetable"
                                                     onClick={() => {
@@ -581,9 +581,11 @@ export default function Student() {
                                         <td>{entry.weekday}</td>
                                         <td>
                                             {entry.timetable.map((slot, idx) => (
-                                                <span key={idx} className="time-slot">
-                                                    {slot.startTime} - {slot.endTime}
-                                                </span>
+                                                <>
+                                                    <span key={idx} className="time-slot">
+                                                        {slot.startTime} - {slot.endTime}
+                                                    </span><br />
+                                                </>
                                             ))}
                                         </td>
                                     </tr>
@@ -602,50 +604,43 @@ export default function Student() {
         <ModalFour isOpen={showModalFour === student._id} onClose={() => setShowModalFour(null)}>
             <div className="fee-details">
                 <h1 className="modal-title">Fee Details</h1>
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>Installment</th>
-                            <th>Amount</th>
-                            <th>Due Date</th>
-                            <th>Paid Date</th>
-                            <th>Method</th>
-                            <th>Status</th>
-                            <th>Receipt</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {Array.isArray(installments) && installments.map((record, index) => {
-                            const status = record.paidDate ? "Paid" : "Due";
-                            return (
-                                <tr key={index}>
-                                    <td>Installment {record.installmentNo}</td>
-                                    <td>{record.amount || "--"}</td>
-                                    <td>{formatDate(record.dueDate)}</td>
-                                    <td>{formatDate(record.paidDate)}</td>
-                                    <td>{record.method || "--"}</td>
-                                    <td className={record.paidDate ? "text-success" : "text-danger"}>
-                                        {status}
-                                    </td>
-                                    <td>
-                                        {record.paidDate ? (
-                                            <button
-                                                className="download-button"
-                                                onClick={() => generatePDFReceipt(student, record)}
-                                            >
-                                                Download
-                                            </button>
-                                        ) : "--"}
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-                <div className="fee-summary">
-                    <span><strong>Total Fee:</strong> ₹ {totalFee}</span>
-                    <span><strong>Paid:</strong> ₹ {totalPaid}</span>
-                    <span><strong>Balance:</strong> ₹ {balance}</span>
+                <div className="fee-summary mb-3">
+                    <span>Total Fee:<strong> ₹ {totalFee}</strong></span>
+                    <span>Paid:<strong> ₹ {totalPaid}</strong></span>
+                    <span>Balance:<strong> ₹ {balance}</strong></span>
+                </div>
+                <div className="flex ">
+                    {Array.isArray(installments) && installments.map((record, index) => {
+                        const status = record.paidDate ? "Paid" : "Due";
+                        const isPaid = !!record.paidDate;
+
+                        return (
+                            <div className="flex " key={index}>
+                                <div className="batch-card h-100 p-3 mb-3" style={{ minWidth: "400px" }}>
+                                    <div className="batch-header ps-0 pt-0">
+                                        <h5 className="batch-name">Installment {record.installmentNo}</h5>
+                                    </div>
+                                    <p className="mb-1">Amount: ₹ {record.amount || "--"}</p>
+                                    <p className="mb-1">Due Date: {formatDate(record.dueDate)}</p>
+                                    <p className="mb-1">Paid Date: {formatDate(record.paidDate) || "--"}</p>
+                                    <p className="mb-1">Method: {record.method || "--"}</p>
+
+                                    <div className="d-flex mt-3 align-items-center justify-content-between">
+                                        <p className={`fw-bold m-0 ${isPaid ? "text-success" : "text-warning"}`}>
+                                            {status}
+                                        </p>
+                                        <button
+                                            className="btn btn-outline-primary btn-sm"
+                                            onClick={() => generatePDFReceipt(student, record)}
+                                            disabled={!record.paidDate}
+                                        >
+                                            Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         </ModalFour>

@@ -187,7 +187,6 @@ body {
 
 .fee-button:hover {
   background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
@@ -392,9 +391,8 @@ body {
 
 /* Calendar Styles */
 .carousel {
-  background: white;
   border-radius: 12px;
-  padding: 1.5rem;
+  margin: 1.5rem;
 }
 
 .carousel-inner {
@@ -473,7 +471,6 @@ body {
 
 .calendar-button:hover {
   background: #2563eb;
-  transform: translateY(-1px);
 }
 
 /* Table Styles */
@@ -483,7 +480,6 @@ body {
   margin-top: 1rem;
   background: white;
   border-radius: 8px;
-  overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -505,10 +501,6 @@ body {
   color: #6b7280;
 }
 
-.table tbody tr:hover {
-  background: #f9fafb;
-}
-
 .table tbody tr:last-child td {
   border-bottom: none;
 }
@@ -516,9 +508,6 @@ body {
 /* Time Slot Styles */
 .time-slot {
   display: inline-block;
-  background: #dbeafe;
-  color: #1e40af;
-  padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
   margin-right: 0.5rem;
@@ -527,20 +516,18 @@ body {
 
 /* Fee Details */
 .fee-details {
-  background: white;
   border-radius: 12px;
-  padding: 2rem;
+  padding: 1rem;
+  gap:0;
 }
 
 .fee-summary {
   display: flex;
   justify-content: space-around;
-  margin-top: 2rem;
-  padding: 1rem;
-  background: #f8fafc;
+  padding: 0rem;
   border-radius: 8px;
   flex-wrap: wrap;
-  gap: 1rem;
+  width: 100%;
 }
 
 .fee-summary span {
@@ -576,15 +563,13 @@ body {
 
 /* Test Details */
 .test-details {
-  background: white;
   border-radius: 12px;
-  padding: 2rem;
+  margin: 1rem;
 }
 
 .timetable-details {
-  background: white;
   border-radius: 12px;
-  padding: 2rem;
+  margin: 1rem;
 }
 
 /* Responsive Design */
@@ -687,7 +672,7 @@ body {
 
   .table th,
   .table td {
-    padding: 0.75rem 0.5rem;
+    padding: 0.75rem 0rem;
   }
 }
 
@@ -721,7 +706,7 @@ body {
   }
 
   .calendar-controls {
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .calendar-button {
@@ -733,8 +718,12 @@ body {
   }
 
   .table th,
-  .table td {
-    padding: 0.5rem 0.25rem;
+  .table tr td {
+    padding: 0.5rem 0.7rem!important;
+  }
+
+  .test-details{
+    margin: 15px 0px;
   }
 
   .modal-title {

@@ -78,10 +78,8 @@ td {
   padding: 20px;
   border-radius: 8px;
   position: relative;
-  width: 89%;
-  min-height: 60vh;
-  max-height: 90vh; /* 👈 Restrict height */
-  overflow-y: auto; /* 👈 Enable vertical scrolling */
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-box::-webkit-scrollbar {
@@ -95,12 +93,13 @@ td {
 
 .modal-close {
   position: absolute;
-  top: 8px;
+  top: -8px;
   right: 12px;
-  font-size: 20px;
+  font-size: 35px;
   background: none;
   border: none;
   cursor: pointer;
+  color: #2c3e50;
 }
 
 .btn {

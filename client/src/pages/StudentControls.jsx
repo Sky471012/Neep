@@ -1149,7 +1149,7 @@ export default function StudentControls() {
                         <div className="row row-cols-1 row-cols-md-2 g-4 mt-2">
                             {installments.map((record, index) => {
                                 const status = record.paidDate ? "Paid" : "Due";
-                                const statusClass = record.paidDate ? "text-success" : "text-danger";
+                                const statusClass = record.paidDate ? "text-success" : "text-warning";
                                 const isEditing = editingInstallmentData === record._id;
                                 const isMarkingPaid = editingInstallmentId === record._id;
 

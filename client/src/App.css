@@ -161,6 +161,11 @@ ul, li {
   animation: fadeIn 0.6s ease-in-out;
 }
 
+.preloader.fade-out {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
 /* Optional: Add fade-in animation */
 @keyframes fadeIn {
   0% { opacity: 0; transform: scale(0.95); }
