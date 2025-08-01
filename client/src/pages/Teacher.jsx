@@ -369,15 +369,15 @@ export default function Teacher() {
 
                                                     {/* ====== MODALS WITH THEIR CONTENT RESTORED ====== */}
                                                     <ModalOne isOpen={showModalOneFor === batchId} onClose={() => setShowModalOneFor(null)}>
-                                                        <div>
+                                                        <div className="student-list">
                                                             <h3>{batch.batchName}</h3>
-                                                            <ul className="mt-2">
+                                                            <ul className="mt-3">
                                                                 {students[batchId]?.map((student) => (
-                                                                    <li key={student._id} className="mb-3">
-                                                                        <div className="d-flex flex-wrap gap-2 align-items-center">
-                                                                            <span>{student.name}</span>
+                                                                    <li key={student._id} className="mb-2 border rounded ps-2 pe-2 p-1">
+                                                                        <div className="d-flex align-items-center justify-content-between">
+                                                                            <span className="text-break" style={{ maxWidth: '160px' }}>{student.name}</span>
                                                                             <button
-                                                                                className="btn btn-sm btn-info"
+                                                                                className="btn btn-sm btn-primary"
                                                                                 onClick={() => {
                                                                                     if (activeStudentAttendance === student._id) {
                                                                                         setActiveStudentAttendance(null);
@@ -392,7 +392,7 @@ export default function Teacher() {
                                                                         </div>
 
                                                                         {activeStudentAttendance === student._id && (
-                                                                            <div className="attendance-calendar mt-2">
+                                                                            <div className="attendance-calendar mt-2 border rounded" style={{ backgroundColor: "#d4d4d4ff" }}>
                                                                                 <div id={`carousel-${student._id}`} className="carousel slide">
                                                                                     <div className="carousel-inner">
                                                                                         {allMonths.map((month, monthIdx) => {
@@ -443,14 +443,22 @@ export default function Teacher() {
                                                     </ModalOne>
 
                                                     <ModalTwo isOpen={openModalTwo[batchId]} onClose={() => closeAttendanceModal(batchId)}>
-                                                        <div>
+                                                        <div className="attendance-form">
                                                             <h3>Mark Attendance for {batch.batchName}</h3>
                                                             <DatePicker
-                                                                className="datePicker"
-                                                                dateFormat="yyyy-MM-dd"
+                                                                className="datePicker mt-3"
+                                                                dateFormat="dd-MM-yyyy"
                                                                 selected={selectedDate}
                                                                 onChange={(date) => setSelectedDates((prev) => ({ ...prev, [batchId]: date }))}
                                                                 placeholderText="Select date"
+                                                                required
+                                                                showYearDropdown
+                                                                dropdownMode="select"
+                                                                yearDropdownItemNumber={10}
+                                                                scrollableYearDropdown
+                                                                maxDate={new Date()}
+                                                                openToDate={new Date()}
+                                                                minDate={new Date("1995-01-01")}
                                                             />
                                                             <table className="table table-bordered mt-3">
                                                                 <thead>
@@ -489,7 +497,7 @@ export default function Teacher() {
                                                             <h3>Timetable for {batch.batchName}</h3>
                                                             {timetable[batchId]?.length > 0 ? (
                                                                 <table className="table table-bordered text-center mt-3">
-                                                                    <thead className="table-dark">
+                                                                    <thead className="table">
                                                                         <tr>
                                                                             <th>Weekday</th>
                                                                             <th>Time Slots</th>
@@ -517,27 +525,43 @@ export default function Teacher() {
                                                     </ModalThree>
 
                                                     <ModalFour isOpen={openModalFour[batchId]} onClose={() => closeTestModal(batchId)}>
-                                                        <div>
+                                                        <div className="test-form">
                                                             <h3>Add Test for {batch.batchName}</h3>
-                                                            <form onSubmit={async (e) => {
-                                                                e.preventDefault();
-                                                                const { testName, maxMarks, testDate } = testDetails;
-                                                                if (!testName || !maxMarks || !testDate) { return alert("Please fill test name, max marks, and date."); }
-                                                                const date = new Date(testDate);
-                                                                for (const student of students[batch.batchId] || []) {
-                                                                    const marksScored = testFormData[student._id];
-                                                                    if (marksScored !== undefined && marksScored !== "") {
-                                                                        await addTest(student._id, batch.batchId, testName, Number(maxMarks), Number(marksScored), date);
+                                                            <form
+                                                                className="mt-3"
+                                                                onSubmit={async (e) => {
+                                                                    e.preventDefault();
+                                                                    const { testName, maxMarks, testDate } = testDetails;
+                                                                    if (!testName || !maxMarks || !testDate) { return alert("Please fill test name, max marks, and date."); }
+                                                                    const date = new Date(testDate);
+                                                                    for (const student of students[batch.batchId] || []) {
+                                                                        const marksScored = testFormData[student._id];
+                                                                        if (marksScored !== undefined && marksScored !== "") {
+                                                                            await addTest(student._id, batch.batchId, testName, Number(maxMarks), Number(marksScored), date);
+                                                                        }
                                                                     }
-                                                                }
-                                                                setTestDetails({ testName: "", maxMarks: "", testDate: null });
-                                                                setTestFormData({});
-                                                                closeTestModal(batch.batchId);
-                                                            }}>
+                                                                    setTestDetails({ testName: "", maxMarks: "", testDate: null });
+                                                                    setTestFormData({});
+                                                                    closeTestModal(batch.batchId);
+                                                                }}>
                                                                 <div className="mb-2">
-                                                                    <DatePicker selected={testDetails.testDate} onChange={(date) => setTestDetails((prev) => ({ ...prev, testDate: date }))} className="form-control mb-2" dateFormat="yyyy-MM-dd" placeholderText="Select test date" required />
-                                                                    <input type="text" placeholder="Test Name" value={testDetails.testName} onChange={(e) => setTestDetails((prev) => ({ ...prev, testName: e.target.value }))} className="form-control mb-1" required />
-                                                                    <input type="number" placeholder="Max Marks" value={testDetails.maxMarks} onChange={(e) => setTestDetails((prev) => ({ ...prev, maxMarks: e.target.value }))} className="form-control mb-1" required />
+                                                                    <DatePicker
+                                                                        selected={testDetails.testDate}
+                                                                        onChange={(date) => setTestDetails((prev) => ({ ...prev, testDate: date }))}
+                                                                        className="datePicker mb-2"
+                                                                        dateFormat="dd-MM-yyyy"
+                                                                        placeholderText="Select test date"
+                                                                        required
+                                                                        showYearDropdown
+                                                                        dropdownMode="select"
+                                                                        yearDropdownItemNumber={10}
+                                                                        scrollableYearDropdown
+                                                                        maxDate={new Date()}
+                                                                        openToDate={new Date()}
+                                                                        minDate={new Date("1995-01-01")}
+                                                                    />
+                                                                    <input type="text" placeholder="Test Name" value={testDetails.testName} onChange={(e) => setTestDetails((prev) => ({ ...prev, testName: e.target.value }))} className="form-control mb-2" required />
+                                                                    <input type="number" placeholder="Max Marks" value={testDetails.maxMarks} onChange={(e) => setTestDetails((prev) => ({ ...prev, maxMarks: e.target.value }))} className="form-control mb-2" required />
                                                                 </div>
                                                                 <table className="table table-bordered">
                                                                     <thead>
@@ -549,15 +573,15 @@ export default function Teacher() {
                                                                     <tbody>
                                                                         {(students[batch.batchId] || []).map((student) => (
                                                                             <tr key={student._id}>
-                                                                                <td>{student.name}</td>
-                                                                                <td>
+                                                                                <td style={{ width: "57%" }}>{student.name}</td>
+                                                                                <td style={{ width: "43%" }}>
                                                                                     <input type="number" className="form-control" value={testFormData[student._id] || ""} onChange={(e) => setTestFormData((prev) => ({ ...prev, [student._id]: e.target.value }))} placeholder="Enter marks" />
                                                                                 </td>
                                                                             </tr>
                                                                         ))}
                                                                     </tbody>
                                                                 </table>
-                                                                <button type="submit" className="btn btn-primary">Add Test</button>
+                                                                <button type="submit" className="btn btn-primary" style={{width:"100%"}}>Add Test</button>
                                                             </form>
                                                         </div>
                                                     </ModalFour>

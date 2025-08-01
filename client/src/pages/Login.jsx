@@ -277,7 +277,7 @@ export default function Login() {
                     required
                     showYearDropdown
                     dropdownMode="select"
-                    yearDropdownItemNumber={100}
+                    yearDropdownItemNumber={10}
                     scrollableYearDropdown
                     maxDate={new Date()}
                     openToDate={new Date('2005-01-01')}

@@ -404,7 +404,7 @@ body {
   font-size: 0.8rem;
   font-weight: 500;
   cursor: default;
-  background: #f3f4f6;
+  background: #ffffff!important;
   color: #374151;
   border: 2px solid transparent;
 }
@@ -419,6 +419,78 @@ body {
   background: #fee2e2;
   color: #dc2626;
   border-color: #ef4444;
+}
+
+.student-list {
+  border-radius: 12px;
+  padding: 1rem;
+  gap:0;
+  min-width: 400px;
+}
+
+.test-form{
+  margin: 1rem;
+}
+
+.test-form input,
+.datePicker {
+  border: 1px solid #cce3f8;
+  background: #f8fbfe;
+  border-radius: 10px;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  color: #1a365d;
+  outline: none;
+  transition: all 0.25s ease;
+  width: 100%;
+  font-family: "Inter", sans-serif;
+  box-shadow: none;
+}
+
+.test-form input:focus,
+.datePicker:focus {
+  background: #f1f8ff;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  outline: none;
+  border: none;
+}
+
+.test-form input::placeholder,
+.datePicker::placeholder {
+  color: #8eb3d6;
+  opacity: 1;
+  font-family: "Inter", sans-serif;
+}
+
+.attendance-form{
+  margin: 1rem;
+}
+
+.attendance-form .datePicker {
+  border: 1px solid #cce3f8;
+  background: #f8fbfe;
+  border-radius: 10px;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  color: #1a365d;
+  outline: none;
+  transition: all 0.25s ease;
+  width: 100%;
+  font-family: "Inter", sans-serif;
+  box-shadow: none;
+}
+
+.attendance-form .datePicker:focus {
+  background: #f1f8ff;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  outline: none;
+  border: none;
+}
+
+.attendance-form .datePicker::placeholder {
+  color: #8eb3d6;
+  opacity: 1;
+  font-family: "Inter", sans-serif;
 }
 
 /* Responsive Design */
@@ -523,6 +595,15 @@ body {
 
   .action-button-t {
     min-width: auto;
+  }
+
+  .student-list {
+    padding: 1rem 0;
+    min-width: 340px;
+  }
+
+  .attendance-form, .test-form{
+    margin: 1rem 0.2rem;
   }
 }
 

@@ -452,9 +452,9 @@ export default function Student() {
             isOpen={showModalOne !== null}
             onClose={() => setShowModalOne(null)}
         >
-            {showModalOne && (
-                <div id={`carousel-${showModalOne}`} className="carousel slide">
-                    <h5 className="modal-title">{batchesRecords.find((b) => b.batchId === showModalOne)?.batchName}</h5>
+            {showModalOne && (<>
+                    <h5 className="modal-title mb-0">{batchesRecords.find((b) => b.batchId === showModalOne)?.batchName}</h5>
+                <div id={`carousel-${showModalOne}`} className="carousel slide p-1 mt-2" style={{ backgroundColor: "#d4d4d4ff" }}>
                     <div className="carousel-inner">
                         {allMonths.map((month, idx) => {
                             let calendarMonth, calendarYear;
@@ -503,7 +503,7 @@ export default function Student() {
 
                     <div className="calendar-controls">
                         <button
-                            className="calendar-button"
+                            className="calendar-button ms-1 mb-1"
                             type="button"
                             data-bs-target={`#carousel-${showModalOne}`}
                             data-bs-slide="prev"
@@ -511,7 +511,7 @@ export default function Student() {
                             ‹ Previous
                         </button>
                         <button
-                            className="calendar-button"
+                            className="calendar-button mb-1 me-1"
                             type="button"
                             data-bs-target={`#carousel-${showModalOne}`}
                             data-bs-slide="next"
@@ -520,7 +520,7 @@ export default function Student() {
                         </button>
                     </div>
                 </div>
-            )}
+            </>)}
         </ModalOne>
 
         {/* Tests Modal */}
