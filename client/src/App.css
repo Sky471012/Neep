@@ -454,6 +454,11 @@ ul, li {
     flex-direction: column;
     gap: 2rem;
   }
+
+  .social-box img{
+    margin: auto;
+  }
+  
   .contactus, .findus, .social-box {
     min-width: 100%;
   }

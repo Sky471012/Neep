@@ -159,7 +159,7 @@ export default function Student() {
     }
 
     async function generatePDFReceipt(student, record) {
-        const { base64: logoBase64, width: originalWidth, height: originalHeight } = await getBase64FromImagePath("/logo_rectagle.jpg");
+        const { base64: logoBase64, width: originalWidth, height: originalHeight } = await getBase64FromImagePath("/logo_rectangle.jpg");
 
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();

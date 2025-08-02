@@ -1,10 +1,5 @@
 import React from "react";
-import Navbar from "../components/Navbar";
-import Whatsapp from "../components/Whatsapp";
-import Footer from "../components/Footer";
-import Call from "../components/Call";
 import googleplay from "../assets/images/googleplay.png";
-import appstore from "../assets/images/appstore.png";
 import qr from "../assets/images/qr.png";
 import app from "../assets/images/app.png";
 
@@ -958,9 +953,6 @@ export default function DownloadApp() {
           </div>
         </div>
       </div>
-
-      <Whatsapp />
-      <Call />
     </>
   );
 }

@@ -1,4 +1,5 @@
 import React from 'react'
+import logo from "/logo_rectangle.jpg";
 
 export default function Footer() {
     return (<>
@@ -7,7 +8,7 @@ export default function Footer() {
             <div className="footer-container">
                 
                 <div className="social-box">
-                    <div className="logo">MySite</div>
+                    <img src={logo} style={{height:"55px", border:"1px solid white"}} className="logo"/>
                     <div className="social-media">
                         <a href="https://www.facebook.com/neep.org" target="_blank" rel="noopener noreferrer">
                             <i className="bi bi-facebook"></i>

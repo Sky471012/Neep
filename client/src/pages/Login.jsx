@@ -8,6 +8,7 @@ import Instagram from '../components/Instagram';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../css/login.css';
+import logo from "/logo_rectangle.jpg";
 
 export default function Login() {
   // Generic login management
@@ -222,11 +223,11 @@ export default function Login() {
           className="login-page-card"
         >
           <div className="login-page-box">
-            <h3
-              className="login-heading"
-            >
-              New Era Education Point
-            </h3>
+            <img
+            style={{ height: "80px", margin:"auto", marginBottom: "20px"}}
+              src={logo}
+              className="logo"
+            />
 
             {/* Role Switcher */}
             <div

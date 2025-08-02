@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, matchPath } from "react-router-dom";
+import logo from "/logo_rectangle.jpg";
 
 export default function Navbar() {
   const authToken = localStorage.getItem("authToken");
@@ -75,7 +76,7 @@ export default function Navbar() {
   return (
     <>
       <nav className={`navbar ${scrolled || isDashboardRoute ? "navbar-scrolled" : ""}`}>
-        <Link to="/#home" className="logo">MySite</Link>
+        <Link to="/#home"><img className="logo" src={logo}/></Link>
         <ul className="nav-links">
           <li><Link to="/all-courses" className={isRouteActive("/all-courses") ? "active" : ""}>Courses</Link></li>
           <li><Link to="/#reviews" className={isAnchorActive("reviews") ? "active" : ""} onClick={() => handleAnchorClick("reviews")}>Student Reviews</Link></li>
@@ -120,6 +121,7 @@ export default function Navbar() {
           &times;
         </button>
 
+        <Link to="/#home" className={isAnchorActive("home") ? "active" : ""} onClick={() => handleAnchorClick("home")}>Home</Link>
         <Link to="/all-courses" className={isRouteActive("/all-courses") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Courses</Link>
         <Link to="/#reviews" className={isAnchorActive("reviews") ? "active" : ""} onClick={() => handleAnchorClick("reviews")}>Student Reviews</Link>
         <Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link>
@@ -204,11 +206,10 @@ export default function Navbar() {
         }
 
         .logo {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: var(--primary);
-          letter-spacing: -0.5px;
+          height: 50px;
           margin-right: var(--space-lg);
+          margin: 0;
+          border-radius: var(--radius-sm);
         }
 
         .login-button{
@@ -423,9 +424,6 @@ export default function Navbar() {
         @media (max-width: 480px) {
           .navbar {
             padding: 0.75rem 1rem;
-          }
-          .logo {
-            font-size: 1.25rem;
           }
           .sidebar {
             width: 85%;
