@@ -370,8 +370,8 @@ export default function Teacher() {
                                                     {/* ====== MODALS WITH THEIR CONTENT RESTORED ====== */}
                                                     <ModalOne isOpen={showModalOneFor === batchId} onClose={() => setShowModalOneFor(null)}>
                                                         <div className="student-list">
-                                                            <h3>{batch.batchName}</h3>
-                                                            <ul className="mt-3">
+                                                            <h3 className="modal-title">{batch.batchName}</h3>
+                                                            <ul className="mt-3" style={{ maxHeight: "67vh", overflowY: "auto", margin: "10px 0" }}>
                                                                 {students[batchId]?.map((student) => (
                                                                     <li key={student._id} className="mb-2 border rounded ps-2 pe-2 p-1">
                                                                         <div className="d-flex align-items-center justify-content-between">
@@ -444,9 +444,9 @@ export default function Teacher() {
 
                                                     <ModalTwo isOpen={openModalTwo[batchId]} onClose={() => closeAttendanceModal(batchId)}>
                                                         <div className="attendance-form">
-                                                            <h3>Mark Attendance for {batch.batchName}</h3>
+                                                            <h3 className="modal-title">Mark Attendance for {batch.batchName}</h3>
                                                             <DatePicker
-                                                                className="datePicker mt-3"
+                                                                className="datePicker mt-1 mb-1"
                                                                 dateFormat="dd-MM-yyyy"
                                                                 selected={selectedDate}
                                                                 onChange={(date) => setSelectedDates((prev) => ({ ...prev, [batchId]: date }))}
@@ -460,64 +460,68 @@ export default function Teacher() {
                                                                 openToDate={new Date()}
                                                                 minDate={new Date("1995-01-01")}
                                                             />
-                                                            <table className="table table-bordered mt-3">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Student Name</th>
-                                                                        <th>Mark Attendance</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {students[batchId]?.length > 0 ? (
-                                                                        students[batchId].map((student) => (
-                                                                            <tr key={student._id}>
-                                                                                <td>{student.name}</td>
-                                                                                <td>
-                                                                                    <button
-                                                                                        className={`btn btn-success btn-sm me-2 ${markedStatus[`${student._id}_${batchId}_${selectedDate.toDateString()}`] === "present" ? "active" : ""}`}
-                                                                                        onClick={() => markAttendance(student._id, batchId, "present", selectedDate)}
-                                                                                    >Present</button>
-                                                                                    <button
-                                                                                        className={`btn btn-danger btn-sm ${markedStatus[`${student._id}_${batchId}_${selectedDate.toDateString()}`] === "absent" ? "active" : ""}`}
-                                                                                        onClick={() => markAttendance(student._id, batchId, "absent", selectedDate)}
-                                                                                    >Absent</button>
-                                                                                </td>
-                                                                            </tr>
-                                                                        ))
-                                                                    ) : (
-                                                                        <tr><td colSpan="2">Loading or no students found.</td></tr>
-                                                                    )}
-                                                                </tbody>
-                                                            </table>
+                                                            <div style={{ maxHeight: "55vh", overflowY: "auto", margin: "10px 0" }}>
+                                                                <table className="table table-bordered mt-3">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Student Name</th>
+                                                                            <th>Mark Attendance</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {students[batchId]?.length > 0 ? (
+                                                                            students[batchId].map((student) => (
+                                                                                <tr key={student._id}>
+                                                                                    <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
+                                                                                    <td style={{ width: "50%" }}>
+                                                                                        <button
+                                                                                            className={`btn btn-success btn-sm me-2 ${markedStatus[`${student._id}_${batchId}_${selectedDate.toDateString()}`] === "present" ? "active" : ""}`}
+                                                                                            onClick={() => markAttendance(student._id, batchId, "present", selectedDate)}
+                                                                                        >Present</button>
+                                                                                        <button
+                                                                                            className={`btn btn-danger btn-sm ${markedStatus[`${student._id}_${batchId}_${selectedDate.toDateString()}`] === "absent" ? "active" : ""}`}
+                                                                                            onClick={() => markAttendance(student._id, batchId, "absent", selectedDate)}
+                                                                                        >Absent</button>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            ))
+                                                                        ) : (
+                                                                            <tr><td colSpan="2">Loading or no students found.</td></tr>
+                                                                        )}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
                                                         </div>
                                                     </ModalTwo>
 
                                                     <ModalThree isOpen={openModalThree[batchId]} onClose={() => closeTimetableModal(batchId)}>
                                                         <div className="timetable-details">
-                                                            <h3>Timetable for {batch.batchName}</h3>
+                                                            <h2 className="modal-title">Timetable for {batch.batchName}</h2>
                                                             {timetable[batchId]?.length > 0 ? (
-                                                                <table className="table table-bordered text-center mt-3">
-                                                                    <thead className="table">
-                                                                        <tr>
-                                                                            <th>Weekday</th>
-                                                                            <th>Time Slots</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        {timetable[batchId]
-                                                                            .sort((a, b) => weekdayOrder[a.weekday] - weekdayOrder[b.weekday])
-                                                                            .map((entry, index) => (
-                                                                                <tr key={index}>
-                                                                                    <td>{entry.weekday}</td>
-                                                                                    <td>
-                                                                                        {entry.classTimings.map((slot, idx) => (
-                                                                                            <div key={idx}>{slot.startTime} - {slot.endTime}</div>
-                                                                                        ))}
-                                                                                    </td>
-                                                                                </tr>
-                                                                            ))}
-                                                                    </tbody>
-                                                                </table>
+                                                                <div style={{ maxHeight: "67vh", overflowY: "auto" }}>
+                                                                    <table className="table table-bordered text-center mt-3">
+                                                                        <thead className="table">
+                                                                            <tr>
+                                                                                <th>Weekday</th>
+                                                                                <th>Time Slots</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {timetable[batchId]
+                                                                                .sort((a, b) => weekdayOrder[a.weekday] - weekdayOrder[b.weekday])
+                                                                                .map((entry, index) => (
+                                                                                    <tr key={index}>
+                                                                                        <td>{entry.weekday}</td>
+                                                                                        <td>
+                                                                                            {entry.classTimings.map((slot, idx) => (
+                                                                                                <div key={idx}>{slot.startTime} - {slot.endTime}</div>
+                                                                                            ))}
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
                                                             ) : (
                                                                 <p>No timetable found for this batch.</p>
                                                             )}
@@ -526,9 +530,8 @@ export default function Teacher() {
 
                                                     <ModalFour isOpen={openModalFour[batchId]} onClose={() => closeTestModal(batchId)}>
                                                         <div className="test-form">
-                                                            <h3>Add Test for {batch.batchName}</h3>
+                                                            <h2 className="modal-title mb-1">Add Test for {batch.batchName}</h2>
                                                             <form
-                                                                className="mt-3"
                                                                 onSubmit={async (e) => {
                                                                     e.preventDefault();
                                                                     const { testName, maxMarks, testDate } = testDetails;
@@ -563,25 +566,27 @@ export default function Teacher() {
                                                                     <input type="text" placeholder="Test Name" value={testDetails.testName} onChange={(e) => setTestDetails((prev) => ({ ...prev, testName: e.target.value }))} className="form-control mb-2" required />
                                                                     <input type="number" placeholder="Max Marks" value={testDetails.maxMarks} onChange={(e) => setTestDetails((prev) => ({ ...prev, maxMarks: e.target.value }))} className="form-control mb-2" required />
                                                                 </div>
-                                                                <table className="table table-bordered">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>Student Name</th>
-                                                                            <th>Marks Scored</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        {(students[batch.batchId] || []).map((student) => (
-                                                                            <tr key={student._id}>
-                                                                                <td style={{ width: "57%" }}>{student.name}</td>
-                                                                                <td style={{ width: "43%" }}>
-                                                                                    <input type="number" className="form-control" value={testFormData[student._id] || ""} onChange={(e) => setTestFormData((prev) => ({ ...prev, [student._id]: e.target.value }))} placeholder="Enter marks" />
-                                                                                </td>
+                                                                <div style={{ maxHeight: "40vh", overflowY: "auto", margin: "10px 0" }}>
+                                                                    <table className="table table-bordered">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Student Name</th>
+                                                                                <th>Marks Scored</th>
                                                                             </tr>
-                                                                        ))}
-                                                                    </tbody>
-                                                                </table>
-                                                                <button type="submit" className="btn btn-primary" style={{width:"100%"}}>Add Test</button>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {(students[batch.batchId] || []).map((student) => (
+                                                                                <tr key={student._id}>
+                                                                                    <td style={{ width: "57%" }}>{student.name}</td>
+                                                                                    <td style={{ width: "43%" }}>
+                                                                                        <input type="number" className="form-control" value={testFormData[student._id] || ""} onChange={(e) => setTestFormData((prev) => ({ ...prev, [student._id]: e.target.value }))} placeholder="Enter marks" />
+                                                                                    </td>
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                                <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>Add Test</button>
                                                             </form>
                                                         </div>
                                                     </ModalFour>
@@ -595,7 +600,7 @@ export default function Teacher() {
                                                                     const uniqueTests = Array.from(new Map(tests[batchId].map(test => [`${test.name}_${test.date}`, test])).values());
                                                                     return (
                                                                         <div className="overflow-x-auto">
-                                                                            <h3>Showing All Tests for {batch.batchName}</h3>
+                                                                            <h3 className="modal-title">Showing All Tests for {batch.batchName}</h3>
                                                                             <table className="table table-bordered w-full">
                                                                                 <thead>
                                                                                     <tr>

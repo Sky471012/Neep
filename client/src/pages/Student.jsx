@@ -453,7 +453,7 @@ export default function Student() {
             onClose={() => setShowModalOne(null)}
         >
             {showModalOne && (<>
-                    <h5 className="modal-title mb-0">{batchesRecords.find((b) => b.batchId === showModalOne)?.batchName}</h5>
+                <h3 className="modal-title mb-0">{batchesRecords.find((b) => b.batchId === showModalOne)?.batchName}</h3>
                 <div id={`carousel-${showModalOne}`} className="carousel slide p-1 mt-2" style={{ backgroundColor: "#d4d4d4ff" }}>
                     <div className="carousel-inner">
                         {allMonths.map((month, idx) => {
@@ -566,6 +566,7 @@ export default function Student() {
             <div className="timetable-details">
                 <h3 className="modal-title">Timetable for {batchesRecords.find((b) => b.batchId === showModalThree)?.batchName}</h3>
                 {timetableRecords[showModalThree]?.length > 0 ? (
+                <div style={{maxHeight: "67vh", overflowY: "auto"}}>
                     <table className="table">
                         <thead>
                             <tr>
@@ -592,6 +593,7 @@ export default function Student() {
                                 ))}
                         </tbody>
                     </table>
+                        </div>
                 ) : (
                     <p style={{ color: "#6b7280", textAlign: "center", padding: "2rem" }}>
                         No timetable found for this batch.
@@ -603,20 +605,20 @@ export default function Student() {
         {/* Fee Table */}
         <ModalFour isOpen={showModalFour === student._id} onClose={() => setShowModalFour(null)}>
             <div className="fee-details">
-                <h1 className="modal-title">Fee Details</h1>
+                <h3 className="modal-title">Fee Details</h3>
                 <div className="fee-summary mb-3">
                     <span>Total Fee:<strong> ₹ {totalFee}</strong></span>
                     <span>Paid:<strong> ₹ {totalPaid}</strong></span>
                     <span>Balance:<strong> ₹ {balance}</strong></span>
                 </div>
-                <div className="flex ">
+                <div className="flex"  style={{maxHeight: "55vh", overflowY: "auto"}}>
                     {Array.isArray(installments) && installments.map((record, index) => {
                         const status = record.paidDate ? "Paid" : "Due";
                         const isPaid = !!record.paidDate;
 
                         return (
                             <div className="flex " key={index}>
-                                <div className="batch-card h-100 p-3 mb-3" style={{ minWidth: "400px" }}>
+                                <div className="batch-card h-100 p-3 mb-3" style={{ minWidth: "350px" }}>
                                     <div className="batch-header ps-0 pt-0">
                                         <h5 className="batch-name">Installment {record.installmentNo}</h5>
                                     </div>

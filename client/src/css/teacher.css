@@ -266,13 +266,6 @@ body {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Batches Grid */
-.batches-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
 .batch-card {
   background: white;
   border: 2px solid #e5e7eb;
@@ -511,10 +504,6 @@ body {
   .main-layout {
     flex-direction: row;
   }
-
-  .batches-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
 }
 
 @media (max-width: 769px) {
@@ -554,10 +543,6 @@ body {
 
   .search-container {
     max-width: none;
-  }
-
-  .batches-grid {
-    grid-template-columns: 1fr;
   }
 
   .action-button-t {

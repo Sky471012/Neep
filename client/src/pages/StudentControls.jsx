@@ -338,8 +338,8 @@ export default function StudentControls() {
                 return;
             }
 
-            setBatches((prev) => [...prev, ...data.addedBatches]);
             setModalOne(false);
+            setBatches((prev) => [...prev, ...data.addedBatches]);
             setSelectedToAdd([]);
             setSearchTerm("");
         } catch (err) {
@@ -1402,34 +1402,35 @@ export default function StudentControls() {
                             setSearchTerm("");
                         }}
                     >
-                        <h3>Add Student to batches</h3>
-
-                        <input
-                            type="text"
-                            className="form-control mb-3"
-                            placeholder="Search by name..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <div style={{ maxHeight: "300px", overflowY: "auto", margin: "10px" }}>
-                            {filteredBatches.map((batch) => (
-                                <div key={batch._id} className="form-check mt-1">
-                                    <input
-                                        type="checkbox"
-                                        className="form-check-input me-2"
-                                        id={batch._id}
-                                        checked={selectedToAdd.includes(batch._id)}
-                                        onChange={() => toggleSelectBatch(batch._id)}
-                                    />
-                                    <label className="form-check-label" htmlFor={batch._id}>
-                                        {batch.name}
-                                    </label>
-                                </div>
-                            ))}
+                        <div className="addToBatch-box">
+                            <h3 className="modal-title">Add Student to Batches</h3>
+                            <input
+                                type="text"
+                                className="form-control mb-3"
+                                placeholder="Search by name..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <div style={{ maxHeight: "45vh", overflowY: "auto", margin: "10px" }}>
+                                {filteredBatches.map((batch) => (
+                                    <div key={batch._id} className="d-flex align-items-center mb-1 text-break w-100">
+                                        <input
+                                            className="checkbox"
+                                            type="checkbox"
+                                            id={batch._id}
+                                            checked={selectedToAdd.includes(batch._id)}
+                                            onChange={() => toggleSelectBatch(batch._id)}
+                                        />
+                                        <label htmlFor={batch._id}>
+                                            <div className="d-flex">{batch.name} <div className="dot"></div> Class: {batch.class}</div>
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                            <button className="btn btn-primary mt-3" style={{ width: "100%" }} onClick={handleAddToSelectedBatches}>
+                                Add to selected Batches
+                            </button>
                         </div>
-                        <button className="button" onClick={handleAddToSelectedBatches}>
-                            Add to selected Batches
-                        </button>
                     </ModalOne>
 
                     <ModalTwo
@@ -1438,35 +1439,37 @@ export default function StudentControls() {
                             setModalTwo(false);
                         }}
                     >
-                        <h3 className="mb-3">Adding Fee Structure of {student.name}</h3>
+                        <div className="addFeeBox">
+                            <h3 className="modal-title">Adding Fee Structure of {student.name}</h3>
 
-                        <div className="mb-3">
-                            <label className="form-label">Total Fee Amount</label>
-                            <input
-                                type="number"
-                                className="form-control"
-                                value={editedFee}
-                                onChange={(e) => setEditedFee(e.target.value)}
-                                min="1"
-                                placeholder="Enter total fee amount"
-                            />
+                            <div className="mb-3">
+                                <label className="form-label">Total Fee Amount</label>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    value={editedFee}
+                                    onChange={(e) => setEditedFee(e.target.value)}
+                                    min="1"
+                                    placeholder="Enter total fee amount"
+                                />
+                            </div>
+
+                            <div className="mb-3">
+                                <label className="form-label">Number of Installments</label>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    value={numInstallments}
+                                    onChange={(e) => setNumInstallments(e.target.value)}
+                                    min="1"
+                                    placeholder="Enter number of installments"
+                                />
+                            </div>
+
+                            <button className="btn btn-primary mt-2" style={{width:"100%"}}onClick={handleAddFeeStructureSubmit}>
+                                Create Fee Structure
+                            </button>
                         </div>
-
-                        <div className="mb-3">
-                            <label className="form-label">Number of Installments</label>
-                            <input
-                                type="number"
-                                className="form-control"
-                                value={numInstallments}
-                                onChange={(e) => setNumInstallments(e.target.value)}
-                                min="1"
-                                placeholder="Enter number of installments"
-                            />
-                        </div>
-
-                        <button className="btn btn-primary" onClick={handleAddFeeStructureSubmit}>
-                            Create Fee Structure
-                        </button>
                     </ModalTwo>
 
                 </div>

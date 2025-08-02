@@ -161,7 +161,7 @@ body {
   word-break: break-word;
 }
 
-.balance-header{
+.balance-header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -473,13 +473,75 @@ body {
   background: #2563eb;
 }
 
+.addToBatch-box,
+.addFeeBox {
+  padding: 0;
+  margin: 1rem;
+  min-width: 400px;
+}
+
+.addToBatch-box input {
+  border: 1px solid #cce3f8;
+  background: #f8fbfe;
+  border-radius: 10px;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  color: #1a365d;
+  outline: none;
+  transition: all 0.25s ease;
+  width: 100%;
+  font-family: "Inter", sans-serif;
+  box-shadow: none;
+}
+
+.addToBatch-box input:focus {
+  background: #f1f8ff;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  outline: none;
+  border: none;
+}
+
+.addToBatch-box input::placeholder {
+  color: #8eb3d6;
+  opacity: 1;
+  font-family: "Inter", sans-serif;
+}
+
+.addFeeBox input:focus {
+  background: #f1f8ff;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  outline: none;
+  border: none;
+}
+
+.addFeeBox input::placeholder {
+  color: #8eb3d6;
+  opacity: 1;
+  font-family: "Inter", sans-serif;
+}
+
+.checkbox {
+  margin-right: 1rem;
+  width: 20px !important;
+  height: 20px;
+  accent-color: #3b82f6;
+}
+
+.checkboxbox:focus {
+  box-shadow: none !important;
+}
+
+.checkbox:checked {
+  box-shadow: none !important;
+}
+
 /* Table Styles */
 .table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
   background: white;
-  border-radius: 8px;
+  border-radius: 8px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -518,7 +580,7 @@ body {
 .fee-details {
   border-radius: 12px;
   padding: 1rem;
-  gap:0;
+  gap: 0;
 }
 
 .fee-summary {
@@ -633,8 +695,8 @@ body {
   .batches-header {
     flex-direction: column;
   }
-  
-  .balance-header{
+
+  .balance-header {
     flex-direction: column;
     align-items: stretch;
   }
@@ -719,15 +781,21 @@ body {
 
   .table th,
   .table tr td {
-    padding: 0.5rem 0.7rem!important;
+    padding: 0.5rem 0.7rem !important;
   }
 
-  .test-details{
+  .test-details {
     margin: 15px 0px;
   }
 
   .modal-title {
     font-size: 1.25rem;
+  }
+
+  .addToBatch-box,
+  .addFeeBox {
+    margin: 1rem 0;
+    min-width: 0px;
   }
 }
 

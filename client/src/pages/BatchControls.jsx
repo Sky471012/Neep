@@ -49,10 +49,10 @@ export default function BatchControls() {
   const [newStudentData, setNewStudentData] = useState({
     name: "",
     phone: "",
-    dob: format(new Date(), "dd-MM-yyyy"),
+    dob: "",
     address: "",
-    class: "Kids",
-    dateOfJoining: format(new Date(), "dd-MM-yyyy"),
+    class: "",
+    dateOfJoining: "",
   });
   const [studentSearch, setStudentSearch] = useState("");
   const [testFormData, setTestFormData] = useState({});
@@ -1007,76 +1007,75 @@ export default function BatchControls() {
             setActiveStudent(null);
           }}
         >
-          {activeStudent && (
-            <div className="attendance-calendar mt-2">
-              <div id={`carousel-${activeStudent._id}`} className="carousel slide">
-                <div className="carousel-inner">
-                  {allMonths.map((month, monthIdx) => {
-                    let calendarMonth, calendarYear;
-                    if (monthIdx <= 8) {
-                      calendarMonth = monthIdx + 3;
-                      calendarYear = academicYearStart;
-                    } else {
-                      calendarMonth = monthIdx - 9;
-                      calendarYear = academicYearStart + 1;
-                    }
+          {activeStudent && (<>
+            <h5 className="modal-title mb-0">Attendance of {activeStudent.name}</h5>
+            <div id={`carousel-${activeStudent._id}`} className="carousel slide p-1 mt-2" style={{ backgroundColor: "#d4d4d4ff" }}>
+              <div className="carousel-inner">
+                {allMonths.map((month, monthIdx) => {
+                  let calendarMonth, calendarYear;
+                  if (monthIdx <= 8) {
+                    calendarMonth = monthIdx + 3;
+                    calendarYear = academicYearStart;
+                  } else {
+                    calendarMonth = monthIdx - 9;
+                    calendarYear = academicYearStart + 1;
+                  }
 
-                    const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
 
-                    return (
-                      <div
-                        key={month}
-                        className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`}
-                      >
-                        <h6>{month} {calendarYear}</h6>
-                        <div className="calendar-grid">
-                          {[...Array(daysInMonth)].map((_, d) => {
-                            const date = new Date(calendarYear, calendarMonth, d + 1);
-                            const formatted = date.toISOString().split("T")[0];
-                            const key = `${batchId}_${formatted}`;
-                            const status = attendanceMap[key];
+                  return (
+                    <div
+                      key={month}
+                      className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`}
+                    >
+                      <h6 className="month-title">{month} {calendarYear}</h6>
+                      <div className="calendar-grid">
+                        {[...Array(daysInMonth)].map((_, d) => {
+                          const date = new Date(calendarYear, calendarMonth, d + 1);
+                          const formatted = date.toISOString().split("T")[0];
+                          const key = `${batchId}_${formatted}`;
+                          const status = attendanceMap[key];
 
-                            return (
-                              <div
-                                key={d}
-                                className={`date-box ${status === "present"
-                                  ? "present"
-                                  : status === "absent"
-                                    ? "absent"
-                                    : ""
-                                  }`}
-                                title={`${month} ${d + 1}, ${calendarYear} - ${status || "No record"}`}
-                              >
-                                {d + 1}
-                              </div>
-                            );
-                          })}
-                        </div>
+                          return (
+                            <div
+                              key={d}
+                              className={`date-box ${status === "present"
+                                ? "present"
+                                : status === "absent"
+                                  ? "absent"
+                                  : ""
+                                }`}
+                              title={`${month} ${d + 1}, ${calendarYear} - ${status || "No record"}`}
+                            >
+                              {d + 1}
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                </div>
-                <div className="calendar-controls d-flex justify-content-between mt-2">
-                  <button
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={() =>
-                      setActiveMonthIndex((prev) => (prev - 1 + 12) % 12)
-                    }
-                  >
-                    ‹ Previous
-                  </button>
-                  <button
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={() =>
-                      setActiveMonthIndex((prev) => (prev + 1) % 12)
-                    }
-                  >
-                    Next ›
-                  </button>
-                </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="calendar-controls">
+                <button
+                  className="calendar-button ms-1 mb-1"
+                  onClick={() =>
+                    setActiveMonthIndex((prev) => (prev - 1 + 12) % 12)
+                  }
+                >
+                  ‹ Previous
+                </button>
+                <button
+                  className="calendar-button mb-1 me-1"
+                  onClick={() =>
+                    setActiveMonthIndex((prev) => (prev + 1) % 12)
+                  }
+                >
+                  Next ›
+                </button>
               </div>
             </div>
-          )}
+          </>)}
         </ModalThree>
 
         <ModalFour isOpen={modalFour} onClose={() => setModalFour(false)}>
@@ -1106,128 +1105,171 @@ export default function BatchControls() {
             });
           }}
         >
-          <h3>Add Students to {batch.name}</h3>
+          <div className="adding-student-box">
+            <h3>Add Students to {batch.name}</h3>
 
-          <div className="btn-group mb-3 mt-3">
-            <button
-              className={`btn btn-outline-primary ${mode === "select" ? "active" : ""}`}
-              onClick={() => setMode("select")}
+            {/* Role Switcher */}
+            <div
+              style={{
+                display: 'flex',
+                background: 'rgba(220, 220, 220, 0.8)',
+                borderRadius: '12px',
+                padding: '4px',
+                marginBottom: '20px',
+                marginTop: '20px',
+              }}
             >
-              Select Existing
-            </button>
-            <button
-              className={`btn btn-outline-primary ${mode === "create" ? "active" : ""}`}
-              onClick={() => setMode("create")}
-            >
-              Create New
-            </button>
-          </div>
-
-          {mode === "select" ? (
-            <>
-              <input
-                type="text"
-                className="form-control mb-3"
-                placeholder="Search by name or number..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <div style={{ maxHeight: "300px", overflowY: "auto", margin: "10px" }}>
-                {filteredStudents.map((student) => (
-                  <div key={student._id} className="form-check mt-1">
-                    <input
-                      type="checkbox"
-                      className="form-check-input me-2"
-                      id={student._id}
-                      checked={selectedToAdd.includes(student._id)}
-                      onChange={() => toggleSelectStudent(student._id)}
-                    />
-                    <label className="form-check-label" htmlFor={student._id}>
-                      {student.name} ({student.phone})
-                    </label>
-                  </div>
-                ))}
-              </div>
-              <button className="button" onClick={handleAddSelectedStudents}>
-                Add Selected Students
-              </button>
-            </>
-          ) : (
-            <>
-              <input
-                className="form-control mb-2"
-                placeholder="Name"
-                value={newStudentData.name}
-                onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
-              />
-              <input
-                className="form-control mb-2"
-                placeholder="Phone"
-                value={newStudentData.phone}
-                onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
-              />
-              <DatePicker
-                selected={parse(newStudentData.dob, "dd-MM-yyyy", new Date())}
-                onChange={(date) =>
-                  setNewStudentData({
-                    ...newStudentData,
-                    dob: format(date, "dd-MM-yyyy"),
-                  })
-                }
-                dateFormat="dd-MM-yyyy"
-                className="form-control mb-2"
-                placeholderText="Date of Birth"
-              />
-              <input
-                className="form-control mb-2"
-                placeholder="Address"
-                value={newStudentData.address}
-                onChange={(e) => setNewStudentData({ ...newStudentData, address: e.target.value })}
-              />
-              <select
-                className="form-select mb-2"
-                value={newStudentData.class}
-                onChange={(e) => setNewStudentData({ ...newStudentData, class: e.target.value })}
+              <button
+                onClick={() => setMode("select")}
+                className={`role-switch-button ${mode === "select" ? "active" : ""
+                  }`}
               >
-                {["Kids", "English Spoken", "9", "10", "11", "12"].map((cls) => (
-                  <option key={cls} value={cls}>{cls}</option>
-                ))}
-              </select>
-              <DatePicker
-                selected={parse(newStudentData.dateOfJoining, "dd-MM-yyyy", new Date())}
-                onChange={(date) =>
-                  setNewStudentData({
-                    ...newStudentData,
-                    dateOfJoining: format(date, "dd-MM-yyyy"),
-                  })
-                }
-                dateFormat="dd-MM-yyyy"
-                className="form-control mb-3"
-                placeholderText="Date of Joining"
-              />
-              <button className="button" onClick={async () => {
-                try {
-                  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudentByCreating/${batchId}`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ ...newStudentData, batchName: batch.name }),
-                  });
-                  const data = await res.json();
-                  if (!res.ok) return alert(data.message || "Error creating student");
-                  setStudents((prev) => [...prev, data.student]);
-                  setModalFive(false);
-                } catch (err) {
-                  alert("Failed to create student.");
-                  console.error(err);
-                }
-              }}>
-                Create Student
+                Select Existing
               </button>
-            </>
-          )}
+              <button
+                onClick={() => setMode("create")}
+                className={`role-switch-button ${mode === "create" ? "active" : ""
+                  }`}
+              >
+                Create New
+              </button>
+            </div>
+
+            {mode === "select" ? (
+              <>
+                <input
+                  type="text"
+                  className="form-control mb-3"
+                  placeholder="Search by name or number..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <div style={{ maxHeight: "53vh", overflowY: "auto", margin: "10px" }}>
+                  {filteredStudents.map((student) => (
+                    <div key={student._id} className="d-flex align-items-center mb-1 text-break w-100">
+                      <input
+                        type="checkbox"
+                        className="checkbox"
+                        id={student._id}
+                        checked={selectedToAdd.includes(student._id)}
+                        onChange={() => toggleSelectStudent(student._id)}
+                      />
+                      <label className="form-check-label" htmlFor={student._id}>
+                        {student.name} ({student.phone})
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <button className="btn btn-primary mt-2" style={{ width: "100%" }} onClick={handleAddSelectedStudents}>
+                  Add Selected Students
+                </button>
+              </>
+            ) : (
+              <>
+                <input
+                  className="form-control mb-2"
+                  placeholder="Name"
+                  value={newStudentData.name}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
+                />
+                <input
+                  className="form-control mb-2"
+                  placeholder="Phone"
+                  value={newStudentData.phone}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
+                />
+                <DatePicker
+                  selected={
+                    newStudentData.dob
+                      ? parse(newStudentData.dob, "dd-MM-yyyy", new Date())
+                      : null
+                  }
+                  onChange={(date) =>
+                    setNewStudentData({
+                      ...newStudentData,
+                      dob: format(date, "dd-MM-yyyy"),
+                    })
+                  }
+                  dateFormat="dd-MM-yyyy"
+                  className="datePicker"
+                  placeholderText="Date of Birth"
+                  showYearDropdown
+                  dropdownMode="select"
+                  yearDropdownItemNumber={10}
+                  scrollableYearDropdown
+                  maxDate={new Date()}
+                  openToDate={new Date('2005-01-01')}
+                  minDate={new Date("1995-01-01")}
+                />
+                <input
+                  className="form-control mb-2"
+                  placeholder="Address"
+                  value={newStudentData.address}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, address: e.target.value })}
+                />
+                <select
+                  className="form-select mb-2"
+                  value={newStudentData.class}
+                  onChange={(e) =>
+                    setNewStudentData({ ...newStudentData, class: e.target.value })
+                  }
+                >
+                  <option value="" disabled hidden>
+                    Select Class
+                  </option>
+                  {["Kids", "English Spoken", "9", "10", "11", "12"].map((cls) => (
+                    <option key={cls} value={cls}>
+                      {cls}
+                    </option>
+                  ))}
+                </select>
+                <DatePicker
+                  selected={
+                    newStudentData.dateOfJoining
+                      ? parse(newStudentData.dateOfJoining, "dd-MM-yyyy", new Date())
+                      : null
+                  }
+                  onChange={(date) =>
+                    setNewStudentData({
+                      ...newStudentData,
+                      dateOfJoining: format(date, "dd-MM-yyyy"),
+                    })
+                  }
+                  dateFormat="dd-MM-yyyy"
+                  className="datePicker"
+                  placeholderText="Date of Joining"
+                  showYearDropdown
+                  dropdownMode="select"
+                  yearDropdownItemNumber={10}
+                  scrollableYearDropdown
+                  maxDate={new Date()}
+                  openToDate={new Date()}
+                  minDate={new Date("1995-01-01")}
+                />
+                <button className="btn btn-primary" style={{ width: "100%" }} onClick={async () => {
+                  try {
+                    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudentByCreating/${batchId}`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({ ...newStudentData, batchName: batch.name }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) return alert(data.message || "Error creating student");
+                    setStudents((prev) => [...prev, data.student]);
+                    setModalFive(false);
+                  } catch (err) {
+                    alert("Failed to create student.");
+                    console.error(err);
+                  }
+                }}>
+                  Create Student
+                </button>
+              </>
+            )}
+          </div>
         </ModalFive>
 
         <ModalSix
@@ -1237,13 +1279,13 @@ export default function BatchControls() {
             setActiveStudent(null);
           }}
         >
-          <div className="p-3">
-            <h3>Tests for {activeStudent?.name}</h3>
+          <div className="test-details">
+            <h3 className="modal-title">Tests for {activeStudent?.name}</h3>
 
             {studentTests.length === 0 ? (
               <p>No test records found for this batch.</p>
             ) : (
-              <table className="table table-bordered mt-3">
+              <table className="table">
                 <thead>
                   <tr>
                     <th>Test Name</th>

@@ -532,6 +532,43 @@ body {
   font-weight: 600;
 }
 
+.adding-student-box{
+  padding: 0;
+  margin: 1rem;
+}
+
+.adding-student-box input, select{
+  border: 1px solid #cce3f8;
+  background: #f8fbfe;
+  border-radius: 10px;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  color: #1a365d;
+  outline: none;
+  transition: all 0.25s ease;
+  width: 100%;
+  font-family: "Inter", sans-serif;
+  box-shadow: none;
+  margin-bottom: 10px;
+}
+
+.adding-student-box input:focus, 
+.adding-student-box select:focus {
+  background: #f1f8ff;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  outline: none;
+  border: none;
+}
+
+.adding-student-box input::placeholder,
+.adding-student-box select::placeholder {
+  color: #8eb3d6;
+  opacity: 1;
+  font-family: "Inter", sans-serif;
+}
+
+
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .admin-sidebar {
@@ -693,6 +730,10 @@ body {
 
   .data-card {
     padding: 1rem;
+  }
+
+  .adding-student-box{
+    margin: 1rem 0;
   }
 }
 
