@@ -74,7 +74,7 @@ export default function TimetableEditor({ batch, timetable, onSave, initialDay =
 
     return (
         <div>
-            <h4 className="mb-3">Timetable of {batch.name}</h4>
+            <h3 className="modal-title">Timetable of {batch.name}</h3>
 
             {/* Day Buttons */}
             <div className="flex justify-between mb-4">

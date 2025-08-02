@@ -532,41 +532,92 @@ body {
   font-weight: 600;
 }
 
-.adding-student-box{
+.adding-student-box, .selectTeacherBox{
   padding: 0;
   margin: 1rem;
 }
 
 .adding-student-box input, select{
-  border: 1px solid #cce3f8;
-  background: #f8fbfe;
-  border-radius: 10px;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-  color: #1a365d;
-  outline: none;
-  transition: all 0.25s ease;
+  border: 1px solid #cce3f8!important;
+  background: #f8fbfe!important;
+  border-radius: 10px!important;
+  font-size: 1rem!important;
+  padding: 0.5rem 1rem!important;
+  color: #1a365d!important;
+  outline: none!important;
+  transition: all 0.25s ease!important;
   width: 100%;
-  font-family: "Inter", sans-serif;
-  box-shadow: none;
-  margin-bottom: 10px;
+  font-family: "Inter", sans-serif!important;
+  box-shadow: none!important;
+  margin-bottom: 10px!important;
 }
 
-.adding-student-box input:focus, 
+.adding-student-box input:focus{
+  background: #f1f8ff!important;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2)!important;
+  outline: none!important;
+  border: none!important;
+}
+
 .adding-student-box select:focus {
-  background: #f1f8ff;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-  outline: none;
-  border: none;
+  background: #f1f8ff!important;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2)!important;
+  outline: none!important;
+  border: none!important;
 }
 
-.adding-student-box input::placeholder,
+.adding-student-box input::placeholder {
+  color: #8eb3d6!important;
+  opacity: 1!important;
+  font-family: "Inter", sans-serif!important;
+}
+
 .adding-student-box select::placeholder {
-  color: #8eb3d6;
-  opacity: 1;
-  font-family: "Inter", sans-serif;
+  color: #8eb3d6!important;
+  opacity: 1!important;
+  font-family: "Inter", sans-seri!important;
 }
 
+.selectTeacherBox input, select{
+  border: 1px solid #cce3f8!important;
+  background: #f8fbfe!important;
+  border-radius: 10px!important;
+  font-size: 1rem!important;
+  padding: 0.5rem 1rem!important;
+  color: #1a365d!important;
+  outline: none!important;
+  transition: all 0.25s ease!important;
+  width: 100%;
+  font-family: "Inter", sans-serif!important;
+  box-shadow: none!important;
+  margin-bottom: 10px!important;
+}
+
+.selectTeacherBox input:focus{
+  background: #f1f8ff!important;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2)!important;
+  outline: none!important;
+  border: none!important;
+}
+
+.selectTeacherBox select:focus {
+  background: #f1f8ff!important;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2)!important;
+  outline: none!important;
+  border: none!important;
+}
+
+.selectTeacherBox input::placeholder {
+  color: #8eb3d6!important;
+  opacity: 1!important;
+  font-family: "Inter", sans-serif!important;
+}
+
+.selectTeacherBox select::placeholder {
+  color: #8eb3d6!important;
+  opacity: 1!important;
+  font-family: "Inter", sans-seri!important;
+}
 
 
 /* Responsive Design */
@@ -732,7 +783,7 @@ body {
     padding: 1rem;
   }
 
-  .adding-student-box{
+  .adding-student-box, .selectTeacherBox{
     margin: 1rem 0;
   }
 }

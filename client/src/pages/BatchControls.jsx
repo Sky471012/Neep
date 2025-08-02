@@ -920,49 +920,59 @@ export default function BatchControls() {
 
         {/* Attendance Modal */}
         <ModalOne isOpen={openModalOne} onClose={closeAttendanceModalHandler}>
-          <div>
-            <h3>{batch.name}</h3>
+          <div className="attendance-form">
+            <h3 className="modal-title">Mark Attendance for {batch.name}</h3>
             <DatePicker
-              className="datePicker"
-              dateFormat="yyyy-MM-dd"
+              className="datePicker mt-1 mb-1"
+              dateFormat="dd-MM-yyyy"
               selected={selectedDate}
               onChange={(date) => setSelectedDate(date)}
               placeholderText="Select date"
+              required
+              showYearDropdown
+              dropdownMode="select"
+              yearDropdownItemNumber={10}
+              scrollableYearDropdown
+              maxDate={new Date()}
+              openToDate={new Date()}
+              minDate={new Date("1995-01-01")}
             />
-            <table className="table table-bordered mt-3">
-              <thead>
-                <tr>
-                  <th>Student Name</th>
-                  <th>Mark Attendance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((student) => {
-                  const key = `${student._id}_${selectedDate.toDateString()}`;
-                  return (
-                    <tr key={student._id}>
-                      <td>{student.name} ({student.phone})</td>
-                      <td>
-                        <button
-                          className={`btn btn-success btn-sm me-2 ${markedStatus[key] === "present" ? "active" : ""
-                            }`}
-                          onClick={() => markAttendance(student._id, "present")}
-                        >
-                          Present
-                        </button>
-                        <button
-                          className={`btn btn-danger btn-sm ${markedStatus[key] === "absent" ? "active" : ""
-                            }`}
-                          onClick={() => markAttendance(student._id, "absent")}
-                        >
-                          Absent
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div style={{ maxHeight: "55vh", overflowY: "auto", margin: "10px 0" }}>
+              <table className="table table-bordered mt-3">
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Mark Attendance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((student) => {
+                    const key = `${student._id}_${selectedDate.toDateString()}`;
+                    return (
+                      <tr key={student._id}>
+                        <td style={{ width: "50%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
+                        <td style={{ width: "50%" }}>
+                          <button
+                            className={`btn btn-success btn-sm me-2 ${markedStatus[key] === "present" ? "active" : ""
+                              }`}
+                            onClick={() => markAttendance(student._id, "present")}
+                          >
+                            Present
+                          </button>
+                          <button
+                            className={`btn btn-danger btn-sm ${markedStatus[key] === "absent" ? "active" : ""
+                              }`}
+                            onClick={() => markAttendance(student._id, "absent")}
+                          >
+                            Absent
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </ModalOne>
 
@@ -971,32 +981,35 @@ export default function BatchControls() {
           isOpen={modalTwo}
           onClose={() => setModalTwo(false)}
         >
-          <h3>Assigning Teacher to {batch.name}</h3>
+          <div className="selectTeacherBox">
+            <h3 className="modal-title">Assigning Teacher to {batch.name}</h3>
 
-          <div className="input-group mt-3 gap-3">
-            <label>Select Teacher:</label>
-            <select
-              className="form-select mt-1"
-              value={selectedTeacher[batchId] || ""}
-              onChange={(e) =>
-                setSelectedTeacher((prev) => ({ ...prev, [batchId]: e.target.value }))
-              }
+            <div className="form-group">
+              <label>Select Teacher</label>
+              <select
+                className="form-select mt-1"
+                value={selectedTeacher[batchId] || ""}
+                onChange={(e) =>
+                  setSelectedTeacher((prev) => ({ ...prev, [batchId]: e.target.value }))
+                }
+              >
+                <option value="">-- Select a teacher --</option>
+                {teachersList.map((teacher) => (
+                  <option key={teacher._id} value={teacher._id}>
+                    {teacher.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              className="btn btn-primary mt-3"
+              style={{ width: "100%" }}
+              onClick={() => assignTeacherToBatch(batchId, selectedTeacher[batchId])}
             >
-              <option value="">-- Select a teacher --</option>
-              {teachersList.map((teacher) => (
-                <option key={teacher._id} value={teacher._id}>
-                  {teacher.name}
-                </option>
-              ))}
-            </select>
+              Assign Teacher
+            </button>
           </div>
-
-          <button
-            className="button mt-3"
-            onClick={() => assignTeacherToBatch(batchId, selectedTeacher[batchId])}
-          >
-            Assign Teacher
-          </button>
         </ModalTwo>
 
 
@@ -1008,7 +1021,7 @@ export default function BatchControls() {
           }}
         >
           {activeStudent && (<>
-            <h5 className="modal-title mb-0">Attendance of {activeStudent.name}</h5>
+            <h3 className="modal-title mb-0">Attendance of {activeStudent.name}</h3>
             <div id={`carousel-${activeStudent._id}`} className="carousel slide p-1 mt-2" style={{ backgroundColor: "#d4d4d4ff" }}>
               <div className="carousel-inner">
                 {allMonths.map((month, monthIdx) => {
@@ -1106,7 +1119,7 @@ export default function BatchControls() {
           }}
         >
           <div className="adding-student-box">
-            <h3>Add Students to {batch.name}</h3>
+            <h3 className="modal-title">Add Students to {batch.name}</h3>
 
             {/* Role Switcher */}
             <div
@@ -1318,8 +1331,8 @@ export default function BatchControls() {
           isOpen={modalSeven[batch.batchId]}
           onClose={() => closeTestModal(batch.batchId)}
         >
-          <div>
-            <h3>Add Test for {batch.batchName}</h3>
+          <div className="test-form">
+            <h3 className="modal-title mb-1">Add Test for {batch.name}</h3>
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
@@ -1354,10 +1367,17 @@ export default function BatchControls() {
                   onChange={(date) =>
                     setTestDetails((prev) => ({ ...prev, testDate: date }))
                   }
-                  className="form-control mb-2"
-                  dateFormat="yyyy-MM-dd"
+                  className="datePicker mb-2"
+                  dateFormat="dd-MM-yyyy"
                   placeholderText="Select test date"
                   required
+                  showYearDropdown
+                  dropdownMode="select"
+                  yearDropdownItemNumber={10}
+                  scrollableYearDropdown
+                  maxDate={new Date()}
+                  openToDate={new Date()}
+                  minDate={new Date("1995-01-01")}
                 />
                 <input
                   type="text"
@@ -1366,7 +1386,7 @@ export default function BatchControls() {
                   onChange={(e) =>
                     setTestDetails((prev) => ({ ...prev, testName: e.target.value }))
                   }
-                  className="form-control mb-1"
+                  className="form-control mb-2"
                   required
                 />
                 <input
@@ -1376,42 +1396,42 @@ export default function BatchControls() {
                   onChange={(e) =>
                     setTestDetails((prev) => ({ ...prev, maxMarks: e.target.value }))
                   }
-                  className="form-control mb-1"
+                  className="form-control mb-2"
                   required
                 />
               </div>
-
-              <table className="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Student Name</th>
-                    <th>Marks Scored</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((student) => (
-                    <tr key={student._id}>
-                      <td>{student.name}</td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          value={testFormData[student._id] || ""}
-                          onChange={(e) =>
-                            setTestFormData((prev) => ({
-                              ...prev,
-                              [student._id]: e.target.value
-                            }))
-                          }
-                          placeholder="Enter marks"
-                        />
-                      </td>
+              <div style={{ maxHeight: "40vh", overflowY: "auto", margin: "10px 0" }}>
+                <table className="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Student Name</th>
+                      <th>Marks Scored</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <button type="submit" className="button">
+                  </thead>
+                  <tbody>
+                    {students.map((student) => (
+                      <tr key={student._id}>
+                        <td style={{ width: "57%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
+                        <td style={{ width: "43%" }}>
+                          <input
+                            type="number"
+                            className="form-control"
+                            value={testFormData[student._id] || ""}
+                            onChange={(e) =>
+                              setTestFormData((prev) => ({
+                                ...prev,
+                                [student._id]: e.target.value
+                              }))
+                            }
+                            placeholder="Enter marks"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>
                 Add
               </button>
             </form>

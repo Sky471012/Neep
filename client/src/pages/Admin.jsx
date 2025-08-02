@@ -29,7 +29,7 @@ export default function Admin() {
   const [openPopupModal, setOpenPopupModal] = useState(false)
   const [description, setDescription] = useState("")
   const [image, setImage] = useState(null)
-  const [dob, setDob] = useState(new Date())
+  const [dob, setDob] = useState("")
   const [dateOfJoining, setDateOfJoining] = useState(new Date())
   const [startDate, setStartDate] = useState(new Date())
   const [showFeeTracking, setShowFeeTracking] = useState(false)
@@ -991,175 +991,205 @@ export default function Admin() {
 
       {/* All Modals */}
       <ModalOne isOpen={openModalOne} onClose={() => setOpenModalOne(false)} onCreate={createBatch}>
-        <h3>Batch Creation</h3>
-        <form className="login-form mt-3" onSubmit={handleBatchFormSubmit}>
-          <div className="input-group flex gap-1 mb-2">
-            <label htmlFor="batch">Batch Name</label>
-            <input
-              type="text"
-              id="batch"
-              name="batch"
-              value={credentials.batch}
-              onChange={handleInputChange}
-              required
-              placeholder="Write Batch Name..."
-            />
-          </div>
-          <div className="input-group flex gap-1 mb-2">
-            <label className="class">Class:</label>
-            <select
-              name="batchClass"
-              value={credentials.batchClass}
-              onChange={handleInputChange}
-              required
-              placeholder="Select Class..."
-            >
-              <option value="">Select Class</option>
-              {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
-                <option key={cls} value={cls}>
-                  {cls}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="input-group flex gap-1">
-            <label htmlFor="startDate">Start Date</label>
-            <DatePicker
-              className="form-control"
-              dateFormat="dd-MM-yyyy"
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              placeholderText="Select Start Date"
-              required
-            />
-          </div>
-          <button className="btn btn-success mt-2" type="submit">
-            Create Batch
-          </button>
-        </form>
+        <div className="adding-student-box" style={{ minWidth: "300px" }}>
+          <h3 className="modal-title">Batch Creation</h3>
+          <form className="login-form" onSubmit={handleBatchFormSubmit}>
+            <div className="form-group">
+              <label htmlFor="batch">Batch Name</label>
+              <input
+                type="text"
+                id="batch"
+                name="batch"
+                value={credentials.batch}
+                onChange={handleInputChange}
+                required
+                placeholder="Write Batch Name..."
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="class">Class</label>
+              <select
+                name="batchClass"
+                className="form-select"
+                value={credentials.batchClass}
+                onChange={handleInputChange}
+                required
+                placeholder="Select Class..."
+              >
+                <option value="">Select Class</option>
+                {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
+                  <option key={cls} value={cls}>
+                    {cls}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="startDate">Start Date</label>
+              <DatePicker
+                className="datePicker"
+                dateFormat="dd-MM-yyyy"
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+                placeholderText="Select Start Date"
+                required
+                showYearDropdown
+                dropdownMode="select"
+                yearDropdownItemNumber={10}
+                scrollableYearDropdown
+                maxDate={new Date()}
+                openToDate={new Date()}
+                minDate={new Date("1995-01-01")}
+              />
+            </div>
+            <button className="btn btn-success" style={{ width: "100%" }} type="submit">
+              Create Batch
+            </button>
+          </form>
+        </div>
       </ModalOne>
 
       <ModalTwo isOpen={openModalTwo} onClose={() => setOpenModalTwo(false)} onCreate={createStudent}>
-        <h3>Adding a Student</h3>
-        <form className="login-form mt-3" onSubmit={handleStudentFormSubmit}>
-          <div className="mb-2 d-flex gap-3 w-75">
-            <label className="form-label">Name:</label>
-            <input
-              type="text"
-              className="form-control"
-              name="studentName"
-              value={credentials.studentName}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="d-flex gap-3 w-75">
-            <label className="form-label">Phone:</label>
-            <input
-              type="tel"
-              className="form-control"
-              name="studentPhone"
-              value={credentials.studentPhone}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="d-flex gap-3 w-75">
-            <label className="form-label">DOB (dd-mm-yyyy):</label>
-            <DatePicker
-              className="form-control"
-              dateFormat="dd-MM-yyyy"
-              selected={dob}
-              onChange={(date) => setDob(date)}
-              placeholderText="Select DOB"
-              required
-              maxDate={new Date()}
-            />
-          </div>
-          <div className="d-flex gap-3 w-75">
-            <label className="form-label">Address:</label>
-            <input
-              type="text"
-              className="form-control"
-              name="studentAddress"
-              value={credentials.studentAddress}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="d-flex gap-3 w-75">
-            <label className="form-label">Class:</label>
-            <select
-              className="form-select"
-              name="studentClass"
-              value={credentials.studentClass}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Select Class</option>
-              {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
-                <option key={cls} value={cls}>
-                  {cls}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="d-flex gap-3 w-75">
-            <label className="form-label">Date of Joining (dd-mm-yyyy):</label>
-            <DatePicker
-              className="form-control"
-              dateFormat="dd-MM-yyyy"
-              selected={dateOfJoining}
-              onChange={(date) => setDateOfJoining(date)}
-              placeholderText="Select Joining Date"
-              required
-            />
-          </div>
-          <button className="btn btn-success mt-3" type="submit">
-            Add Student
-          </button>
-        </form>
+        <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
+          <h3 className="modal-title mb-2">Adding a Student</h3>
+          <form onSubmit={handleStudentFormSubmit}>
+            <div className="form-group">
+              <label>Name:</label>
+              <input
+                type="text"
+                className="form-control"
+                name="studentName"
+                placeholder="Write Student's Name..."
+                value={credentials.studentName}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div  className="form-group">
+              <label>Phone:</label>
+              <input
+                type="tel"
+                className="form-control"
+                name="studentPhone"
+                placeholder="Write Student's Phone..."
+                value={credentials.studentPhone}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div  className="form-group">
+              <label>DOB (dd-mm-yyyy):</label>
+              <DatePicker
+                className="form-control"
+                dateFormat="dd-MM-yyyy"
+                selected={dob}
+                onChange={(date) => setDob(date)}
+                placeholderText="Select DOB"
+                required
+                showYearDropdown
+                dropdownMode="select"
+                yearDropdownItemNumber={10}
+                scrollableYearDropdown
+                maxDate={new Date()}
+                openToDate={new Date()}
+                minDate={new Date("1995-01-01")}
+              />
+            </div>
+            <div  className="form-group">
+              <label>Address:</label>
+              <input
+                type="text"
+                className="form-control"
+                name="studentAddress"
+                placeholder="Write Student's Address..."
+                value={credentials.studentAddress}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div  className="form-group">
+              <label>Class:</label>
+              <select
+                className="form-select"
+                name="studentClass"
+                value={credentials.studentClass}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Class</option>
+                {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
+                  <option key={cls} value={cls}>
+                    {cls}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Date of Joining (dd-mm-yyyy):</label>
+              <DatePicker
+                className="form-control"
+                dateFormat="dd-MM-yyyy"
+                selected={dateOfJoining}
+                onChange={(date) => setDateOfJoining(date)}
+                placeholderText="Select Joining Date"
+                required
+                showYearDropdown
+                dropdownMode="select"
+                yearDropdownItemNumber={10}
+                scrollableYearDropdown
+                maxDate={new Date()}
+                openToDate={new Date()}
+                minDate={new Date("1995-01-01")}
+              />
+            </div>
+            <button className="btn btn-success mt-3" style={{width:"100%"}} type="submit">
+              Add Student
+            </button>
+          </form>
+        </div>
       </ModalTwo>
 
       <ModalThree isOpen={openModalThree} onClose={() => setOpenModalThree(false)} onCreate={createTeacher}>
-        <h3>Adding a Teacher</h3>
-        <form className="login-form mt-3" onSubmit={handleTeacherFormSubmit}>
-          <div className="input-group flex gap-1">
-            <label htmlFor="teacherName">Teacher Name</label>
-            <input
-              type="text"
-              id="teacherName"
-              name="teacherName"
-              value={credentials.teacherName}
-              onChange={handleInputChange}
-              required
-              placeholder="Write Teacher Name..."
-            />
-            <label htmlFor="teacherEmail">Teacher Email</label>
-            <input
-              type="email"
-              id="teacherEmail"
-              name="teacherEmail"
-              value={credentials.teacherEmail}
-              onChange={handleInputChange}
-              required
-              placeholder="Write Teacher Email..."
-            />
-            <label htmlFor="teacherPhone">Teacher Phone</label>
-            <input
-              type="tel"
-              id="teacherPhone"
-              name="teacherPhone"
-              value={credentials.teacherPhone}
-              onChange={handleInputChange}
-              required
-              placeholder="Write Teacher Phone..."
-            />
-          </div>
-          <button className="btn btn-success mt-2" type="submit">
-            Add Teacher
-          </button>
-        </form>
+        <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
+          <h3 className="modal-title">Adding a Teacher</h3>
+          <form onSubmit={handleTeacherFormSubmit}>
+            <div className="form-group">
+              <label htmlFor="teacherName">Teacher Name</label>
+              <input
+                type="text"
+                id="teacherName"
+                name="teacherName"
+                value={credentials.teacherName}
+                onChange={handleInputChange}
+                required
+                placeholder="Write Teacher Name..."
+              />
+              <label htmlFor="teacherEmail">Teacher Email</label>
+              <input
+                type="email"
+                id="teacherEmail"
+                name="teacherEmail"
+                value={credentials.teacherEmail}
+                onChange={handleInputChange}
+                required
+                placeholder="Write Teacher Email..."
+              />
+              <label htmlFor="teacherPhone">Teacher Phone</label>
+              <input
+                type="tel"
+                id="teacherPhone"
+                name="teacherPhone"
+                value={credentials.teacherPhone}
+                onChange={handleInputChange}
+                required
+                placeholder="Write Teacher Phone..."
+              />
+            </div>
+            <button className="btn btn-success mt-2" type="submit" style={{ width: "100%" }}>
+              Add Teacher
+            </button>
+          </form>
+        </div>
       </ModalThree>
 
       <Popup isOpen={openPopupModal} onClose={() => setOpenPopupModal(false)}>
@@ -1180,8 +1210,10 @@ export default function Admin() {
       </Popup>
 
       <ModalFour isOpen={openModalFour} onClose={() => setOpenModalFour(false)}>
-        <h3>Upload Excel to Add Students</h3>
-        <ExcelUpload />
+        <div className="selectTeacherBox">
+          <h3 className="modal-title">Upload Excel to Add Students</h3>
+          <ExcelUpload />
+        </div>
       </ModalFour>
 
     </>

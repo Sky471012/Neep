@@ -472,7 +472,7 @@ export default function Teacher() {
                                                                         {students[batchId]?.length > 0 ? (
                                                                             students[batchId].map((student) => (
                                                                                 <tr key={student._id}>
-                                                                                    <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
+                                                                                    <td style={{ width: "50%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
                                                                                     <td style={{ width: "50%" }}>
                                                                                         <button
                                                                                             className={`btn btn-success btn-sm me-2 ${markedStatus[`${student._id}_${batchId}_${selectedDate.toDateString()}`] === "present" ? "active" : ""}`}
@@ -530,7 +530,7 @@ export default function Teacher() {
 
                                                     <ModalFour isOpen={openModalFour[batchId]} onClose={() => closeTestModal(batchId)}>
                                                         <div className="test-form">
-                                                            <h2 className="modal-title mb-1">Add Test for {batch.batchName}</h2>
+                                                            <h3 className="modal-title mb-1">Add Test for {batch.batchName}</h3>
                                                             <form
                                                                 onSubmit={async (e) => {
                                                                     e.preventDefault();
@@ -577,7 +577,7 @@ export default function Teacher() {
                                                                         <tbody>
                                                                             {(students[batch.batchId] || []).map((student) => (
                                                                                 <tr key={student._id}>
-                                                                                    <td style={{ width: "57%" }}>{student.name}</td>
+                                                                                    <td style={{ width: "57%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
                                                                                     <td style={{ width: "43%" }}>
                                                                                         <input type="number" className="form-control" value={testFormData[student._id] || ""} onChange={(e) => setTestFormData((prev) => ({ ...prev, [student._id]: e.target.value }))} placeholder="Enter marks" />
                                                                                     </td>
