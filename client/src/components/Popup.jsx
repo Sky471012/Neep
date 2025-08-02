@@ -42,7 +42,10 @@ export default function Popup() {
                     &times;
                 </button>
                 <img src={`${import.meta.env.VITE_BACKEND_URL}${popup.imageUrl}`} alt="Popup" className="popup-img" />
-                <p className="popup-text"><strong>{popup.description}</strong></p>
+                <div className="popup-text">
+                    <p><strong>{popup.description}</strong></p>
+                    <a className="login-page-button pt-2 pb-2">Register Now</a>
+                </div>
             </div>
         </div>
     );

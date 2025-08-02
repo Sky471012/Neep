@@ -357,7 +357,6 @@ export default function Admin() {
         },
       })
       if (res.status === 200) {
-        alert("Popup updated successfully!")
         setOpenPopupModal(false)
       }
     } catch (error) {
