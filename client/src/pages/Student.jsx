@@ -617,7 +617,7 @@ export default function Student() {
                         const isPaid = !!record.paidDate;
 
                         return (
-                            <div className="batch-card h-100 p-3 mb-3" style={{ minWidth: "350px" }}>
+                            <div className="batch-card h-100 p-3 mb-3" style={{ minWidth: "300px" }}>
                                 <div className="batch-header ps-0 pt-0">
                                     <h5 className="batch-name">Installment {record.installmentNo}</h5>
                                 </div>

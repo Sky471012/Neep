@@ -35,7 +35,7 @@ export default function Footer() {
                         <i className="bi bi-telephone-fill"></i>
                         <span>+91 9891214643</span>
                     </a>
-                    <a href="mailto:pizzabhateja.com">
+                    <a href="mailto:neep.md@gmail.com">
                         <i className="bi bi-envelope-at-fill"></i>
                         <span>neep.md@gmail.com</span>
                     </a>
