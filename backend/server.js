@@ -14,6 +14,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api', require('./routes/popup'))
+app.use("/api/contactus", require("./routes/contactus"));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/student', require('./routes/student'));
 app.use('/api/teacher', require('./routes/teacher'));

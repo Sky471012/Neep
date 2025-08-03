@@ -160,7 +160,7 @@ export default function Navbar() {
       )}
 
       {/* Styles */}
-      <style jsx>{`
+      <style>{`
         /* Global reset to remove default margins and padding */
         * {
           margin: 0;

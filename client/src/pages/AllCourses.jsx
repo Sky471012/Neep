@@ -54,7 +54,7 @@ const AllCourses = () => {
 
   return (
     <>
-      <style jsx>{`
+      <style>{`
         :root {
           --bs-blue: #0d6efd;
           --bs-indigo: #6610f2;

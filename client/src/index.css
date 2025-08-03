@@ -313,3 +313,16 @@ td {
 .white-space-nowrap {
   white-space: nowrap;
 }
+
+.toastify-custom {
+  font-size: 1rem;
+  padding: 10px 15px;
+  border-radius: 10px;
+}
+.toastify-custom .Toastify__toast-body {
+  font-family: 'Inter', sans-serif;
+}
+
+.toastify-custom .Toastify__close-button {
+  color: #444;
+}

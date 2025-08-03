@@ -1,14 +1,41 @@
-import React from "react";
+import React, {useState} from "react";
 import Navbar from "../components/Navbar";
 import Whatsapp from "../components/Whatsapp";
 import Footer from "../components/Footer";
 import Call from "../components/Call";
 import Instagram from "../components/Instagram";
+import axios from "axios";
+import { toast } from 'react-toastify';
 
 export default function Contactus() {
-    return (
-        <>
-            <style jsx>{`
+
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    message: "",
+  });
+
+  const [status, setStatus] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/contactus`, formData);
+      toast.success("Message sent successfully!");
+      setFormData({ name: "", phone: "", email: "", message: "" });
+    } catch (err) {
+      toast.error("Something went wrong.");
+    }
+  };
+
+  return (
+    <>
+      <style>{`
         @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
 
         :root {
@@ -365,47 +392,47 @@ export default function Contactus() {
         }
       `}</style>
 
-            <Navbar />
+      <Navbar />
 
-            <div className="contact-container">
-                <div className="contact-box">
-                    <h3 className="contact-title">Reach Out to Us</h3>
-                    <span className="contact-subtitle">
-                        Contact us online and let our team assist you with admissions and
-                        more.
-                    </span>
+      <div className="contact-container">
+        <div className="contact-box">
+          <h3 className="contact-title">Reach Out to Us</h3>
+          <span className="contact-subtitle">
+            Contact us online and let our team assist you with admissions and
+            more.
+          </span>
 
-                    <div className="contact-form">
-                        <div className="input-row">
-                            <div className="form-group">
-                                <div className="form-label">Your Name</div>
-                                <input type="text" placeholder="Aakash Sharma" />
-                            </div>
-                            <div className="form-group">
-                                <div className="form-label">Your Phone</div>
-                                <input type="tel" placeholder="8929676776" />
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <div className="form-label">Your Email</div>
-                            <input type="email" placeholder="sharma.aakash@gmail.com" />
-                        </div>
-
-                        <div className="form-group">
-                            <div className="form-label">Your Message</div>
-                            <textarea placeholder="How can we help you?" rows="5"></textarea>
-                        </div>
-
-                        <div className="button">Send Message</div>
-                    </div>
-                </div>
+          <form className="contact-form" onSubmit={handleSubmit}>
+            <div className="input-row">
+              <div className="form-group">
+                <div className="form-label">Your Name</div>
+                <input type="text" placeholder="Aakash Sharma" name="name" required value={formData.name} onChange={handleChange} />
+              </div>
+              <div className="form-group">
+                <div className="form-label">Your Phone</div>
+                <input type="tel" placeholder="8929676776" name="phone" required value={formData.phone} onChange={handleChange}/>
+              </div>
             </div>
 
-            <Whatsapp />
-            <Call />
-            <Instagram />
-            <Footer />
-        </>
-    );
+            <div className="form-group">
+              <div className="form-label">Your Email</div>
+              <input type="email" placeholder="sharma.aakash1012@gmail.com" name="email" required value={formData.email} onChange={handleChange}/>
+            </div>
+
+            <div className="form-group">
+              <div className="form-label">Your Message</div>
+              <textarea placeholder="How can we help you?" rows="5" name="message" required value={formData.message} onChange={handleChange}></textarea>
+            </div>
+
+            <button type="submit" className="button">Send Message</button>
+          </form>
+        </div>
+      </div>
+
+      <Whatsapp />
+      <Call />
+      <Instagram />
+      <Footer />
+    </>
+  );
 }

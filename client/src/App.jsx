@@ -6,8 +6,8 @@ import Home from './pages/Home'
 import Preloader from './components/Preloader'
 import Login from './pages/Login';
 import AllCourses from './pages/AllCourses';
-// import LoginAdmin from './pages/LoginAdmin';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Contactus from './pages/Contactus';
 import Student from './pages/Student';
 import Teacher from './pages/Teacher';
@@ -63,7 +63,6 @@ function App() {
             <Route exact path='/' element={<Home />} />
             <Route exact path='/login' element={<Login />} />
             <Route exact path='/all-courses' element={<AllCourses />} />
-            {/* <Route exact path='/loginAdmin' element={<LoginAdmin/>} /> */}
             <Route exact path='/contactus' element={<Contactus />} />
             <Route exact path='/student' element={<Student />} />
             <Route exact path='/teacher' element={<Teacher />} />
@@ -73,6 +72,14 @@ function App() {
             <Route path="/teacher/:teacherId" element={<TeacherControls />} />
             <Route path="/student/:studentId" element={<StudentControls />} />
           </Routes>
+          <ToastContainer
+            position="bottom-center"
+            autoClose={1500}
+            hideProgressBar={true}
+            newestOnTop={true}
+            theme="light"
+            toastClassName="toastify-custom"
+          />
         </BrowserRouter>
       )}
     </>

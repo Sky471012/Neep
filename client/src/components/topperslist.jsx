@@ -74,7 +74,7 @@ const ToppersList = () => {
         ))}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .toppers-section {
           padding: 5rem 2rem;
           background-color: #f2f4f8;

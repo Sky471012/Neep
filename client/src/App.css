@@ -349,26 +349,28 @@ ul, li {
   text-decoration: none;
 }
 
-.contactus div{
+.contactus a{
   display: flex;
   gap: 5px;
   color: #a0a0a0;
   align-content: flex-end;
 }
 
-.contactus div span{
+.contactus a span{
   font-size: 1rem;
 }
 
-.contactus div:hover i{
+.contactus a:hover i{
   color: #ffffff !important;
 }
 
-.contactus div:hover span{
+.contactus a:hover span{
   color: #ffffff !important;
+  cursor: pointer!important;
+
 }
 
-.contactus div i{
+.contactus a i{
   font-size: 1.2rem!important;
   padding: 0;
   margin: 0;
@@ -427,7 +429,7 @@ ul, li {
   margin-bottom: 1.5rem;
 }
 
-.contactus div {
+.contactus a {
   display: flex;
   align-items: center;
   margin: 0.5rem 0;

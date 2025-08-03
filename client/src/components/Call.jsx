@@ -4,7 +4,7 @@ export default function Call() {
     return (<>
 
         <a
-            href="tel:+918929676776"
+            href="tel:+919313214643"
             target="_blank"
             rel="noopener noreferrer"
             className='make-a-call'
