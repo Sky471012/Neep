@@ -416,7 +416,7 @@ export default function Contactus() {
 
             <div className="form-group">
               <div className="form-label">Your Email</div>
-              <input type="email" placeholder="sharma.aakash1012@gmail.com" name="email" required value={formData.email} onChange={handleChange}/>
+              <input type="email" placeholder="sharma.aakash1012@gmail.com" name="email" value={formData.email} onChange={handleChange}/>
             </div>
 
             <div className="form-group">

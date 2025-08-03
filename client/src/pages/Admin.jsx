@@ -1064,7 +1064,7 @@ export default function Admin() {
                 required
               />
             </div>
-            <div  className="form-group">
+            <div className="form-group">
               <label>Phone:</label>
               <input
                 type="tel"
@@ -1076,10 +1076,10 @@ export default function Admin() {
                 required
               />
             </div>
-            <div  className="form-group">
+            <div className="form-group">
               <label>DOB (dd-mm-yyyy):</label>
               <DatePicker
-                className="form-control"
+                className="datePicker"
                 dateFormat="dd-MM-yyyy"
                 selected={dob}
                 onChange={(date) => setDob(date)}
@@ -1094,7 +1094,7 @@ export default function Admin() {
                 minDate={new Date("1995-01-01")}
               />
             </div>
-            <div  className="form-group">
+            <div className="form-group">
               <label>Address:</label>
               <input
                 type="text"
@@ -1106,7 +1106,7 @@ export default function Admin() {
                 required
               />
             </div>
-            <div  className="form-group">
+            <div className="form-group">
               <label>Class:</label>
               <select
                 className="form-select"
@@ -1126,7 +1126,7 @@ export default function Admin() {
             <div className="form-group">
               <label>Date of Joining (dd-mm-yyyy):</label>
               <DatePicker
-                className="form-control"
+                className="datePicker"
                 dateFormat="dd-MM-yyyy"
                 selected={dateOfJoining}
                 onChange={(date) => setDateOfJoining(date)}
@@ -1141,7 +1141,7 @@ export default function Admin() {
                 minDate={new Date("1995-01-01")}
               />
             </div>
-            <button className="btn btn-success mt-3" style={{width:"100%"}} type="submit">
+            <button className="btn btn-success mt-3" style={{ width: "100%" }} type="submit">
               Add Student
             </button>
           </form>
@@ -1192,20 +1192,80 @@ export default function Admin() {
       </ModalThree>
 
       <Popup isOpen={openPopupModal} onClose={() => setOpenPopupModal(false)}>
-        <h3>Updating Popup</h3>
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
-          <input type="file" onChange={(e) => setImage(e.target.files[0])} accept="image/*" required />
-          <br />
-          <textarea
-            rows={4}
-            placeholder="Enter popup description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-          <br />
-          <button type="submit">Upload</button>
-        </form>
+        <div
+          className="selectTeacherBox"
+          style={{ cursor: "move" }}
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.setData("text/plain", "drag");
+          }}
+        >
+          <h3 className="modal-title mb-2">Upload Popup</h3>
+          <p className="text-info text-center">(Upload image with 1:1 ratio)</p>
+          
+          <form onSubmit={handleSubmit} encType="multipart/form-data" className="mt-3">
+            <div
+              className={`border border-secondary border-3 rounded text-center p-4 mb-3`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.add("bg-light");
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove("bg-light");
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove("bg-light");
+                const droppedFile = e.dataTransfer.files[0];
+                if (droppedFile && droppedFile.type.startsWith("image")) {
+                  setImage(droppedFile);
+                } else {
+                  alert("Please drop a valid image file.");
+                }
+              }}
+              style={{ backgroundColor: "#eef7ffff" }}
+            >
+              <label htmlFor="popup-upload" style={{ cursor: "pointer" }}>
+                <i className="bi bi-upload fs-1 text-secondary"></i>
+                <p className="mb-1 text-secondary">Click or drag & drop image here</p>
+              </label>
+              <input
+                id="popup-upload"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
+                style={{ display: "none" }}
+              />
+              {image && (
+                <div className="mt-2 text-success flex justify-content-center align-items-center gap-2">
+                  <div style={{maxWidth:"250px"}}>{image.name}</div>
+                  <button
+                    type="button"
+                    className="btn btn-sm text-danger"
+                    onClick={() => setImage(null)}
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <input
+              type="text"
+              rows={4}
+              className="form-control mb-3"
+              placeholder="Enter popup title..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+
+            <button type="submit" className="btn btn-success w-100 mt-3">
+              Upload
+            </button>
+          </form>
+        </div>
       </Popup>
 
       <ModalFour isOpen={openModalFour} onClose={() => setOpenModalFour(false)}>

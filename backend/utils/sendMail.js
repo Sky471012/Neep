@@ -1,14 +1,14 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // or your mail service
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
 });
 
-module.exports = async function sendMail(to, subject, text) {
+async function sendMail(to, subject, text) {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
@@ -17,10 +17,9 @@ module.exports = async function sendMail(to, subject, text) {
   };
 
   await transporter.sendMail(mailOptions);
-};
+}
 
-module.exports = async function sendMailToAdmin(name, phone, email, message) {
-  
+async function sendMailToAdmin(name, phone, email, message) {
   const mailOptions = {
     from: `"NEEP Contact Form" <${process.env.EMAIL_USER}>`,
     to: process.env.EMAIL_TO_ADMIN,
@@ -35,4 +34,9 @@ module.exports = async function sendMailToAdmin(name, phone, email, message) {
   };
 
   await transporter.sendMail(mailOptions);
+}
+
+module.exports = {
+  sendMail,
+  sendMailToAdmin
 };

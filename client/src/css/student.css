@@ -298,12 +298,69 @@ body {
   padding: 0;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-color: #a35dff;
 }
 
 .batch-card:hover {
-  border-color: #3b82f6;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
+
+.batches-grid .batch-card:nth-child(3n + 1) {
+  border-color: #60a5fa;
+}
+
+.batches-grid .batch-card:nth-child(3n + 2) {
+  border-color: #34d399;
+}
+
+.batches-grid .batch-card:nth-child(3n + 3) {
+  border-color: #fbbf24;
+}
+
+.fee-flex .batch-card:nth-child(3n + 1) {
+  border-color: #60a5fa;
+}
+
+.fee-flex .batch-card:nth-child(3n + 2) {
+  border-color: #34d399;
+}
+
+.fee-flex .batch-card:nth-child(3n + 3) {
+  border-color: #fbbf24;
+}
+
+.data-grid .data-card:nth-child(5n + 1) {
+  border-color: #60c7fa;
+}
+
+.data-grid .data-card:nth-child(5n + 2) {
+  border-color: #34d399;
+}
+
+.data-grid .data-card:nth-child(5n + 3) {
+  border-color: #fbbf24;
+}
+
+.data-grid .data-card:nth-child(5n + 4) {
+  border-color: #d334c6;
+}
+
+.data-grid .data-card:nth-child(5n + 5) {
+  border-color: #a35dff;
+}
+
+.fee-grid .fee-card-a:nth-child(3n + 1) {
+  border-color: #60a5fa; /* Blue */
+}
+
+.fee-grid .fee-card-a:nth-child(3n + 2) {
+  border-color: #34d399; /* Green */
+}
+
+.fee-grid .fee-card-a:nth-child(3n + 3) {
+  border-color: #fbbf24; /* Yellow */
+}
+
 
 .batch-header {
   padding: 1rem;
@@ -553,19 +610,21 @@ body {
   padding: 1rem;
   text-align: left;
   font-weight: 600;
-  color: #374151;
+  color: #000000;
   border-bottom: 2px solid #e5e7eb;
+  background: #f3f4f6;
 }
 
 .table td {
   padding: 1rem;
   border-bottom: 1px solid #e5e7eb;
-  color: #6b7280;
+  color: #5b616c;
 }
 
 .table tbody tr:last-child td {
   border-bottom: none;
 }
+
 
 /* Time Slot Styles */
 .time-slot {

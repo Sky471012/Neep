@@ -16,10 +16,6 @@
   margin-bottom: 30px;
 }
 
-.batch-card {
-  padding: 20px;
-}
-
 .table {
   width: 70%;
 }
@@ -212,24 +208,26 @@ td {
 
 /* Input container */
 .react-time-picker__wrapper {
-  border-radius: 50px;
-  padding: 6px 10px;
+  border-radius: 10px;
+  padding: 6px;
   display: flex;
   align-items: center;
 }
 
 /* Hour, Minute inputs */
 .react-time-picker__inputGroup__input {
-  width: 50px;
-  padding: 3px 5px;
-  border: none;
-  text-align: center;
+  width: 3rem;
+  outline: none!important;
+  background: transparent!important;
+  box-shadow: none!important;
 }
 
 /* AM/PM Selector */
 .react-time-picker__inputGroup__amPm {
-  padding: 3px 6px;
-  border: none;
+  padding: 0px!important;
+  border: none!important;
+  margin: 0 !important;
+  color: black!important;
 }
 
 /* Remove focus ring */

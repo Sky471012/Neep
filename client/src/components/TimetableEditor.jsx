@@ -73,15 +73,15 @@ export default function TimetableEditor({ batch, timetable, onSave, initialDay =
     };
 
     return (
-        <div>
+        <div className="timetableEditorBox">
             <h3 className="modal-title">Timetable of {batch.name}</h3>
 
             {/* Day Buttons */}
-            <div className="flex justify-between mb-4">
+            <div style={{ display: "flex", fontSize: "1rem", width: "100%", justifyContent: "space-between", marginBottom: "20px", gap:"10px" }}>
                 {weekdays.map((day, idx) => (
-                    <button style={{borderRadius:"50%", width:"40px", height:"40px", margin:"10px"}}
+                    <button style={{ borderRadius: "50%", width: "40px", height: "40px" }}
                         key={day}
-                        className={`w-10 h-10 rounded-full border ${selectedDay === day ? "bg-blue-500 text-success" : "text-gray-800"
+                        className={`border ${selectedDay === day ? "border-success text-success" : "text-gray-800"
                             }`}
                         onClick={() => setSelectedDay(day)}
                     >
@@ -93,9 +93,8 @@ export default function TimetableEditor({ batch, timetable, onSave, initialDay =
             {/* Time Slot Input */}
             {selectedDay && (
                 <div className="mt-3">
-                    <h5>Add Time for {selectedDay}</h5>
-                    <div className="d-flex flex-wrap align-items-end gap-3 mb-3">
-                        <div className="d-flex flex-column">
+                    <div className="d-flex justify-content-between align-items-end w-100 mb-3">
+                        <div className="d-flex flex-column align-items-center">
                             <label className="form-label mb-1">Start Time</label>
                             <ReactTimePicker
                                 onChange={setStartTime}
@@ -106,12 +105,12 @@ export default function TimetableEditor({ batch, timetable, onSave, initialDay =
                             />
                         </div>
 
-                        <div className="d-flex flex-column">
+                        <div className="d-flex flex-column align-items-center">
                             <label className="form-label mb-1">End Time</label>
                             <ReactTimePicker
                                 onChange={setEndTime}
                                 value={endTime}
-                                disableClock={true}
+                                disableClock={false}
                                 clearIcon={null}
                                 className="time-picker"
                             />
@@ -119,28 +118,30 @@ export default function TimetableEditor({ batch, timetable, onSave, initialDay =
 
                         <div className="mt-2">
                             <button
-                                className="btn btn-success"
+                                className="btn btn-sm btn-outline-success py-1 mb-1"
                                 onClick={() => {
                                     if (startTime && endTime) addTimeSlot(startTime, endTime);
                                 }}
                             >
-                                Add Slot
+                                Add
                             </button>
                         </div>
                     </div>
 
                     {/* Existing Slots */}
-                    {(timeSlots[selectedDay] || []).map((slot, index) => (
-                        <div key={index} className="d-flex justify-content-between align-items-center border-bottom py-1">
-                            <span>{slot.startTime} - {slot.endTime}</span>
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => removeTimeSlot(index)}>Remove</button>
-                        </div>
-                    ))}
+                    <div style={{ height: "30vh", overflowY: "auto" }}>
+                        {(timeSlots[selectedDay] || []).map((slot, index) => (
+                            <div key={index} className="d-flex justify-content-between align-items-center border-bottom p-1">
+                                <span>{slot.startTime} - {slot.endTime}</span>
+                                <button className="btn btn-sm btn-outline-danger py-1" onClick={() => removeTimeSlot(index)}>Remove</button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 
             <div className="d-flex justify-content-end mt-4">
-                <button className="btn btn-secondary me-2" onClick={handleSave}>Save Timetable</button>
+                <button className="btn btn-primary w-100" onClick={handleSave}>Save Timetable</button>
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, matchPath } from "react-router-dom";
-import logo from "/logo_rectangle.jpg";
+import logo from "/logo_rectangle-1.png";
 
 export default function Navbar() {
   const authToken = localStorage.getItem("authToken");

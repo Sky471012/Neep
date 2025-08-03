@@ -58,7 +58,7 @@ select {
 .react-datepicker {
   border-radius: 10px!important;
   border: none!important;
-    filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.575));
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.575));
 }
 
 .react-datepicker__day--selected {

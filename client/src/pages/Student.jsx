@@ -566,34 +566,34 @@ export default function Student() {
             <div className="timetable-details">
                 <h3 className="modal-title">Timetable for {batchesRecords.find((b) => b.batchId === showModalThree)?.batchName}</h3>
                 {timetableRecords[showModalThree]?.length > 0 ? (
-                <div style={{maxHeight: "67vh", overflowY: "auto"}}>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Weekday</th>
-                                <th>Time Slots</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {[...timetableRecords[showModalThree]]
-                                .sort((a, b) => weekdayOrder[a.weekday] - weekdayOrder[b.weekday])
-                                .map((entry, index) => (
-                                    <tr key={index}>
-                                        <td>{entry.weekday}</td>
-                                        <td>
-                                            {entry.timetable.map((slot, idx) => (
-                                                <>
-                                                    <span key={idx} className="time-slot">
-                                                        {slot.startTime} - {slot.endTime}
-                                                    </span><br />
-                                                </>
-                                            ))}
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                        </div>
+                    <div style={{ maxHeight: "67vh", overflowY: "auto" }}>
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Weekday</th>
+                                    <th>Time Slots</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {[...timetableRecords[showModalThree]]
+                                    .sort((a, b) => weekdayOrder[a.weekday] - weekdayOrder[b.weekday])
+                                    .map((entry, index) => (
+                                        <tr key={index}>
+                                            <td>{entry.weekday}</td>
+                                            <td>
+                                                {entry.timetable.map((slot, idx) => (
+                                                    <>
+                                                        <span key={idx} className="time-slot">
+                                                            {slot.startTime} - {slot.endTime}
+                                                        </span><br />
+                                                    </>
+                                                ))}
+                                            </td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    </div>
                 ) : (
                     <p style={{ color: "#6b7280", textAlign: "center", padding: "2rem" }}>
                         No timetable found for this batch.
@@ -611,34 +611,32 @@ export default function Student() {
                     <span>Paid:<strong> ₹ {totalPaid}</strong></span>
                     <span>Balance:<strong> ₹ {balance}</strong></span>
                 </div>
-                <div className="flex"  style={{maxHeight: "55vh", overflowY: "auto"}}>
+                <div className="flex fee-flex" style={{ maxHeight: "55vh", overflowY: "auto" }}>
                     {Array.isArray(installments) && installments.map((record, index) => {
                         const status = record.paidDate ? "Paid" : "Due";
                         const isPaid = !!record.paidDate;
 
                         return (
-                            <div className="flex " key={index}>
-                                <div className="batch-card h-100 p-3 mb-3" style={{ minWidth: "350px" }}>
-                                    <div className="batch-header ps-0 pt-0">
-                                        <h5 className="batch-name">Installment {record.installmentNo}</h5>
-                                    </div>
-                                    <p className="mb-1">Amount: ₹ {record.amount || "--"}</p>
-                                    <p className="mb-1">Due Date: {formatDate(record.dueDate)}</p>
-                                    <p className="mb-1">Paid Date: {formatDate(record.paidDate) || "--"}</p>
-                                    <p className="mb-1">Method: {record.method || "--"}</p>
+                            <div className="batch-card h-100 p-3 mb-3" style={{ minWidth: "350px" }}>
+                                <div className="batch-header ps-0 pt-0">
+                                    <h5 className="batch-name">Installment {record.installmentNo}</h5>
+                                </div>
+                                <p className="mb-1">Amount: ₹ {record.amount || "--"}</p>
+                                <p className="mb-1">Due Date: {formatDate(record.dueDate)}</p>
+                                <p className="mb-1">Paid Date: {formatDate(record.paidDate) || "--"}</p>
+                                <p className="mb-1">Method: {record.method || "--"}</p>
 
-                                    <div className="d-flex mt-3 align-items-center justify-content-between">
-                                        <p className={`fw-bold m-0 ${isPaid ? "text-success" : "text-warning"}`}>
-                                            {status}
-                                        </p>
-                                        <button
-                                            className="btn btn-outline-primary btn-sm"
-                                            onClick={() => generatePDFReceipt(student, record)}
-                                            disabled={!record.paidDate}
-                                        >
-                                            Download
-                                        </button>
-                                    </div>
+                                <div className="d-flex mt-3 align-items-center justify-content-between">
+                                    <p className={`fw-bold m-0 ${isPaid ? "text-success" : "text-warning"}`}>
+                                        {status}
+                                    </p>
+                                    <button
+                                        className="btn btn-outline-primary btn-sm"
+                                        onClick={() => generatePDFReceipt(student, record)}
+                                        disabled={!record.paidDate}
+                                    >
+                                        Download
+                                    </button>
                                 </div>
                             </div>
                         );

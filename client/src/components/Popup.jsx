@@ -43,8 +43,15 @@ export default function Popup() {
                 </button>
                 <img src={`${import.meta.env.VITE_BACKEND_URL}${popup.imageUrl}`} alt="Popup" className="popup-img" />
                 <div className="popup-text">
-                    <p><strong>{popup.description}</strong></p>
-                    <a className="login-page-button pt-2 pb-2">Register Now</a>
+                    <p style={{ width: "90%", overflowWrap: "break-word" }}><strong>{popup.description}</strong></p>
+                    <a
+                        className="login-page-button pt-2 pb-2" style={{ fontWeight: "bolder" }} href="https://wa.me/919313214643"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <i className="bi bi-whatsapp me-1">
+                        </i>Enquire on WhatsApp
+                    </a>
                 </div>
             </div>
         </div>

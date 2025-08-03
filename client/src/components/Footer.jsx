@@ -8,7 +8,7 @@ export default function Footer() {
             <div className="footer-container">
 
                 <div className="social-box">
-                    <img src={logo} style={{ height: "80px", border: "1px solid white" }} className="logo" />
+                    <img src={logo} style={{ height: "80px", border: "2px solid white" }} className="logo" />
                     <div className="social-media">
                         <a href="https://www.facebook.com/share/1B4w5KzHeQ/" target="_blank" rel="noopener noreferrer">
                             <i className="bi bi-facebook"></i>
@@ -48,7 +48,7 @@ export default function Footer() {
                         rel="noopener noreferrer"
                     >
                         <p>
-                            RZ- 625/1C,  First Floor, Near Delhi Mart Departmental / Grocery Store In Kailash Puri Delhi,  Near Solanki Complex, Main Road Indra Park, Indra Park Palam-110045
+                            RZ- 625/1C,  First Floor, Near Raj Mandir Store And Above Raja Cycle, Indra Park, Palam Colony, New Delhi-110045.
                         </p>
                     </a>
                 </div>

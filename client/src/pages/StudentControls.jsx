@@ -884,7 +884,7 @@ export default function StudentControls() {
                                     <div className="detail-label">
                                         Class:
                                         <select
-                                            className="form-control d-inline-block ms-2"
+                                            className="form-control d-inline-block ms-2 detail-item-select"
                                             name="class"
                                             value={editForm.class}
                                             onChange={handleInputChange}

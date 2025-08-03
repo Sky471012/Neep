@@ -2,7 +2,7 @@ const Student = require("../models/Student");
 const AdminTeacher = require("../models/Admins_teachers");
 const OtpLog = require("../models/Otp");
 const jwt = require("jsonwebtoken");
-const sendMail = require("../utils/sendMail"); // Custom mailer util
+const {sendMail} = require("../utils/sendMail"); // Custom mailer util
 
 exports.loginStudent = async (req, res) => {
   const { phone, dob } = req.body;

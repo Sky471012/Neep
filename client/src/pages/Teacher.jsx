@@ -35,6 +35,7 @@ export default function Teacher() {
     const [activeStudentAttendance, setActiveStudentAttendance] = useState(null);
     const [batchSearch, setBatchSearch] = useState("");
     const [todaysClasses, setTodaysClasses] = useState([]);
+    const [selectedTest, setSelectedTest] = useState(null);
 
     const allMonths = [
         "April", "May", "June", "July", "August", "September",
@@ -472,7 +473,7 @@ export default function Teacher() {
                                                                         {students[batchId]?.length > 0 ? (
                                                                             students[batchId].map((student) => (
                                                                                 <tr key={student._id}>
-                                                                                    <td style={{ width: "50%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
+                                                                                    <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
                                                                                     <td style={{ width: "50%" }}>
                                                                                         <button
                                                                                             className={`btn btn-success btn-sm me-2 ${markedStatus[`${student._id}_${batchId}_${selectedDate.toDateString()}`] === "present" ? "active" : ""}`}
@@ -530,7 +531,7 @@ export default function Teacher() {
 
                                                     <ModalFour isOpen={openModalFour[batchId]} onClose={() => closeTestModal(batchId)}>
                                                         <div className="test-form">
-                                                            <h3 className="modal-title mb-1">Add Test for {batch.batchName}</h3>
+                                                            <h3 className="modal-title mb-1">Add Test in {batch.batchName}</h3>
                                                             <form
                                                                 onSubmit={async (e) => {
                                                                     e.preventDefault();
@@ -577,7 +578,7 @@ export default function Teacher() {
                                                                         <tbody>
                                                                             {(students[batch.batchId] || []).map((student) => (
                                                                                 <tr key={student._id}>
-                                                                                    <td style={{ width: "57%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
+                                                                                    <td style={{ width: "57%", textWrap: "wrap" }}>{student.name}</td>
                                                                                     <td style={{ width: "43%" }}>
                                                                                         <input type="number" className="form-control" value={testFormData[student._id] || ""} onChange={(e) => setTestFormData((prev) => ({ ...prev, [student._id]: e.target.value }))} placeholder="Enter marks" />
                                                                                     </td>
@@ -592,45 +593,61 @@ export default function Teacher() {
                                                     </ModalFour>
 
                                                     <ModalFive isOpen={showModalFiveFor === batchId} onClose={() => setShowModalFiveFor(null)}>
-                                                        {students[batchId] && tests[batchId] ? (
-                                                            tests[batchId].length === 0 ? (
-                                                                <div className="p-4 text-center text-gray-600">No tests found for this batch.</div>
-                                                            ) : (
-                                                                (() => {
-                                                                    const uniqueTests = Array.from(new Map(tests[batchId].map(test => [`${test.name}_${test.date}`, test])).values());
-                                                                    return (
-                                                                        <div className="overflow-x-auto">
-                                                                            <h3 className="modal-title">Showing All Tests for {batch.batchName}</h3>
-                                                                            <table className="table table-bordered w-full">
-                                                                                <thead>
-                                                                                    <tr>
-                                                                                        <th>Student Name</th>
-                                                                                        {uniqueTests.map((test) => (
-                                                                                            <th key={`${test.name}_${test.date}`}>{test.name} <br /> ({test.date})</th>
-                                                                                        ))}
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>
-                                                                                    {students[batchId].map((student) => (
-                                                                                        <tr key={student._id}>
-                                                                                            <td><b>{student.name}</b></td>
-                                                                                            {uniqueTests.map((test) => {
-                                                                                                const match = tests[batchId].find(t => t.name === test.name && t.date === test.date && t.studentId === student._id);
-                                                                                                return (
-                                                                                                    <td key={`${test.name}_${test.date}_${student._id}`}>{match ? `${match.marksScored}/${match.maxMarks}` : "-"}</td>
-                                                                                                );
-                                                                                            })}
-                                                                                        </tr>
+                                                        <div className="selectTeacherBox" style={{ minWidth: "350px" }}>
+                                                            {students[batchId] && tests[batchId] ? (
+                                                                tests[batchId].length === 0 ? (
+                                                                    <div className="p-4 text-center text-muted">No tests found for this batch.</div>
+                                                                ) : (
+                                                                    <div>
+                                                                        {!selectedTest ? (
+                                                                            <div>
+                                                                                <h5 className="mb-3">Tests for {batch.batchName}</h5>
+                                                                                <ul className="list-group">
+                                                                                    {Array.from(new Map(tests[batchId].map(test => [`${test.name}_${test.date}`, test])).values()).map((test, idx) => (
+                                                                                        <li key={idx} className="list-group-item d-flex justify-content-between align-items-center">
+                                                                                            <span>{test.name} <small className="text-muted">({test.date})</small></span>
+                                                                                            <button className="text-primary" style={{ border: "none", background: "transparent", fontSize: "13px" }} onClick={() => setSelectedTest(test)}>View<i className="bi bi-arrow-right ms-1"></i></button>
+                                                                                        </li>
                                                                                     ))}
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </div>
-                                                                    );
-                                                                })()
-                                                            )
-                                                        ) : (
-                                                            <div className="p-4 text-center">No records found</div>
-                                                        )}
+                                                                                </ul>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div style={{ height: "85vh", overflowY: "auto" }}>
+                                                                                <h3 className="modal-title" style={{ textAlign: "left" }}><button style={{ border: "none", background: "transparent" }} onClick={() => setSelectedTest(null)}><i className="fas fa-arrow-left"></i></button>{selectedTest.name}</h3>
+                                                                                <span style={{ textAlign: "left", marginBottom: "1rem" }}>Date :- {selectedTest.date} <br /> Maximum Marks :- {selectedTest.maxMarks}</span>
+                                                                                <table className="table table-bordered">
+                                                                                    <thead>
+                                                                                        <tr>
+                                                                                            <th>Student Name</th>
+                                                                                            <th>Marks</th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                        {students[batchId].map((student) => {
+                                                                                            const match = tests[batchId].find(
+                                                                                                (t) =>
+                                                                                                    t.name === selectedTest.name &&
+                                                                                                    t.date === selectedTest.date &&
+                                                                                                    t.studentId === student._id
+                                                                                            );
+
+                                                                                            return (
+                                                                                                <tr key={student._id}>
+                                                                                                    <td style={{ width: "75%", textWrap: "wrap" }}>{student.name}</td>
+                                                                                                    <td style={{ width: "25%", textWrap: "wrap" }}>{match ? match.marksScored : "--"}</td>
+                                                                                                </tr>
+                                                                                            );
+                                                                                        })}
+                                                                                    </tbody>
+                                                                                </table>
+                                                                                </div>
+                                                                        )}
+                                                                    </div>
+                                                                )
+                                                            ) : (
+                                                                <div className="p-4 text-center">No records found</div>
+                                                            )}
+                                                        </div>
                                                     </ModalFive>
 
                                                 </div>

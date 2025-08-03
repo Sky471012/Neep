@@ -1,4 +1,4 @@
-const sendMailToAdmin = require("../utils/sendMail");
+const {sendMailToAdmin} = require("../utils/sendMail");
 
 exports.handleContactForm = async (req, res, next) => {
   const { name, phone, email, message } = req.body;

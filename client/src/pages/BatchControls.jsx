@@ -658,18 +658,12 @@ export default function BatchControls() {
                   <div className="detail-label">
                     Class:
                     <select
-                      className="form-control d-inline-block ms-2"
+                      className="form-control d-inline-block ms-2 detail-item-select"
                       name="class"
                       value={editForm.class}
                       onChange={handleInputChange}
                       style={{
                         width: '73%',
-                        fontSize: 'inherit',
-                        fontWeight: 'inherit',
-                        background: 'transparent',
-                        padding: "0px 8px",
-                        boxShadow: "none",
-                        color: "inherit"
                       }}
                     >
                       <option value="">Select Class</option>
@@ -1096,7 +1090,7 @@ export default function BatchControls() {
             batch={batch}
             timetable={timetable}
             onSave={updateTimetable}
-            initialDay="Monday" // 👈 Add this line
+            initialDay="Monday"
           />
         </ModalFour>
 
@@ -1181,16 +1175,33 @@ export default function BatchControls() {
               <>
                 <input
                   className="form-control mb-2"
-                  placeholder="Name"
+                  placeholder="Student's Name..."
                   value={newStudentData.name}
                   onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
                 />
                 <input
                   className="form-control mb-2"
-                  placeholder="Phone"
+                  placeholder="Student's Phone..."
                   value={newStudentData.phone}
                   onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
                 />
+                <select
+                  className="form-select mb-2"
+                  value={newStudentData.class}
+                  onChange={(e) =>
+                    setNewStudentData({ ...newStudentData, class: e.target.value })
+                  }
+                >
+                  <option value="" disabled hidden>
+                    Select Class
+                  </option>
+                  {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map((cls) => (
+                    <option key={cls} value={cls}>
+                      {cls}
+                    </option>
+                  ))}
+                </select>
+                <div  className="form-group">
                 <DatePicker
                   selected={
                     newStudentData.dob
@@ -1205,7 +1216,7 @@ export default function BatchControls() {
                   }
                   dateFormat="dd-MM-yyyy"
                   className="datePicker"
-                  placeholderText="Date of Birth"
+                  placeholderText="Date of Birth..."
                   showYearDropdown
                   dropdownMode="select"
                   yearDropdownItemNumber={10}
@@ -1214,28 +1225,14 @@ export default function BatchControls() {
                   openToDate={new Date('2005-01-01')}
                   minDate={new Date("1995-01-01")}
                 />
+                </div>
                 <input
-                  className="form-control mb-2"
-                  placeholder="Address"
+                  className="form-select"
+                  placeholder="Student's Address..."
                   value={newStudentData.address}
                   onChange={(e) => setNewStudentData({ ...newStudentData, address: e.target.value })}
                 />
-                <select
-                  className="form-select mb-2"
-                  value={newStudentData.class}
-                  onChange={(e) =>
-                    setNewStudentData({ ...newStudentData, class: e.target.value })
-                  }
-                >
-                  <option value="" disabled hidden>
-                    Select Class
-                  </option>
-                  {["Kids", "English Spoken", "9", "10", "11", "12"].map((cls) => (
-                    <option key={cls} value={cls}>
-                      {cls}
-                    </option>
-                  ))}
-                </select>
+                <div  className="form-group">
                 <DatePicker
                   selected={
                     newStudentData.dateOfJoining
@@ -1250,7 +1247,7 @@ export default function BatchControls() {
                   }
                   dateFormat="dd-MM-yyyy"
                   className="datePicker"
-                  placeholderText="Date of Joining"
+                  placeholderText="Date of Joining..."
                   showYearDropdown
                   dropdownMode="select"
                   yearDropdownItemNumber={10}
@@ -1259,6 +1256,7 @@ export default function BatchControls() {
                   openToDate={new Date()}
                   minDate={new Date("1995-01-01")}
                 />
+                </div>
                 <button className="btn btn-primary" style={{ width: "100%" }} onClick={async () => {
                   try {
                     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudentByCreating/${batchId}`, {
@@ -1293,7 +1291,7 @@ export default function BatchControls() {
           }}
         >
           <div className="test-details">
-            <h3 className="modal-title">Tests for {activeStudent?.name}</h3>
+            <h3 className="modal-title">Tests Scores of {activeStudent?.name}</h3>
 
             {studentTests.length === 0 ? (
               <p>No test records found for this batch.</p>
@@ -1332,7 +1330,7 @@ export default function BatchControls() {
           onClose={() => closeTestModal(batch.batchId)}
         >
           <div className="test-form">
-            <h3 className="modal-title mb-1">Add Test for {batch.name}</h3>
+            <h3 className="modal-title mb-1">Add Test in {batch.name}</h3>
             <form
               onSubmit={async (e) => {
                 e.preventDefault();

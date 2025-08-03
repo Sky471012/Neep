@@ -104,7 +104,7 @@ const ExcelUpload = () => {
           />
           {file && (
             <div className="mt-2 text-success flex justify-content-center align-items-center gap-2">
-              <div>{file.name}</div>
+              <div style={{maxWidth:"250px"}}>{file.name}</div>
               <button
                 type="button"
                 className="btn btn-sm text-danger"

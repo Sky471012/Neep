@@ -266,20 +266,6 @@ body {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.batch-card {
-  background: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 0;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.batch-card:hover {
-  border-color: #3b82f6;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
 .batch-header {
   padding: 1rem;
 }
