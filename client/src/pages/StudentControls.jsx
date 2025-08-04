@@ -74,32 +74,49 @@ export default function StudentControls() {
 
 
     useEffect(() => {
-        const fetchData = async () => {
-            const res1 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getStudentDetails/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const res2 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentBatches/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const res3 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const res4 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const res5 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/installments/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+        const token = localStorage.getItem("authToken");
 
-            const [sData, bData, fData, abData, iData] = await Promise.all([res1.json(), res2.json(), res3.json(), res4.json(), res5.json()]);
-            setStudent(sData || {});
-            setBatches(bData.batches || []);
-            setFee(Array.isArray(fData.fee) ? fData.fee[0] : {});
-            setAllBatches(abData || {});
-            setInstallments(Array.isArray(iData) ? iData : iData.installments || []);
-        };
+        if (token && studentId) {
+            // Fetch student details
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getStudentDetails/${studentId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => setStudent(data || {}))
+                .catch(err => console.error("Student details fetch error:", err));
 
-        fetchData();
+            // Fetch student's batches
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentBatches/${studentId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => setBatches(data.batches || []))
+                .catch(err => console.error("Student batches fetch error:", err));
+
+            // Fetch fee info
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/${studentId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => setFee(Array.isArray(data.fee) ? data.fee[0] : {}))
+                .catch(err => console.error("Fee fetch error:", err));
+
+            // Fetch all batches
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => setAllBatches(data || {}))
+                .catch(err => console.error("All batches fetch error:", err));
+
+            // Fetch installments
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/installments/${studentId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => setInstallments(Array.isArray(data) ? data : data.installments || []))
+                .catch(err => console.error("Installments fetch error:", err));
+        }
     }, [studentId]);
 
     useEffect(() => {
@@ -1466,7 +1483,7 @@ export default function StudentControls() {
                                 />
                             </div>
 
-                            <button className="btn btn-primary mt-2" style={{width:"100%"}}onClick={handleAddFeeStructureSubmit}>
+                            <button className="btn btn-primary mt-2" style={{ width: "100%" }} onClick={handleAddFeeStructureSubmit}>
                                 Create Fee Structure
                             </button>
                         </div>
