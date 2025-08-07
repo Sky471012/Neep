@@ -94,38 +94,57 @@ export default function BatchControls() {
 
 
   useEffect(() => {
-    console.log(token);
+    const token = localStorage.getItem("authToken");
 
-    const fetchData = async () => {
-      const res1 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getBatchDetails/${batchId}`, {
+    if (token) {
+      // Get Batch Details
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getBatchDetails/${batchId}`, {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      const res2 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchStudents/${batchId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const res3 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const res4 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const res5 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchTimetable/${batchId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const res6 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      })
+        .then(res => res.json())
+        .then(data => setBatch(data || {}))
+        .catch(err => console.error("Batch fetch error:", err));
 
-      const [bData, sData, tData, tList, ttData, asData] = await Promise.all([res1.json(), res2.json(), res3.json(), res4.json(), res5.json(), res6.json()]);
-      setBatch(bData || {});
-      setStudents(sData.students || []);
-      setTeacher(tData.teacher[0] || null);
-      setTeachersList(tList || []);
-      setTimetable(ttData.timetable || []);
-      setAllStudents(asData || {});
-    };
+      // Get Batch Students
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchStudents/${batchId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => setStudents(data.students || []))
+        .catch(err => console.error("Batch students fetch error:", err));
 
-    fetchData();
+      // Get Assigned Teacher for Batch
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => setTeacher(data.teacher?.[0] || null))
+        .catch(err => console.error("Assigned teacher fetch error:", err));
+
+      // Get All Teachers List
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => setTeachersList(data || []))
+        .catch(err => console.error("Teachers list fetch error:", err));
+
+      // Get Timetable
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchTimetable/${batchId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => setTimetable(data.timetable || []))
+        .catch(err => console.error("Timetable fetch error:", err));
+
+      // Get All Students
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => setAllStudents(data || {}))
+        .catch(err => console.error("All students fetch error:", err));
+    }
   }, [batchId]);
 
   useEffect(() => {
@@ -1201,30 +1220,30 @@ export default function BatchControls() {
                     </option>
                   ))}
                 </select>
-                <div  className="form-group">
-                <DatePicker
-                  selected={
-                    newStudentData.dob
-                      ? parse(newStudentData.dob, "dd-MM-yyyy", new Date())
-                      : null
-                  }
-                  onChange={(date) =>
-                    setNewStudentData({
-                      ...newStudentData,
-                      dob: format(date, "dd-MM-yyyy"),
-                    })
-                  }
-                  dateFormat="dd-MM-yyyy"
-                  className="datePicker"
-                  placeholderText="Date of Birth..."
-                  showYearDropdown
-                  dropdownMode="select"
-                  yearDropdownItemNumber={10}
-                  scrollableYearDropdown
-                  maxDate={new Date()}
-                  openToDate={new Date('2005-01-01')}
-                  minDate={new Date("1995-01-01")}
-                />
+                <div className="form-group">
+                  <DatePicker
+                    selected={
+                      newStudentData.dob
+                        ? parse(newStudentData.dob, "dd-MM-yyyy", new Date())
+                        : null
+                    }
+                    onChange={(date) =>
+                      setNewStudentData({
+                        ...newStudentData,
+                        dob: format(date, "dd-MM-yyyy"),
+                      })
+                    }
+                    dateFormat="dd-MM-yyyy"
+                    className="datePicker"
+                    placeholderText="Date of Birth..."
+                    showYearDropdown
+                    dropdownMode="select"
+                    yearDropdownItemNumber={10}
+                    scrollableYearDropdown
+                    maxDate={new Date()}
+                    openToDate={new Date('2005-01-01')}
+                    minDate={new Date("1995-01-01")}
+                  />
                 </div>
                 <input
                   className="form-select"
@@ -1232,30 +1251,30 @@ export default function BatchControls() {
                   value={newStudentData.address}
                   onChange={(e) => setNewStudentData({ ...newStudentData, address: e.target.value })}
                 />
-                <div  className="form-group">
-                <DatePicker
-                  selected={
-                    newStudentData.dateOfJoining
-                      ? parse(newStudentData.dateOfJoining, "dd-MM-yyyy", new Date())
-                      : null
-                  }
-                  onChange={(date) =>
-                    setNewStudentData({
-                      ...newStudentData,
-                      dateOfJoining: format(date, "dd-MM-yyyy"),
-                    })
-                  }
-                  dateFormat="dd-MM-yyyy"
-                  className="datePicker"
-                  placeholderText="Date of Joining..."
-                  showYearDropdown
-                  dropdownMode="select"
-                  yearDropdownItemNumber={10}
-                  scrollableYearDropdown
-                  maxDate={new Date()}
-                  openToDate={new Date()}
-                  minDate={new Date("1995-01-01")}
-                />
+                <div className="form-group">
+                  <DatePicker
+                    selected={
+                      newStudentData.dateOfJoining
+                        ? parse(newStudentData.dateOfJoining, "dd-MM-yyyy", new Date())
+                        : null
+                    }
+                    onChange={(date) =>
+                      setNewStudentData({
+                        ...newStudentData,
+                        dateOfJoining: format(date, "dd-MM-yyyy"),
+                      })
+                    }
+                    dateFormat="dd-MM-yyyy"
+                    className="datePicker"
+                    placeholderText="Date of Joining..."
+                    showYearDropdown
+                    dropdownMode="select"
+                    yearDropdownItemNumber={10}
+                    scrollableYearDropdown
+                    maxDate={new Date()}
+                    openToDate={new Date()}
+                    minDate={new Date("1995-01-01")}
+                  />
                 </div>
                 <button className="btn btn-primary" style={{ width: "100%" }} onClick={async () => {
                   try {

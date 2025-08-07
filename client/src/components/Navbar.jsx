@@ -428,6 +428,9 @@ export default function Navbar() {
           .sidebar {
             width: 85%;
           }
+          .logo{
+            height:40px;
+          }
         }
       `}</style>
     </>

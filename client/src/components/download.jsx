@@ -830,6 +830,16 @@ export default function DownloadApp() {
           .app-box {
             gap: 15px;
           }
+          
+          .content {
+            border-bottom-right-radius: 13px;
+            border-bottom-left-radius: 13px;
+          }
+
+          .qr-box {
+            border-top-right-radius: 13px;
+            border-top-left-radius: 13px;
+          }
 
           .qr {
             height: 320px;
@@ -843,6 +853,7 @@ export default function DownloadApp() {
             width: 100%;
             margin: 15px auto;
             padding: 6px;
+
           }
         }
         /* Large screen adjustments */

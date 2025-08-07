@@ -22,20 +22,28 @@ export default function TeacherControls() {
 
 
     useEffect(() => {
-        const fetchData = async () => {
-            const res1 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getTeacherDetails/${teacherId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const res2 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherBatches/${teacherId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+        const storedTeacher = localStorage.getItem("user");
+        const token = localStorage.getItem("authToken");
 
-            const [tData, bData] = await Promise.all([res1.json(), res2.json()]);
-            setTeacher(tData || {});
-            setBatches(bData.batches || []);
-        };
+        if (storedTeacher && token) {
+            setTeacher(JSON.parse(storedTeacher));
 
-        fetchData();
+            // Fetch teacher details
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getTeacherDetails/${teacherId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => setTeacher(data || {}))
+                .catch(err => console.error("Teacher fetch error:", err));
+
+            // Fetch teacher batches
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherBatches/${teacherId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => setBatches(data.batches || []))
+                .catch(err => console.error("Batches fetch error:", err));
+        }
     }, [teacherId]);
 
     useEffect(() => {

@@ -5,73 +5,73 @@ const StudentsReviews = () => {
 
   const students = [
     {
-      name: "Arjun Mehta",
+      name: "Rishabh Jain",
       review:
-        "Faculty's teaching helped a lot. The practical approach and detailed explanations made complex concepts easy to understand. Highly recommended!",
-      image: "/logo.png",
+        "NEW ERA EDUCATION POINT offers exceptional math's classes in Palam. The experienced teachers provide clear explanations and helpful resources to ensure students understand complex math concepts. Highly recommended for anyone looking to improve their math skills.",
+      image: "/avatars/2.png",
       rating: "★★★★★",
     },
     {
-      name: "Kavya Sharma",
+      name: "Nainaa Roy",
       review:
-        "Notes provided were comprehensive and well-structured. The teaching methodology helped me achieve excellent results in my exams.",
-      image: "/logo.png",
+        "Excellent teaching and very supportive environment. Mohan Sir breaks down complex topics into simple steps. Perfect for school students and competitive exams alike.",
+      image: "/avatars/3.png",
       rating: "★★★★★",
     },
     {
-      name: "Rohit Agarwal",
+      name: "Gurudeep Nat",
       review:
-        "Practical examples and case studies made learning engaging. The faculty's industry experience added real value to the curriculum.",
-      image: "/logo.png",
+        "If you’re looking for quality maths tuition in Kailashpuri, this is the place. Mohan Sir gives personal attention to each student and uses real-life examples to make learning engaging. His passion for teaching shows in every class.",
+      image: "/avatars/1.png",
       rating: "★★★★★",
     },
     {
-      name: "Priyanka Singh",
+      name: "Kiran Pal",
       review:
-        "Doubts were cleared quickly and efficiently. The personalized attention and step-by-step problem-solving approach was exceptional.",
-      image: "/logo.png",
+        "Mr. mohan sir is very excellent teacher and i am very thankfully to him.  i am study in neep institute before 4 years and very supportive in my bad condition...best teacher in my life and they  best understand student and very best education point....❤❤",
+      image: "/avatars/12.png",
       rating: "★★★★★",
     },
     {
-      name: "Vikram Joshi",
+      name: "Parwati Chauhan",
       review:
-        "Excellent faculty with deep subject knowledge. The interactive sessions and regular assessments helped track my progress effectively.",
-      image: "/logo.png",
+        "Mohan sir is the sweetest teacher. He is an amazing teacher. He is very supportive. He clears each and every doubt of every student  . He never make you feels embarrassed about your grade instead he will help you to improve yourself. He focuses on building concept. Thank you mohan sir.",
+      image: "/avatars/4.png",
       rating: "★★★★★",
     },
     {
-      name: "Sneha Patel",
+      name: "Rachna",
       review:
-        "Great practical approach to learning. The real-world applications and hands-on practice sessions were incredibly beneficial.",
-      image: "/logo.png",
+        "The experienced faculty and personalized attention ensure excellent results. The study material provided is comprehensive and helped me secure top marks in my exams.",
+      image: "/avatars/6.png",
       rating: "★★★★★",
     },
     {
-      name: "Aditya Kumar",
+      name: "Meena Dhayani",
       review:
-        "Amazing support throughout the course! The faculty was always available for guidance and provided excellent study materials.",
-      image: "/logo.png",
+        "I am very lucky that I  found this institute, it's a very good point to improve your education. The teachers here are also very good, my experience here has been very good.💖💖😊😊 …",
+      image: "/avatars/9.png",
       rating: "★★★★★",
     },
     {
-      name: "Isha Verma",
+      name: "Samji Buchiya",
       review:
-        "Loved the innovative teaching methods! The blend of theory and practical knowledge prepared me well for competitive exams.",
-      image: "/logo.png",
+        "NEW ERA EDUCATION POINT is the best coaching centre in Kailash Puri. The experienced faculty and personalized attention ensure excellent results.",
+      image: "/avatars/5.png",
       rating: "★★★★★",
     },
     {
-      name: "Rajat Sen",
+      name: "Meenu Ojha",
       review:
-        "Clear and concise concept explanations. The systematic approach to covering the syllabus was very effective for my preparation.",
-      image: "/logo.png",
+        "Mohan Sir provide excellent guidance to help students excel in mathematics.this institute for anyone looking to improve their math skills.",
+      image: "/avatars/10.png",
       rating: "★★★★★",
     },
     {
-      name: "Divya Kaul",
+      name: "Rupesh Saini",
       review:
-        "Excellent teaching quality and methodology. The problem-solving techniques taught here are invaluable for competitive examinations.",
-      image: "/logo.png",
+        "This study center has helped me to improve my grades and build confidence in my abilities. I feel more prepared and motivated to succeed in my studies thanks to the resources and support available here.",
+      image: "/avatars/11.png",
       rating: "★★★★★",
     },
   ];
@@ -451,7 +451,6 @@ const StudentsReviews = () => {
         }
 
         .see-more-card:hover {
-          transform: translateY(-10px);
           box-shadow: 0 30px 60px rgba(13, 110, 253, 0.3);
           background: linear-gradient(
             135deg,
@@ -679,7 +678,7 @@ const StudentsReviews = () => {
               ))}
 
               {/* See More Reviews Card */}
-              <a href="" className="see-more-card">
+              <a href="https://www.google.com/maps/place/NEW+ERA+EDUCATION+POINT/@28.5952199,77.0952862,17z/data=!4m18!1m9!3m8!1s0x390d1b5bb76fcc85:0x1f90bc98be2bab0d!2sNEW+ERA+EDUCATION+POINT!8m2!3d28.5952199!4d77.0978611!9m1!1b1!16s%2Fg%2F11cmsgb6vj!3m7!1s0x390d1b5bb76fcc85:0x1f90bc98be2bab0d!8m2!3d28.5952199!4d77.0978611!9m1!1b1!16s%2Fg%2F11cmsgb6vj?entry=ttu&g_ep=EgoyMDI1MDgwMy4wIKXMDSoASAFQAw%3D%3D" className="see-more-card">
                 <div className="see-more-icon">
                   <span className="see-more-arrow">
                     <i className="bi bi-chevron-right"></i>

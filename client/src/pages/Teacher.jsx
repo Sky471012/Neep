@@ -57,7 +57,6 @@ export default function Teacher() {
     useEffect(() => {
         const storedTeacher = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
-        console.log(token);
 
         if (storedTeacher && token && storedTeacher !== "undefined") {
             try {
@@ -593,7 +592,7 @@ export default function Teacher() {
                                                     </ModalFour>
 
                                                     <ModalFive isOpen={showModalFiveFor === batchId} onClose={() => setShowModalFiveFor(null)}>
-                                                        <div className="selectTeacherBox" style={{ minWidth: "350px" }}>
+                                                        <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
                                                             {students[batchId] && tests[batchId] ? (
                                                                 tests[batchId].length === 0 ? (
                                                                     <div className="p-4 text-center text-muted">No tests found for this batch.</div>

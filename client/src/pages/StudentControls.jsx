@@ -15,7 +15,6 @@ export default function StudentControls() {
     const { studentId } = useParams();
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
-    console.log(token);
 
     const [student, setStudent] = useState({});
     const [batches, setBatches] = useState([]);

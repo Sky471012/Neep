@@ -393,6 +393,7 @@ body {
   transition: all 0.3s ease;
   text-decoration: none;
   justify-content: center;
+  overflow: hidden;
 }
 
 .action-button svg {
@@ -534,7 +535,7 @@ body {
 .addFeeBox {
   padding: 0;
   margin: 1rem;
-  min-width: 400px;
+  min-width: 300px;
 }
 
 .addToBatch-box input {

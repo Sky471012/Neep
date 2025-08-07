@@ -297,6 +297,7 @@ body {
   transition: all 0.3s ease;
   text-decoration: none;
   justify-content: center;
+  overflow: hidden;
 }
 
 .action-button-t svg {
@@ -404,7 +405,7 @@ body {
   border-radius: 12px;
   padding: 1rem;
   gap:0;
-  min-width: 400px;
+  min-width: 300px;
 }
 
 .test-form{
@@ -570,7 +571,7 @@ body {
 
   .student-list {
     padding: 1rem 0;
-    min-width: 340px;
+    min-width: 300px;
   }
 
   .attendance-form, .test-form{

@@ -10,46 +10,148 @@ const AllCourses = () => {
   const courses = [
     {
       id: 1,
-      title: "Economics Foundation",
-      batchName: "Parivartan Batch",
-      facultyName: "Dr. Rajesh Kumar",
-      duration: "6 Months",
+      title: "Foundation Mathematics for JEE",
+      batchName: "AADHARSHEELA",
+      facultyName: "Mr. Mohan Verma",
+      facultyExperience: "17+ Years",
       description:
-        "Complete foundation course covering micro and macro economics",
+        "Comprehensive foundation course for JEE aspirants focusing on conceptual clarity and problem-solving in Mathematics.",
     },
     {
       id: 2,
-      title: "Advanced Statistics",
-      batchName: "Excellence Batch",
-      facultyName: "Prof. Priya Sharma",
-      duration: "4 Months",
+      title: "Foundation Physics for JEE/NEET",
+      batchName: "AADHARSHEELA",
+      facultyName: "Mr. Digvijay",
+      facultyExperience: "11+ Years",
       description:
-        "Statistical analysis and data interpretation for competitive exams",
+        "Strong foundation in Physics concepts tailored for both JEE and NEET aspirants with conceptual and numerical approach.",
     },
     {
       id: 3,
-      title: "Business Studies",
-      batchName: "Success Batch",
-      facultyName: "Mr. Amit Singh",
-      duration: "5 Months",
-      description: "Comprehensive business studies with practical applications",
+      title: "Foundation Chemistry for JEE/NEET",
+      batchName: "AADHARSHEELA",
+      facultyName: "Mr. Pankaj",
+      facultyExperience: "15+ Years",
+      description:
+        "In-depth foundation course in Chemistry to prepare students for JEE and NEET with focus on theory and applications.",
     },
     {
       id: 4,
-      title: "Quantitative Aptitude",
-      batchName: "Master Batch",
-      facultyName: "Dr. Neha Gupta",
-      duration: "3 Months",
-      description: "Mathematical problem solving and quantitative techniques",
+      title: "Foundation Biology for NEET",
+      batchName: "AADHARSHEELA",
+      facultyName: "Mr. Riyaz and Mr. Vijay",
+      facultyExperience: "14+ Years & 8+ Years",
+      description:
+        "Biology foundation tailored for NEET aspirants, covering essential topics with dual faculty guidance.",
     },
     {
       id: 5,
-      title: "Research Methodology",
-      batchName: "Research Batch",
-      facultyName: "Prof. Suresh Patel",
-      duration: "8 Months",
-      description: "Advanced research methods and academic writing skills",
+      title: "CA Foundation (Special Mathematics and Statistics)",
+      batchName: "UDAN-FOR-CA",
+      facultyName: "Mr. Mohan Verma",
+      facultyExperience: "17+ Years",
+      description:
+        "Specialized preparation for CA Foundation Mathematics and Statistics with real-world examples and conceptual clarity.",
     },
+    {
+      id: 6,
+      title: "CA Foundation (Special Economics)",
+      batchName: "UDAN-FOR-CA",
+      facultyName: "Mr. Mohan Verma",
+      facultyExperience: "17+ Years",
+      description:
+        "Focused course on Economics for CA Foundation including both micro and macro economics with exam-oriented teaching.",
+    },
+    {
+      id: 7,
+      title: "CA Foundation (Special Accounts and Law)",
+      batchName: "UDAN-FOR-CA",
+      facultyName: "Mr. Anuj Rajput",
+      facultyExperience: "23+ Years",
+      description:
+        "Comprehensive Accounts and Law course for CA Foundation aspirants, with practical approach and case studies.",
+    },
+    {
+      id: 8,
+      title: "CUET Preparation",
+      batchName: "PAHAL",
+      facultyName: null,
+      facultyExperience: null,
+      description:
+        "Complete preparation course for CUET covering aptitude, domain subjects, and general test strategy.",
+    },
+    {
+      id: 9,
+      title: "Mathematics (11th and 12th)",
+      batchName: "Mathematics BY MOHAN SIR",
+      facultyName: "Mr. Mohan Verma",
+      facultyExperience: "17+ Years",
+      description:
+        "Detailed and structured Mathematics course for Classes 11 & 12 focusing on NCERT and competitive exam preparation.",
+    },
+    {
+      id: 10,
+      title: "Physics (11th and 12th)",
+      batchName: "PHYSICS BY DIGVIJAY SIR",
+      facultyName: "Mr. Digvijay",
+      facultyExperience: "11+ Years",
+      description:
+        "Concept-driven Physics course for Classes 11 & 12 with practical insights and problem-solving sessions.",
+    },
+    {
+      id: 11,
+      title: "Chemistry (11th and 12th)",
+      batchName: "CHEMISTRY BY PANKAJ SIR",
+      facultyName: "Dr. Pankaj",
+      facultyExperience: "15+ Years",
+      description:
+        "Balanced approach to Chemistry for Classes 11 & 12 including physical, organic, and inorganic sections.",
+    },
+    {
+      id: 12,
+      title: "Biology (11th and 12th)",
+      batchName: "BIOLOGY BY VIJAY SIR",
+      facultyName: "Mr. Vijay",
+      facultyExperience: "8+ Years",
+      description:
+        "Complete Biology course for Classes 11 & 12 with focus on NCERT and NEET preparation.",
+    },
+    {
+      id: 13,
+      title: "Economics (11th and 12th)",
+      batchName: "ECO. BY MOHAN SIR",
+      facultyName: "Mr. Mohan Verma",
+      facultyExperience: "17+ Years",
+      description:
+        "Detailed Economics course for senior secondary students covering both micro and macro concepts.",
+    },
+    {
+      id: 14,
+      title: "Accounts (11th and 12th)",
+      batchName: "ACC. BY ANUJ SIR",
+      facultyName: "Mr. Anuj Rajput",
+      facultyExperience: "23+ Years",
+      description:
+        "Advanced Accounts course for Classes 11 & 12 with deep conceptual learning and practical illustrations.",
+    },
+    {
+      id: 15,
+      title: "Business Studies (11th and 12th)",
+      batchName: "B.ST BY ANUJ SIR",
+      facultyName: "Mr. Anuj Rajput",
+      facultyExperience: "23+ Years",
+      description:
+        "Structured Business Studies course for senior secondary students with focus on case studies and concepts.",
+    },
+    {
+      id: 16,
+      title: "Humanities (11th and 12th)",
+      batchName: "ARTS BY SHUBHAM SIR",
+      facultyName: "Mr. Shubham Rawat",
+      facultyExperience: "8+ Years",
+      description:
+        "Complete Humanities package for Classes 11 & 12 covering political science, history, and sociology.",
+    }
   ];
 
   return (

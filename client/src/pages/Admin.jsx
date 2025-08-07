@@ -96,10 +96,19 @@ export default function Admin() {
     return diffInDays === 0 ? "Paid today" : `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`
   }
 
-  const sortInstallments = (data, order) => {
+  const sortInstallments = (data, order, key = "dueDate") => {
     return [...data].sort((a, b) =>
-      order === "asc" ? new Date(a.dueDate) - new Date(b.dueDate) : new Date(b.dueDate) - new Date(a.dueDate),
+      order === "asc"
+        ? new Date(a[key]) - new Date(b[key])
+        : new Date(b[key]) - new Date(a[key])
     )
+  }
+
+  const handleTabChange = (tab) => {
+    setActiveFeeTab(tab)
+    setSelectedUnpaidClass(null)
+    setSelectedUpcomingClass(null)
+    setSelectedPaidClass(null)
   }
 
   // Group classes by timing
@@ -116,8 +125,10 @@ export default function Admin() {
   }
 
   useEffect(() => {
-    const storedAdmin = localStorage.getItem("user")
-    const token = localStorage.getItem("authToken")
+    const storedAdmin = localStorage.getItem("user");
+    const token = localStorage.getItem("authToken");
+    console.log(token);
+
     if (storedAdmin && token && storedAdmin !== "undefined") {
       try {
         setAdmin(JSON.parse(storedAdmin))
@@ -726,7 +737,7 @@ export default function Admin() {
                               <button
                                 className="dropdown-item"
                                 onClick={() => {
-                                  const sorted = sortInstallments(unpaidInstallments, "asc")
+                                  const sorted = sortInstallments(unpaidInstallments, "asc", "dueDate")
                                   setUnpaidInstallments(sorted)
                                   setUnpaidSortOrder("asc")
                                 }}
@@ -738,7 +749,7 @@ export default function Admin() {
                               <button
                                 className="dropdown-item"
                                 onClick={() => {
-                                  const sorted = sortInstallments(unpaidInstallments, "desc")
+                                  const sorted = sortInstallments(unpaidInstallments, "desc", "dueDate")
                                   setUnpaidInstallments(sorted)
                                   setUnpaidSortOrder("desc")
                                 }}
@@ -817,9 +828,9 @@ export default function Admin() {
                               <button
                                 className="dropdown-item"
                                 onClick={() => {
-                                  const sorted = sortInstallments(upcomingInstallments, "asc")
+                                  const sorted = sortInstallments(upcomingInstallments, "desc", "dueDate")
                                   setUpcomingInstallments(sorted)
-                                  setUpcomingSortOrder("asc")
+                                  setUpcomingSortOrder("desc")
                                 }}
                               >
                                 Oldest First
@@ -829,9 +840,9 @@ export default function Admin() {
                               <button
                                 className="dropdown-item"
                                 onClick={() => {
-                                  const sorted = sortInstallments(upcomingInstallments, "desc")
+                                  const sorted = sortInstallments(upcomingInstallments, "asc", "dueDate")
                                   setUpcomingInstallments(sorted)
-                                  setUpcomingSortOrder("desc")
+                                  setUpcomingSortOrder("asc")
                                 }}
                               >
                                 Newest First
@@ -908,7 +919,7 @@ export default function Admin() {
                               <button
                                 className="dropdown-item"
                                 onClick={() => {
-                                  const sorted = sortInstallments(paidInstallments, "asc")
+                                  const sorted = sortInstallments(paidInstallments, "asc", "paidDate")
                                   setPaidInstallments(sorted)
                                   setPaidSortOrder("asc")
                                 }}
@@ -920,7 +931,7 @@ export default function Admin() {
                               <button
                                 className="dropdown-item"
                                 onClick={() => {
-                                  const sorted = sortInstallments(paidInstallments, "desc")
+                                  const sorted = sortInstallments(paidInstallments, "desc", "paidDate")
                                   setPaidInstallments(sorted)
                                   setPaidSortOrder("desc")
                                 }}
@@ -1202,7 +1213,7 @@ export default function Admin() {
         >
           <h3 className="modal-title mb-2">Upload Popup</h3>
           <p className="text-info text-center">(Upload image with 1:1 ratio)</p>
-          
+
           <form onSubmit={handleSubmit} encType="multipart/form-data" className="mt-3">
             <div
               className={`border border-secondary border-3 rounded text-center p-4 mb-3`}
@@ -1239,7 +1250,7 @@ export default function Admin() {
               />
               {image && (
                 <div className="mt-2 text-success flex justify-content-center align-items-center gap-2">
-                  <div style={{maxWidth:"250px"}}>{image.name}</div>
+                  <div style={{ maxWidth: "250px" }}>{image.name}</div>
                   <button
                     type="button"
                     className="btn btn-sm text-danger"

@@ -6,46 +6,49 @@ const OurCourses = () => {
   const courses = [
     {
       id: 1,
-      title: "Economics Foundation",
-      batchName: "Parivartan Batch",
-      facultyName: "Dr. Rajesh Kumar",
-      duration: "6 Months",
+      title: "Foundation Mathematics for JEE",
+      batchName: "AADHARSHEELA",
+      facultyName: "Mr. Mohan Verma",
+      facultyExperience: "17+ Years",
       description:
-        "Complete foundation course covering micro and macro economics",
+        "Comprehensive foundation course for JEE aspirants focusing on conceptual clarity and problem-solving in Mathematics.",
     },
     {
       id: 2,
-      title: "Advanced Statistics",
-      batchName: "Excellence Batch",
-      facultyName: "Prof. Priya Sharma",
-      duration: "4 Months",
+      title: "Foundation Physics for JEE/NEET",
+      batchName: "AADHARSHEELA",
+      facultyName: "Mr. Digvijay",
+      facultyExperience: "11+ Years",
       description:
-        "Statistical analysis and data interpretation for competitive exams",
+        "Strong foundation in Physics concepts tailored for both JEE and NEET aspirants with conceptual and numerical approach.",
     },
     {
       id: 3,
-      title: "Business Studies",
-      batchName: "Success Batch",
-      facultyName: "Mr. Amit Singh",
-      duration: "5 Months",
-      description: "Comprehensive business studies with practical applications",
+      title: "Foundation Chemistry for JEE/NEET",
+      batchName: "AADHARSHEELA",
+      facultyName: "Mr. Pankaj",
+      facultyExperience: "15+ Years",
+      description:
+        "In-depth foundation course in Chemistry to prepare students for JEE and NEET with focus on theory and applications.",
     },
     {
       id: 4,
-      title: "Quantitative Aptitude",
-      batchName: "Master Batch",
-      facultyName: "Dr. Neha Gupta",
-      duration: "3 Months",
-      description: "Mathematical problem solving and quantitative techniques",
+      title: "Foundation Biology for NEET",
+      batchName: "AADHARSHEELA",
+      facultyName: "Mr. Riyaz and Mr. Vijay",
+      facultyExperience: "14+ Years & 8+ Years",
+      description:
+        "Biology foundation tailored for NEET aspirants, covering essential topics with dual faculty guidance.",
     },
     {
       id: 5,
-      title: "Research Methodology",
-      batchName: "Research Batch",
-      facultyName: "Prof. Suresh Patel",
-      duration: "8 Months",
-      description: "Advanced research methods and academic writing skills",
-    },
+      title: "CA Foundation (Special Mathematics and Statistics)",
+      batchName: "UDAN-FOR-CA",
+      facultyName: "Mr. Mohan Verma",
+      facultyExperience: "17+ Years",
+      description:
+        "Specialized preparation for CA Foundation Mathematics and Statistics with real-world examples and conceptual clarity.",
+    }
   ];
 
   return (
@@ -586,9 +589,9 @@ const OurCourses = () => {
                     </span>
                   </div>
                   <div className="course-info-item">
-                    <span className="info-label">Duration:</span>
+                    <span className="info-label">Faculty Experience:</span>
                     <span className="info-value duration">
-                      {course.duration}
+                      {course.facultyExperience}
                     </span>
                   </div>
                 </div>

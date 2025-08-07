@@ -3,59 +3,59 @@ import React from "react";
 const toppers = [
   {
     id: 1,
-    name: "Priya Sharma",
-    subject: "Economics",
-    marks: "98.6%",
-    image: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?crop=faces&fit=crop&w=120&h=120",
+    name: "Nidhi",
+    subject: "Bussiness Studies",
+    marks: "100",
+    image: "/toppers/Nidhi.png",
   },
   {
     id: 2,
-    name: "Rahul Kumar",
-    subject: "Statistics",
-    marks: "97.8%",
-    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?crop=faces&fit=crop&w=120&h=120",
+    name: "Prince",
+    subject: "Chemistry",
+    marks: "100",
+    image: "/toppers/Prince.png",
   },
   {
     id: 3,
-    name: "Anita Singh",
-    subject: "Business Studies",
-    marks: "96.4%",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=faces&fit=crop&w=120&h=120",
+    name: "Nidhi",
+    subject: "Economics",
+    marks: "99",
+    image: "/toppers/Nidhi.png",
   },
   {
     id: 4,
     name: "Vikash Gupta",
     subject: "Mathematics",
-    marks: "99.2%",
-    image: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?crop=faces&fit=crop&w=120&h=120",
+    marks: "98",
+    image: "/toppers/Neha.png",
   },
   {
     id: 5,
     name: "Sneha Patel",
-    subject: "Economics",
-    marks: "95.8%",
-    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?crop=faces&fit=crop&w=120&h=120",
+    subject: "Biology",
+    marks: "98",
+    image: "/toppers/Amit.png",
   },
   {
     id: 6,
-    name: "Amit Verma",
+    name: "Nidhi",
     subject: "Accountancy",
-    marks: "97.2%",
-    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?crop=faces&fit=crop&w=120&h=120",
+    marks: "99",
+    image: "/toppers/Nidhi.png",
   },
   {
     id: 7,
-    name: "Pooja Jain",
-    subject: "Statistics",
-    marks: "94.6%",
-    image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?crop=faces&fit=crop&w=120&h=120",
+    name: "Ayush",
+    subject: "Physics",
+    marks: "95",
+    image: "/toppers/Ayush.png",
   },
   {
     id: 8,
-    name: "Ravi Sharma",
-    subject: "Business Studies",
-    marks: "96.8%",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=faces&fit=crop&w=120&h=120",
+    name: "Soniya",
+    subject: "Political Science",
+    marks: "95",
+    image: "/toppers/Soniya.png",
   },
 ];
 
@@ -120,6 +120,7 @@ const ToppersList = () => {
           border-radius: 50%;
           object-fit: cover;
           margin-bottom: 1rem;
+          border: 2px solid #0b3d91;
         }
 
         .topper-name {

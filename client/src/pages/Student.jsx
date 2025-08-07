@@ -64,8 +64,7 @@ export default function Student() {
     useEffect(() => {
         const storedStudent = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
-        console.log(token);
-
+        
         if (storedStudent && token) {
             setStudent(JSON.parse(storedStudent));
 
