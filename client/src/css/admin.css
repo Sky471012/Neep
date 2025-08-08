@@ -296,7 +296,7 @@ body {
 .data-grid {
   background-color: none;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.3rem;
   padding: 0;
   grid-auto-rows: 1fr;
@@ -414,7 +414,7 @@ body {
   border-radius: 5px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 2px solid #e5e7eb;
-  width: 55%;
+  width: 40%;
 }
 
 .fee-card h4 {
@@ -751,7 +751,7 @@ select {
   }
 
   .installments-list {
-    height: 45vh;
+    height: 50vh;
     overflow-y: scroll;
   }
 

@@ -1241,7 +1241,7 @@ export default function BatchControls() {
                     yearDropdownItemNumber={10}
                     scrollableYearDropdown
                     maxDate={new Date()}
-                    openToDate={new Date('2005-01-01')}
+                    openToDate={new Date('2007-01-01')}
                     minDate={new Date("1995-01-01")}
                   />
                 </div>

@@ -1422,16 +1422,17 @@ exports.editTeacher = async (req, res) => {
 // Fee tracking
 exports.getUnpaidInstallments = async (req, res) => {
   try {
-    const today = startOfToday();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     const installments = await Installment.find({
-      dueDate: { $lte: today },
+      dueDate: { $lte: new Date() },
       $or: [{ paidDate: { $exists: false } }, { paidDate: null }],
     })
       .populate("studentId")
       .populate("feeId");
 
-    res.status(200).json(installments);
+    res.json(installments);
   } catch (err) {
     console.error("Error fetching unpaid installments:", err.message);
     res.status(500).json({ message: "Server error", error: err.message });
@@ -1440,19 +1441,20 @@ exports.getUnpaidInstallments = async (req, res) => {
 
 exports.getUpcomingInstallments = async (req, res) => {
   try {
-    const tomorrow = startOfToday();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrow = new Date();
+    tomorrow.setHours(0, 0, 0, 0); // Set to start of today
+    tomorrow.setDate(tomorrow.getDate() + 1); // Move to tomorrow
 
-    const installments = await Installment.find({
+    const upcomingInstallments = await Installment.find({
       dueDate: { $gte: tomorrow },
       $or: [{ paidDate: { $exists: false } }, { paidDate: null }],
     })
       .populate("studentId")
       .populate("feeId");
 
-    res.status(200).json(installments);
+    res.json(upcomingInstallments);
   } catch (err) {
-    console.error("Error fetching upcoming installments:", err.message);
+    console.error("Error fetching upcoming installments:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
@@ -1465,18 +1467,18 @@ exports.getPaidInstallments = async (req, res) => {
       .populate("studentId")
       .populate("feeId");
 
+    // Sort by paidDate descending (most recently paid first)
     const sorted = installments.sort(
       (a, b) => new Date(b.paidDate) - new Date(a.paidDate)
     );
 
-    const totalPaidAmount = sorted.reduce((sum, inst) => sum + (inst.amount || 0), 0);
+    const totalPaidAmount = sorted.reduce((sum, inst) => {
+      return sum + (inst.amount || 0);
+    }, 0);
 
-    res.status(200).json({
-      installments: sorted,
-      totalPaidAmount,
-    });
+    res.json({ installments: sorted, totalPaidAmount });
   } catch (err) {
-    console.error("Error fetching paid installments:", err.message);
+    console.error("Error fetching paid installments:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };

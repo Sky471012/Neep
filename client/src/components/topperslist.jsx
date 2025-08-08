@@ -24,14 +24,14 @@ const toppers = [
   },
   {
     id: 4,
-    name: "Vikash Gupta",
+    name: "Neha",
     subject: "Mathematics",
     marks: "98",
     image: "/toppers/Neha.png",
   },
   {
     id: 5,
-    name: "Sneha Patel",
+    name: "Amit",
     subject: "Biology",
     marks: "98",
     image: "/toppers/Amit.png",

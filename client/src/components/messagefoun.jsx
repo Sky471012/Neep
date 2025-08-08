@@ -114,9 +114,11 @@ const MessageFromFounder = () => {
           color: #3b82f6;
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          margin-bottom: 1.5rem;
+          margin-bottom: 1.5rem!important;
+          margin-top: 1.5rem!important;
           backdrop-filter: blur(10px);
           transition: all 0.3s ease;
+          width: fit-content!important;
         }
 
         .section-badge:hover {
