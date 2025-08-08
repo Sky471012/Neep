@@ -430,18 +430,22 @@ export default function BatchControls() {
   };
 
   const addTest = async (studentId, batchId, name, maxMarks, marksScored, date) => {
-    if (!studentId || !batchId || !name || !maxMarks || marksScored === undefined || marksScored === null || isNaN(date.getTime())) {
-      return alert("All fields are required.");
+    if (!studentId || !batchId || !name || !maxMarks || !date || isNaN(date.getTime())) {
+      return alert("All fields are required (marks can be blank for absent).");
     }
 
+    const token = localStorage.getItem("authToken");
 
-    console.log("DEBUG:", { studentId, batchId, name, maxMarks, marksScored, date });
-
-    // ✅ Format date to dd-mm-yyyy
+    // dd-mm-yyyy
     const dd = ("0" + date.getDate()).slice(-2);
     const mm = ("0" + (date.getMonth() + 1)).slice(-2);
     const yyyy = date.getFullYear();
     const formattedDate = `${dd}-${mm}-${yyyy}`;
+
+    // derive absent
+    const isEmpty = marksScored === "" || marksScored === undefined || marksScored === null;
+    const absent = isEmpty;
+    const payloadMarks = absent ? null : Number(marksScored);
 
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/test/addEdit`, {
@@ -454,9 +458,10 @@ export default function BatchControls() {
           studentId,
           batchId,
           name,
-          maxMarks,
-          marksScored,
-          date: formattedDate // ✅ dd-mm-yyyy
+          maxMarks: Number(maxMarks),
+          marksScored: payloadMarks,  // null when absent
+          date: formattedDate,
+          absent
         }),
       });
 
@@ -468,15 +473,16 @@ export default function BatchControls() {
         [batchId]: [
           ...(prev[batchId] || []).filter(
             t => !(t.name === name && t.date === formattedDate && t.studentId === studentId)
-          ), // remove old entry if exists
+          ),
           {
-            _id: data.test._id, // if returned by backend
+            _id: data.test?._id,
             studentId,
             batchId,
             name,
-            maxMarks,
-            marksScored,
-            date: formattedDate
+            maxMarks: Number(maxMarks),
+            marksScored: absent ? 0 : Number(marksScored),
+            date: formattedDate,
+            absent
           }
         ]
       }));
@@ -1334,7 +1340,11 @@ export default function BatchControls() {
                       <tr key={test._id}>
                         <td>{test.name}</td>
                         <td>{test.date}</td>
-                        <td>{test.marksScored}</td>
+                        <td>
+                          {test.absent
+                            ? <span style={{ color: "red" }}>-AB-</span>
+                            : test.marksScored}
+                        </td>
                         <td>{test.maxMarks}</td>
                       </tr>
                     ))}
@@ -1359,18 +1369,18 @@ export default function BatchControls() {
                 }
 
                 const date = new Date(testDate);
+
+                // ✅ Call for every student; pass raw value (can be "", undefined, or "0")
                 for (const student of students || []) {
-                  const marksScored = testFormData[student._id];
-                  if (marksScored !== undefined && marksScored !== "") {
-                    await addTest(
-                      student._id,
-                      batch._id,
-                      testName,
-                      Number(maxMarks),
-                      Number(marksScored),
-                      date
-                    );
-                  }
+                  const ms = testFormData[student._id]; // raw input
+                  await addTest(
+                    student._id,
+                    batch._id,
+                    testName,
+                    Number(maxMarks),
+                    ms,          // leave as-is; addTest will infer absent if empty
+                    date
+                  );
                 }
 
                 setTestDetails({ testName: "", maxMarks: "", testDate: null });

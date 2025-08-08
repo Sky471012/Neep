@@ -156,9 +156,7 @@ export default function Teacher() {
     };
 
     const addTest = async (studentId, batchId, name, maxMarks, marksScored, date) => {
-        if (!studentId || !batchId || !name || !maxMarks || !marksScored || !date) {
-            return alert("All fields are required.");
-        }
+
         const token = localStorage.getItem("authToken");
         const dd = ("0" + date.getDate()).slice(-2);
         const mm = ("0" + (date.getMonth() + 1)).slice(-2);
@@ -538,10 +536,18 @@ export default function Teacher() {
                                                                     if (!testName || !maxMarks || !testDate) { return alert("Please fill test name, max marks, and date."); }
                                                                     const date = new Date(testDate);
                                                                     for (const student of students[batch.batchId] || []) {
-                                                                        const marksScored = testFormData[student._id];
-                                                                        if (marksScored !== undefined && marksScored !== "") {
-                                                                            await addTest(student._id, batch.batchId, testName, Number(maxMarks), Number(marksScored), date);
-                                                                        }
+                                                                        const ms = testFormData[student._id];
+                                                                        const absent = ms === undefined || ms === "";
+
+                                                                        await addTest(
+                                                                            student._id,
+                                                                            batch.batchId,
+                                                                            testName,
+                                                                            Number(maxMarks),
+                                                                            absent ? null : Number(ms), // << send null if absent
+                                                                            date,
+                                                                            absent
+                                                                        );
                                                                     }
                                                                     setTestDetails({ testName: "", maxMarks: "", testDate: null });
                                                                     setTestFormData({});
@@ -633,13 +639,19 @@ export default function Teacher() {
                                                                                             return (
                                                                                                 <tr key={student._id}>
                                                                                                     <td style={{ width: "75%", textWrap: "wrap" }}>{student.name}</td>
-                                                                                                    <td style={{ width: "25%", textWrap: "wrap" }}>{match ? match.marksScored : "--"}</td>
+                                                                                                    <td style={{ width: "25%", textWrap: "wrap" }}>
+                                                                                                        {match
+                                                                                                            ? match.absent
+                                                                                                                ? <span style={{ color: "red"}}>-AB-</span>
+                                                                                                                : match.marksScored
+                                                                                                            : "--"}
+                                                                                                    </td>
                                                                                                 </tr>
                                                                                             );
                                                                                         })}
                                                                                     </tbody>
                                                                                 </table>
-                                                                                </div>
+                                                                            </div>
                                                                         )}
                                                                     </div>
                                                                 )

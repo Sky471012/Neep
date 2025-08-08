@@ -64,7 +64,7 @@ export default function Student() {
     useEffect(() => {
         const storedStudent = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
-        
+
         if (storedStudent && token) {
             setStudent(JSON.parse(storedStudent));
 
@@ -528,7 +528,9 @@ export default function Student() {
             onClose={() => setShowModalTwo(null)}
         >
             <div className="test-details">
-                <h3 className="modal-title">All Tests of {batchesRecords.find((b) => b.batchId === showModalTwo)?.batchName}</h3>
+                <h3 className="modal-title">
+                    All Tests of {batchesRecords.find((b) => b.batchId === showModalTwo)?.batchName}
+                </h3>
                 <table className="table">
                     <thead>
                         <tr>
@@ -546,13 +548,19 @@ export default function Student() {
                                     <td>{test.name}</td>
                                     <td>{test.date}</td>
                                     <td>{test.maxMarks}</td>
-                                    <td>{test.marksScored}</td>
+                                    <td>
+                                        {test.absent
+                                            ? <span style={{ color: "red" }}>-AB-</span>
+                                            : test.marksScored}
+                                    </td>
                                 </tr>
                             ))}
                     </tbody>
                 </table>
                 {testRecords.filter(test => test.batchId === showModalTwo).length === 0 && (
-                    <p style={{ color: "#6b7280", textAlign: "center", padding: "2rem" }}>No tests found for this batch.</p>
+                    <p style={{ color: "#6b7280", textAlign: "center", padding: "2rem" }}>
+                        No tests found for this batch.
+                    </p>
                 )}
             </div>
         </ModalTwo>

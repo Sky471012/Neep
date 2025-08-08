@@ -18,11 +18,6 @@ import "../css/admin.css"
 export default function Admin() {
   const navigate = useNavigate()
   const [admin, setAdmin] = useState(null)
-  const [batchesRecords, setBatchesRecords] = useState([])
-  const [archivedBatchesRecords, setArchivedBatchesRecords] = useState([])
-  const [studentsRecords, setStudentsRecords] = useState([])
-  const [teachersRecords, setTeachersRecords] = useState([])
-  const [teacher, setTeacher] = useState({})
   const [openModalOne, setOpenModalOne] = useState(false)
   const [openModalTwo, setOpenModalTwo] = useState(false)
   const [openModalThree, setOpenModalThree] = useState(false)
@@ -33,7 +28,6 @@ export default function Admin() {
   const [dob, setDob] = useState("")
   const [dateOfJoining, setDateOfJoining] = useState(new Date())
   const [startDate, setStartDate] = useState(new Date())
-  const [showFeeTracking, setShowFeeTracking] = useState(false)
   const [todaysClasses, setTodaysClasses] = useState([])
   const [credentials, setCredentials] = useState({
     studentName: "",
@@ -44,79 +38,7 @@ export default function Admin() {
     teacherEmail: "",
     teacherPhone: "",
   })
-  const [showBatches, setShowBatches] = useState(false)
-  const [showArchiveBatches, setShowArchiveBatches] = useState(false)
-  const [showStudents, setShowStudents] = useState(false)
-  const [showTeachers, setShowTeachers] = useState(false)
-  const [batchSearchQuery, setBatchSearchQuery] = useState("")
-  const [archivedBatchSearchQuery, setArchivedBatchSearchQuery] = useState("")
-  const [studentSearchQuery, setStudentSearchQuery] = useState("")
-  const [teacherSearchQuery, setTeacherSearchQuery] = useState("")
-  const [activeFeeTab, setActiveFeeTab] = useState("unpaid");
-
-  // Fee tracking states (from QuickView)
-  const [unpaidInstallments, setUnpaidInstallments] = useState([])
-  const [totalUnpaidAmount, setTotalUnpaidAmount] = useState([])
-  const [upcomingInstallments, setUpcomingInstallments] = useState([])
-  const [totalUpcomingAmount, setTotalUpcomingAmount] = useState([])
-  const [paidInstallments, setPaidInstallments] = useState([])
-  const [totalPaidAmount, setTotalPaidAmount] = useState([])
-  const [selectedUnpaidClass, setSelectedUnpaidClass] = useState(null)
-  const [selectedUpcomingClass, setSelectedUpcomingClass] = useState(null)
-  const [selectedPaidClass, setSelectedPaidClass] = useState(null)
-  const [unpaidSortOrder, setUnpaidSortOrder] = useState("asc")
-  const [upcomingSortOrder, setUpcomingSortOrder] = useState("asc")
-  const [paidSortOrder, setPaidSortOrder] = useState("asc")
-
-  const getDaysOverdue = (dueDate) => {
-    const due = new Date(dueDate);
-    const now = new Date();
-    const diff = Math.floor((now - due) / (1000 * 60 * 60 * 24)); // days
-    return diff > 0 ? `${diff} days ago` : "Due today";
-  };
-
-  function getDaysLeft(dueDate) {
-    const now = new Date();
-    const due = new Date(dueDate);
-
-    // Clear time components for accurate day difference
-    now.setHours(0, 0, 0, 0);
-    due.setHours(0, 0, 0, 0);
-
-    const diffInMs = due - now;
-    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-
-    if (diffInDays === 0) return "Due today";
-    if (diffInDays === 1) return "Due tomorrow";
-    return `${diffInDays} days left`;
-  }
-
-  function getDaysSincePaid(paidDate) {
-    if (!paidDate) return "Not Paid";
-
-    const paid = new Date(paidDate);
-    const today = new Date();
-
-    // Clear time part
-    paid.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-
-    const diffInMs = today - paid;
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-    return diffInDays === 0
-      ? "Paid today"
-      : `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
-  }
-
-  const sortInstallments = (data, order) => {
-    return [...data].sort((a, b) =>
-      order === "asc"
-        ? new Date(a.dueDate) - new Date(b.dueDate)
-        : new Date(b.dueDate) - new Date(a.dueDate)
-    );
-  };
-
+  
   // Group classes by timing
   const groupClassesByTiming = (classes) => {
     const grouped = {}
@@ -153,108 +75,8 @@ export default function Admin() {
         .then((data) => setTodaysClasses(data.classes))
         .catch((err) => console.error("Error loading timetable", err))
 
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, { headers })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch all batches")
-          return res.json()
-        })
-        .then(setBatchesRecords)
-        .catch((err) => console.error("Batches fetch error:", err))
-
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/archivedBatches`, { headers })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch all archived batches")
-          return res.json()
-        })
-        .then(setArchivedBatchesRecords)
-        .catch((err) => console.error("Archived Batches fetch error:", err))
-
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, { headers })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch all students")
-          return res.json()
-        })
-        .then(setStudentsRecords)
-        .catch((err) => console.error("Students fetch error:", err))
-
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, { headers })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch all teachers")
-          return res.json()
-        })
-        .then(setTeachersRecords)
-        .catch((err) => console.error("Teachers fetch error:", err))
     }
   }, [])
-
-  const loadFeeTrackingData = () => {
-    const token = localStorage.getItem("authToken")
-    const headers = { Authorization: `Bearer ${token}` }
-
-    // Fetch unpaid installments
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/unpaid`, { headers })
-      .then((res) => res.json())
-      .then((data) => {
-        const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-        const totalOutstanding = sorted.reduce((sum, inst) => sum + (inst.amount || 0), 0)
-        setUnpaidInstallments(sorted)
-        setTotalUnpaidAmount(totalOutstanding)
-      })
-      .catch((err) => console.error("Error loading unpaid installments:", err))
-
-    // Fetch upcoming installments
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/upcoming`, { headers })
-      .then((res) => res.json())
-      .then((data) => {
-        const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-        const totalUpcoming = sorted.reduce((sum, inst) => sum + (inst.amount || 0), 0)
-        setUpcomingInstallments(sorted)
-        setTotalUpcomingAmount(totalUpcoming)
-      })
-      .catch((err) => console.error("Error loading upcoming installments:", err))
-
-    // Fetch paid installments
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/paid`, { headers })
-      .then((res) => res.json())
-      .then((data) => {
-        const sorted = data.installments.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
-        const totalPaid = sorted.reduce((sum, inst) => sum + (inst.amount || 0), 0)
-        setPaidInstallments(sorted)
-        setTotalPaidAmount(totalPaid)
-      })
-      .catch((err) => console.error("Error loading paid installments:", err))
-  }
-
-  const handleFeeTrackingClick = () => {
-    if (!showFeeTracking) {
-      loadFeeTrackingData()
-    }
-    setShowFeeTracking(!showFeeTracking)
-  }
-
-  useEffect(() => {
-    const token = localStorage.getItem("authToken")
-    const findTeacher = async (batchId) => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const teacherGet = await res.json()
-        if (!res.ok) throw new Error(teacherGet.message || "Error fetching teacher")
-        setTeacher((prev) => ({
-          ...prev,
-          [batchId]: teacherGet.teacher[0],
-        }))
-      } catch (err) {
-        console.error("Failed to fetch assigned teacher:", err)
-        alert("Error fetching assigned teacher.")
-      }
-    }
-
-    batchesRecords.forEach((batch) => {
-      findTeacher(batch._id)
-    })
-  }, [batchesRecords])
 
   const createBatch = async (batchName, batchClass, batchStartDate) => {
     if (!batchName.trim()) {
@@ -278,7 +100,6 @@ export default function Admin() {
         return
       }
       setOpenModalOne(false)
-      setBatchesRecords((prev) => [...prev, data])
       setCredentials({ batch: "" })
       setStartDate(new Date())
       navigate(`/batch/${data._id}`)
@@ -311,7 +132,6 @@ export default function Admin() {
         return
       }
       setOpenModalTwo(false)
-      setStudentsRecords((prev) => [...prev, data])
       setCredentials({
         studentName: "",
         studentPhone: "",
@@ -347,7 +167,6 @@ export default function Admin() {
         return
       }
       setOpenModalThree(false)
-      setTeachersRecords((prev) => [...prev, data])
       setCredentials((prev) => ({
         ...prev,
         teacherName: "",
@@ -420,10 +239,7 @@ export default function Admin() {
       <Navbar />
       <div className="admin-container">
         {/* Fixed Sidebar */}
-        <div className={`admin-sidebar ${showFeeTracking || showBatches || showArchiveBatches || showStudents || showTeachers
-          ? 'hide-on-mobile'
-          : ''
-          }`}>
+        <div className="admin-sidebar">
           {/* Today's Classes Section */}
           <h3 className="sidebar-title">
             <i className="fas fa-clock"></i> Today's Classes
@@ -481,7 +297,7 @@ export default function Admin() {
               <h3>All Teachers</h3>
             </Link>
 
-            <Link to='/fee-tracking' className="dashboard-card fee-tracking" onClick={handleFeeTrackingClick}>
+            <Link to='/fee-tracking' className="dashboard-card fee-tracking">
               <div className="card-icon">
                 <i className="fas fa-money-bill-wave"></i>
               </div>

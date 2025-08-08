@@ -157,25 +157,30 @@ exports.markAttendance = async (req, res) => {
 };
 
 exports.addEditTest = async (req, res) => {
-  const { studentId, batchId, name, maxMarks, marksScored, date } = req.body;
+  const { studentId, batchId, name, maxMarks, marksScored, date, absent: absentFromClient } = req.body;
 
   try {
+    // infer absent if client didn't send a boolean
+    const inferredAbsent = marksScored === null || marksScored === undefined || marksScored === "";
+    const absent = typeof absentFromClient === "boolean" ? absentFromClient : inferredAbsent;
+
+    const safeMarks = absent ? 0 : Number(marksScored);
+    if (!absent && (Number.isNaN(safeMarks) || safeMarks < 0)) {
+      return res.status(400).json({ error: "Invalid marksScored" });
+    }
+
     const updatedTest = await Test.findOneAndUpdate(
-      {
-        studentId,
-        batchId,
-        name,
-        date, // match these four fields for uniqueness
-      },
+      { studentId, batchId, name, date }, // uniqueness
       {
         $set: {
-          maxMarks,
-          marksScored,
+          maxMarks: Number(maxMarks),
+          marksScored: safeMarks,
+          absent
         },
       },
       {
-        new: true, // return the updated document
-        upsert: true, // create if not found
+        new: true,
+        upsert: true,
         setDefaultsOnInsert: true,
       }
     );

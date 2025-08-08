@@ -28,6 +28,10 @@ const testSchema = new Schema({
     type: String,
     required: true,
   },
+  absent: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = model("Test", testSchema);
