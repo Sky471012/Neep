@@ -14,7 +14,6 @@ export default function AllArchivedBatches() {
 
         const storedAdmin = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
-        console.log(token);
 
         if (storedAdmin && token && storedAdmin !== "undefined") {
             try {

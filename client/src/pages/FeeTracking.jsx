@@ -17,7 +17,7 @@ export default function FeeTracking() {
     const [selectedUnpaidClass, setSelectedUnpaidClass] = useState(null)
     const [selectedUpcomingClass, setSelectedUpcomingClass] = useState(null)
     const [selectedPaidClass, setSelectedPaidClass] = useState(null)
-    const [unpaidSortOrder, setUnpaidSortOrder] = useState("asc")
+    const [unpaidSortOrder, setUnpaidSortOrder] = useState("desc")
     const [upcomingSortOrder, setUpcomingSortOrder] = useState("asc")
     const [paidSortOrder, setPaidSortOrder] = useState("asc")
     const [activeFeeTab, setActiveFeeTab] = useState("unpaid");

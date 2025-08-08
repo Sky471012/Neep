@@ -963,8 +963,8 @@ export default function BatchControls() {
                     const key = `${student._id}_${selectedDate.toDateString()}`;
                     return (
                       <tr key={student._id}>
-                        <td style={{ width: "50%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
-                        <td style={{ width: "50%" }}>
+                        <td style={{ width: "40%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
+                        <td style={{ width: "60%" }}>
                           <button
                             className={`btn btn-success btn-sm me-2 ${markedStatus[key] === "present" ? "active" : ""
                               }`}

@@ -152,7 +152,7 @@ const MessageFromFounder = () => {
           content: '';
           position: absolute;
           bottom: -8px;
-          left: 0;
+          left: 40%;
           width: 80px;
           height: 3px;
           background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);

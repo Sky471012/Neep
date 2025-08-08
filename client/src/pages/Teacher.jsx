@@ -472,8 +472,8 @@ export default function Teacher() {
                                                                         {students[batchId]?.length > 0 ? (
                                                                             students[batchId].map((student) => (
                                                                                 <tr key={student._id}>
-                                                                                    <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
-                                                                                    <td style={{ width: "50%" }}>
+                                                                                    <td style={{ width: "40%", textWrap: "wrap" }}>{student.name}</td>
+                                                                                    <td style={{ width: "60%" }}>
                                                                                         <button
                                                                                             className={`btn btn-success btn-sm me-2 ${markedStatus[`${student._id}_${batchId}_${selectedDate.toDateString()}`] === "present" ? "active" : ""}`}
                                                                                             onClick={() => markAttendance(student._id, batchId, "present", selectedDate)}

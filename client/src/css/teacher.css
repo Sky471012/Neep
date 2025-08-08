@@ -191,7 +191,7 @@ body {
 
 .schedule-card .table th,
 .schedule-card .table td {
-  padding: 1rem;
+  padding: 0.5rem;
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
 }

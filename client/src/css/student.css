@@ -450,7 +450,7 @@ body {
 /* Calendar Styles */
 .carousel {
   border-radius: 12px;
-  margin: 1.5rem;
+  margin: 1rem;
 }
 
 .carousel-inner {
@@ -608,7 +608,7 @@ body {
 }
 
 .table th {
-  padding: 1rem;
+  padding: 0.5rem;
   text-align: left;
   font-weight: 600;
   color: #000000;
@@ -617,7 +617,7 @@ body {
 }
 
 .table td {
-  padding: 1rem;
+  padding: 0.5rem;
   border-bottom: 1px solid #e5e7eb;
   color: #5b616c;
 }
