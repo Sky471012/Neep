@@ -50,7 +50,7 @@ exports.sendOtp = async (req, res) => {
       expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
     });
 
-    await sendMail(email, "Your OTP", `Your OTP is: ${otp}`);
+    await sendMail(email, "New Era Education Point (NEEP) – Your One-Time Password (OTP)", `Your OTP is: ${otp}`);
     res.json({ success: true, message: "OTP sent to email" });
 
   } catch (err) {

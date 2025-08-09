@@ -1,11 +1,11 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 async function sendMail(to, subject, text) {
@@ -13,7 +13,16 @@ async function sendMail(to, subject, text) {
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text
+    text: `Dear User,
+
+Your One-Time Password (OTP) is: ${otp}
+
+This OTP will expire in 60 minutes. Please use it to complete your verification process.
+
+If you did not request this code, please ignore this email.
+
+Best regards,
+${process.env.APP_NAME || "New Era Education Point (NEEP)"}`,
   };
 
   await transporter.sendMail(mailOptions);
@@ -38,5 +47,5 @@ async function sendMailToAdmin(name, phone, email, message) {
 
 module.exports = {
   sendMail,
-  sendMailToAdmin
+  sendMailToAdmin,
 };
