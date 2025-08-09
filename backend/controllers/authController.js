@@ -2,7 +2,7 @@ const Student = require("../models/Student");
 const AdminTeacher = require("../models/Admins_teachers");
 const OtpLog = require("../models/Otp");
 const jwt = require("jsonwebtoken");
-const {sendMail} = require("../utils/sendMail"); // Custom mailer util
+const { sendMail } = require("../utils/sendMail"); // Custom mailer util
 
 exports.loginStudent = async (req, res) => {
   const { phone, dob } = req.body;
@@ -28,7 +28,7 @@ exports.loginStudent = async (req, res) => {
         address: student.address,
         class: student.class,
         fee: student.fee,
-        dateOfJoining: student.dateOfJoining
+        dateOfJoining: student.dateOfJoining,
       },
     });
   } catch (err) {
@@ -47,13 +47,27 @@ exports.sendOtp = async (req, res) => {
     await OtpLog.create({
       email,
       otp,
-      expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
     });
 
-    await sendMail(email, "New Era Education Point (NEEP) – Your One-Time Password (OTP)", `Your OTP is: ${otp}`);
-    res.json({ success: true, message: "OTP sent to email" });
+    await sendMail(
+      email,
+      "New Era Education Point (NEEP) – Your One-Time Password (OTP)",
+      `Dear User,
 
+Your One-Time Password (OTP) is: ${otp}
+
+This OTP will expire in 60 minutes. Please use it to complete your verification process.
+
+If you did not request this code, please ignore this email.
+
+Best regards,
+New Era Education Point (NEEP)`
+    );
+    
+    res.json({ success: true, message: "OTP sent to email" });
   } catch (err) {
+    console.error("Email sending failed:", err); // Full error
     res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -65,16 +79,19 @@ exports.verifyOtp = async (req, res) => {
     const log = await OtpLog.findOne({
       email,
       otp,
-      expiresAt: { $gt: new Date() }
+      expiresAt: { $gt: new Date() },
     });
 
-    if (!log) return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+    if (!log)
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired OTP" });
 
     const user = await AdminTeacher.findOne({ email });
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET
     );
 
     await OtpLog.deleteOne({ _id: log._id }); // Auto delete OTP after use
@@ -86,10 +103,9 @@ exports.verifyOtp = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
-        role: user.role
+        role: user.role,
       },
     });
-
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

@@ -13,16 +13,7 @@ async function sendMail(to, subject, text) {
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text: `Dear User,
-
-Your One-Time Password (OTP) is: ${otp}
-
-This OTP will expire in 60 minutes. Please use it to complete your verification process.
-
-If you did not request this code, please ignore this email.
-
-Best regards,
-${process.env.APP_NAME || "New Era Education Point (NEEP)"}`,
+    text,
   };
 
   await transporter.sendMail(mailOptions);
