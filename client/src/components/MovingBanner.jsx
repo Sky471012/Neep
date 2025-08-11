@@ -345,8 +345,8 @@ const BannerSection = () => {
           }
 
           .btn{
-            padding: 10px 20px;
-            font-size: 0.7rem;
+            padding: 10px 15px;
+            font-size: 0.85rem;
           }
 
           .banner-buttons {

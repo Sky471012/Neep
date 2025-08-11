@@ -11,6 +11,7 @@ import Whatsapp from '../components/Whatsapp'
 import Instagram from '../components/Instagram'
 import DownloadApp from '../components/download.jsx'
 import StudentsReviews from '../components/studentsreview.jsx'
+import Regarding from '../components/Regarding.jsx'
 
 export default function Home() {
   return (<>
@@ -21,6 +22,7 @@ export default function Home() {
     <MessageFromFounder />
     <ToppersList/>
     <StudentsReviews />
+    <Regarding />
     <DownloadApp />
     <Call />
     <Whatsapp />
