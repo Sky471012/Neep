@@ -2,39 +2,42 @@
 import { useState, useEffect } from "react"
 
 const BannerSection = () => {
-  const [currentSlide, setCurrentSlide] = useState(0)
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const banners = [
     {
       id: 1,
-      title: "Parivartan Batch",
-      subtitle: "Economics • Micro Economics • Statistics",
-      description:
-        "Transform your understanding of economics with our comprehensive Parivartan batch. Expert faculty, proven methodology, and personalized attention for your success.",
-      backgroundColor: "linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)",
+      imageDesktop: "/slide-lg-1.jpg", // 1920x600
+      imageMobile: "/slide-1.jpg", // 1080x1080
       primaryButton: "Enroll Now",
-      secondaryButton: "Learn More",
     },
     {
       id: 2,
-      title: "Advanced Economics",
-      subtitle: "Macro Economics • Econometrics • Research Methods",
-      description:
-        "Master advanced economic concepts with our specialized courses designed for competitive exams and higher studies. Join our success story today.",
-      backgroundColor: "linear-gradient(135deg, #198754 0%, #20c997 100%)",
+      imageDesktop: "/slide-lg-2.jpg",
+      imageMobile: "/slide-2.jpg",
       primaryButton: "Join Batch",
-      secondaryButton: "View Syllabus",
     },
     {
       id: 3,
-      title: "Statistics Mastery",
-      subtitle: "Applied Statistics • Data Analysis • Research",
-      description:
-        "Excel in statistical analysis and data interpretation with hands-on learning and real-world applications. Build your analytical skills with us.",
-      backgroundColor: "linear-gradient(135deg, #6f42c1 0%, #d63384 100%)",
-      primaryButton: "Start Learning",
-      secondaryButton: "Free Demo",
+      imageDesktop: "/slide-lg-3.jpg",
+      imageMobile: "/slide-3.jpg",
+      primaryButton: "Free Demo"
     },
+    {
+      id: 4,
+      imageDesktop: "/slide-lg-4.jpg",
+      imageMobile: "/slide-4.jpg",
+      primaryButton: "Learn More"
+    }
   ]
 
   useEffect(() => {
@@ -56,6 +59,8 @@ const BannerSection = () => {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length)
   }
+
+  const currentBanner = banners[currentSlide];
 
   return (
     <div>
@@ -113,37 +118,29 @@ const BannerSection = () => {
         .banner-section {
           position: relative;
           width: 100%;
-          min-height: 500px;
           overflow: hidden;
           background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-          margin: 0; /* Remove any margin */
-          padding: 0; /* Remove any padding */
-          display: block; /* Ensure proper display */
+          margin: 0;
+          padding: 0;
+          display: block;
         }
 
         .banner-container {
           display: flex;
-          transition: transform 0.5s ease-in-out;
+          transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           height: 100%;
-          width: 300%;
+          width: ${banners.length * 100}%;
           margin: 0;
           padding: 0;
+          transform: translateX(-${currentSlide * (100 / banners.length)}%);
         }
 
         .banner-slide {
-          min-width: 33.333%;
-          width: 33.333%;
-          position: relative;
+          min-width: ${100 / banners.length}%;
           display: flex;
-          align-items: center;
           justify-content: center;
-          padding: 60px 20px;
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-          min-height: 500px;
-          flex-shrink: 0;
-          margin: 0;
+          align-items: center;
+          position: relative;
         }
 
         .banner-slide::before {
@@ -194,8 +191,23 @@ const BannerSection = () => {
         .banner-buttons {
           display: flex;
           gap: 1rem;
-          justify-content: center;
-          flex-wrap: wrap;
+          z-index: 2;
+          position: absolute;
+          bottom: 10px;
+          left: 800px;
+        }
+
+        .banner-slide::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.3);
+          z-index: 1;
+        }
+
+        .banner-buttons a {
+          position: relative;
+          z-index: 2;
         }
 
         .btn {
@@ -209,6 +221,7 @@ const BannerSection = () => {
           transition: all 0.3s ease;
           cursor: pointer;
           font-family: var(--bs-font-sans-serif);
+          transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .btn-primary {
@@ -221,6 +234,7 @@ const BannerSection = () => {
           background-color: #f8f9fa;
           transform: translateY(-2px);
           box-shadow: 0 0.75rem 1.5rem rgba(255, 255, 255, 0.3);
+          color: var(--bs-primary);
         }
 
         .btn-outline {
@@ -255,6 +269,7 @@ const BannerSection = () => {
           cursor: pointer;
           transition: all 0.3s ease;
           border: 2px solid var(--bs-white);
+          transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .nav-dot.active {
@@ -262,42 +277,30 @@ const BannerSection = () => {
           transform: scale(1.2);
         }
 
-        .banner-arrows {
+        /* Side Navigation Areas */
+        .side-nav-area {
           position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          background-color: var(--bs-white);
-          border: 2px solid var(--bs-white);
-          color: var(--bs-primary);
-          font-size: 2rem;
-          padding: 0px 16px 10px;
-          border-radius: 50%;
-          cursor: pointer;
-          transition: all 0.3s ease;
+          top: 0;
+          height: 100%;
+          width: 15%;
           z-index: 3;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          line-height: 1;
+          cursor: pointer;
+          background: transparent;
+          transition: background-color 0.2s ease;
         }
 
-        .banner-arrows:hover {
-          background-color: var(--bs-primary);
-          color: var(--bs-white);
-          transform: translateY(-50%) scale(1.03);
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        .side-nav-left {
+          left: 0;
         }
 
-        .arrow-left {
-          left: 20px;
-        }
-
-        .arrow-right {
-          right: 20px;
+        .side-nav-right {
+          right: 0;
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
           .banner-slide {
-            padding: 40px 15px;
+            height: 100vw;
           }
 
           .banner-title {
@@ -315,11 +318,17 @@ const BannerSection = () => {
           .banner-buttons {
             flex-direction: column;
             align-items: center;
+            left: 10px;
           }
 
           .btn {
             width: 100%;
             max-width: 250px;
+          }
+
+          /* Increase side nav areas on mobile for better touch targets */
+          .side-nav-area {
+            width: 25%;
           }
         }
 
@@ -332,48 +341,47 @@ const BannerSection = () => {
             font-size: 1.1rem;
           }
 
-          .arrow-left,
-          .arrow-right {
-            display: none;
+          /* Even larger touch areas on small screens */
+          .side-nav-area {
+            width: 30%;
+          }
+        }
+
+        @media (min-width: 769px) {
+          .banner-slide {
+            height: 400px;
+          }
+        }
+        
+        @media (min-width: 1024px) {
+          .banner-slide {
+            height: 500px;
           }
         }
       `}</style>
-      
+
       <section id="home" className="banner-section">
-        <div 
-          className="banner-container" 
-          style={{ transform: `translateX(-${currentSlide * 33.333}%)` }}
-        >
+        <div className="banner-container">
           {banners.map((banner, index) => (
-            <div 
-              key={banner.id} 
-              className="banner-slide" 
-              style={{ background: banner.backgroundColor }}
+            <div
+              key={banner.id}
+              className="banner-slide"
+              style={{
+                backgroundImage: `url(${isMobile ? banner.imageMobile : banner.imageDesktop})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center"
+              }}
             >
-              <div className="banner-content">
-                <h1 className="banner-title">{banner.title}</h1>
-                <h2 className="banner-subtitle">{banner.subtitle}</h2>
-                <p className="banner-description">{banner.description}</p>
-                <div className="banner-buttons">
-                  <a href="#enroll" className="btn btn-primary">
-                    {banner.primaryButton}
-                  </a>
-                  <a href="#learn-more" className="btn btn-outline">
-                    {banner.secondaryButton}
-                  </a>
-                </div>
+              <div className="banner-buttons">
+                <a href="https://wa.me/919313214643" target="_blank" rel="noopener noreferrer" className="btn btn-primary">{banner.primaryButton}</a>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Navigation Arrows */}
-        <button className="banner-arrows arrow-left" onClick={prevSlide}>
-          &#8249;
-        </button>
-        <button className="banner-arrows arrow-right" onClick={nextSlide}>
-          &#8250;
-        </button>
+        {/* Side Navigation Areas */}
+        <div className="side-nav-area side-nav-left" onClick={prevSlide}></div>
+        <div className="side-nav-area side-nav-right" onClick={nextSlide}></div>
 
         {/* Navigation Dots */}
         <div className="banner-navigation">
