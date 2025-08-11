@@ -193,7 +193,8 @@ const BannerSection = () => {
           gap: 1rem;
           z-index: 2;
           position: absolute;
-          bottom: 10px;
+          bottom: 20px;
+          right: 110px;
         }
 
         .banner-slide::before {
@@ -306,11 +307,6 @@ const BannerSection = () => {
             font-size: 2.5rem;
           }
 
-          .banner-buttons {
-            left: 40px;
-            bottom: 40px;
-          }
-
           .banner-subtitle {
             font-size: 1.2rem;
           }
@@ -350,10 +346,7 @@ const BannerSection = () => {
           }
 
           .banner-buttons {
-            flex-direction: column;
-            align-items: center;
-            left: 10px;
-            bottom: 15px;
+            right: 20px;
           }
         }
 
@@ -361,19 +354,11 @@ const BannerSection = () => {
           .banner-slide {
             height: 400px;
           }
-
-          .banner-buttons {
-            left: 460px; 
-          }
         }
         
         @media (min-width: 1024px) {
           .banner-slide {
             height: 500px;
-          }
-
-          .banner-buttons {
-            left: 850px;  
           }
         }
       `}</style>
