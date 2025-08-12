@@ -14,7 +14,7 @@ import StudentsReviews from '../components/studentsreview.jsx'
 import Regarding from '../components/Regarding.jsx'
 
 export default function Home() {
-  return (<>
+  return (<div id='home' className='m-0 p-0'>
     <Navbar />
     <Popup />
     <BannerSection />
@@ -28,5 +28,5 @@ export default function Home() {
     <Whatsapp />
     <Instagram />
     <Footer />
-  </>)
+  </div>)
 }

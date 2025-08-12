@@ -169,7 +169,7 @@ const MessageFromFounder = () => {
           line-height: 1.6;
           position: relative;
           padding: 1.5rem 2rem;
-          background: rgba(255, 255, 255, 0.7);
+          background: rgba(245, 254, 251, 0.7);
           border-radius: 12px;
           backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 255, 255, 0.2);
@@ -211,7 +211,7 @@ const MessageFromFounder = () => {
         }
 
         .founder-signature {
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+          background: rgba(245, 254, 251, 0.7);
           border-radius: 16px;
           padding: 12px 2rem;
           border: 1px solid rgba(255, 255, 255, 0.4);
@@ -288,7 +288,7 @@ const MessageFromFounder = () => {
           right: -15px;
           bottom: -15px;
           border-radius: 28px;
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(16, 185, 129, 0.15) 50%, rgba(139, 92, 246, 0.15) 100%);
+          background: linear-gradient(135deg, rgba(8, 101, 249, 0.15) 0%, rgba(16, 185, 129, 0.15) 50%, rgba(139, 92, 246, 0.15) 100%);
           z-index: -1;
           animation: pulse 3s ease-in-out infinite;
         }
@@ -301,7 +301,7 @@ const MessageFromFounder = () => {
           right: -30px;
           bottom: -30px;
           border-radius: 35px;
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(16, 185, 129, 0.08) 50%, rgba(139, 92, 246, 0.08) 100%);
+          background: linear-gradient(135deg, rgba(14, 94, 222, 0.08) 0%, rgba(16, 185, 129, 0.08) 50%, rgba(139, 92, 246, 0.08) 100%);
           z-index: -2;
           animation: pulse 3s ease-in-out infinite reverse;
         }

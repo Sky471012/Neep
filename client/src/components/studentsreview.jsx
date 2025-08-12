@@ -219,7 +219,7 @@ const StudentsReviews = () => {
 
         .section-title {
           font-family: "Playfair Display", Georgia, serif;
-          font-size: 3rem;
+          font-size: 3rem!important;
           font-weight: 700;
           margin-bottom: 1.5rem;
           line-height: 1.2;

@@ -1206,7 +1206,6 @@ export default function StudentControls() {
                                                 {isEditing ? (
                                                     <DatePicker
                                                         scrollableYearDropdown
-                                                        maxDate={new Date()}
                                                         selected={editedDueDate}
                                                         onChange={(date) => setEditedDueDate(date)}
                                                         dateFormat="dd-MM-yyyy"
@@ -1226,7 +1225,6 @@ export default function StudentControls() {
                                                     <label className="me-2 mb-0 white-space-nowrap">Paid Date:</label>
                                                     <DatePicker
                                                         scrollableYearDropdown
-                                                        maxDate={new Date()}
                                                         selected={paidDateInput}
                                                         onChange={(date) => setPaidDateInput(date)}
                                                         dateFormat="dd-MM-yyyy"

@@ -281,7 +281,7 @@ const BannerSection = () => {
         .side-nav-area {
           position: absolute;
           top: 0;
-          height: 100%;
+          height: 82%;
           width: 15%;
           z-index: 3;
           cursor: pointer;
@@ -358,12 +358,12 @@ const BannerSection = () => {
         
         @media (min-width: 1024px) {
           .banner-slide {
-            height: 500px;
+            height: 570px;
           }
         }
       `}</style>
 
-      <section id="home" className="banner-section">
+      <section className="banner-section">
         <div className="banner-container">
           {banners.map((banner, index) => (
             <div

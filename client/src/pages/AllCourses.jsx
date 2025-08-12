@@ -30,8 +30,8 @@ const AllCourses = () => {
       id: 3,
       title: "Foundation Chemistry for JEE/NEET",
       batchName: "AADHARSHEELA",
-      facultyName: "Mr. Pankaj",
-      facultyExperience: "15+ Years",
+      facultyName: "Mr. Pankaj and Mr. Prem",
+      facultyExperience: "15+ Years & 21+ Years",
       description:
         "In-depth foundation course in Chemistry to prepare students for JEE and NEET with focus on theory and applications.",
     },
@@ -101,9 +101,9 @@ const AllCourses = () => {
     {
       id: 11,
       title: "Chemistry (11th and 12th)",
-      batchName: "CHEMISTRY BY PANKAJ SIR",
-      facultyName: "Dr. Pankaj",
-      facultyExperience: "15+ Years",
+      batchName: "CHEMISTRY BY EXPERTS",
+      facultyName: "Dr. Pankaj and Mr. Prem",
+      facultyExperience: "15+ Years & 21+ Years",
       description:
         "Balanced approach to Chemistry for Classes 11 & 12 including physical, organic, and inorganic sections.",
     },
@@ -150,7 +150,7 @@ const AllCourses = () => {
       facultyName: "Mr. Shubham Rawat",
       facultyExperience: "8+ Years",
       description:
-        "Complete Humanities package for Classes 11 & 12 covering political science, history, and sociology.",
+        "Complete Humanities package for Classes 11 & 12 covering political science, history, and geography.",
     }
   ];
 
@@ -447,7 +447,8 @@ const AllCourses = () => {
         }
 
         .view-details-btn {
-          width: 100%;
+          display: block; 
+          width: 100%!important;
           padding: 12px 20px;
           background: linear-gradient(
             135deg,
@@ -463,6 +464,7 @@ const AllCourses = () => {
           transition: all 0.3s ease;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          text-align: center;
         }
 
         .view-details-btn:hover {
@@ -477,6 +479,75 @@ const AllCourses = () => {
 
         .view-details-btn:active {
           transform: translateY(0);
+        }
+
+        /* View All Courses Button Styles */
+        .view-all-card {
+          background: linear-gradient(
+            135deg,
+            var(--bs-primary) 0%,
+            var(--bs-info) 100%
+          );
+          border-radius: var(--bs-border-radius-lg);
+          padding: 30px;
+          box-shadow: var(--bs-box-shadow-sm);
+          border: 1px solid var(--bs-primary);
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          min-height: 300px;
+        }
+
+        .view-all-card:hover {
+          transform: translateY(-8px);
+          box-shadow: var(--bs-box-shadow-lg);
+          background: linear-gradient(
+            135deg,
+            var(--bs-link-hover-color) 0%,
+            var(--bs-primary) 100%
+          );
+        }
+
+        .view-all-icon {
+          width: 60px;
+          height: 60px;
+          border: 3px solid var(--bs-white);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 20px;
+          transition: all 0.3s ease;
+          padding: 10px;
+        }
+
+        .view-all-card:hover .view-all-icon {
+          transform: scale(1.1);
+          border-width: 4px;
+        }
+
+        .view-all-arrow {
+          color: var(--bs-white);
+          font-size: 30px;
+        }
+
+        .view-all-title {
+          color: var(--bs-white);
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin-bottom: 10px;
+        }
+
+        .view-all-subtitle {
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 1rem;
+          font-weight: 400;
+          line-height: 1.4;
         }
 
         /* Responsive Design */
@@ -528,6 +599,23 @@ const AllCourses = () => {
           .view-details-btn {
             padding: 10px 16px;
             font-size: 0.9rem;
+          }
+
+           .view-all-card {
+            padding: 20px;
+          }
+
+          .view-all-title {
+            font-size: 1.2rem;
+          }
+
+          .view-all-icon {
+            width: 50px;
+            height: 50px;
+          }
+
+          .view-all-arrow {
+            font-size: 20px;
           }
         }
 
@@ -591,26 +679,37 @@ const AllCourses = () => {
                     </span>
                   </div>
                   <div className="course-info-item">
-                    <span className="info-label">Duration:</span>
+                    <span className="info-label">Faculty Experience:</span>
                     <span className="info-value duration">
-                      {course.duration}
+                      {course.facultyExperience}
                     </span>
                   </div>
                 </div>
 
                 <p className="course-description">{course.description}</p>
 
-                {/* <button
+                <a
                   className="view-details-btn"
-                  onClick={() => {
-                    // Add your navigation logic here
-                    console.log(`View details for ${course.title}`)
-                  }}
+                  href="https://wa.me/919313214643"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  View Details
-                </button> */}
+                  Enquire Now
+                </a>
               </div>
             ))}
+
+            <div
+              className="view-all-card"
+            >
+              <div className="view-all-icon">
+                <span className="view-all-arrow"><i className="bi bi-chevron-up"></i></span>
+              </div>
+              <h3 className="view-all-title">Many More</h3>
+              <p className="view-all-subtitle">
+                Explore our complete course catalog and find the perfect program for your goals.
+              </p>
+            </div>
           </div>
         </div>
       </section>

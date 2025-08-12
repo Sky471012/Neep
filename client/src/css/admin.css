@@ -116,6 +116,15 @@ body {
   border-radius: 2px;
 }
 
+.class-link:nth-child(odd) .class-info {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.class-link:nth-child(even) .class-info {
+  background: rgba(224, 224, 224, 0.15); /* visible even color */
+}
+
+
 .class-link {
   color: #cbd5e1;
   text-decoration: none;
@@ -489,7 +498,7 @@ body {
 .installment-details {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: end;
   font-size: 0.875rem;
   color: #6b7280;
 }

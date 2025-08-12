@@ -82,9 +82,7 @@ export default function FeeTracking() {
             .then((res) => res.json())
             .then((data) => {
                 const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-                const totalOutstanding = sorted.reduce((sum, inst) => sum + (inst.amount || 0), 0)
                 setUnpaidInstallments(sorted)
-                setTotalUnpaidAmount(totalOutstanding)
             })
             .catch((err) => console.error("Error loading unpaid installments:", err))
 
@@ -93,9 +91,7 @@ export default function FeeTracking() {
             .then((res) => res.json())
             .then((data) => {
                 const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-                const totalUpcoming = sorted.reduce((sum, inst) => sum + (inst.amount || 0), 0)
                 setUpcomingInstallments(sorted)
-                setTotalUpcomingAmount(totalUpcoming)
             })
             .catch((err) => console.error("Error loading upcoming installments:", err))
 
@@ -104,305 +100,340 @@ export default function FeeTracking() {
             .then((res) => res.json())
             .then((data) => {
                 const sorted = data.installments.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
-                const totalPaid = sorted.reduce((sum, inst) => sum + (inst.amount || 0), 0)
                 setPaidInstallments(sorted)
-                setTotalPaidAmount(totalPaid)
             })
             .catch((err) => console.error("Error loading paid installments:", err))
 
     }, []);
 
 
-    return (<>
-        <Navbar />
+    // Compute filtered lists & totals before return
+const filteredUnpaid = unpaidInstallments.filter(
+  (inst) => !selectedUnpaidClass || inst.studentId?.class === selectedUnpaidClass
+);
+const unpaidTotal = filteredUnpaid.reduce((sum, inst) => sum + (inst.amount || 0), 0);
 
-        <div className="data-section">
-            <div className="section-header">
-                <div className="d-flex mx-2">
-                    <h2 className="batches-title">Fee Tracking</h2>
-                </div>
-            </div>
+const filteredUpcoming = upcomingInstallments.filter(
+  (inst) => !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass
+);
+const upcomingTotal = filteredUpcoming.reduce((sum, inst) => sum + (inst.amount || 0), 0);
 
-            <div className="fee-cards-container fee-card">
-                <div className="fee-controls">
-                    <button className={activeFeeTab === "unpaid" ? "unpaid-btn active" : "unpaid-btn"} onClick={() => setActiveFeeTab("unpaid")}>Unpaid</button>
-                    <button className={activeFeeTab === "upcoming" ? "upcoming-btn active" : "upcoming-btn"} onClick={() => setActiveFeeTab("upcoming")}>Upcoming</button>
-                    <button className={activeFeeTab === "paid" ? "paid-btn active" : "paid-btn"} onClick={() => setActiveFeeTab("paid")}>Paid</button>
-                </div>
-                {activeFeeTab === "unpaid" && (
-                    <div className="unpaid">
-                        <h4>Unpaid</h4>
-                        <div className="fee-amount">₹ {totalUnpaidAmount}</div>
-                        <div className="installments-section">
-                            <div className="installments-header">
-                                <span>Installments</span>
-                                <div className="dropdown">
-                                    <button className="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Filter <i className="fas fa-cog"></i>
-                                    </button>
-                                    <ul className="dropdown-menu dropdown-menu-end shadow">
-                                        <li>
-                                            <button
-                                                className="dropdown-item"
-                                                onClick={() => {
-                                                    const sorted = sortInstallments(unpaidInstallments, "asc");
-                                                    setUnpaidInstallments(sorted);
-                                                    setUnpaidSortOrder("asc");
-                                                }}
-                                            >
-                                                Oldest First
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button
-                                                className="dropdown-item"
-                                                onClick={() => {
-                                                    const sorted = sortInstallments(unpaidInstallments, "desc");
-                                                    setUnpaidInstallments(sorted);
-                                                    setUnpaidSortOrder("desc");
-                                                }}
-                                            >
-                                                Newest First
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <div className="dropdown-item p-2">
-                                                Filter by Class:
-                                                <ul className="list-unstyled border mt-1">
-                                                    {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(cls => (
-                                                        <li key={cls}>
-                                                            <button
-                                                                className="btn btn-sm text-start fw-normal pt-1 pb-0"
-                                                                onClick={() => setSelectedUnpaidClass(cls)}
-                                                            >
-                                                                {cls}
-                                                            </button>
-                                                        </li>
-                                                    ))}
-                                                    <li>
-                                                        <button
-                                                            className="btn btn-sm text-start text-danger"
-                                                            onClick={() => setSelectedUnpaidClass(null)}
-                                                        >
-                                                            Clear Filter
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div className="installments-list">
-                                {unpaidInstallments
-                                    .filter((inst) => !selectedUnpaidClass || inst.studentId?.class === selectedUnpaidClass)
-                                    .map((inst) => {
-                                        const student = inst.studentId
-                                        const name = student?.name || "Unknown"
-                                        const className = student?.class || "--"
-                                        const amount = inst.amount || 0
-                                        const num = inst.installmentNo || 0
-                                        return (
-                                            <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
-                                                <div className="installment-header">
-                                                    <h5>{name}</h5>
-                                                    <span className="amount">₹ {amount}/-</span>
-                                                </div>
-                                                <div className="installment-details">
-                                                    <div className="d-flex"><span>Class: {className}</span><div className="dot"></div><span>Installment #: {num}</span></div>
-                                                    <span className="overdue">{getDaysOverdue(inst.dueDate)}</span>
-                                                </div>
-                                            </Link>
-                                        )
-                                    })}
-                            </div>
-                        </div>
-                    </div>
-                )}
+const filteredPaid = paidInstallments.filter(
+  (inst) => !selectedPaidClass || inst.studentId?.class === selectedPaidClass
+);
+const paidTotal = filteredPaid.reduce((sum, inst) => sum + (inst.amount || 0), 0);
 
-                {activeFeeTab === "upcoming" && (
-                    <div className="upcoming">
-                        <h4>Upcoming</h4>
-                        <div className="fee-amount">₹ {totalUpcomingAmount}</div>
-                        <div className="installments-section">
-                            <div className="installments-header">
-                                <span>Installments</span>
-                                <div className="dropdown">
-                                    <button className="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Filter <i className="fas fa-cog"></i>
-                                    </button>
-                                    <ul className="dropdown-menu dropdown-menu-end shadow">
-                                        <li>
-                                            <button
-                                                className="dropdown-item"
-                                                onClick={() => {
-                                                    const sorted = sortInstallments(upcomingInstallments, "desc");
-                                                    setUpcomingInstallments(sorted);
-                                                    setUpcomingSortOrder("desc");
-                                                }}
-                                            >
-                                                Oldest First
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button
-                                                className="dropdown-item"
-                                                onClick={() => {
-                                                    const sorted = sortInstallments(upcomingInstallments, "asc");
-                                                    setUpcomingInstallments(sorted);
-                                                    setUpcomingSortOrder("asc");
-                                                }}
-                                            >
-                                                Newest First
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <div className="dropdown-item p-2">
-                                                Filter by Class:
-                                                <ul className="list-unstyled border mt-1">
-                                                    {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(cls => (
-                                                        <li key={cls}>
-                                                            <button
-                                                                className="btn btn-sm text-start fw-normal pt-1 pb-0"
-                                                                onClick={() => setSelectedUpcomingClass(cls)}
-                                                            >
-                                                                {cls}
-                                                            </button>
-                                                        </li>
-                                                    ))}
-                                                    <li>
-                                                        <button
-                                                            className="btn btn-sm text-start text-danger"
-                                                            onClick={() => setSelectedUpcomingClass(null)}
-                                                        >
-                                                            Clear Filter
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div className="installments-list">
-                                {upcomingInstallments
-                                    .filter((inst) => !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass)
-                                    .map((inst) => {
-                                        const student = inst.studentId
-                                        const name = student?.name || "Unknown"
-                                        const className = student?.class || "--"
-                                        const amount = inst.amount || 0
-                                        const num = inst.installmentNo || 0
-                                        return (
-                                            <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
-                                                <div className="installment-header">
-                                                    <h5>{name}</h5>
-                                                    <span className="amount">₹ {amount}/-</span>
-                                                </div>
-                                                <div className="installment-details">
-                                                    <div className="d-flex"><span>Class: {className}</span><div className="dot"></div><span>Installment #: {num}</span></div>
-                                                    <span className="upcoming-date">{getDaysLeft(inst.dueDate)}</span>
-                                                </div>
-                                            </Link>
-                                        )
-                                    })}
-                            </div>
-                        </div>
-                    </div>
-                )}
+return (
+  <>
+    <Navbar />
 
-                {activeFeeTab === "paid" && (
-                    <div className="paid">
-                        <h4>Paid</h4>
-                        <div className="fee-amount">₹ {totalPaidAmount}</div>
-                        <div className="installments-section">
-                            <div className="installments-header">
-                                <span>Installments</span>
-                                <div className="dropdown">
-                                    <button className="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Filter <i className="fas fa-cog"></i>
-                                    </button>
-                                    <ul className="dropdown-menu dropdown-menu-end shadow">
-                                        <li>
-                                            <button
-                                                className="dropdown-item"
-                                                onClick={() => {
-                                                    const sorted = sortInstallments(paidInstallments, "asc");
-                                                    setPaidInstallments(sorted);
-                                                    setPaidSortOrder("asc");
-                                                }}
-                                            >
-                                                Oldest First
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button
-                                                className="dropdown-item"
-                                                onClick={() => {
-                                                    const sorted = sortInstallments(paidInstallments, "desc");
-                                                    setPaidInstallments(sorted);
-                                                    setPaidSortOrder("desc");
-                                                }}
-                                            >
-                                                Newest First
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <div className="dropdown-item p-2">
-                                                Filter by Class:
-                                                <ul className="list-unstyled border mt-1">
-                                                    {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(cls => (
-                                                        <li key={cls}>
-                                                            <button
-                                                                className="btn btn-sm text-start fw-normal pt-1 pb-0"
-                                                                onClick={() => setSelectedPaidClass(cls)}
-                                                            >
-                                                                {cls}
-                                                            </button>
-                                                        </li>
-                                                    ))}
-                                                    <li>
-                                                        <button
-                                                            className="btn btn-sm text-start text-danger"
-                                                            onClick={() => setSelectedPaidClass(null)}
-                                                        >
-                                                            Clear Filter
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div className="installments-list">
-                                {paidInstallments
-                                    .filter((inst) => !selectedPaidClass || inst.studentId?.class === selectedPaidClass)
-                                    .map((inst) => {
-                                        const student = inst.studentId
-                                        const name = student?.name || "Unknown"
-                                        const className = student?.class || "--"
-                                        const amount = inst.amount || 0
-                                        const num = inst.installmentNo || 0
-                                        return (
-                                            <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
-                                                <div className="installment-header">
-                                                    <h5>{name}</h5>
-                                                    <span className="amount">₹ {amount}/-</span>
-                                                </div>
-                                                <div className="installment-details">
-                                                    <div className="d-flex"><span>Class: {className}</span><div className="dot"></div><span>Installment #: {num}</span></div>
-                                                    <span className="paid-date">{getDaysSincePaid(inst.paidDate)}</span>
-                                                </div>
-                                            </Link>
-                                        )
-                                    })}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
+    <div className="data-section">
+      <div className="section-header justify-content-center">
+        <div className="d-flex mx-2">
+          <h2 className="batches-title">Fee Tracking</h2>
+        </div>
+      </div>
+
+      <div className="fee-cards-container fee-card">
+        <div className="fee-controls">
+          <button
+            className={activeFeeTab === "unpaid" ? "unpaid-btn active" : "unpaid-btn"}
+            onClick={() => setActiveFeeTab("unpaid")}
+          >
+            Unpaid
+          </button>
+          <button
+            className={activeFeeTab === "upcoming" ? "upcoming-btn active" : "upcoming-btn"}
+            onClick={() => setActiveFeeTab("upcoming")}
+          >
+            Upcoming
+          </button>
+          <button
+            className={activeFeeTab === "paid" ? "paid-btn active" : "paid-btn"}
+            onClick={() => setActiveFeeTab("paid")}
+          >
+            Paid
+          </button>
         </div>
 
-    </>)
+        {/* Unpaid Tab */}
+        {activeFeeTab === "unpaid" && (
+          <div className="unpaid">
+            <h4>Unpaid</h4>
+            <div className="fee-amount">₹ {unpaidTotal}</div>
+            <div className="installments-section">
+              <div className="installments-header">
+                <span>Installments</span>
+                <div className="dropdown">
+                  <button className="btn" type="button" data-bs-toggle="dropdown">
+                    Filter <i className="fas fa-cog"></i>
+                  </button>
+                  <ul className="dropdown-menu dropdown-menu-end shadow">
+                    <li>
+                      <button
+                        className="dropdown-item"
+                        onClick={() => {
+                          const sorted = sortInstallments(unpaidInstallments, "asc");
+                          setUnpaidInstallments(sorted);
+                          setUnpaidSortOrder("asc");
+                        }}
+                      >
+                        Oldest First
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        className="dropdown-item"
+                        onClick={() => {
+                          const sorted = sortInstallments(unpaidInstallments, "desc");
+                          setUnpaidInstallments(sorted);
+                          setUnpaidSortOrder("desc");
+                        }}
+                      >
+                        Newest First
+                      </button>
+                    </li>
+                    <li>
+                      <div className="dropdown-item p-2">
+                        Filter by Class:
+                        <ul className="list-unstyled border mt-1">
+                          {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(
+                            (cls) => (
+                              <li key={cls}>
+                                <button
+                                  className="btn btn-sm text-start fw-normal pt-1 pb-0"
+                                  onClick={() => setSelectedUnpaidClass(cls)}
+                                >
+                                  {cls}
+                                </button>
+                              </li>
+                            )
+                          )}
+                          <li>
+                            <button
+                              className="btn btn-sm text-start text-danger"
+                              onClick={() => setSelectedUnpaidClass(null)}
+                            >
+                              Clear Filter
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div className="installments-list">
+                {filteredUnpaid.map((inst) => {
+                  const student = inst.studentId;
+                  return (
+                    <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                      <div className="installment-header">
+                        <h5>{student?.name || "Unknown"}</h5>
+                        <span className="amount">₹ {inst.amount || 0}/-</span>
+                      </div>
+                      <div className="installment-details">
+                        <div className="d-flex">
+                          <span>Class: {student?.class || "--"}
+                          <br/>
+                          Installment #: {inst.installmentNo || 0}</span>
+                        </div>
+                        <span className="overdue">{getDaysOverdue(inst.dueDate)}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Upcoming Tab */}
+        {activeFeeTab === "upcoming" && (
+          <div className="upcoming">
+            <h4>Upcoming</h4>
+            <div className="fee-amount">₹ {upcomingTotal}</div>
+            <div className="installments-section">
+              <div className="installments-header">
+                <span>Installments</span>
+                <div className="dropdown">
+                  <button className="btn" type="button" data-bs-toggle="dropdown">
+                    Filter <i className="fas fa-cog"></i>
+                  </button>
+                  <ul className="dropdown-menu dropdown-menu-end shadow">
+                    <li>
+                      <button
+                        className="dropdown-item"
+                        onClick={() => {
+                          const sorted = sortInstallments(upcomingInstallments, "asc");
+                          setUpcomingInstallments(sorted);
+                          setUpcomingSortOrder("asc");
+                        }}
+                      >
+                        Oldest First
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        className="dropdown-item"
+                        onClick={() => {
+                          const sorted = sortInstallments(upcomingInstallments, "desc");
+                          setUpcomingInstallments(sorted);
+                          setUpcomingSortOrder("desc");
+                        }}
+                      >
+                        Newest First
+                      </button>
+                    </li>
+                    <li>
+                      <div className="dropdown-item p-2">
+                        Filter by Class:
+                        <ul className="list-unstyled border mt-1">
+                          {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(
+                            (cls) => (
+                              <li key={cls}>
+                                <button
+                                  className="btn btn-sm text-start fw-normal pt-1 pb-0"
+                                  onClick={() => setSelectedUpcomingClass(cls)}
+                                >
+                                  {cls}
+                                </button>
+                              </li>
+                            )
+                          )}
+                          <li>
+                            <button
+                              className="btn btn-sm text-start text-danger"
+                              onClick={() => setSelectedUpcomingClass(null)}
+                            >
+                              Clear Filter
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div className="installments-list">
+                {filteredUpcoming.map((inst) => {
+                  const student = inst.studentId;
+                  return (
+                    <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                      <div className="installment-header">
+                        <h5>{student?.name || "Unknown"}</h5>
+                        <span className="amount">₹ {inst.amount || 0}/-</span>
+                      </div>
+                      <div className="installment-details">
+                        <div className="d-flex">
+                          <span>Class: {student?.class || "--"}
+                            <br/>
+                          Installment #: {inst.installmentNo || 0}</span>
+                        </div>
+                        <span className="upcoming-date">{getDaysLeft(inst.dueDate)}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Paid Tab */}
+        {activeFeeTab === "paid" && (
+          <div className="paid">
+            <h4>Paid</h4>
+            <div className="fee-amount">₹ {paidTotal}</div>
+            <div className="installments-section">
+              <div className="installments-header">
+                <span>Installments</span>
+                <div className="dropdown">
+                  <button className="btn" type="button" data-bs-toggle="dropdown">
+                    Filter <i className="fas fa-cog"></i>
+                  </button>
+                  <ul className="dropdown-menu dropdown-menu-end shadow">
+                    <li>
+                      <button
+                        className="dropdown-item"
+                        onClick={() => {
+                          const sorted = sortInstallments(paidInstallments, "asc");
+                          setPaidInstallments(sorted);
+                          setPaidSortOrder("asc");
+                        }}
+                      >
+                        Oldest First
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        className="dropdown-item"
+                        onClick={() => {
+                          const sorted = sortInstallments(paidInstallments, "desc");
+                          setPaidInstallments(sorted);
+                          setPaidSortOrder("desc");
+                        }}
+                      >
+                        Newest First
+                      </button>
+                    </li>
+                    <li>
+                      <div className="dropdown-item p-2">
+                        Filter by Class:
+                        <ul className="list-unstyled border mt-1">
+                          {["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"].map(
+                            (cls) => (
+                              <li key={cls}>
+                                <button
+                                  className="btn btn-sm text-start fw-normal pt-1 pb-0"
+                                  onClick={() => setSelectedPaidClass(cls)}
+                                >
+                                  {cls}
+                                </button>
+                              </li>
+                            )
+                          )}
+                          <li>
+                            <button
+                              className="btn btn-sm text-start text-danger"
+                              onClick={() => setSelectedPaidClass(null)}
+                            >
+                              Clear Filter
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div className="installments-list">
+                {filteredPaid.map((inst) => {
+                  const student = inst.studentId;
+                  return (
+                    <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                      <div className="installment-header">
+                        <h5>{student?.name || "Unknown"}</h5>
+                        <span className="amount">₹ {inst.amount || 0}/-</span>
+                      </div>
+                      <div className="installment-details">
+                        <div className="d-flex">
+                          <span>Class: {student?.class || "--"}
+                            <br/>
+                          Installment #: {inst.installmentNo || 0}</span>
+                        </div>
+                        <span className="paid-date">{getDaysSincePaid(inst.paidDate)}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </>
+);
+
 }

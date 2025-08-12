@@ -184,7 +184,7 @@ export default function Regarding() {
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.02) 0%, transparent 50%),
+                    background: radial-gradient(circle at 10% 20%, rgba(0, 98, 255, 0.02) 0%, transparent 50%),
                                 radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.02) 0%, transparent 50%);
                     pointer-events: none;
                     z-index: 0;
@@ -243,7 +243,7 @@ export default function Regarding() {
                     border-left: 3px solid transparent;
                     padding-left: 2rem;
                     transition: all 0.3s ease;
-                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(16, 185, 129, 0.02) 100%);
+                    background: linear-gradient(135deg, rgba(0, 91, 238, 0.11) 0%, rgba(16, 185, 129, 0.11) 100%);
                     border-radius: 16px;
                     padding: 2rem;
                     border-left: 4px solid;
@@ -252,12 +252,12 @@ export default function Regarding() {
 
                 .info-section:nth-child(2) {
                     border-image: linear-gradient(135deg, #10b981 0%, #8b5cf6 100%) 1;
-                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.02) 0%, rgba(139, 92, 246, 0.02) 100%);
+                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.11) 0%, rgba(138, 92, 246, 0.11) 100%);
                 }
 
                 .info-section:nth-child(3) {
                     border-image: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%) 1;
-                    background: linear-gradient(135deg, rgba(139, 92, 246, 0.02) 0%, rgba(236, 72, 153, 0.02) 100%);
+                    background: linear-gradient(135deg, rgba(138, 92, 246, 0.11) 0%, rgba(236, 72, 154, 0.11) 100%);
                 }
 
                 .section-title {

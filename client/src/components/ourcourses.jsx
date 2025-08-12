@@ -26,8 +26,8 @@ const OurCourses = () => {
       id: 3,
       title: "Foundation Chemistry for JEE/NEET",
       batchName: "AADHARSHEELA",
-      facultyName: "Mr. Pankaj",
-      facultyExperience: "15+ Years",
+      facultyName: "Mr. Pankaj and Mr. Prem",
+      facultyExperience: "15+ Years & 21+ Years",
       description:
         "In-depth foundation course in Chemistry to prepare students for JEE and NEET with focus on theory and applications.",
     },
@@ -344,7 +344,10 @@ const OurCourses = () => {
         }
 
         .view-details-btn {
-          width: 100%;
+          display: block;
+          text-align: center;
+          width: 100%!important;
+          margin: 0px!important;
           padding: 12px 20px;
           background: linear-gradient(
             135deg,
@@ -598,15 +601,14 @@ const OurCourses = () => {
 
                 <p className="course-description">{course.description}</p>
 
-                {/* <button
+                <a
                   className="view-details-btn"
-                  onClick={() => {
-                    // Add your navigation logic here
-                    console.log(`View details for ${course.title}`)
-                  }}
+                  href="https://wa.me/919313214643"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  View Details
-                </button> */}
+                  Enquire Now
+                </a>
               </div>
             ))}
 
