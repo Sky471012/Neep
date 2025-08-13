@@ -419,6 +419,12 @@ const MessageFromFounder = () => {
           }
         }
 
+        @media (max-width: 480px) {
+          .founder-section { 
+            padding-top: 3.5rem!important;
+          }
+        }
+
         /* Entrance animations */
         @keyframes fadeInLeft {
           from {

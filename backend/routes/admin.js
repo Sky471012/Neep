@@ -26,6 +26,7 @@ router.post('/addStudents', adminController.addStudentsToBatch);
 router.post('/addStudentByCreating/:batchId', adminController.addStudentByCreating);
 router.put('/:batchId/archive', adminController.toggleArchiveStatus);
 router.put('/editBatchProfile/:batchId', adminController.editBatch);
+router.get('/getTest/:batchId', adminController.getTest);
 
 // Student Management
 router.get('/students', adminController.getStudents);

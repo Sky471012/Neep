@@ -4,7 +4,6 @@ import DatePicker from "react-datepicker";
 import { format, parse } from 'date-fns';
 import axios from 'axios';
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import TimetableEditor from "../components/TimetableEditor";
 import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
@@ -13,6 +12,7 @@ import ModalFour from "../modals/ModalFour";
 import ModalFive from "../modals/ModalFive";
 import ModalSix from "../modals/ModalSix";
 import ModalSeven from "../modals/ModalSeven";
+import ModalEight from "../modals/ModalEight";
 
 export default function BatchControls() {
   const { batchId } = useParams();
@@ -32,7 +32,9 @@ export default function BatchControls() {
   const [modalFive, setModalFive] = useState(false);
   const [modalSix, setModalSix] = useState(false);
   const [modalSeven, setModalSeven] = useState(false);
+  const [modalEight, setModalEight] = useState(false);
   const [studentTests, setStudentTests] = useState([]);
+  const [selectedTest, setSelectedTest] = useState(null);
   const [allStudents, setAllStudents] = useState({});
   const [markedStatus, setMarkedStatus] = useState({});
   const [selectedTeacher, setSelectedTeacher] = useState({});
@@ -57,6 +59,7 @@ export default function BatchControls() {
   const [studentSearch, setStudentSearch] = useState("");
   const [testFormData, setTestFormData] = useState({});
   const [tests, setTests] = useState({});
+  const [alltests, setAllTests] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
@@ -201,6 +204,17 @@ export default function BatchControls() {
     } catch (err) {
       console.error("Failed to fetch student tests:", err);
       alert("Error fetching tests");
+    }
+  };
+
+  const fetchAllTests = async (batchId) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getTest/${batchId}`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Error fetching tests");
+      setAllTests((prev) => ({ ...prev, [batchId]: data.test }));
+    } catch (err) {
+      console.error(`Error fetching tests for batch ${batchId}:`, err);
     }
   };
 
@@ -486,6 +500,26 @@ export default function BatchControls() {
           }
         ]
       }));
+
+      setAllTests(prev => ({
+        ...prev,
+        [batchId]: [
+          ...(prev[batchId] || []).filter(
+            t => !(t.name === name && t.date === formattedDate && t.studentId === studentId)
+          ),
+          {
+            _id: data.test?._id,
+            studentId,
+            batchId,
+            name,
+            maxMarks: Number(maxMarks),
+            marksScored: absent ? 0 : Number(marksScored),
+            date: formattedDate,
+            absent
+          }
+        ]
+      }));
+
     } catch (err) {
       console.error("Test error:", err);
       alert("Failed to add test.");
@@ -496,8 +530,19 @@ export default function BatchControls() {
     setModalSeven((prev) => ({ ...prev, [batchId]: true }));
   };
 
+  const openAllTestModal = async (id) => {
+    await fetchAllTests(id);
+    setSelectedTest(null);
+    setModalEight(prev => ({ ...prev, [id]: true }));
+  };
+
+
   const closeTestModal = (batchId) => {
     setModalSeven((prev) => ({ ...prev, [batchId]: false }));
+  };
+
+  const closeAllTestModal = (batchId) => {
+    setModalEight((prev) => ({ ...prev, [batchId]: false }));
   };
 
   const handleEditClick = () => {
@@ -607,6 +652,11 @@ export default function BatchControls() {
                   <li>
                     <button className="dropdown-item" onClick={() => openTestModal(batch.batchId)}>
                       Add / Change Test Scores
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={() => openAllTestModal(batch._id)}>
+                      Show Tests
                     </button>
                   </li>
                   <li>
@@ -1464,6 +1514,113 @@ export default function BatchControls() {
             </form>
           </div>
         </ModalSeven>
+
+        <ModalEight
+          isOpen={modalEight[batch._id]}
+          onClose={() => closeAllTestModal(batch._id)}
+        >
+          <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
+            {(() => {
+              const batchIdKey = batch._id;
+              const batchStudents = students || [];                 // array, not students[batchId]
+              const batchTests = alltests[batchIdKey] || [];        // <-- server-fetched tests ONLY
+
+              if (!batchTests.length) {
+                return <div className="p-4 text-center text-muted">No tests found for this batch.</div>;
+              }
+
+              // Unique (name+date) test headers for list view
+              const uniqueTestHeaders = Array.from(
+                new Map(
+                  batchTests.map(t => [
+                    `${t.name}_${t.date}`,
+                    { name: t.name, date: t.date, maxMarks: t.maxMarks }
+                  ])
+                ).values()
+              ).sort((a, b) => {
+                const pa = new Date(a.date.split('-').reverse().join('-'));
+                const pb = new Date(b.date.split('-').reverse().join('-'));
+                return pb - pa; // latest first
+              });
+
+              return (
+                <div>
+                  {!selectedTest ? (
+                    <div>
+                      <h5 className="mb-3">Tests for {batch.name}</h5>
+                      <ul className="list-group">
+                        {uniqueTestHeaders.map((test, idx) => (
+                          <li
+                            key={`${test.name}_${test.date}_${idx}`}
+                            className="list-group-item d-flex justify-content-between align-items-center"
+                          >
+                            <span>{test.name} <small className="text-muted">({test.date})</small></span>
+                            <button
+                              className="text-primary"
+                              style={{ border: "none", background: "transparent", fontSize: "13px" }}
+                              onClick={() => setSelectedTest(test)}
+                            >
+                              View<i className="bi bi-arrow-right ms-1"></i>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div style={{ height: "85vh", overflowY: "auto" }}>
+                      <h3 className="modal-title" style={{ textAlign: "left" }}>
+                        <button
+                          style={{ border: "none", background: "transparent" }}
+                          onClick={() => setSelectedTest(null)}
+                        >
+                          <i className="fas fa-arrow-left"></i>
+                        </button>
+                        {selectedTest.name}
+                      </h3>
+
+                      <span style={{ textAlign: "left", marginBottom: "1rem", display: "inline-block" }}>
+                        Date :- {selectedTest.date} <br />
+                        Maximum Marks :- {selectedTest.maxMarks}
+                      </span>
+
+                      <table className="table table-bordered">
+                        <thead>
+                          <tr>
+                            <th>Student Name</th>
+                            <th>Marks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {batchStudents.map((student) => {
+                            const match = batchTests.find(
+                              (t) =>
+                                t.name === selectedTest.name &&
+                                t.date === selectedTest.date &&
+                                t.studentId === student._id
+                            );
+
+                            return (
+                              <tr key={student._id}>
+                                <td style={{ width: "75%", textWrap: "wrap" }}>{student.name}</td>
+                                <td style={{ width: "25%", textWrap: "wrap" }}>
+                                  {match
+                                    ? match.absent
+                                      ? <span style={{ color: "red" }}>-AB-</span>
+                                      : match.marksScored
+                                    : "--"}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        </ModalEight>
 
       </div>
     </div>

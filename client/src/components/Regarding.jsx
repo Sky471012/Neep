@@ -158,7 +158,7 @@ export default function Regarding() {
                 .combined-card {
                     background: rgba(255, 255, 255, 0.8);
                     border-radius: 28px;
-                    padding: 4rem 3.5rem;
+                    padding: 4rem 3rem;
                     border: 1px solid rgba(255, 255, 255, 0.4);
                     backdrop-filter: blur(20px);
                     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
@@ -375,7 +375,7 @@ export default function Regarding() {
                     }
 
                     .info-section {
-                        padding: 1.5rem;
+                        padding: 1rem;
                     }
 
                     .welcome-text {
@@ -405,6 +405,16 @@ export default function Regarding() {
 
                     .features-list li::before {
                         margin-bottom: 0.5rem;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .combined-card {
+                        padding: 2rem 1rem;
+                    }
+
+                    .section-title {
+                        font-size: 1.7rem!important;
                     }
                 }
 

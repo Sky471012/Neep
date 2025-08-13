@@ -566,6 +566,18 @@ exports.editBatch = async (req, res) => {
   }
 };
 
+exports.getTest = async (req, res) => {
+  try {
+    const { batchId } = req.params;
+
+    const test = await Test.find({ batchId });
+
+    res.json({ test });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // Student Management
 exports.getStudents = async (req, res) => {
   try {
