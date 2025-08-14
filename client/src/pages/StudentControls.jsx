@@ -9,6 +9,7 @@ import { Inter18ptBold } from "../assets/fonts/Inter_18pt-Bold-bold";
 import Navbar from "../components/Navbar";
 import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
+import { useMemo } from "react";
 
 export default function StudentControls() {
 
@@ -38,6 +39,7 @@ export default function StudentControls() {
     const [editedMethod, setEditedMethod] = useState("Cash");
     const [batchSearch, setBatchSearch] = useState("");
     const [isEditing, setIsEditing] = useState(false);
+    const hasFee = Boolean(fee && fee._id);
     const [editForm, setEditForm] = useState({
         name: '',
         phone: '',
@@ -130,6 +132,18 @@ export default function StudentControls() {
             });
         }
     }, [student]);
+
+    useEffect(() => {
+        setEditedFee(fee?.totalAmount || 0);
+    }, [fee]);
+
+    const refetchFee = async () => {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/${studentId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setFee(Array.isArray(data.fee) ? data.fee[0] : data.fee || {});
+    };
 
     function getBase64FromImagePath(path) {
         return new Promise((resolve, reject) => {
@@ -274,12 +288,16 @@ export default function StudentControls() {
         return words + ' only';
     }
 
-    const totalPaid = installments.reduce((sum, record) => {
-        return sum + (record.paidDate ? (record.amount || 0) : 0);
-    }, 0);
-
     const totalFee = fee?.totalAmount || 0;
-    const balance = totalFee - totalPaid;
+
+    const totalPaid = useMemo(() => {
+        return installments.reduce((sum, inst) => {
+            const paid = inst?.paidDate ? Number(inst.amount || 0) : 0;
+            return sum + paid;
+        }, 0);
+    }, [installments]);
+
+    const balance = useMemo(() => Math.max(0, (Number(totalFee) || 0) - (Number(totalPaid) || 0)), [totalFee, totalPaid]);
 
     const removeStudent = async (batchId, studentId) => {
         const confirmDelete = window.confirm("Are you sure you want to remove student?");
@@ -380,6 +398,10 @@ export default function StudentControls() {
     };
 
     const handleAddInstallment = async () => {
+        if (!fee?._id) {
+            alert("Please create a fee structure first.");
+            return;
+        }
         const newInstallment = {
             feeId: fee._id,
             studentId: student._id,
@@ -402,7 +424,8 @@ export default function StudentControls() {
 
         if (response.ok) {
             const data = await response.json();
-            setInstallments((prev) => [...prev, data.installment]);
+            setInstallments(prev => [...prev, data.installment]);
+            await refetchFee(); // if backend mutates total
         } else {
             alert("Failed to add installment");
         }
@@ -436,6 +459,8 @@ export default function StudentControls() {
             const updatedList = await refreshed.json();
 
             setInstallments(Array.isArray(updatedList) ? updatedList : updatedList.installments || []);
+            await refetchFee();
+
         } catch (error) {
             console.error("Error removing installment:", error);
             alert("Something went wrong.");
@@ -575,7 +600,6 @@ export default function StudentControls() {
     };
 
     const handleMarkPaid = async (installmentId) => {
-
         try {
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/mark-paid/${installmentId}`, {
                 method: "PATCH",
@@ -591,14 +615,21 @@ export default function StudentControls() {
 
             const updated = await res.json();
             if (res.ok) {
-                setInstallments(prev =>
-                    prev.map(inst =>
-                        inst._id === installmentId ? { ...inst, paidDate: paidDateInput, method: methodInput } : inst
-                    )
-                );
+                setInstallments(prev => prev.map(inst =>
+                    inst._id === installmentId
+                        ? {
+                            ...inst,
+                            paidDate: paidDateInput ? paidDateInput.toISOString().split("T")[0] : null,
+                            method: methodInput
+                        }
+                        : inst
+                ));
+
                 setEditingInstallmentId(null);
-                setPaidDateInput("");
+                setPaidDateInput(null);
                 setMethodInput("Cash");
+
+                // (Optional) await refetchFee();
             } else {
                 console.error(updated.message || "Failed to update");
             }
@@ -643,18 +674,21 @@ export default function StudentControls() {
                 return;
             }
 
-            // Update the installment in local state
-            setInstallments(prev =>
-                prev.map(inst =>
-                    inst._id === installmentId ? {
+            // Update local installments with normalized date strings
+            setInstallments(prev => prev.map(inst =>
+                inst._id === installmentId
+                    ? {
                         ...inst,
                         amount: editedAmount,
                         dueDate: editedDueDate?.toISOString().split("T")[0],
                         paidDate: editedPaidDate?.toISOString().split("T")[0] || null,
                         method: editedPaidDate ? editedMethod : null,
-                    } : inst
-                )
-            );
+                    }
+                    : inst
+            ));
+
+            // 🔁 Fee may have changed on backend — refresh it
+            await refetchFee();
 
             // Reset editing state
             setEditingInstallmentData(null);
@@ -1108,6 +1142,7 @@ export default function StudentControls() {
                             <h2 className="batches-title">Fee Status</h2>
                             <button
                                 className="btn btn-outline-primary btn-sm"
+                                disabled={!hasFee}
                                 onClick={handleAddInstallment}
                             >
                                 Add Installment

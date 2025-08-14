@@ -9,6 +9,7 @@ const Student = require("../models/Student");
 const Teacher = require("../models/Admins_teachers");
 const BatchTeacher = require("../models/Batch_teachers");
 const XLSX = require("xlsx");
+const mongoose = require("mongoose");
 
 function convertTo24Hour(time12h) {
   const [time, modifier] = time12h.split(" ");
@@ -1069,11 +1070,22 @@ exports.markInstallmentPaid = async (req, res) => {
 };
 
 exports.updateInstallment = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const { id } = req.params;
-    const updateFields = {};
     const { amount, dueDate, paidDate, method } = req.body;
 
+    // 1) Load existing installment (to compute delta)
+    const existing = await Installment.findById(id).session(session);
+    if (!existing) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: "Installment not found" });
+    }
+
+    // Build update object
+    const updateFields = {};
     if (amount !== undefined) updateFields.amount = amount;
     if (dueDate !== undefined) updateFields.dueDate = dueDate;
 
@@ -1085,23 +1097,39 @@ exports.updateInstallment = async (req, res) => {
       if (method) updateFields.method = method;
     }
 
-    const updated = await Installment.findByIdAndUpdate(id, updateFields, {
-      new: true,
-    });
+    // 2) Apply installment update
+    const updated = await Installment.findByIdAndUpdate(
+      id,
+      updateFields,
+      { new: true, session }
+    );
 
-    if (!updated) {
-      return res.status(404).json({ message: "Installment not found" });
+    // 3) If amount changed, adjust Fee.totalAmount
+    if (amount !== undefined) {
+      const oldAmt = Number(existing.amount || 0);
+      const newAmt = Number(updated.amount || 0);
+      const delta = newAmt - oldAmt;
+
+      // Assumes Installment has studentId to link to Fee(studentId)
+      await Fee.findOneAndUpdate(
+        { studentId: updated.studentId },
+        { $inc: { totalAmount: delta } },
+        { session }
+      );
     }
+
+    await session.commitTransaction();
+    session.endSession();
 
     return res.json({
       message: "Installment updated successfully",
       installment: updated,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("Error updating installment:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: error.message });
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 

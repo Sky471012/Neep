@@ -83,7 +83,7 @@ const AllCourses = () => {
     {
       id: 9,
       title: "Mathematics (11th and 12th)",
-      batchName: "Mathematics BY MOHAN SIR",
+      batchName: "MATHEMATICS BY MOHAN SIR",
       facultyName: "Mr. Mohan Verma",
       facultyExperience: "17+ Years",
       description:
@@ -127,7 +127,7 @@ const AllCourses = () => {
     },
     {
       id: 14,
-      title: "Accounts (11th and 12th)",
+      title: "Accountancy (11th and 12th)",
       batchName: "ACC. BY ANUJ SIR",
       facultyName: "Mr. Anuj Rajput",
       facultyExperience: "23+ Years",
@@ -690,7 +690,7 @@ const AllCourses = () => {
 
                 <a
                   className="view-details-btn"
-                  href="https://wa.me/919313214643"
+                  href={`https://wa.me/919313214643?text=Hi, I’m interested in learning more about the ${course.title} course. Could you please share the details?`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

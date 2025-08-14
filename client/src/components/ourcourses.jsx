@@ -603,7 +603,7 @@ const OurCourses = () => {
 
                 <a
                   className="view-details-btn"
-                  href="https://wa.me/919313214643"
+                  href={`https://wa.me/919313214643?text=Hi, I’m interested in learning more about the ${course.title} course. Could you please share the details?`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

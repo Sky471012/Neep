@@ -19,24 +19,28 @@ const BannerSection = () => {
       imageDesktop: "/slide-lg-1.jpg", // 1920x600
       imageMobile: "/slide-1.jpg", // 1080x1080
       primaryButton: "Enroll Now",
+      batchName: "Manzil",
     },
     {
       id: 2,
       imageDesktop: "/slide-lg-2.jpg",
       imageMobile: "/slide-2.jpg",
       primaryButton: "Join Batch",
+      batchName: "Parishram",
     },
     {
       id: 3,
       imageDesktop: "/slide-lg-3.jpg",
       imageMobile: "/slide-3.jpg",
-      primaryButton: "Free Demo"
+      primaryButton: "Free Demo",
+      batchName: "Aadhar",
     },
     {
       id: 4,
       imageDesktop: "/slide-lg-4.jpg",
       imageMobile: "/slide-4.jpg",
-      primaryButton: "Learn More"
+      primaryButton: "Learn More",
+      batchName: "Achiever's",
     }
   ]
 
@@ -376,7 +380,7 @@ const BannerSection = () => {
               }}
             >
               <div className="banner-buttons">
-                <a href="https://wa.me/919313214643" target="_blank" rel="noopener noreferrer" className="btn btn-primary">{banner.primaryButton}</a>
+                <a href={`https://wa.me/919313214643?text=Hi, I’m interested in learning more about the ${banner.batchName} batch. Could you please share the details?`} target="_blank" rel="noopener noreferrer" className="btn btn-primary">{banner.primaryButton}</a>
               </div>
             </div>
           ))}

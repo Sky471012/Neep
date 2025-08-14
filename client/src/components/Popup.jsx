@@ -4,6 +4,7 @@ import axios from 'axios';
 export default function Popup() {
     const [visible, setVisible] = useState(false);
     const [popup, setPopup] = useState(null);
+    const message = encodeURIComponent("Hi, I’m interested in learning more about your special course. Could you please share the details?");
 
     useEffect(() => {
         // Check if popup was already shown in this session
@@ -45,7 +46,7 @@ export default function Popup() {
                 <div className="popup-text">
                     <p style={{ width: "90%", overflowWrap: "break-word" }}><strong>{popup.description}</strong></p>
                     <a
-                        className="login-page-button pt-2 pb-2" style={{ fontWeight: "bolder" }} href="https://wa.me/919313214643"
+                        className="login-page-button pt-2 pb-2" style={{ fontWeight: "bolder" }} href={`https://wa.me/919313214643?text=${message}`}
                         target="_blank"
                         rel="noopener noreferrer"
                     >

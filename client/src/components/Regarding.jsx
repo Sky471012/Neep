@@ -244,7 +244,8 @@ export default function Regarding() {
                     padding-left: 2rem;
                     transition: all 0.3s ease;
                     background: linear-gradient(135deg, rgba(0, 91, 238, 0.11) 0%, rgba(16, 185, 129, 0.11) 100%);
-                    border-radius: 16px;
+                    border-bottom-right-radius: 16px;
+                    border-top-right-radius: 16px;
                     padding: 2rem;
                     border-left: 4px solid;
                     border-image: linear-gradient(135deg, #3b82f6 0%, #10b981 100%) 1;
