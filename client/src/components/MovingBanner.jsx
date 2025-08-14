@@ -16,29 +16,29 @@ const BannerSection = () => {
   const banners = [
     {
       id: 1,
-      imageDesktop: "/slide-lg-1.jpg", // 1920x600
-      imageMobile: "/slide-1.jpg", // 1080x1080
+      imageDesktop: "/slide-lg-1.webp", // 1920x600
+      imageMobile: "/slide-1.webp", // 1080x1080
       primaryButton: "Enroll Now",
       batchName: "Manzil",
     },
     {
       id: 2,
-      imageDesktop: "/slide-lg-2.jpg",
-      imageMobile: "/slide-2.jpg",
+      imageDesktop: "/slide-lg-2.webp",
+      imageMobile: "/slide-2.webp",
       primaryButton: "Join Batch",
       batchName: "Parishram",
     },
     {
       id: 3,
-      imageDesktop: "/slide-lg-3.jpg",
-      imageMobile: "/slide-3.jpg",
+      imageDesktop: "/slide-lg-3.webp",
+      imageMobile: "/slide-3.webp",
       primaryButton: "Free Demo",
       batchName: "Aadhar",
     },
     {
       id: 4,
-      imageDesktop: "/slide-lg-4.jpg",
-      imageMobile: "/slide-4.jpg",
+      imageDesktop: "/slide-lg-4.webp",
+      imageMobile: "/slide-4.webp",
       primaryButton: "Learn More",
       batchName: "Achiever's",
     }

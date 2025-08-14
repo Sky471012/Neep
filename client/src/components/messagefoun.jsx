@@ -484,7 +484,7 @@ const MessageFromFounder = () => {
             <div className="image-block">
               <div className="founder-image-container">
                 <img
-                  src="/founderimage.png"
+                  src="/founderimage.webp"
                   alt="MOHAN VERMA"
                   className="founder-image"
                 />

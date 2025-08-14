@@ -645,6 +645,18 @@ exports.getStudentInstallments = async (req, res) => {
   }
 };
 
+exports.getStudentsAllTests = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const tests = await Test.find({ studentId });
+
+    res.json({ tests });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.createStudent = async (req, res) => {
   try {
     const {

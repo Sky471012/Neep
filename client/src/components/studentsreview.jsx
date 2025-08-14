@@ -8,70 +8,70 @@ const StudentsReviews = () => {
       name: "Rishabh Jain",
       review:
         "NEW ERA EDUCATION POINT offers exceptional math's classes in Palam. The experienced teachers provide clear explanations and helpful resources to ensure students understand complex math concepts. Highly recommended for anyone looking to improve their math skills.",
-      image: "/avatars/2.png",
+      image: "/avatars/2.webp",
       rating: "★★★★★",
     },
     {
       name: "Nainaa Roy",
       review:
         "Excellent teaching and very supportive environment. Mohan Sir breaks down complex topics into simple steps. Perfect for school students and competitive exams alike.",
-      image: "/avatars/3.png",
+      image: "/avatars/3.webp",
       rating: "★★★★★",
     },
     {
       name: "Gurudeep Nat",
       review:
         "If you’re looking for quality maths tuition in Kailashpuri, this is the place. Mohan Sir gives personal attention to each student and uses real-life examples to make learning engaging. His passion for teaching shows in every class.",
-      image: "/avatars/1.png",
+      image: "/avatars/1.webp",
       rating: "★★★★★",
     },
     {
       name: "Kiran Pal",
       review:
         "Mr. mohan sir is very excellent teacher and i am very thankfully to him.  i am study in neep institute before 4 years and very supportive in my bad condition...best teacher in my life and they  best understand student and very best education point....❤❤",
-      image: "/avatars/12.png",
+      image: "/avatars/12.webp",
       rating: "★★★★★",
     },
     {
       name: "Parwati Chauhan",
       review:
         "Mohan sir is the sweetest teacher. He is an amazing teacher. He is very supportive. He clears each and every doubt of every student  . He never make you feels embarrassed about your grade instead he will help you to improve yourself. He focuses on building concept. Thank you mohan sir.",
-      image: "/avatars/4.png",
+      image: "/avatars/4.webp",
       rating: "★★★★★",
     },
     {
       name: "Rachna",
       review:
         "The experienced faculty and personalized attention ensure excellent results. The study material provided is comprehensive and helped me secure top marks in my exams.",
-      image: "/avatars/6.png",
+      image: "/avatars/6.webp",
       rating: "★★★★★",
     },
     {
       name: "Meena Dhayani",
       review:
         "I am very lucky that I  found this institute, it's a very good point to improve your education. The teachers here are also very good, my experience here has been very good.💖💖😊😊 …",
-      image: "/avatars/9.png",
+      image: "/avatars/9.webp",
       rating: "★★★★★",
     },
     {
       name: "Samji Buchiya",
       review:
         "NEW ERA EDUCATION POINT is the best coaching centre in Kailash Puri. The experienced faculty and personalized attention ensure excellent results.",
-      image: "/avatars/5.png",
+      image: "/avatars/5.webp",
       rating: "★★★★★",
     },
     {
       name: "Meenu Ojha",
       review:
         "Mohan Sir provide excellent guidance to help students excel in mathematics.this institute for anyone looking to improve their math skills.",
-      image: "/avatars/10.png",
+      image: "/avatars/10.webp",
       rating: "★★★★★",
     },
     {
       name: "Rupesh Saini",
       review:
         "This study center has helped me to improve my grades and build confidence in my abilities. I feel more prepared and motivated to succeed in my studies thanks to the resources and support available here.",
-      image: "/avatars/11.png",
+      image: "/avatars/11.webp",
       rating: "★★★★★",
     },
   ];

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import preloader_img from "../assets/images/preloader-img.png";
+import preloader_img from "../assets/images/preloader-img.webp";
 
 export default function Preloader({ fadeOut }) {
   const [imageLoaded, setImageLoaded] = useState(false);

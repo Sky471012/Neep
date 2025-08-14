@@ -20,6 +20,7 @@ export default function StudentControls() {
     const [student, setStudent] = useState({});
     const [batches, setBatches] = useState([]);
     const [installments, setInstallments] = useState([]);
+    const [tests, setTests] = useState([]);
     const [fee, setFee] = useState({});
     const [allBatches, setAllBatches] = useState([]);
     const [modalOne, setModalOne] = useState(false);
@@ -76,6 +77,7 @@ export default function StudentControls() {
 
     useEffect(() => {
         const token = localStorage.getItem("authToken");
+        console.log("Token:", token);
 
         if (token && studentId) {
             // Fetch student details
@@ -117,6 +119,14 @@ export default function StudentControls() {
                 .then(res => res.json())
                 .then(data => setInstallments(Array.isArray(data) ? data : data.installments || []))
                 .catch(err => console.error("Installments fetch error:", err));
+            
+            // Fetch alltests
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/allTests/${studentId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => setTests(Array.isArray(data) ? data : data.tests || []))
+                .catch(err => console.error("Tests fetch error:", err));
         }
     }, [studentId]);
 

@@ -34,6 +34,7 @@ router.get('/getStudentDetails/:studentId', adminController.getStudent);
 router.get('/studentBatches/:studentId', adminController.getStudentBatches);
 router.get('/fee/:studentId', adminController.getStudentFee);
 router.get('/installments/:studentId', adminController.getStudentInstallments);
+router.get('/allTests/:studentId', adminController.getStudentsAllTests);
 router.post('/studentCreate', adminController.createStudent);
 router.delete('/studentDelete/:studentId', adminController.deleteStudent);
 router.post('/addStudent/:studentId/:batchId', adminController.addStudentToBatch);

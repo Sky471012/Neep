@@ -1,7 +1,7 @@
 import React from "react";
-import googleplay from "../assets/images/googleplay.png";
-import qr from "../assets/images/qr.png";
-import app from "../assets/images/app.png";
+import googleplay from "../assets/images/googleplay.webp";
+import qr from "../assets/images/qr.webp";
+import app from "../assets/images/app.webp";
 
 export default function DownloadApp() {
   return (
