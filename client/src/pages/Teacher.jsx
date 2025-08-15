@@ -606,7 +606,7 @@ export default function Teacher() {
                                                                     <div>
                                                                         {!selectedTest ? (
                                                                             <div>
-                                                                                <h5 className="mb-3">Tests for {batch.batchName}</h5>
+                                                                                <h3 className="modal-title">Tests for {batch.batchName}</h3>
                                                                                 <ul className="list-group">
                                                                                     {Array.from(new Map(tests[batchId].map(test => [`${test.name}_${test.date}`, test])).values()).map((test, idx) => (
                                                                                         <li key={idx} className="list-group-item d-flex justify-content-between align-items-center">

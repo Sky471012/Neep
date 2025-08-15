@@ -649,9 +649,25 @@ exports.getStudentsAllTests = async (req, res) => {
   try {
     const { studentId } = req.params;
 
-    const tests = await Test.find({ studentId });
+    const tests = await Test.find({ studentId })
+      .populate({
+        path: "batchId",
+        select: "name" // only fetch the name field from Batch
+      });
 
-    res.json({ tests });
+    // If you want a cleaner response without the nested batchId object:
+    const formattedTests = tests.map(test => ({
+      _id: test._id,
+      name: test.name,
+      maxMarks: test.maxMarks,
+      marksScored: test.marksScored,
+      date: test.date,
+      absent: test.absent,
+      batchId: test.batchId?._id,
+      batchName: test.batchId?.name || null
+    }));
+
+    res.json({ tests: formattedTests });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

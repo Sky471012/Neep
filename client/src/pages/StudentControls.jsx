@@ -9,6 +9,7 @@ import { Inter18ptBold } from "../assets/fonts/Inter_18pt-Bold-bold";
 import Navbar from "../components/Navbar";
 import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
+import ModalThree from "../modals/ModalThree";
 import { useMemo } from "react";
 
 export default function StudentControls() {
@@ -25,7 +26,10 @@ export default function StudentControls() {
     const [allBatches, setAllBatches] = useState([]);
     const [modalOne, setModalOne] = useState(false);
     const [modalTwo, setModalTwo] = useState(false);
+    const [modalThree, setModalThree] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedTest, setSelectedTest] = useState(null);
+    const [selectedBatch, setSelectedBatch] = useState(null);
     const [selectedToAdd, setSelectedToAdd] = useState([]);
     const [isEditingFee, setIsEditingFee] = useState(false);
     const [editedFee, setEditedFee] = useState(fee?.totalAmount || 0);
@@ -77,7 +81,6 @@ export default function StudentControls() {
 
     useEffect(() => {
         const token = localStorage.getItem("authToken");
-        console.log("Token:", token);
 
         if (token && studentId) {
             // Fetch student details
@@ -119,7 +122,7 @@ export default function StudentControls() {
                 .then(res => res.json())
                 .then(data => setInstallments(Array.isArray(data) ? data : data.installments || []))
                 .catch(err => console.error("Installments fetch error:", err));
-            
+
             // Fetch alltests
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/allTests/${studentId}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -1144,6 +1147,9 @@ export default function StudentControls() {
                                     ))}
                             </tbody>
                         </table>
+                        <button className="btn btn-success w-100 p-2" onClick={() => setModalThree(true)} >
+                            Show Student's Test Score
+                        </button>
                     </div>
 
 
@@ -1530,6 +1536,88 @@ export default function StudentControls() {
                             </button>
                         </div>
                     </ModalTwo>
+
+                    <ModalThree
+                        isOpen={modalThree}
+                        onClose={() => setModalThree(false)}
+                    >
+                        <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
+                        <h3 className="modal-title" >Showing Scores of {student.name}</h3>
+
+                        <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
+                            {tests.length === 0 ? (
+                                <div className="p-4 text-center text-muted">No tests found.</div>
+                            ) : (
+                                <>
+                                    {/* Step 1: Show batches */}
+                                    {!selectedBatch && (
+                                        <ul className="list-group">
+                                            {[...new Set(tests.map(t => t.batchId))].map(batchId => {
+                                                const batchName = tests.find(t => t.batchId === batchId)?.batchName || "Unknown Batch";
+                                                return (
+                                                    <li key={batchId} className="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{batchName}</span>
+                                                        <button
+                                                            className="text-primary"
+                                                            onClick={() => setSelectedBatch(batchId)}
+                                                            style={{ border: "none", background: "transparent", fontSize: "13px" }}
+                                                        >
+                                                            View<i className="bi bi-arrow-right ms-1"></i>
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    )}
+
+                                    {/* Step 2: Show all tests of selected batch */}
+                                    {selectedBatch && (
+                                        <div style={{ height: "85vh", overflowY: "auto" }}>
+                                            <h3 className="modal-title" style={{ textAlign: "left" }}>
+                                                <button
+                                                    style={{ border: "none", background: "transparent" }}
+                                                    onClick={() => setSelectedBatch(null)}
+                                                >
+                                                    <i className="fas fa-arrow-left"></i>
+                                                </button>
+                                                Test Scores in {tests.find(t => t.batchId === selectedBatch)?.batchName}
+                                            </h3>
+
+                                            <table className="table table-bordered mt-3">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Test Name</th>
+                                                        <th>Date</th>
+                                                        <th>Max Marks</th>
+                                                        <th>Marks Scored</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {tests
+                                                        .filter(t => t.batchId === selectedBatch)
+                                                        .map(test => (
+                                                            <tr key={test._id}>
+                                                                <td>{test.name}</td>
+                                                                <td>{test.date}</td>
+                                                                <td>{test.maxMarks}</td>
+                                                                <td>
+                                                                    {test
+                                                                        ? test.absent
+                                                                            ? <span style={{ color: "red"}}>-AB-</span>
+                                                                            : test.marksScored
+                                                                        : "--"}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                        </div>
+                    </ModalThree>
 
                 </div>
 
