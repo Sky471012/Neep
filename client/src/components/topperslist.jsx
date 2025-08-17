@@ -24,24 +24,24 @@ const toppers = [
   },
   {
     id: 4,
+    name: "Megha",
+    subject: "Accountancy",
+    marks: "99",
+    image: "/toppers/Megha.webp",
+  },
+  {
+    id: 5,
     name: "Neha",
     subject: "Mathematics",
     marks: "98",
     image: "/toppers/Neha.webp",
   },
   {
-    id: 5,
+    id: 6,
     name: "Amit",
     subject: "Biology",
     marks: "98",
     image: "/toppers/Amit.webp",
-  },
-  {
-    id: 6,
-    name: "Nidhi",
-    subject: "Accountancy",
-    marks: "99",
-    image: "/toppers/Nidhi.webp",
   },
   {
     id: 7,
