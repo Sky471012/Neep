@@ -640,11 +640,16 @@ export default function Teacher() {
                                                                                                 <tr key={student._id}>
                                                                                                     <td style={{ width: "75%", textWrap: "wrap" }}>{student.name}</td>
                                                                                                     <td style={{ width: "25%", textWrap: "wrap" }}>
-                                                                                                        {match
-                                                                                                            ? match.absent
-                                                                                                                ? <span style={{ color: "red"}}>-AB-</span>
-                                                                                                                : match.marksScored
-                                                                                                            : "--"}
+                                                                                                        {match ? (
+                                                                                                            match.absent ? (
+                                                                                                                <span style={{ color: "red" }}>-AB-</span>
+                                                                                                            ) : (
+                                                                                                                match.marksScored ?? "--"
+                                                                                                            )
+                                                                                                        ) : (
+                                                                                                            "--"
+                                                                                                        )}
+
                                                                                                     </td>
                                                                                                 </tr>
                                                                                             );
