@@ -201,7 +201,7 @@ return (
                             (cls) => (
                               <li key={cls}>
                                 <button
-                                  className="btn btn-sm text-start fw-normal pt-1 pb-0"
+                                  className="btn btn-sm text-start fw-normal pt-1 pb-0 w-100"
                                   onClick={() => setSelectedUnpaidClass(cls)}
                                 >
                                   {cls}
@@ -211,7 +211,7 @@ return (
                           )}
                           <li>
                             <button
-                              className="btn btn-sm text-start text-danger"
+                              className="btn btn-sm text-start text-danger w-100"
                               onClick={() => setSelectedUnpaidClass(null)}
                             >
                               Clear Filter
@@ -293,7 +293,7 @@ return (
                             (cls) => (
                               <li key={cls}>
                                 <button
-                                  className="btn btn-sm text-start fw-normal pt-1 pb-0"
+                                  className="btn btn-sm text-start fw-normal pt-1 pb-0 w-100"
                                   onClick={() => setSelectedUpcomingClass(cls)}
                                 >
                                   {cls}
@@ -303,7 +303,7 @@ return (
                           )}
                           <li>
                             <button
-                              className="btn btn-sm text-start text-danger"
+                              className="btn btn-sm text-start text-danger w-100"
                               onClick={() => setSelectedUpcomingClass(null)}
                             >
                               Clear Filter
@@ -385,7 +385,7 @@ return (
                             (cls) => (
                               <li key={cls}>
                                 <button
-                                  className="btn btn-sm text-start fw-normal pt-1 pb-0"
+                                  className="btn btn-sm text-start fw-normal pt-1 pb-0 w-100"
                                   onClick={() => setSelectedPaidClass(cls)}
                                 >
                                   {cls}
@@ -395,7 +395,7 @@ return (
                           )}
                           <li>
                             <button
-                              className="btn btn-sm text-start text-danger"
+                              className="btn btn-sm text-start text-danger w-100"
                               onClick={() => setSelectedPaidClass(null)}
                             >
                               Clear Filter
