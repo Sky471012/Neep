@@ -122,31 +122,38 @@ exports.addTest = async (req, res) => {
   const { studentId, batchId, name, maxMarks, marksScored, date, absent: absentFromClient } = req.body;
 
   try {
+    // Check if test already exists
+    const existingTest = await Test.findOne({ studentId, batchId, name, date });
+
+    if (existingTest) {
+      return res.status(200).json({
+        message: "Test already exists. No changes made.",
+        test: existingTest
+      });
+    }
+    
     const inferredAbsent = marksScored === null || marksScored === undefined || marksScored === "";
     const absent = typeof absentFromClient === "boolean" ? absentFromClient : inferredAbsent;
 
-    const updatedTest = await Test.findOneAndUpdate(
-      { studentId, batchId, name, date },
-      {
-        $set: {
-          maxMarks,
-          marksScored: absent ? 0 : Number(marksScored),
-          absent
-        },
-      },
-      {
-        new: true,
-        upsert: true,
-        setDefaultsOnInsert: true,
-      }
-    );
+    // Create new test
+    const newTest = new Test({
+      studentId,
+      batchId,
+      name,
+      maxMarks,
+      marksScored: absent ? 0 : Number(marksScored),
+      absent,
+      date
+    });
+
+    await newTest.save();
 
     res.status(201).json({
-      message: "Test added or updated successfully",
-      test: updatedTest,
+      message: "Test added successfully",
+      test: newTest,
     });
   } catch (err) {
-    console.error("Error adding/updating test:", err);
+    console.error("Error adding test:", err);
     res.status(500).json({ error: err.message });
   }
 };

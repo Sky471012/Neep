@@ -651,7 +651,7 @@ export default function BatchControls() {
                   </li>
                   <li>
                     <button className="dropdown-item" onClick={() => openTestModal(batch.batchId)}>
-                      Add / Change Test Scores
+                      Add Test Scores
                     </button>
                   </li>
                   <li>
