@@ -158,7 +158,15 @@ exports.markAttendance = async (req, res) => {
 };
 
 exports.addTest = async (req, res) => {
-  const { studentId, batchId, name, maxMarks, marksScored, date, absent: absentFromClient } = req.body;
+  const {
+    studentId,
+    batchId,
+    name,
+    maxMarks,
+    marksScored,
+    date,
+    absent: absentFromClient,
+  } = req.body;
 
   try {
     // Check if test already exists
@@ -172,8 +180,10 @@ exports.addTest = async (req, res) => {
     }
 
     // infer absent if client didn't send a boolean
-    const inferredAbsent = marksScored === null || marksScored === undefined || marksScored === "";
-    const absent = typeof absentFromClient === "boolean" ? absentFromClient : inferredAbsent;
+    const inferredAbsent =
+      marksScored === null || marksScored === undefined || marksScored === "";
+    const absent =
+      typeof absentFromClient === "boolean" ? absentFromClient : inferredAbsent;
 
     const safeMarks = absent ? 0 : Number(marksScored);
     if (!absent && (Number.isNaN(safeMarks) || safeMarks < 0)) {
@@ -188,7 +198,7 @@ exports.addTest = async (req, res) => {
       maxMarks: Number(maxMarks),
       marksScored: safeMarks,
       absent,
-      date
+      date,
     });
 
     await newTest.save();
@@ -434,7 +444,7 @@ exports.addStudentByCreating = async (req, res) => {
 
     if (existingStudent) {
       return res.status(400).json({
-        message: "Student with same name, phone and DOB already exists.",
+        message: "Student with same phone and DOB already exists.",
       });
     }
 
@@ -486,11 +496,7 @@ exports.toggleArchiveStatus = async (req, res) => {
 exports.editBatch = async (req, res) => {
   try {
     const { batchId } = req.params;
-    const {
-      name,
-      class: batchClass,
-      startDate,
-    } = req.body;
+    const { name, class: batchClass, startDate } = req.body;
 
     // Validate required fields
     if (!name || !batchClass || !startDate) {
@@ -498,9 +504,12 @@ exports.editBatch = async (req, res) => {
     }
 
     // Validate startDate format (DD-MM-YYYY)
-    const startDateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
+    const startDateRegex =
+      /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
     if (!startDateRegex.test(startDate)) {
-      return res.status(400).json({ error: "Start date must be in DD-MM-YYYY format" });
+      return res
+        .status(400)
+        .json({ error: "Start date must be in DD-MM-YYYY format" });
     }
 
     // Validate class enum
@@ -548,14 +557,8 @@ exports.editBatch = async (req, res) => {
 
     // Also update batchName in Batch_teachers and Batch_students
     await Promise.all([
-      BatchTeacher.updateMany(
-        { batchId },
-        { batchName: name.trim() }
-      ),
-      BatchStudent.updateMany(
-        { batchId },
-        { batchName: name.trim() }
-      )
+      BatchTeacher.updateMany({ batchId }, { batchName: name.trim() }),
+      BatchStudent.updateMany({ batchId }, { batchName: name.trim() }),
     ]);
 
     res.json(updatedBatch);
@@ -655,14 +658,13 @@ exports.getStudentsAllTests = async (req, res) => {
   try {
     const { studentId } = req.params;
 
-    const tests = await Test.find({ studentId })
-      .populate({
-        path: "batchId",
-        select: "name" // only fetch the name field from Batch
-      });
+    const tests = await Test.find({ studentId }).populate({
+      path: "batchId",
+      select: "name", // only fetch the name field from Batch
+    });
 
     // If you want a cleaner response without the nested batchId object:
-    const formattedTests = tests.map(test => ({
+    const formattedTests = tests.map((test) => ({
       _id: test._id,
       name: test.name,
       maxMarks: test.maxMarks,
@@ -670,7 +672,7 @@ exports.getStudentsAllTests = async (req, res) => {
       date: test.date,
       absent: test.absent,
       batchId: test.batchId?._id,
-      batchName: test.batchId?.name || null
+      batchName: test.batchId?.name || null,
     }));
 
     res.json({ tests: formattedTests });
@@ -698,7 +700,7 @@ exports.createStudent = async (req, res) => {
 
     if (existingStudent) {
       return res.status(400).json({
-        message: "Student with same name and phone number already exists.",
+        message: "Student with same DOB and phone number already exists.",
       });
     }
 
@@ -772,7 +774,7 @@ exports.deleteStudent = async (req, res) => {
     await Fee.deleteMany({
       studentId: studentId,
     });
-    
+
     // delete from Installment
     await Installment.deleteMany({
       studentId: studentId,
@@ -1132,11 +1134,10 @@ exports.updateInstallment = async (req, res) => {
     }
 
     // 2) Apply installment update
-    const updated = await Installment.findByIdAndUpdate(
-      id,
-      updateFields,
-      { new: true, session }
-    );
+    const updated = await Installment.findByIdAndUpdate(id, updateFields, {
+      new: true,
+      session,
+    });
 
     // 3) If amount changed, adjust Fee.totalAmount
     if (amount !== undefined) {
@@ -1163,7 +1164,9 @@ exports.updateInstallment = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Error updating installment:", error);
-    return res.status(500).json({ message: "Server error", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
   }
 };
 
@@ -1277,7 +1280,7 @@ exports.editStudent = async (req, res) => {
 
     if (existingStudent) {
       return res.status(400).json({
-        error: "Student with same name and phone number already exists",
+        error: "Student with same DOB and phone number already exists",
       });
     }
 
@@ -1565,7 +1568,10 @@ exports.getPaidInstallments = async (req, res) => {
 // today's classes
 exports.getTodaysClasses = async (req, res) => {
   try {
-    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+    const today = new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      timeZone: "Asia/Kolkata",
+    }).format(new Date());
 
     // Fetch and populate batch details
     const classes = await Timetable.find({ weekday: today }).populate(
@@ -1599,8 +1605,7 @@ exports.getTodaysClasses = async (req, res) => {
       new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);
 
     flattenedTimings.sort(
-      (a, b) =>
-        parseTime(a.timing.startTime) - parseTime(b.timing.startTime)
+      (a, b) => parseTime(a.timing.startTime) - parseTime(b.timing.startTime)
     );
 
     res.json({ today, classes: flattenedTimings });
