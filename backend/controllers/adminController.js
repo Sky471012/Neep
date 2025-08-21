@@ -428,7 +428,6 @@ exports.addStudentByCreating = async (req, res) => {
 
   try {
     const existingStudent = await Student.findOne({
-      name: req.body.name.trim(),
       phone: req.body.phone.trim(),
       dob: req.body.dob.trim(),
     });
@@ -693,8 +692,8 @@ exports.createStudent = async (req, res) => {
 
     // Check if student exists
     const existingStudent = await Student.findOne({
-      name: name.trim(),
       phone: phone.trim(),
+      dob: req.body.dob.trim(),
     });
 
     if (existingStudent) {
@@ -1643,8 +1642,8 @@ exports.uploadExcelSheet = async (req, res) => {
     // Step 2: Remove duplicates against DB
     const existing = await Student.find({
       $or: uniqueBySheet.map((s) => ({
-        name: s.name,
         phone: s.phone,
+        dob: s.dob,
       })),
     });
 
