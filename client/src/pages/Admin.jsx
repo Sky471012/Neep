@@ -25,7 +25,7 @@ export default function Admin() {
   const [openPopupModal, setOpenPopupModal] = useState(false)
   const [description, setDescription] = useState("")
   const [image, setImage] = useState(null)
-  const [dob, setDob] = useState("")
+  const [dob, setDob] = useState(null)
   const [dateOfJoining, setDateOfJoining] = useState(new Date())
   const [startDate, setStartDate] = useState(new Date())
   const [todaysClasses, setTodaysClasses] = useState([])
@@ -38,7 +38,7 @@ export default function Admin() {
     teacherEmail: "",
     teacherPhone: "",
   })
-  
+
   // Group classes by timing
   const groupClassesByTiming = (classes) => {
     const grouped = {}
@@ -443,11 +443,7 @@ export default function Admin() {
                 className="datePicker"
                 dateFormat="dd-MM-yyyy"
                 selected={dob}
-                onChange={(date) => setDob(date)}
-                onChangeRaw={(e) => {
-                  const parsed = parse(e.target.value, "dd-MM-yyyy", new Date());
-                  if (!isNaN(parsed)) setDob(parsed);
-                }}
+                onChange={(date) => setDob(date)}   // keep only this
                 placeholderText="Select DOB"
                 required
                 showYearDropdown
