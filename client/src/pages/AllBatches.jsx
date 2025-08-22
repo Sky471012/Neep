@@ -69,6 +69,7 @@ export default function AllBatches() {
                                     batch.name.toLowerCase().includes(batchSearchQuery.toLowerCase()) ||
                                     batch.class.toLowerCase().includes(batchSearchQuery.toLowerCase()),
                             )
+                            .sort((a, b) => a.name.localeCompare(b.name)) // sort alphabetically
                             .map((batch, index) => (
                                 <Link key={index} to={`/batch/${batch._id}`} className="data-card">
                                     <h5 className="card-title">{batch.name}</h5>

@@ -1127,6 +1127,7 @@ export default function StudentControls() {
                                     .filter((b) =>
                                         b.name.toLowerCase().includes(batchSearch.toLowerCase())
                                     )
+                                    .sort((a, b) => a.name.localeCompare(b.name)) // sort alphabetically
                                     .map((b) => (
                                         <tr key={b._id}>
                                             <td style={{ width: "70%" }}>

@@ -942,6 +942,7 @@ export default function BatchControls() {
                     s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
                     s.phone.includes(studentSearch)
                   )
+                  .sort((a, b) => a.name.localeCompare(b.name)) // sort alphabetically
                   .map((s) => (
                     <tr key={s._id}>
                       <td style={{ width: "60%" }}>

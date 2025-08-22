@@ -70,6 +70,7 @@ export default function AllTeachers() {
                                     teacher.name.toLowerCase().includes(teacherSearchQuery.toLowerCase()) ||
                                     teacher.phone.includes(teacherSearchQuery),
                             )
+                            .sort((a, b) => a.name.localeCompare(b.name)) // sort alphabetically
                             .map((teacher, index) => (
                                 <Link key={index} to={`/teacher/${teacher._id}`} className="data-card">
                                     <h5 className="card-title">{teacher.name}</h5>
