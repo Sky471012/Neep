@@ -36,6 +36,7 @@ export default function Teacher() {
     const [batchSearch, setBatchSearch] = useState("");
     const [todaysClasses, setTodaysClasses] = useState([]);
     const [selectedTest, setSelectedTest] = useState(null);
+    const [attendanceDraft, setAttendanceDraft] = useState({});
 
     const allMonths = [
         "April", "May", "June", "July", "August", "September",
@@ -134,24 +135,73 @@ export default function Teacher() {
         }
     };
 
-    const markAttendance = async (studentId, batchId, status, date) => {
-        if (!date) return alert("Please select a date first.");
+    const setDraftStatus = (batchId, studentId, status) => {
+        setAttendanceDraft(prev => {
+            const next = { ...prev };
+            const batchDraft = { ...(next[batchId] || {}) };
+            if (status === 'present' || status === 'absent') {
+                batchDraft[studentId] = status;
+            } else {
+                delete batchDraft[studentId]; // not used by UI now, harmless fallback
+            }
+            next[batchId] = batchDraft;
+            return next;
+        });
+    };
+
+
+    const saveAttendanceForBatch = async (batchId, dateObj) => {
+        if (!dateObj) {
+            alert("Please select a date first.");
+            return;
+        }
+
+        const list = students[batchId] || [];
+        if (list.length === 0) {
+            alert("No students found for this batch.");
+            return;
+        }
+
         const token = localStorage.getItem("authToken");
-        const dateOnly = new Date(date.toDateString());
+        const dateOnly = new Date(dateObj.toDateString());
         const dateISO = dateOnly.toISOString();
 
+        const draft = attendanceDraft[batchId] || {};
+
+        // Build final status for EVERY student (default present)
+        const finalEntries = list.map(s => {
+            const status = draft[s._id] ?? "present";
+            return [s._id, status];
+        });
+
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/mark`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ studentId, batchId, date: dateISO, status }),
+            await Promise.all(finalEntries.map(async ([studentId, status]) => {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/mark`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ studentId, batchId, date: dateISO, status }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Failed to mark attendance");
+
+                // reflect as "marked" in local UI
+                setMarkedStatus(prev => ({
+                    ...prev,
+                    [`${studentId}_${batchId}_${dateOnly.toDateString()}`]: status,
+                }));
+            }));
+
+            // keep draft (optional) or clear; we’ll clear to avoid stale overrides
+            setAttendanceDraft(prev => {
+                const copy = { ...prev };
+                delete copy[batchId];
+                return copy;
             });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Failed to mark attendance");
-            setMarkedStatus((prev) => ({ ...prev, [`${studentId}_${batchId}_${dateOnly.toDateString()}`]: status }));
+            closeAttendanceModal(batchId);
+
         } catch (err) {
-            console.error("Attendance error:", err);
-            alert("Failed to mark attendance.");
+            console.error("Bulk attendance error:", err);
+            alert("Failed to mark some or all attendance.");
         }
     };
 
@@ -207,9 +257,65 @@ export default function Teacher() {
         }
     };
 
+    const preloadAttendanceForBatchDate = async (batchId, dateObj) => {
+        const token = localStorage.getItem("authToken");
+        const list = students[batchId] || [];
+        if (!token || list.length === 0 || !dateObj) return;
+
+        const dateOnly = new Date(dateObj.toDateString());
+
+        try {
+            const results = await Promise.all(
+                list.map(async (s) => {
+                    const res = await fetch(
+                        `${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/${s._id}`,
+                        { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || "Failed to fetch attendance");
+
+                    const rec = (data.attendance || []).find((r) => {
+                        const rd = new Date(r.date);
+                        return (
+                            r.batchId === batchId &&
+                            rd.getFullYear() === dateOnly.getFullYear() &&
+                            rd.getMonth() === dateOnly.getMonth() &&
+                            rd.getDate() === dateOnly.getDate()
+                        );
+                    });
+
+                    // status can be "present" | "absent" | undefined
+                    return [s._id, rec?.status];
+                })
+            );
+
+            setAttendanceDraft((prev) => {
+                const next = { ...prev };
+                const batchDraft = {};
+                for (const [sid, status] of results) {
+                    if (status === "present" || status === "absent") {
+                        // set exactly what's saved; if undefined we'll default to "present" in UI
+                        batchDraft[sid] = status;
+                    }
+                }
+                next[batchId] = batchDraft;
+                return next;
+            });
+        } catch (err) {
+            console.error("Preload attendance error:", err);
+        }
+    };
+
+    const openAttendanceModal = (batchId) => {
+        const date = selectedDates[batchId] || new Date(); // default to today if not chosen
+        setOpenModalTwo((prev) => ({ ...prev, [batchId]: true }));
+        setSelectedDates((prev) => ({ ...prev, [batchId]: date }));
+        preloadAttendanceForBatchDate(batchId, date);
+    };
+
+
     const openTimetableModal = (batchId) => { fetchTimetable(batchId); setOpenModalThree((prev) => ({ ...prev, [batchId]: true })); };
     const closeTimetableModal = (batchId) => setOpenModalThree((prev) => ({ ...prev, [batchId]: false }));
-    const openAttendanceModal = (batchId) => setOpenModalTwo((prev) => ({ ...prev, [batchId]: true }));
     const closeAttendanceModal = (batchId) => setOpenModalTwo((prev) => ({ ...prev, [batchId]: false }));
     const openTestModal = (batchId) => setOpenModalFour((prev) => ({ ...prev, [batchId]: true }));
     const closeTestModal = (batchId) => setOpenModalFour((prev) => ({ ...prev, [batchId]: false }));
@@ -443,11 +549,15 @@ export default function Teacher() {
                                                     <ModalTwo isOpen={openModalTwo[batchId]} onClose={() => closeAttendanceModal(batchId)}>
                                                         <div className="attendance-form">
                                                             <h3 className="modal-title">Mark Attendance for {batch.batchName}</h3>
+
                                                             <DatePicker
-                                                                className="datePicker mt-1 mb-1"
+                                                                className="datePicker mt-1 mb-2"
                                                                 dateFormat="dd-MM-yyyy"
                                                                 selected={selectedDate}
-                                                                onChange={(date) => setSelectedDates((prev) => ({ ...prev, [batchId]: date }))}
+                                                                onChange={(date) => {
+                                                                    setSelectedDates((prev) => ({ ...prev, [batchId]: date }));
+                                                                    preloadAttendanceForBatchDate(batchId, date);
+                                                                }}
                                                                 placeholderText="Select date"
                                                                 required
                                                                 showYearDropdown
@@ -459,38 +569,79 @@ export default function Teacher() {
                                                                 minDate={new Date("1995-01-01")}
                                                             />
                                                             <div style={{ maxHeight: "55vh", overflowY: "auto", margin: "10px 0" }}>
-                                                                <table className="table table-bordered mt-3">
+                                                                <table className="table table-bordered mt-2">
                                                                     <thead>
                                                                         <tr>
                                                                             <th>Student Name</th>
-                                                                            <th>Mark Attendance</th>
+                                                                            <th style={{ width: 260 }}>Select</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
                                                                         {students[batchId]?.length > 0 ? (
-                                                                            students[batchId].map((student) => (
-                                                                                <tr key={student._id}>
-                                                                                    <td style={{ width: "40%", textWrap: "wrap" }}>{student.name}</td>
-                                                                                    <td style={{ width: "60%" }}>
-                                                                                        <button
-                                                                                            className={`btn btn-success btn-sm me-2 ${markedStatus[`${student._id}_${batchId}_${selectedDate.toDateString()}`] === "present" ? "active" : ""}`}
-                                                                                            onClick={() => markAttendance(student._id, batchId, "present", selectedDate)}
-                                                                                        >Present</button>
-                                                                                        <button
-                                                                                            className={`btn btn-danger btn-sm ${markedStatus[`${student._id}_${batchId}_${selectedDate.toDateString()}`] === "absent" ? "active" : ""}`}
-                                                                                            onClick={() => markAttendance(student._id, batchId, "absent", selectedDate)}
-                                                                                        >Absent</button>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            ))
+                                                                            students[batchId].map((student) => {
+                                                                                const batchDraft = attendanceDraft[batchId] || {};
+                                                                                // Default to 'present' if not set
+                                                                                const currentStatus = batchDraft[student._id] ?? "present";
+
+                                                                                const alreadyMarkedKey = selectedDate
+                                                                                    ? `${student._id}_${batchId}_${selectedDate.toDateString?.()}`
+                                                                                    : null;
+                                                                                const alreadyMarked = alreadyMarkedKey ? markedStatus[alreadyMarkedKey] : undefined;
+
+                                                                                return (
+                                                                                    <tr key={student._id}>
+                                                                                        <td style={{ width: "40%", textWrap: "wrap" }}>{student.name}</td>
+                                                                                        <td style={{ width: "60%" }}>
+                                                                                            <div className="d-flex gap-2 align-items-center flex-wrap">
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    className={`btn btn-sm ${currentStatus === "present" ? "btn-success" : "btn-outline-success"}`}
+                                                                                                    onClick={() => setDraftStatus(batchId, student._id, "present")}
+                                                                                                >
+                                                                                                    Present
+                                                                                                </button>
+
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    className={`btn btn-sm ${currentStatus === "absent" ? "btn-danger" : "btn-outline-danger"}`}
+                                                                                                    onClick={() => setDraftStatus(batchId, student._id, "absent")}
+                                                                                                >
+                                                                                                    Absent
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                );
+                                                                            })
                                                                         ) : (
                                                                             <tr><td colSpan="2">Loading or no students found.</td></tr>
                                                                         )}
                                                                     </tbody>
                                                                 </table>
                                                             </div>
+
+                                                            {/* Summary & single submit button */}
+                                                            <div className="d-flex justify-content-between align-items-center mt-3">
+                                                                <small className="text-muted">
+                                                                    {(() => {
+                                                                        const total = students[batchId]?.length || 0;
+                                                                        const absentCount = Object.values(attendanceDraft[batchId] || {}).filter(v => v === "absent").length;
+                                                                        const presentCount = total - absentCount; // default present
+                                                                        return `Selected: ${presentCount} Present, ${absentCount} Absent`;
+                                                                    })()}
+                                                                </small>
+
+                                                                <button
+                                                                    className="btn btn-primary"
+                                                                    disabled={!selectedDate || (students[batchId]?.length || 0) === 0}
+                                                                    onClick={() => saveAttendanceForBatch(batchId, selectedDate)}
+                                                                >
+                                                                    Mark Attendance
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </ModalTwo>
+
 
                                                     <ModalThree isOpen={openModalThree[batchId]} onClose={() => closeTimetableModal(batchId)}>
                                                         <div className="timetable-details">
