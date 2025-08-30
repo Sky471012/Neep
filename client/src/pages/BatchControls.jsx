@@ -37,6 +37,7 @@ export default function BatchControls() {
   const [selectedTest, setSelectedTest] = useState(null);
   const [allStudents, setAllStudents] = useState({});
   const [markedStatus, setMarkedStatus] = useState({});
+  const [attendanceDraft, setAttendanceDraft] = useState({});
   const [selectedTeacher, setSelectedTeacher] = useState({});
   const [attendanceMap, setAttendanceMap] = useState({});
   const [activeStudent, setActiveStudent] = useState(null);
@@ -298,43 +299,119 @@ export default function BatchControls() {
     }
   };
 
-  const markAttendance = async (studentId, status) => {
-    if (!selectedDate) return alert("Please select a date first.");
+  const setDraftStatus = (studentId, status) => {
+    setAttendanceDraft(prev => {
+      const next = { ...prev };
+      if (status === 'present' || status === 'absent') {
+        next[studentId] = status;
+      } else {
+        delete next[studentId];
+      }
+      return next;
+    });
+  };
 
-    const dateOnly = new Date(selectedDate.toDateString());
-    const dateISO = dateOnly.toISOString();
+  const preloadAttendanceForDate = async (dateObj) => {
+    const token = localStorage.getItem("authToken");
+    if (!token || !dateObj || !Array.isArray(students) || students.length === 0) return;
+
+    const dateOnly = new Date(dateObj.toDateString());
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/mark`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ studentId, batchId, date: dateISO, status }),
+      // Fetch each student's attendance then find the record for this batch & date
+      const results = await Promise.all(
+        students.map(async (s) => {
+          const res = await fetch(
+            `${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/${s._id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Failed to fetch attendance");
+
+          const rec = (data.attendance || []).find((r) => {
+            const rd = new Date(r.date);
+            return (
+              r.batchId === batchId &&
+              rd.getFullYear() === dateOnly.getFullYear() &&
+              rd.getMonth() === dateOnly.getMonth() &&
+              rd.getDate() === dateOnly.getDate()
+            );
+          });
+
+          return [s._id, rec?.status]; // 'present' | 'absent' | undefined
+        })
+      );
+
+      // Populate draft with saved values only; others default to present in UI
+      setAttendanceDraft(() => {
+        const next = {};
+        for (const [sid, status] of results) {
+          if (status === "present" || status === "absent") next[sid] = status;
+        }
+        return next;
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to mark attendance");
-
-      setMarkedStatus((prev) => ({
-        ...prev,
-        [`${studentId}_${dateOnly.toDateString()}`]: status,
-      }));
     } catch (err) {
-      console.error("Attendance error:", err);
-      alert("Failed to mark attendance.");
+      console.error("Preload attendance error:", err);
+    }
+  };
+
+  const saveAttendanceForBatch = async (dateObj) => {
+    if (!dateObj) {
+      alert("Please select a date first.");
+      return;
+    }
+
+    if (!Array.isArray(students) || students.length === 0) {
+      alert("No students found for this batch.");
+      return;
+    }
+
+    const token = localStorage.getItem("authToken");
+    const dateOnly = new Date(dateObj.toDateString());
+    const dateISO = dateOnly.toISOString();
+
+    // Default everyone to 'present' unless draft says 'absent'
+    const finalEntries = students.map(s => {
+      const status = attendanceDraft[s._id] ?? "present";
+      return [s._id, status];
+    });
+
+    try {
+      await Promise.all(finalEntries.map(async ([studentId, status]) => {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/mark`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ studentId, batchId, date: dateISO, status }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to mark attendance");
+
+        // reflect locally as "marked"
+        setMarkedStatus(prev => ({
+          ...prev,
+          [`${studentId}_${batchId}_${dateOnly.toDateString()}`]: status,
+        }));
+      }));
+
+      // Clear draft to avoid accidental carry-over
+      setAttendanceDraft({});
+      closeAttendanceModalHandler();
+    } catch (err) {
+      console.error("Bulk attendance error:", err);
+      alert("Failed to mark some or all attendance.");
     }
   };
 
   const openModalOneHandler = () => {
+    const date = selectedDate || new Date();
     setOpenModalOne(true);
+    setSelectedDate(date);
+    preloadAttendanceForDate(date);
   };
 
   const closeAttendanceModalHandler = () => {
     setOpenModalOne(false);
   };
-
 
   const updateTimetable = async (finalTimetable) => {
     try {
@@ -992,11 +1069,12 @@ export default function BatchControls() {
         <ModalOne isOpen={openModalOne} onClose={closeAttendanceModalHandler}>
           <div className="attendance-form">
             <h3 className="modal-title">Mark Attendance for {batch.name}</h3>
+
             <DatePicker
-              className="datePicker mt-1 mb-1"
+              className="datePicker mt-1 mb-2"
               dateFormat="dd-MM-yyyy"
               selected={selectedDate}
-              onChange={(date) => setSelectedDate(date)}
+              onChange={(date) => { setSelectedDate(date); preloadAttendanceForDate(date); }}
               placeholderText="Select date"
               required
               showYearDropdown
@@ -1007,41 +1085,64 @@ export default function BatchControls() {
               openToDate={new Date()}
               minDate={new Date("1995-01-01")}
             />
+
             <div style={{ maxHeight: "55vh", overflowY: "auto", margin: "10px 0" }}>
               <table className="table table-bordered mt-3">
                 <thead>
                   <tr>
-                    <th>Student Name</th>
-                    <th>Mark Attendance</th>
+                    <th style={{ width: "50%" }}>Student</th>
+                    <th style={{ width: "50%" }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {students.map((student) => {
-                    const key = `${student._id}_${selectedDate.toDateString()}`;
+                    const chosen = attendanceDraft[student._id]; // 'present' | 'absent' | undefined
+                    const effective = chosen ?? "present";
                     return (
                       <tr key={student._id}>
-                        <td style={{ width: "40%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
-                        <td style={{ width: "60%" }}>
-                          <button
-                            className={`btn btn-success btn-sm me-2 ${markedStatus[key] === "present" ? "active" : ""
-                              }`}
-                            onClick={() => markAttendance(student._id, "present")}
-                          >
-                            Present
-                          </button>
-                          <button
-                            className={`btn btn-danger btn-sm ${markedStatus[key] === "absent" ? "active" : ""
-                              }`}
-                            onClick={() => markAttendance(student._id, "absent")}
-                          >
-                            Absent
-                          </button>
+                        <td style={{ width: "50%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
+                        <td style={{ width: "50%" }}>
+                          <div className="d-flex gap-2 align-items-center flex-wrap" role="group" aria-label="attendance">
+                            <button
+                              type="button"
+                              className={`btn btn-sm ${effective === "present" ? "btn-success" : "btn-outline-success"}`}
+                              onClick={() => setDraftStatus(student._id, "present")}
+                            >
+                              Present
+                            </button>
+                            <button
+                              type="button"
+                              className={`btn btn-sm ${effective === "absent" ? "btn-danger" : "btn-outline-danger"}`}
+                              onClick={() => setDraftStatus(student._id, "absent")}
+                            >
+                              Absent
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
+            </div>
+
+            <div className="d-flex justify-content-between align-items-center mt-2">
+              <small className="text-muted">
+                {(() => {
+                  const total = students.length || 0;
+                  const absentCount = Object.values(attendanceDraft || {}).filter(v => v === "absent").length;
+                  const presentCount = total - absentCount; // default present
+                  return `Selected: ${presentCount} Present, ${absentCount} Absent`;
+                })()}
+              </small>
+
+              <button
+                className="btn btn-primary"
+                disabled={!selectedDate || (students.length || 0) === 0}
+                onClick={() => saveAttendanceForBatch(selectedDate)}
+              >
+                Mark Attendance
+              </button>
             </div>
           </div>
         </ModalOne>

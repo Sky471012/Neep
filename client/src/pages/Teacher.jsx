@@ -573,7 +573,7 @@ export default function Teacher() {
                                                                     <thead>
                                                                         <tr>
                                                                             <th>Student Name</th>
-                                                                            <th style={{ width: 260 }}>Select</th>
+                                                                            <th>Status</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -590,8 +590,8 @@ export default function Teacher() {
 
                                                                                 return (
                                                                                     <tr key={student._id}>
-                                                                                        <td style={{ width: "40%", textWrap: "wrap" }}>{student.name}</td>
-                                                                                        <td style={{ width: "60%" }}>
+                                                                                        <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
+                                                                                        <td style={{ width: "50%" }}>
                                                                                             <div className="d-flex gap-2 align-items-center flex-wrap">
                                                                                                 <button
                                                                                                     type="button"
