@@ -13,5 +13,6 @@ router.get('/timetable/:batchId', teacherController.getTimetable);
 router.post('/test/add', teacherController.addTest);
 router.get('/getTest/:batchId', teacherController.getTest);
 router.get('/today/timetable', teacherController.getTodaysClassesForTeacher );
+router.patch('/editMarks', teacherController.editMarks );
 
 module.exports = router;

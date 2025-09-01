@@ -236,3 +236,35 @@ exports.getTodaysClassesForTeacher = async (req, res) => {
     res.status(500).json({ message: "Failed to load teacher's timetable" });
   }
 };
+
+exports.editMarks = async (req, res) => {
+  try {
+    const { testId } = req.params;
+    const { marksScored, absent } = req.body; // absent?: boolean
+
+    const test = await Test.findById(testId);
+    if (!test) return res.status(404).json({ message: 'Test not found' });
+
+    // basic validation
+    if (absent === true) {
+      test.absent = true;
+      test.marksScored = null;
+    } else {
+      if (marksScored == null || Number.isNaN(Number(marksScored))) {
+        return res.status(400).json({ message: 'marksScored must be a number when not absent' });
+      }
+      const n = Number(marksScored);
+      if (n < 0 || n > test.maxMarks) {
+        return res.status(400).json({ message: `marksScored must be between 0 and ${test.maxMarks}` });
+      }
+      test.absent = false;
+      test.marksScored = n;
+    }
+
+    await test.save();
+    return res.json({ test });
+  } catch (err) {
+    console.error('Update marks error:', err);
+    return res.status(500).json({ message: 'Failed to update marks' });
+  }
+};
