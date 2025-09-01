@@ -240,20 +240,21 @@ exports.getTodaysClassesForTeacher = async (req, res) => {
 exports.editMarks = async (req, res) => {
   try {
     const { testId } = req.params;
-    const { marksScored, absent } = req.body; // absent?: boolean
+    const { marksScored } = req.body; // may be "" (mark absent) or a number-like string
 
     const test = await Test.findById(testId);
     if (!test) return res.status(404).json({ message: 'Test not found' });
 
-    // basic validation
-    if (absent === true) {
+    // If empty or null -> Absent
+    if (marksScored === '' || marksScored === null || typeof marksScored === 'undefined') {
       test.absent = true;
-      test.marksScored = null;
+      test.marksScored = null; // safe even if previously set
     } else {
-      if (marksScored == null || Number.isNaN(Number(marksScored))) {
-        return res.status(400).json({ message: 'marksScored must be a number when not absent' });
-      }
+      // Non-empty -> must be a number within [0, maxMarks]
       const n = Number(marksScored);
+      if (Number.isNaN(n)) {
+        return res.status(400).json({ message: 'marksScored must be a number or empty to mark absent' });
+      }
       if (n < 0 || n > test.maxMarks) {
         return res.status(400).json({ message: `marksScored must be between 0 and ${test.maxMarks}` });
       }

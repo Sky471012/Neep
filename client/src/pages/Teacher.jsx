@@ -330,37 +330,31 @@ export default function Teacher() {
         const draft = editingMarks[testObj._id];
         if (!draft) return;
 
-        const body = {
-            // if the teacher clears value, you could either prevent save or mark absent.
-            // Here we treat empty as "not absent" and require a number; tweak as needed:
-            marksScored: Number(draft.value),
-            absent: false
-        };
+        // IMPORTANT: send empty string to mark absent on backend
+        const payload = { marksScored: draft.value === "" ? "" : draft.value };
 
         try {
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/editMarks/${testObj._id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify(body),
+                body: JSON.stringify(payload),
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || "Failed to update marks");
 
-            // Update local tests state
+            // Update the UI list you keep for tests[batchId]
             setTests(prev => {
                 const list = prev[batchId] || [];
                 const updated = list.map(t => (t._id === testObj._id ? { ...t, ...data.test } : t));
                 return { ...prev, [batchId]: updated };
             });
 
-            // Exit edit mode
             cancelEditMarks(testObj._id);
         } catch (err) {
-            console.error("Update marks error:", err);
+            console.error(err);
             alert(err.message || "Failed to update marks");
         }
     };
-
 
     const openTimetableModal = (batchId) => { fetchTimetable(batchId); setOpenModalThree((prev) => ({ ...prev, [batchId]: true })); };
     const closeTimetableModal = (batchId) => setOpenModalThree((prev) => ({ ...prev, [batchId]: false }));
@@ -837,57 +831,53 @@ export default function Teacher() {
 
                                                                                             return (
                                                                                                 <tr key={student._id}>
-                                                                                                    <td style={{ width: "75%", textWrap: "wrap" }}>{student.name}</td>
-                                                                                                    <td style={{ width: "25%", textWrap: "wrap" }}>
+                                                                                                    <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
+                                                                                                    <td style={{ width: "50%", textWrap: "wrap" }}>
+                                                                                                        {/* match = the test row for that student you’re rendering */}
                                                                                                         {match ? (
-                                                                                                            match.absent ? (
-                                                                                                                <span style={{ color: "red" }}>-AB-</span>
-                                                                                                            ) : (
-                                                                                                                <>
-                                                                                                                    {editingMarks[match._id] ? (
-                                                                                                                        <div className="d-flex gap-2 align-items-center">
-                                                                                                                            <input
-                                                                                                                                type="number"
-                                                                                                                                className="form-control form-control-sm"
-                                                                                                                                value={editingMarks[match._id].value}
-                                                                                                                                onChange={(e) =>
-                                                                                                                                    setEditingMarks(prev => ({
-                                                                                                                                        ...prev,
-                                                                                                                                        [match._id]: { value: e.target.value }
-                                                                                                                                    }))
-                                                                                                                                }
-                                                                                                                                placeholder="Enter marks"
-                                                                                                                                style={{ maxWidth: 100 }}
-                                                                                                                            />
-                                                                                                                            <button
-                                                                                                                                className="btn btn-sm btn-primary"
-                                                                                                                                onClick={() => saveEditMarks(batch.batchId, match)}
-                                                                                                                                title="Save"
-                                                                                                                            >
-                                                                                                                                Save
-                                                                                                                            </button>
-                                                                                                                            <button
-                                                                                                                                className="btn btn-sm btn-outline-secondary"
-                                                                                                                                onClick={() => cancelEditMarks(match._id)}
-                                                                                                                                title="Cancel"
-                                                                                                                            >
-                                                                                                                                Cancel
-                                                                                                                            </button>
-                                                                                                                        </div>
-                                                                                                                    ) : (
-                                                                                                                        <div className="d-flex justify-content-between align-items-center">
-                                                                                                                            <span>{match.marksScored ?? "--"}</span>
-                                                                                                                            <button
-                                                                                                                                className="btn btn-link btn-sm p-0"
-                                                                                                                                onClick={() => startEditMarks(match._id, match.marksScored)}
-                                                                                                                                title="Edit marks"
-                                                                                                                            >
-                                                                                                                                <i className="bi bi-pencil-square"></i>
-                                                                                                                            </button>
-                                                                                                                        </div>
-                                                                                                                    )}
-                                                                                                                </>
-                                                                                                            )
+                                                                                                            <>
+                                                                                                                {editingMarks[match._id] ? (
+                                                                                                                    <div className="d-flex gap-2 align-items-center">
+                                                                                                                        <input
+                                                                                                                            type="number"
+                                                                                                                            className="form-control form-control-sm"
+                                                                                                                            value={editingMarks[match._id].value}
+                                                                                                                            onChange={(e) =>
+                                                                                                                                setEditingMarks(prev => ({
+                                                                                                                                    ...prev,
+                                                                                                                                    [match._id]: { value: e.target.value }
+                                                                                                                                }))
+                                                                                                                            }
+                                                                                                                            placeholder="Empty = Absent"
+                                                                                                                            style={{ maxWidth: 120 }}
+                                                                                                                        />
+                                                                                                                        <button
+                                                                                                                            className="btn btn-sm btn-outline-success border-0"
+                                                                                                                            onClick={() => saveEditMarks(batch.batchId, match)}
+                                                                                                                        >
+                                                                                                                            <i className="bi bi-check-lg"></i>
+                                                                                                                        </button>
+                                                                                                                        <button
+                                                                                                                            className="btn btn-sm btn-outline-secondary border-0"
+                                                                                                                            onClick={() => cancelEditMarks(match._id)}
+                                                                                                                        >
+                                                                                                                            <i className="bi bi-x-lg"></i>
+                                                                                                                        </button>
+                                                                                                                    </div>
+                                                                                                                ) : (
+                                                                                                                    <div className="d-flex justify-content-between align-items-center" style={{ gap: 8 }}>
+                                                                                                                        {/* Show -AB- if absent, else the marks (or -- if truly missing) */}
+                                                                                                                        <span>{match.absent ? <span style={{ color: "red" }}>-AB-</span> : (match.marksScored ?? "--")}</span>
+                                                                                                                        <button
+                                                                                                                            className="btn btn-link btn-sm p-0"
+                                                                                                                            onClick={() => startEditMarks(match._id, match.absent ? "" : (match.marksScored ?? ""))}
+                                                                                                                            title="Edit marks"
+                                                                                                                        >
+                                                                                                                            <i className="bi bi-pencil-square"></i>
+                                                                                                                        </button>
+                                                                                                                    </div>
+                                                                                                                )}
+                                                                                                            </>
                                                                                                         ) : (
                                                                                                             "--"
                                                                                                         )}
