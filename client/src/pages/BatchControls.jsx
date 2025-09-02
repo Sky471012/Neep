@@ -1012,8 +1012,8 @@ export default function BatchControls() {
                 <table className="table table-bordered text-center mt-3">
                   <thead className="table">
                     <tr>
-                      <th>Weekday</th>
-                      <th style={{ textAlign: "right" }}>Time Slots</th>
+                      <th style={{ padding: "10px 20px" }}>Weekday</th>
+                      <th style={{ textAlign: "right", padding: "10px 20px" }}>Time Slots</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1143,38 +1143,41 @@ export default function BatchControls() {
               <table className="table table-bordered mt-3">
                 <thead>
                   <tr>
-                    <th style={{ width: "50%" }}>Student</th>
-                    <th style={{ width: "50%" }}>Status</th>
+                    <th style={{ width: "50%", padding: "10px 20px" }}>Student</th>
+                    <th style={{ width: "50%", padding: "10px 20px" }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((student) => {
-                    const chosen = attendanceDraft[student._id]; // 'present' | 'absent' | undefined
-                    const effective = chosen ?? "present";
-                    return (
-                      <tr key={student._id}>
-                        <td style={{ width: "50%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
-                        <td style={{ width: "50%" }}>
-                          <div className="d-flex gap-2 align-items-center flex-wrap" role="group" aria-label="attendance">
-                            <button
-                              type="button"
-                              className={`btn btn-sm ${effective === "present" ? "btn-success" : "btn-outline-success"}`}
-                              onClick={() => setDraftStatus(student._id, "present")}
-                            >
-                              Present
-                            </button>
-                            <button
-                              type="button"
-                              className={`btn btn-sm ${effective === "absent" ? "btn-danger" : "btn-outline-danger"}`}
-                              onClick={() => setDraftStatus(student._id, "absent")}
-                            >
-                              Absent
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {students
+                    ?.slice() // make a shallow copy so original array isn’t mutated
+                    .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                    .map((student) => {
+                      const chosen = attendanceDraft[student._id]; // 'present' | 'absent' | undefined
+                      const effective = chosen ?? "present";
+                      return (
+                        <tr key={student._id}>
+                          <td style={{ width: "50%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
+                          <td style={{ width: "50%" }}>
+                            <div className="d-flex gap-2 align-items-center flex-wrap" role="group" aria-label="attendance">
+                              <button
+                                type="button"
+                                className={`btn btn-sm ${effective === "present" ? "btn-success" : "btn-outline-success"}`}
+                                onClick={() => setDraftStatus(student._id, "present")}
+                              >
+                                Present
+                              </button>
+                              <button
+                                type="button"
+                                className={`btn btn-sm ${effective === "absent" ? "btn-danger" : "btn-outline-danger"}`}
+                                onClick={() => setDraftStatus(student._id, "absent")}
+                              >
+                                Absent
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>
@@ -1218,11 +1221,14 @@ export default function BatchControls() {
                 }
               >
                 <option value="">-- Select a teacher --</option>
-                {teachersList.map((teacher) => (
-                  <option key={teacher._id} value={teacher._id}>
-                    {teacher.name}
-                  </option>
-                ))}
+                {teachersList
+                  ?.slice() // make a shallow copy so original array isn’t mutated
+                  .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                  .map((teacher) => (
+                    <option key={teacher._id} value={teacher._id}>
+                      {teacher.name}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -1235,7 +1241,6 @@ export default function BatchControls() {
             </button>
           </div>
         </ModalTwo>
-
 
         <ModalThree
           isOpen={modalThree}
@@ -1382,20 +1387,23 @@ export default function BatchControls() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <div style={{ maxHeight: "53vh", overflowY: "auto", margin: "10px" }}>
-                  {filteredStudents.map((student) => (
-                    <div key={student._id} className="d-flex align-items-center mb-1 text-break w-100">
-                      <input
-                        type="checkbox"
-                        className="checkbox"
-                        id={student._id}
-                        checked={selectedToAdd.includes(student._id)}
-                        onChange={() => toggleSelectStudent(student._id)}
-                      />
-                      <label className="form-check-label" htmlFor={student._id}>
-                        {student.name} ({student.phone})
-                      </label>
-                    </div>
-                  ))}
+                  {filteredStudents
+                    ?.slice() // make a shallow copy so original array isn’t mutated
+                    .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                    .map((student) => (
+                      <div key={student._id} className="d-flex align-items-center mb-1 text-break w-100">
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          id={student._id}
+                          checked={selectedToAdd.includes(student._id)}
+                          onChange={() => toggleSelectStudent(student._id)}
+                        />
+                        <label className="form-check-label" htmlFor={student._id}>
+                          {student.name} ({student.phone})
+                        </label>
+                      </div>
+                    ))}
                 </div>
                 <button className="btn btn-primary mt-2" style={{ width: "100%" }} onClick={handleAddSelectedStudents}>
                   Add Selected Students
@@ -1529,10 +1537,10 @@ export default function BatchControls() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Test Name</th>
-                    <th>Date</th>
-                    <th>Marks Scored</th>
-                    <th>Max Marks</th>
+                    <th style={{ padding: "10px 20px" }}>Test Name</th>
+                    <th style={{ padding: "10px 20px" }}>Date</th>
+                    <th style={{ padding: "10px 20px" }}>Marks Scored</th>
+                    <th style={{ padding: "10px 20px" }}>Max Marks</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1636,30 +1644,33 @@ export default function BatchControls() {
                 <table className="table table-bordered">
                   <thead>
                     <tr>
-                      <th>Student Name</th>
-                      <th>Marks Scored</th>
+                      <th style={{ padding: "10px 20px" }}>Student Name</th>
+                      <th style={{ padding: "10px 20px" }}>Marks Scored</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {students.map((student) => (
-                      <tr key={student._id}>
-                        <td style={{ width: "57%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
-                        <td style={{ width: "43%" }}>
-                          <input
-                            type="number"
-                            className="form-control"
-                            value={testFormData[student._id] || ""}
-                            onChange={(e) =>
-                              setTestFormData((prev) => ({
-                                ...prev,
-                                [student._id]: e.target.value
-                              }))
-                            }
-                            placeholder="Enter marks"
-                          />
-                        </td>
-                      </tr>
-                    ))}
+                    {students
+                      ?.slice() // make a shallow copy so original array isn’t mutated
+                      .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                      .map((student) => (
+                        <tr key={student._id}>
+                          <td style={{ width: "57%", textWrap: "wrap" }}>{student.name} ({student.phone})</td>
+                          <td style={{ width: "43%" }}>
+                            <input
+                              type="number"
+                              className="form-control"
+                              value={testFormData[student._id] || ""}
+                              onChange={(e) =>
+                                setTestFormData((prev) => ({
+                                  ...prev,
+                                  [student._id]: e.target.value
+                                }))
+                              }
+                              placeholder="Enter marks"
+                            />
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -1741,71 +1752,74 @@ export default function BatchControls() {
                       <table className="table table-bordered">
                         <thead>
                           <tr>
-                            <th>Student Name</th>
-                            <th>Marks</th>
+                            <th style={{ padding: "10px 20px" }}>Student Name</th>
+                            <th style={{ padding: "10px 20px" }}>Marks</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {batchStudents.map((student) => {
-                            const match = batchTests.find(
-                              (t) =>
-                                t.name === selectedTest.name &&
-                                t.date === selectedTest.date &&
-                                t.studentId === student._id
-                            );
+                          {batchStudents
+                            ?.slice() // make a shallow copy so original array isn’t mutated
+                            .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                            .map((student) => {
+                              const match = batchTests.find(
+                                (t) =>
+                                  t.name === selectedTest.name &&
+                                  t.date === selectedTest.date &&
+                                  t.studentId === student._id
+                              );
 
-                            return (
-                              <tr key={student._id}>
-                                <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
-                                <td style={{ width: "50%", textWrap: "wrap" }}>
-                                  {match ? (
-                                    editingMarks[match._id] ? (
-                                      <div className="d-flex align-items-center" style={{ gap: 8 }}>
-                                        <input
-                                          type="number"
-                                          className="form-control form-control-sm"
-                                          value={editingMarks[match._id].value}
-                                          onChange={(e) =>
-                                            setEditingMarks(prev => ({ ...prev, [match._id]: { value: e.target.value } }))
-                                          }
-                                          placeholder="Empty = Absent"
-                                          style={{ maxWidth: 120 }}
-                                        />
-                                        <button
-                                          className="btn btn-sm btn-outline-success border-0"
-                                          onClick={() => saveEditMarks(batch._id, match)}
-                                          title="Save"
-                                        >
-                                          <i className="bi bi-check-lg"></i>
-                                        </button>
-                                        <button
-                                          className="btn btn-sm btn-outline-secondary border-0"
-                                          onClick={() => cancelEditMarks(match._id)}
-                                          title="Cancel"
-                                        >
-                                          <i className="bi bi-x-lg"></i>
-                                        </button>
-                                      </div>
+                              return (
+                                <tr key={student._id}>
+                                  <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
+                                  <td style={{ width: "50%", textWrap: "wrap" }}>
+                                    {match ? (
+                                      editingMarks[match._id] ? (
+                                        <div className="d-flex align-items-center" style={{ gap: 8 }}>
+                                          <input
+                                            type="number"
+                                            className="form-control form-control-sm"
+                                            value={editingMarks[match._id].value}
+                                            onChange={(e) =>
+                                              setEditingMarks(prev => ({ ...prev, [match._id]: { value: e.target.value } }))
+                                            }
+                                            placeholder="Empty = Absent"
+                                            style={{ maxWidth: 120 }}
+                                          />
+                                          <button
+                                            className="btn btn-sm btn-outline-success border-0"
+                                            onClick={() => saveEditMarks(batch._id, match)}
+                                            title="Save"
+                                          >
+                                            <i className="bi bi-check-lg"></i>
+                                          </button>
+                                          <button
+                                            className="btn btn-sm btn-outline-secondary border-0"
+                                            onClick={() => cancelEditMarks(match._id)}
+                                            title="Cancel"
+                                          >
+                                            <i className="bi bi-x-lg"></i>
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <div className="d-flex justify-content-between align-items-center" style={{ gap: 8 }}>
+                                          {/* Show -AB- if absent, else the marks (or -- if truly missing) */}
+                                          <span>{match.absent ? <span style={{ color: "red" }}>-AB-</span> : (match.marksScored ?? "--")}</span>
+                                          <button
+                                            className="btn btn-link btn-sm p-0"
+                                            onClick={() => startEditMarks(match._id, match.absent ? "" : (match.marksScored ?? ""))}
+                                            title="Edit marks"
+                                          >
+                                            <i className="bi bi-pencil-square"></i>
+                                          </button>
+                                        </div>
+                                      )
                                     ) : (
-                                      <div className="d-flex justify-content-between align-items-center" style={{ gap: 8 }}>
-                                        {/* Show -AB- if absent, else the marks (or -- if truly missing) */}
-                                        <span>{match.absent ? <span style={{ color: "red" }}>-AB-</span> : (match.marksScored ?? "--")}</span>
-                                        <button
-                                          className="btn btn-link btn-sm p-0"
-                                          onClick={() => startEditMarks(match._id, match.absent ? "" : (match.marksScored ?? ""))}
-                                          title="Edit marks"
-                                        >
-                                          <i className="bi bi-pencil-square"></i>
-                                        </button>
-                                      </div>
-                                    )
-                                  ) : (
-                                    "--"
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
+                                      "--"
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
                         </tbody>
                       </table>
                     </div>

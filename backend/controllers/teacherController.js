@@ -173,7 +173,10 @@ exports.getTest = async (req, res) => {
 exports.getTodaysClassesForTeacher = async (req, res) => {
   try {
     const teacherId = req.user.id;
-    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+    const today = new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      timeZone: "Asia/Kolkata",
+    }).format(new Date());
 
     // Get all batches this teacher is assigned to
     const assigned = await BatchesTeacher.find({ teacherId });

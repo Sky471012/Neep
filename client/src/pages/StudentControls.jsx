@@ -1478,20 +1478,23 @@ export default function StudentControls() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                             <div style={{ maxHeight: "45vh", overflowY: "auto", margin: "10px" }}>
-                                {filteredBatches.map((batch) => (
-                                    <div key={batch._id} className="d-flex align-items-center mb-1 text-break w-100">
-                                        <input
-                                            className="checkbox"
-                                            type="checkbox"
-                                            id={batch._id}
-                                            checked={selectedToAdd.includes(batch._id)}
-                                            onChange={() => toggleSelectBatch(batch._id)}
-                                        />
-                                        <label htmlFor={batch._id}>
-                                            <div className="d-flex">{batch.name} <div className="dot"></div> Class: {batch.class}</div>
-                                        </label>
-                                    </div>
-                                ))}
+                                {filteredBatches
+                                    ?.slice() // make a shallow copy so original array isn’t mutated
+                                    .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                                    .map((batch) => (
+                                        <div key={batch._id} className="d-flex align-items-center mb-1 text-break w-100">
+                                            <input
+                                                className="checkbox"
+                                                type="checkbox"
+                                                id={batch._id}
+                                                checked={selectedToAdd.includes(batch._id)}
+                                                onChange={() => toggleSelectBatch(batch._id)}
+                                            />
+                                            <label htmlFor={batch._id}>
+                                                <div className="d-flex">{batch.name} <div className="dot"></div> Class: {batch.class}</div>
+                                            </label>
+                                        </div>
+                                    ))}
                             </div>
                             <button className="btn btn-primary mt-3" style={{ width: "100%" }} onClick={handleAddToSelectedBatches}>
                                 Add to selected Batches
@@ -1543,80 +1546,80 @@ export default function StudentControls() {
                         onClose={() => setModalThree(false)}
                     >
                         <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
-                        <h3 className="modal-title" >Showing Scores of {student.name}</h3>
+                            <h3 className="modal-title" >Showing Scores of {student.name}</h3>
 
-                        <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
-                            {tests.length === 0 ? (
-                                <div className="p-4 text-center text-muted">No tests found.</div>
-                            ) : (
-                                <>
-                                    {/* Step 1: Show batches */}
-                                    {!selectedBatch && (
-                                        <ul className="list-group">
-                                            {[...new Set(tests.map(t => t.batchId))].map(batchId => {
-                                                const batchName = tests.find(t => t.batchId === batchId)?.batchName || "Unknown Batch";
-                                                return (
-                                                    <li key={batchId} className="list-group-item d-flex justify-content-between align-items-center">
-                                                        <span>{batchName}</span>
-                                                        <button
-                                                            className="text-primary"
-                                                            onClick={() => setSelectedBatch(batchId)}
-                                                            style={{ border: "none", background: "transparent", fontSize: "13px" }}
-                                                        >
-                                                            View<i className="bi bi-arrow-right ms-1"></i>
-                                                        </button>
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    )}
+                            <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
+                                {tests.length === 0 ? (
+                                    <div className="p-4 text-center text-muted">No tests found.</div>
+                                ) : (
+                                    <>
+                                        {/* Step 1: Show batches */}
+                                        {!selectedBatch && (
+                                            <ul className="list-group">
+                                                {[...new Set(tests.map(t => t.batchId))].map(batchId => {
+                                                    const batchName = tests.find(t => t.batchId === batchId)?.batchName || "Unknown Batch";
+                                                    return (
+                                                        <li key={batchId} className="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>{batchName}</span>
+                                                            <button
+                                                                className="text-primary"
+                                                                onClick={() => setSelectedBatch(batchId)}
+                                                                style={{ border: "none", background: "transparent", fontSize: "13px" }}
+                                                            >
+                                                                View<i className="bi bi-arrow-right ms-1"></i>
+                                                            </button>
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
+                                        )}
 
-                                    {/* Step 2: Show all tests of selected batch */}
-                                    {selectedBatch && (
-                                        <div style={{ height: "85vh", overflowY: "auto" }}>
-                                            <h3 className="modal-title" style={{ textAlign: "left" }}>
-                                                <button
-                                                    style={{ border: "none", background: "transparent" }}
-                                                    onClick={() => setSelectedBatch(null)}
-                                                >
-                                                    <i className="fas fa-arrow-left"></i>
-                                                </button>
-                                                Test Scores in {tests.find(t => t.batchId === selectedBatch)?.batchName}
-                                            </h3>
+                                        {/* Step 2: Show all tests of selected batch */}
+                                        {selectedBatch && (
+                                            <div style={{ height: "85vh", overflowY: "auto" }}>
+                                                <h3 className="modal-title" style={{ textAlign: "left" }}>
+                                                    <button
+                                                        style={{ border: "none", background: "transparent" }}
+                                                        onClick={() => setSelectedBatch(null)}
+                                                    >
+                                                        <i className="fas fa-arrow-left"></i>
+                                                    </button>
+                                                    Test Scores in {tests.find(t => t.batchId === selectedBatch)?.batchName}
+                                                </h3>
 
-                                            <table className="table table-bordered mt-3">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Test Name</th>
-                                                        <th>Date</th>
-                                                        <th>Max Marks</th>
-                                                        <th>Marks Scored</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {tests
-                                                        .filter(t => t.batchId === selectedBatch)
-                                                        .map(test => (
-                                                            <tr key={test._id}>
-                                                                <td>{test.name}</td>
-                                                                <td>{test.date}</td>
-                                                                <td>{test.maxMarks}</td>
-                                                                <td>
-                                                                    {test
-                                                                        ? test.absent
-                                                                            ? <span style={{ color: "red"}}>-AB-</span>
-                                                                            : test.marksScored
-                                                                        : "--"}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </div>
+                                                <table className="table table-bordered mt-3">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Test Name</th>
+                                                            <th>Date</th>
+                                                            <th>Max Marks</th>
+                                                            <th>Marks Scored</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {tests
+                                                            .filter(t => t.batchId === selectedBatch)
+                                                            .map(test => (
+                                                                <tr key={test._id}>
+                                                                    <td>{test.name}</td>
+                                                                    <td>{test.date}</td>
+                                                                    <td>{test.maxMarks}</td>
+                                                                    <td>
+                                                                        {test
+                                                                            ? test.absent
+                                                                                ? <span style={{ color: "red" }}>-AB-</span>
+                                                                                : test.marksScored
+                                                                            : "--"}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </ModalThree>
 

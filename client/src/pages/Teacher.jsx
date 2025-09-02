@@ -420,9 +420,9 @@ export default function Teacher() {
                                 <table className="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>Batch</th>
-                                            <th>Class</th>
-                                            <th>Timings</th>
+                                            <th style={{ padding: "10px 20px" }}>Batch</th>
+                                            <th style={{ padding: "10px 20px" }}>Class</th>
+                                            <th style={{ padding: "10px 20px" }}>Timings</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -518,72 +518,75 @@ export default function Teacher() {
                                                         <div className="student-list">
                                                             <h3 className="modal-title">{batch.batchName}</h3>
                                                             <ul className="mt-3" style={{ maxHeight: "67vh", overflowY: "auto", margin: "10px 0" }}>
-                                                                {students[batchId]?.map((student) => (
-                                                                    <li key={student._id} className="mb-2 border rounded ps-2 pe-2 p-1">
-                                                                        <div className="d-flex align-items-center justify-content-between">
-                                                                            <span className="text-break" style={{ maxWidth: '160px' }}>{student.name}</span>
-                                                                            <button
-                                                                                className="btn btn-sm btn-primary"
-                                                                                onClick={() => {
-                                                                                    if (activeStudentAttendance === student._id) {
-                                                                                        setActiveStudentAttendance(null);
-                                                                                    } else {
-                                                                                        setActiveStudentAttendance(student._id);
-                                                                                        showStudentAttendance(student._id, batchId);
-                                                                                    }
-                                                                                }}
-                                                                            >
-                                                                                {activeStudentAttendance === student._id ? "Hide Attendance" : "Show Attendance"}
-                                                                            </button>
-                                                                        </div>
+                                                                {students[batchId]
+                                                                    ?.slice() // make a shallow copy so original array isn’t mutated
+                                                                    .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                                                                    .map((student) => (
+                                                                        <li key={student._id} className="mb-2 border rounded ps-2 pe-2 p-1">
+                                                                            <div className="d-flex align-items-center justify-content-between">
+                                                                                <span className="text-break" style={{ maxWidth: '160px' }}>{student.name}</span>
+                                                                                <button
+                                                                                    className="btn btn-sm btn-primary"
+                                                                                    onClick={() => {
+                                                                                        if (activeStudentAttendance === student._id) {
+                                                                                            setActiveStudentAttendance(null);
+                                                                                        } else {
+                                                                                            setActiveStudentAttendance(student._id);
+                                                                                            showStudentAttendance(student._id, batchId);
+                                                                                        }
+                                                                                    }}
+                                                                                >
+                                                                                    {activeStudentAttendance === student._id ? "Hide Attendance" : "Show Attendance"}
+                                                                                </button>
+                                                                            </div>
 
-                                                                        {activeStudentAttendance === student._id && (
-                                                                            <div className="attendance-calendar mt-2 border rounded" style={{ backgroundColor: "#d4d4d4ff" }}>
-                                                                                <div id={`carousel-${student._id}`} className="carousel slide">
-                                                                                    <div className="carousel-inner">
-                                                                                        {allMonths.map((month, monthIdx) => {
-                                                                                            let calendarMonth, calendarYear;
-                                                                                            if (monthIdx <= 8) {
-                                                                                                calendarMonth = monthIdx + 3;
-                                                                                                calendarYear = academicYearStart;
-                                                                                            } else {
-                                                                                                calendarMonth = monthIdx - 9;
-                                                                                                calendarYear = academicYearStart + 1;
-                                                                                            }
-                                                                                            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-                                                                                            return (
-                                                                                                <div className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`} key={month}>
-                                                                                                    <h6>{month} {calendarYear}</h6>
-                                                                                                    <div className="calendar-grid">
-                                                                                                        {[...Array(daysInMonth)].map((_, d) => {
-                                                                                                            const date = new Date(calendarYear, calendarMonth, d + 1);
-                                                                                                            const formatted = date.toISOString().split('T')[0];
-                                                                                                            const key = `${batchId}_${formatted}`;
-                                                                                                            const status = attendanceMap[key];
-                                                                                                            return (
-                                                                                                                <div
-                                                                                                                    key={d}
-                                                                                                                    className={`date-box ${status === "present" ? "present" : status === "absent" ? "absent" : ""}`}
-                                                                                                                    title={`${month} ${d + 1}, ${calendarYear} - ${status || 'No record'}`}
-                                                                                                                >
-                                                                                                                    {d + 1}
-                                                                                                                </div>
-                                                                                                            );
-                                                                                                        })}
+                                                                            {activeStudentAttendance === student._id && (
+                                                                                <div className="attendance-calendar mt-2 border rounded" style={{ backgroundColor: "#d4d4d4ff" }}>
+                                                                                    <div id={`carousel-${student._id}`} className="carousel slide">
+                                                                                        <div className="carousel-inner">
+                                                                                            {allMonths.map((month, monthIdx) => {
+                                                                                                let calendarMonth, calendarYear;
+                                                                                                if (monthIdx <= 8) {
+                                                                                                    calendarMonth = monthIdx + 3;
+                                                                                                    calendarYear = academicYearStart;
+                                                                                                } else {
+                                                                                                    calendarMonth = monthIdx - 9;
+                                                                                                    calendarYear = academicYearStart + 1;
+                                                                                                }
+                                                                                                const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                                                                                                return (
+                                                                                                    <div className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`} key={month}>
+                                                                                                        <h6>{month} {calendarYear}</h6>
+                                                                                                        <div className="calendar-grid">
+                                                                                                            {[...Array(daysInMonth)].map((_, d) => {
+                                                                                                                const date = new Date(calendarYear, calendarMonth, d + 1);
+                                                                                                                const formatted = date.toISOString().split('T')[0];
+                                                                                                                const key = `${batchId}_${formatted}`;
+                                                                                                                const status = attendanceMap[key];
+                                                                                                                return (
+                                                                                                                    <div
+                                                                                                                        key={d}
+                                                                                                                        className={`date-box ${status === "present" ? "present" : status === "absent" ? "absent" : ""}`}
+                                                                                                                        title={`${month} ${d + 1}, ${calendarYear} - ${status || 'No record'}`}
+                                                                                                                    >
+                                                                                                                        {d + 1}
+                                                                                                                    </div>
+                                                                                                                );
+                                                                                                            })}
+                                                                                                        </div>
                                                                                                     </div>
-                                                                                                </div>
-                                                                                            );
-                                                                                        })}
-                                                                                    </div>
-                                                                                    <div className="calendar-controls d-flex justify-content-between mt-2">
-                                                                                        <button className="btn btn-outline-secondary btn-sm" type="button" data-bs-target={`#carousel-${student._id}`} data-bs-slide="prev">‹ Prev</button>
-                                                                                        <button className="btn btn-outline-secondary btn-sm" type="button" data-bs-target={`#carousel-${student._id}`} data-bs-slide="next">Next ›</button>
+                                                                                                );
+                                                                                            })}
+                                                                                        </div>
+                                                                                        <div className="calendar-controls d-flex justify-content-between mt-2">
+                                                                                            <button className="btn btn-outline-secondary btn-sm" type="button" data-bs-target={`#carousel-${student._id}`} data-bs-slide="prev">‹ Prev</button>
+                                                                                            <button className="btn btn-outline-secondary btn-sm" type="button" data-bs-target={`#carousel-${student._id}`} data-bs-slide="next">Next ›</button>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </li>
-                                                                ))}
+                                                                            )}
+                                                                        </li>
+                                                                    ))}
                                                             </ul>
                                                         </div>
                                                     </ModalOne>
@@ -614,47 +617,50 @@ export default function Teacher() {
                                                                 <table className="table table-bordered mt-2">
                                                                     <thead>
                                                                         <tr>
-                                                                            <th>Student Name</th>
-                                                                            <th>Status</th>
+                                                                            <th style={{ padding: "10px 20px" }}>Student Name</th>
+                                                                            <th style={{ padding: "10px 20px" }}>Status</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
                                                                         {students[batchId]?.length > 0 ? (
-                                                                            students[batchId].map((student) => {
-                                                                                const batchDraft = attendanceDraft[batchId] || {};
-                                                                                // Default to 'present' if not set
-                                                                                const currentStatus = batchDraft[student._id] ?? "present";
+                                                                            students[batchId]
+                                                                                ?.slice() // make a shallow copy so original array isn’t mutated
+                                                                                .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                                                                                .map((student) => {
+                                                                                    const batchDraft = attendanceDraft[batchId] || {};
+                                                                                    // Default to 'present' if not set
+                                                                                    const currentStatus = batchDraft[student._id] ?? "present";
 
-                                                                                const alreadyMarkedKey = selectedDate
-                                                                                    ? `${student._id}_${batchId}_${selectedDate.toDateString?.()}`
-                                                                                    : null;
-                                                                                const alreadyMarked = alreadyMarkedKey ? markedStatus[alreadyMarkedKey] : undefined;
+                                                                                    const alreadyMarkedKey = selectedDate
+                                                                                        ? `${student._id}_${batchId}_${selectedDate.toDateString?.()}`
+                                                                                        : null;
+                                                                                    const alreadyMarked = alreadyMarkedKey ? markedStatus[alreadyMarkedKey] : undefined;
 
-                                                                                return (
-                                                                                    <tr key={student._id}>
-                                                                                        <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
-                                                                                        <td style={{ width: "50%" }}>
-                                                                                            <div className="d-flex gap-2 align-items-center flex-wrap">
-                                                                                                <button
-                                                                                                    type="button"
-                                                                                                    className={`btn btn-sm ${currentStatus === "present" ? "btn-success" : "btn-outline-success"}`}
-                                                                                                    onClick={() => setDraftStatus(batchId, student._id, "present")}
-                                                                                                >
-                                                                                                    Present
-                                                                                                </button>
+                                                                                    return (
+                                                                                        <tr key={student._id}>
+                                                                                            <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
+                                                                                            <td style={{ width: "50%" }}>
+                                                                                                <div className="d-flex gap-2 align-items-center flex-wrap">
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        className={`btn btn-sm ${currentStatus === "present" ? "btn-success" : "btn-outline-success"}`}
+                                                                                                        onClick={() => setDraftStatus(batchId, student._id, "present")}
+                                                                                                    >
+                                                                                                        Present
+                                                                                                    </button>
 
-                                                                                                <button
-                                                                                                    type="button"
-                                                                                                    className={`btn btn-sm ${currentStatus === "absent" ? "btn-danger" : "btn-outline-danger"}`}
-                                                                                                    onClick={() => setDraftStatus(batchId, student._id, "absent")}
-                                                                                                >
-                                                                                                    Absent
-                                                                                                </button>
-                                                                                            </div>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                );
-                                                                            })
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        className={`btn btn-sm ${currentStatus === "absent" ? "btn-danger" : "btn-outline-danger"}`}
+                                                                                                        onClick={() => setDraftStatus(batchId, student._id, "absent")}
+                                                                                                    >
+                                                                                                        Absent
+                                                                                                    </button>
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    );
+                                                                                })
                                                                         ) : (
                                                                             <tr><td colSpan="2">Loading or no students found.</td></tr>
                                                                         )}
@@ -693,8 +699,8 @@ export default function Teacher() {
                                                                     <table className="table table-bordered text-center mt-3">
                                                                         <thead className="table">
                                                                             <tr>
-                                                                                <th>Weekday</th>
-                                                                                <th>Time Slots</th>
+                                                                                <th style={{ padding: "10px 20px" }}>Weekday</th>
+                                                                                <th style={{ padding: "10px 20px" }}>Time Slots</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
@@ -769,19 +775,22 @@ export default function Teacher() {
                                                                     <table className="table table-bordered">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th>Student Name</th>
-                                                                                <th>Marks Scored</th>
+                                                                                <th style={{ padding: "10px 20px" }}>Student Name</th>
+                                                                                <th style={{ padding: "10px 20px" }}>Marks Scored</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
-                                                                            {(students[batch.batchId] || []).map((student) => (
-                                                                                <tr key={student._id}>
-                                                                                    <td style={{ width: "57%", textWrap: "wrap" }}>{student.name}</td>
-                                                                                    <td style={{ width: "43%" }}>
-                                                                                        <input type="number" className="form-control" value={testFormData[student._id] || ""} onChange={(e) => setTestFormData((prev) => ({ ...prev, [student._id]: e.target.value }))} placeholder="Enter marks" />
-                                                                                    </td>
-                                                                                </tr>
-                                                                            ))}
+                                                                            {(students[batch.batchId] || [])
+                                                                                ?.slice() // make a shallow copy so original array isn’t mutated
+                                                                                .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                                                                                .map((student) => (
+                                                                                    <tr key={student._id}>
+                                                                                        <td style={{ width: "57%", textWrap: "wrap" }}>{student.name}</td>
+                                                                                        <td style={{ width: "43%" }}>
+                                                                                            <input type="number" className="form-control" value={testFormData[student._id] || ""} onChange={(e) => setTestFormData((prev) => ({ ...prev, [student._id]: e.target.value }))} placeholder="Enter marks" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                ))}
                                                                         </tbody>
                                                                     </table>
                                                                 </div>
@@ -801,12 +810,27 @@ export default function Teacher() {
                                                                             <div>
                                                                                 <h3 className="modal-title">Tests for {batch.batchName}</h3>
                                                                                 <ul className="list-group">
-                                                                                    {Array.from(new Map(tests[batchId].map(test => [`${test.name}_${test.date}`, test])).values()).map((test, idx) => (
-                                                                                        <li key={idx} className="list-group-item d-flex justify-content-between align-items-center">
-                                                                                            <span>{test.name} <small className="text-muted">({test.date})</small></span>
-                                                                                            <button className="text-primary" style={{ border: "none", background: "transparent", fontSize: "13px" }} onClick={() => setSelectedTest(test)}>View<i className="bi bi-arrow-right ms-1"></i></button>
-                                                                                        </li>
-                                                                                    ))}
+                                                                                    {Array.from(
+                                                                                        new Map(
+                                                                                            tests[batchId].map(test => [`${test.name}_${test.date}`, test])
+                                                                                        ).values()
+                                                                                    )
+                                                                                        .slice() // copy so original isn't mutated
+                                                                                        .sort((a, b) => new Date(a.date) - new Date(b.date)) // 🔥 ascending order
+                                                                                        .map((test, idx) => (
+                                                                                            <li key={idx} className="list-group-item d-flex justify-content-between align-items-center">
+                                                                                                <span>
+                                                                                                    {test.name} <small className="text-muted">({test.date})</small>
+                                                                                                </span>
+                                                                                                <button
+                                                                                                    className="text-primary"
+                                                                                                    style={{ border: "none", background: "transparent", fontSize: "13px" }}
+                                                                                                    onClick={() => setSelectedTest(test)}
+                                                                                                >
+                                                                                                    View<i className="bi bi-arrow-right ms-1"></i>
+                                                                                                </button>
+                                                                                            </li>
+                                                                                        ))}
                                                                                 </ul>
                                                                             </div>
                                                                         ) : (
@@ -816,75 +840,78 @@ export default function Teacher() {
                                                                                 <table className="table table-bordered">
                                                                                     <thead>
                                                                                         <tr>
-                                                                                            <th>Student Name</th>
-                                                                                            <th>Marks</th>
+                                                                                            <th style={{ padding: "10px 20px" }}>Student Name</th>
+                                                                                            <th style={{ padding: "10px 20px" }}>Marks</th>
                                                                                         </tr>
                                                                                     </thead>
                                                                                     <tbody>
-                                                                                        {students[batchId].map((student) => {
-                                                                                            const match = tests[batchId].find(
-                                                                                                (t) =>
-                                                                                                    t.name === selectedTest.name &&
-                                                                                                    t.date === selectedTest.date &&
-                                                                                                    t.studentId === student._id
-                                                                                            );
+                                                                                        {students[batchId]
+                                                                                            ?.slice() // make a shallow copy so original array isn’t mutated
+                                                                                            .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                                                                                            .map((student) => {
+                                                                                                const match = tests[batchId].find(
+                                                                                                    (t) =>
+                                                                                                        t.name === selectedTest.name &&
+                                                                                                        t.date === selectedTest.date &&
+                                                                                                        t.studentId === student._id
+                                                                                                );
 
-                                                                                            return (
-                                                                                                <tr key={student._id}>
-                                                                                                    <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
-                                                                                                    <td style={{ width: "50%", textWrap: "wrap" }}>
-                                                                                                        {/* match = the test row for that student you’re rendering */}
-                                                                                                        {match ? (
-                                                                                                            <>
-                                                                                                                {editingMarks[match._id] ? (
-                                                                                                                    <div className="d-flex gap-2 align-items-center">
-                                                                                                                        <input
-                                                                                                                            type="number"
-                                                                                                                            className="form-control form-control-sm"
-                                                                                                                            value={editingMarks[match._id].value}
-                                                                                                                            onChange={(e) =>
-                                                                                                                                setEditingMarks(prev => ({
-                                                                                                                                    ...prev,
-                                                                                                                                    [match._id]: { value: e.target.value }
-                                                                                                                                }))
-                                                                                                                            }
-                                                                                                                            placeholder="Empty = Absent"
-                                                                                                                            style={{ maxWidth: 120 }}
-                                                                                                                        />
-                                                                                                                        <button
-                                                                                                                            className="btn btn-sm btn-outline-success border-0"
-                                                                                                                            onClick={() => saveEditMarks(batch.batchId, match)}
-                                                                                                                        >
-                                                                                                                            <i className="bi bi-check-lg"></i>
-                                                                                                                        </button>
-                                                                                                                        <button
-                                                                                                                            className="btn btn-sm btn-outline-secondary border-0"
-                                                                                                                            onClick={() => cancelEditMarks(match._id)}
-                                                                                                                        >
-                                                                                                                            <i className="bi bi-x-lg"></i>
-                                                                                                                        </button>
-                                                                                                                    </div>
-                                                                                                                ) : (
-                                                                                                                    <div className="d-flex justify-content-between align-items-center" style={{ gap: 8 }}>
-                                                                                                                        {/* Show -AB- if absent, else the marks (or -- if truly missing) */}
-                                                                                                                        <span>{match.absent ? <span style={{ color: "red" }}>-AB-</span> : (match.marksScored ?? "--")}</span>
-                                                                                                                        <button
-                                                                                                                            className="btn btn-link btn-sm p-0"
-                                                                                                                            onClick={() => startEditMarks(match._id, match.absent ? "" : (match.marksScored ?? ""))}
-                                                                                                                            title="Edit marks"
-                                                                                                                        >
-                                                                                                                            <i className="bi bi-pencil-square"></i>
-                                                                                                                        </button>
-                                                                                                                    </div>
-                                                                                                                )}
-                                                                                                            </>
-                                                                                                        ) : (
-                                                                                                            "--"
-                                                                                                        )}
-                                                                                                    </td>
-                                                                                                </tr>
-                                                                                            );
-                                                                                        })}
+                                                                                                return (
+                                                                                                    <tr key={student._id}>
+                                                                                                        <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
+                                                                                                        <td style={{ width: "50%", textWrap: "wrap" }}>
+                                                                                                            {/* match = the test row for that student you’re rendering */}
+                                                                                                            {match ? (
+                                                                                                                <>
+                                                                                                                    {editingMarks[match._id] ? (
+                                                                                                                        <div className="d-flex gap-2 align-items-center">
+                                                                                                                            <input
+                                                                                                                                type="number"
+                                                                                                                                className="form-control form-control-sm"
+                                                                                                                                value={editingMarks[match._id].value}
+                                                                                                                                onChange={(e) =>
+                                                                                                                                    setEditingMarks(prev => ({
+                                                                                                                                        ...prev,
+                                                                                                                                        [match._id]: { value: e.target.value }
+                                                                                                                                    }))
+                                                                                                                                }
+                                                                                                                                placeholder="Empty = Absent"
+                                                                                                                                style={{ maxWidth: 120 }}
+                                                                                                                            />
+                                                                                                                            <button
+                                                                                                                                className="btn btn-sm btn-outline-success border-0"
+                                                                                                                                onClick={() => saveEditMarks(batch.batchId, match)}
+                                                                                                                            >
+                                                                                                                                <i className="bi bi-check-lg"></i>
+                                                                                                                            </button>
+                                                                                                                            <button
+                                                                                                                                className="btn btn-sm btn-outline-secondary border-0"
+                                                                                                                                onClick={() => cancelEditMarks(match._id)}
+                                                                                                                            >
+                                                                                                                                <i className="bi bi-x-lg"></i>
+                                                                                                                            </button>
+                                                                                                                        </div>
+                                                                                                                    ) : (
+                                                                                                                        <div className="d-flex justify-content-between align-items-center" style={{ gap: 8 }}>
+                                                                                                                            {/* Show -AB- if absent, else the marks (or -- if truly missing) */}
+                                                                                                                            <span>{match.absent ? <span style={{ color: "red" }}>-AB-</span> : (match.marksScored ?? "--")}</span>
+                                                                                                                            <button
+                                                                                                                                className="btn btn-link btn-sm p-0"
+                                                                                                                                onClick={() => startEditMarks(match._id, match.absent ? "" : (match.marksScored ?? ""))}
+                                                                                                                                title="Edit marks"
+                                                                                                                            >
+                                                                                                                                <i className="bi bi-pencil-square"></i>
+                                                                                                                            </button>
+                                                                                                                        </div>
+                                                                                                                    )}
+                                                                                                                </>
+                                                                                                            ) : (
+                                                                                                                "--"
+                                                                                                            )}
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                );
+                                                                                            })}
                                                                                     </tbody>
                                                                                 </table>
                                                                             </div>

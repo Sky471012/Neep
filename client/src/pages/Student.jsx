@@ -534,15 +534,16 @@ export default function Student() {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th>Test Name</th>
-                            <th>Date</th>
-                            <th>Max Marks</th>
-                            <th>Marks Scored</th>
+                            <th style={{padding:"10px 20px"}}>Test Name</th>
+                            <th style={{padding:"10px 20px"}}>Date</th>
+                            <th style={{padding:"10px 20px"}}>Max Marks</th>
+                            <th style={{padding:"10px 20px"}}>Marks Scored</th>
                         </tr>
                     </thead>
                     <tbody>
                         {testRecords
                             .filter(test => test.batchId === showModalTwo)
+                            .sort((a, b) => new Date(a.date) - new Date(b.date)) 
                             .map((test, index) => (
                                 <tr key={index}>
                                     <td>{test.name}</td>
@@ -577,8 +578,8 @@ export default function Student() {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Weekday</th>
-                                    <th>Time Slots</th>
+                                    <th style={{padding:"10px 20px"}}>Weekday</th>
+                                    <th style={{padding:"10px 20px"}}>Time Slots</th>
                                 </tr>
                             </thead>
                             <tbody>

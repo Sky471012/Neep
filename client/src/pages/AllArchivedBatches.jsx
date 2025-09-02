@@ -69,6 +69,7 @@ export default function AllArchivedBatches() {
                                     batch.name.toLowerCase().includes(archivedBatchSearchQuery.toLowerCase()) ||
                                     batch.class.toLowerCase().includes(archivedBatchSearchQuery.toLowerCase()),
                             )
+                            .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
                             .map((batch, index) => (
                                 <Link key={index} to={`/batch/${batch._id}`} className="data-card">
                                     <h5 className="card-title">{batch.name}</h5>
