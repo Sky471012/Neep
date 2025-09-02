@@ -1,5 +1,5 @@
 **Future Scope:-**
-1. Test edit option
+1. Test edit option **(done)**
 2. Table color in timetable **(monu)**
 3. DateFilter in fee-tracking **(monu)**
 4. Today's class(schedule):- Completed(red), Running(dot with ongoing and green) and Upcoming(green) **(future)**
@@ -16,3 +16,4 @@
 15. Alabatic batch in student and teacher batches and in attendance and show students
 16. Enquiry system (converted and lost) **(future)**
 17. Study material and chat **(future)**
+18. Remove test

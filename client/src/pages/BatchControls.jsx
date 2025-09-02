@@ -44,6 +44,7 @@ export default function BatchControls() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedToAdd, setSelectedToAdd] = useState([]);
   const [mode, setMode] = useState("select"); // "select" or "create"
+  const [editingMarks, setEditingMarks] = useState({});
   const [testDetails, setTestDetails] = useState({
     testName: "",
     maxMarks: "",
@@ -684,6 +685,58 @@ export default function BatchControls() {
     } catch (error) {
       console.error('Error updating batch:', error);
       alert('Error updating profile');
+    }
+  };
+
+  // begin editing a specific test's marks
+  const startEditMarks = (testId, currentValue) => {
+    setEditingMarks(prev => ({ ...prev, [testId]: { value: currentValue ?? "" } }));
+  };
+
+  const cancelEditMarks = (testId) => {
+    setEditingMarks(prev => {
+      const copy = { ...prev };
+      delete copy[testId];
+      return copy;
+    });
+  };
+
+  // persist the edit, then refresh local UI lists
+  const saveEditMarks = async (batchIdForList, testObj) => {
+    const token = localStorage.getItem("authToken");
+    const draft = editingMarks[testObj._id];
+    if (!draft) return;
+
+    // IMPORTANT: empty string means "absent" on backend (same rule as Teacher view)
+    const payload = { marksScored: draft.value === "" ? "" : draft.value };
+
+    try {
+      // If your admin route differs, adjust below (Teacher uses /api/teacher/editMarks/:id)
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editMarks/${testObj._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update marks");
+
+      // Update both `tests` (if present) and `alltests` (ModalEight uses this)
+      setTests(prev => {
+        const list = prev[batchIdForList] || [];
+        const updated = list.map(t => (t._id === testObj._id ? { ...t, ...data.test } : t));
+        return { ...prev, [batchIdForList]: updated };
+      });
+
+      setAllTests(prev => {
+        const list = prev[batchIdForList] || [];
+        const updated = list.map(t => (t._id === testObj._id ? { ...t, ...data.test } : t));
+        return { ...prev, [batchIdForList]: updated };
+      });
+
+      cancelEditMarks(testObj._id);
+    } catch (err) {
+      console.error("Edit marks error:", err);
+      alert("Failed to update marks.");
     }
   };
 
@@ -1703,13 +1756,52 @@ export default function BatchControls() {
 
                             return (
                               <tr key={student._id}>
-                                <td style={{ width: "75%", textWrap: "wrap" }}>{student.name}</td>
-                                <td style={{ width: "25%", textWrap: "wrap" }}>
-                                  {match
-                                    ? match.absent
-                                      ? <span style={{ color: "red" }}>-AB-</span>
-                                      : match.marksScored
-                                    : "--"}
+                                <td style={{ width: "50%", textWrap: "wrap" }}>{student.name}</td>
+                                <td style={{ width: "50%", textWrap: "wrap" }}>
+                                  {match ? (
+                                    editingMarks[match._id] ? (
+                                      <div className="d-flex align-items-center" style={{ gap: 8 }}>
+                                        <input
+                                          type="number"
+                                          className="form-control form-control-sm"
+                                          value={editingMarks[match._id].value}
+                                          onChange={(e) =>
+                                            setEditingMarks(prev => ({ ...prev, [match._id]: { value: e.target.value } }))
+                                          }
+                                          placeholder="Empty = Absent"
+                                          style={{ maxWidth: 120 }}
+                                        />
+                                        <button
+                                          className="btn btn-sm btn-outline-success border-0"
+                                          onClick={() => saveEditMarks(batch._id, match)}
+                                          title="Save"
+                                        >
+                                          <i className="bi bi-check-lg"></i>
+                                        </button>
+                                        <button
+                                          className="btn btn-sm btn-outline-secondary border-0"
+                                          onClick={() => cancelEditMarks(match._id)}
+                                          title="Cancel"
+                                        >
+                                          <i className="bi bi-x-lg"></i>
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div className="d-flex justify-content-between align-items-center" style={{ gap: 8 }}>
+                                        {/* Show -AB- if absent, else the marks (or -- if truly missing) */}
+                                        <span>{match.absent ? <span style={{ color: "red" }}>-AB-</span> : (match.marksScored ?? "--")}</span>
+                                        <button
+                                          className="btn btn-link btn-sm p-0"
+                                          onClick={() => startEditMarks(match._id, match.absent ? "" : (match.marksScored ?? ""))}
+                                          title="Edit marks"
+                                        >
+                                          <i className="bi bi-pencil-square"></i>
+                                        </button>
+                                      </div>
+                                    )
+                                  ) : (
+                                    "--"
+                                  )}
                                 </td>
                               </tr>
                             );
