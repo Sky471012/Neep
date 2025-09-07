@@ -12,7 +12,8 @@ const testSchema = new Schema({
   },
   marksScored: {
     type: Number,
-    required: true,
+    required: false,
+    default: null,
   },
   studentId: {
     type: Types.ObjectId,
