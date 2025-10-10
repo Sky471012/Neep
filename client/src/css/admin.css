@@ -358,6 +358,13 @@ body {
 }
 
 /* Fee Tracking Content */
+.medium-container{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  padding: 20px 50px;
+}
+
 .fee-tracking-content {
   padding: 1rem 0;
   position: relative;
@@ -516,12 +523,6 @@ body {
 .paid-date {
   color: #059669 !important;
   font-weight: 500;
-}
-
-.unpaid,
-.upcoming,
-.paid {
-  padding-top: 2rem;
 }
 
 .unpaid .fee-amount {
@@ -716,7 +717,7 @@ select {
   }
 
   .fee-cards-container {
-    gap: 1rem;
+    gap: 0.5rem;
   }
 
   .installments-list {

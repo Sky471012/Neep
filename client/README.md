@@ -1,5 +1,5 @@
 **Future Scope:-**
-1. Test edit option
+1. Test edit option **(done)**
 2. Table color in timetable **(monu)**
 3. DateFilter in fee-tracking **(monu)**
 4. Today's class(schedule):- Completed(red), Running(dot with ongoing and green) and Upcoming(green) **(future)**
@@ -8,7 +8,7 @@
 7. Archive batches hide in student and teacher pages **(done)**
 8. Update timetable in teacher **(done)**
 9. Teacher Attendance **(future)**
-10. Search in fee and online & cash total fee **(monu)**
+10. Search in fee and online & cash total fee **(done)**
 11. Student Birthday **(monu)**
 12. Assign batch to teacher **(monu)**
 13. Change system of mark attendance **(done)**
