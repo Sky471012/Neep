@@ -12,7 +12,7 @@
 11. Student Birthday **(monu)**
 12. Assign batch to teacher **(monu)**
 13. Change system of mark attendance **(done)**
-14. Whatsapp on student login **(monu)**
+14. Whatsapp on student login **(done)**
 15. Alabatic batch in student and teacher batches and in attendance and show students **(done)**
 16. Enquiry system (converted and lost) **(future)**
 17. Study material and chat **(future)**

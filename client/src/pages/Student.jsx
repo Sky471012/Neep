@@ -363,7 +363,7 @@ export default function Student() {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="content-area">
+                <div className="content-area pb-5">
                     {/* Welcome Card */}
                     <div className="welcome-card">
                         <h1 className="welcome-title">Welcome back, {student.name}!</h1>
@@ -445,6 +445,16 @@ export default function Student() {
                 </div>
             </div>
         </div>
+
+        <a
+            href={`https://wa.me/919313214643`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className='whatsapp-link'
+            style={{borderRadius:"10px", fontSize:"20px", right:"20px", left:"auto"}}
+        >
+            <i className="bi bi-whatsapp me-1"></i><span style={{}}>Need Help</span>
+        </a>
 
         {/* Attendance Modal */}
         <ModalOne
