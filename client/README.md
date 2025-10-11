@@ -9,7 +9,7 @@
 8. Update timetable in teacher **(done)**
 9. Teacher Attendance **(future)**
 10. Search in fee and online & cash total fee **(done)**
-11. Student Birthday **(monu)**
+11. Student Birthday **(done)**
 12. Assign batch to teacher **(monu)**
 13. Change system of mark attendance **(done)**
 14. Whatsapp on student login **(done)**
@@ -19,3 +19,10 @@
 18. Remove test
 19. test list accorrding to date of joining
 20. test according to date
+
+
+
+Whatsapp on student login
+Search in fee 
+Online & cash total fee
+Student Birthday

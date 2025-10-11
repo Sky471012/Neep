@@ -20,6 +20,7 @@ import FeeTracking from './pages/FeeTracking';
 import BatchControls from './pages/BatchControls';
 import TeacherControls from './pages/TeacherControls';
 import StudentControls from './pages/StudentControls';
+import TodaysBirthdays from './pages/TodaysBirthdays';
 
 function App() {
 
@@ -75,6 +76,7 @@ function App() {
             <Route exact path='/all-students' element={<AllStudents />} />
             <Route exact path='/all-teachers' element={<AllTeachers />} />
             <Route exact path='/all-archived-batches' element={<AllArchivedBatches />} />
+            <Route exact path='/todaysBirthdays' element={<TodaysBirthdays />} />
             <Route exact path='/fee-tracking' element={<FeeTracking />} />
             <Route path="/batch/:batchId" element={<BatchControls />} />
             <Route path="/teacher/:teacherId" element={<TeacherControls />} />

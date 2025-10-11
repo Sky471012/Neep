@@ -71,4 +71,8 @@ router.get('/today/timetable', adminController.getTodaysClasses);
 // Upload excel
 router.post('/upload', upload.single("file"), adminController.uploadExcelSheet);
 
+// Today's Birthdays
+router.get("/birthday/today", adminController.getTodaysBirthdays);
+router.post("/birthday/wish", adminController.markBirthdayWished);
+
 module.exports = router;

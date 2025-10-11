@@ -345,6 +345,13 @@ export default function Admin() {
               </div>
               <h3>Archived Batches</h3>
             </Link>
+
+            <Link to='/todaysBirthdays' className="dashboard-card todaysBirthdays">
+              <div className="card-icon">
+                <i className="bi bi-cake-fill"></i>
+              </div>
+              <h3>Birthday Alerts</h3>
+            </Link>
           </div>
         </div>
       </div>

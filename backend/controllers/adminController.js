@@ -8,7 +8,9 @@ const Installment = require("../models/Installment");
 const Student = require("../models/Student");
 const Teacher = require("../models/Admins_teachers");
 const BatchTeacher = require("../models/Batch_teachers");
+const BirthdayWish = require("../models/Birthday_wish");
 const XLSX = require("xlsx");
+const { DateTime } = require("luxon");
 const mongoose = require("mongoose");
 
 function convertTo24Hour(time12h) {
@@ -594,20 +596,32 @@ exports.editMarks = async (req, res) => {
     const { marksScored } = req.body; // may be "" (mark absent) or a number-like string
 
     const test = await Test.findById(testId);
-    if (!test) return res.status(404).json({ message: 'Test not found' });
+    if (!test) return res.status(404).json({ message: "Test not found" });
 
     // If empty or null -> Absent
-    if (marksScored === '' || marksScored === null || typeof marksScored === 'undefined') {
+    if (
+      marksScored === "" ||
+      marksScored === null ||
+      typeof marksScored === "undefined"
+    ) {
       test.absent = true;
       test.marksScored = null; // safe even if previously set
     } else {
       // Non-empty -> must be a number within [0, maxMarks]
       const n = Number(marksScored);
       if (Number.isNaN(n)) {
-        return res.status(400).json({ message: 'marksScored must be a number or empty to mark absent' });
+        return res
+          .status(400)
+          .json({
+            message: "marksScored must be a number or empty to mark absent",
+          });
       }
       if (n < 0 || n > test.maxMarks) {
-        return res.status(400).json({ message: `marksScored must be between 0 and ${test.maxMarks}` });
+        return res
+          .status(400)
+          .json({
+            message: `marksScored must be between 0 and ${test.maxMarks}`,
+          });
       }
       test.absent = false;
       test.marksScored = n;
@@ -616,8 +630,8 @@ exports.editMarks = async (req, res) => {
     await test.save();
     return res.json({ test });
   } catch (err) {
-    console.error('Update marks error:', err);
-    return res.status(500).json({ message: 'Failed to update marks' });
+    console.error("Update marks error:", err);
+    return res.status(500).json({ message: "Failed to update marks" });
   }
 };
 
@@ -1705,5 +1719,77 @@ exports.uploadExcelSheet = async (req, res) => {
   } catch (error) {
     console.error("Excel upload error:", error);
     res.status(500).json({ message: "Error uploading students", error });
+  }
+};
+
+//  Get today's birthdays
+exports.getTodaysBirthdays = async (req, res) => {
+  try {
+    // Current IST date
+    const nowIST = DateTime.now().setZone("Asia/Kolkata");
+    const todayDay = nowIST.toFormat("dd");
+    const todayMonth = nowIST.toFormat("MM");
+    const todayFull = nowIST.toFormat("dd-MM-yyyy");
+
+    // Fetch all students (large DB but filtered in memory)
+    const students = await Student.find({}).lean();
+
+    // Get today's birthdays
+    const todaysStudents = students.filter((s) => {
+      if (!s.dob) return false;
+      const [day, month] = s.dob.split("-");
+      return day === todayDay && month === todayMonth;
+    });
+
+    // Get wishes already sent today
+    const wished = await BirthdayWish.find({ wishedOn: todayFull }).lean();
+    const wishedIds = new Set(wished.map((w) => w.studentId.toString()));
+
+    // Combine with status
+    const result = todaysStudents.map((s) => ({
+      _id: s._id,
+      name: s.name,
+      dob: s.dob,
+      class: s.class,
+      phone: s.phone,
+      wished: wishedIds.has(s._id.toString()),
+    }));
+
+    res.json({
+      date: todayFull,
+      totalBirthdays: result.length,
+      students: result,
+    });
+  } catch (err) {
+    console.error("Error fetching birthdays:", err);
+    res.status(500).json({ message: "Failed to fetch today's birthdays." });
+  }
+};
+
+// Mark wish as sent
+exports.markBirthdayWished = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+    if (!studentId)
+      return res.status(400).json({ message: "studentId required" });
+
+    const nowIST = DateTime.now().setZone("Asia/Kolkata");
+    const todayFull = nowIST.toFormat("dd-MM-yyyy");
+
+    // Check if already wished
+    const existing = await BirthdayWish.findOne({
+      studentId,
+      wishedOn: todayFull,
+    });
+    if (existing) {
+      return res.json({ message: "Already wished", wished: true });
+    }
+
+    // Save new record
+    await BirthdayWish.create({ studentId, wishedOn: todayFull });
+    res.json({ message: "Wish marked as sent", wished: true });
+  } catch (err) {
+    console.error("Error marking wish:", err);
+    res.status(500).json({ message: "Failed to mark wish." });
   }
 };

@@ -253,7 +253,14 @@ body {
   border-color: #64748b;
 }
 .dashboard-card.archived-batches:hover {
-  background: #f8fafc;
+  background: #e6e8ea;
+}
+
+.dashboard-card.todaysBirthdays {
+  border-color: #ff9dac;
+}
+.dashboard-card.todaysBirthdays:hover {
+  background: #fff6f7;
 }
 
 .dashboard-card.fee-tracking {
