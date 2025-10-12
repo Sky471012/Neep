@@ -43,6 +43,7 @@ exports.sendOtp = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(`Generated OTP for ${email}: ${otp}`); // For debugging
 
     await OtpLog.create({
       email,
@@ -62,7 +63,8 @@ This OTP will expire in 60 minutes. Please use it to complete your verification 
 If you did not request this code, please ignore this email.
 
 Best regards,
-New Era Education Point (NEEP)`
+New Era Education Point (NEEP)`,
+      process.env.EMAIL_USER_OTP
     );
     
     res.json({ success: true, message: "OTP sent to email" });

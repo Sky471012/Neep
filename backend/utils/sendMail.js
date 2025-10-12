@@ -1,39 +1,42 @@
 const nodemailer = require("nodemailer");
+const axios = require("axios");
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+async function sendMail(to, subject, text, senderEmail) {
+  try {
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: { name: "NEEP", email: senderEmail }, // dynamic sender
+        to: [{ email: to }],
+        subject: subject,
+        textContent: text,
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "api-key": process.env.BREVO_API_KEY,
+          "content-type": "application/json",
+        },
+      }
+    );
 
-async function sendMail(to, subject, text) {
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to,
-    subject,
-    text,
-  };
-
-  await transporter.sendMail(mailOptions);
+    console.log("Brevo API response:", response.data);
+  } catch (error) {
+    console.error(
+      "Email sending failed:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
 }
 
 async function sendMailToAdmin(name, phone, email, message) {
-  const mailOptions = {
-    from: `"NEEP Contact Form" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_TO_ADMIN,
-    subject: "New Contact Form Submission",
-    html: `
-      <h3>Contact Message</h3>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Phone:</strong> ${phone}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Message:</strong><br/>${message}</p>
-    `,
-  };
-
-  await transporter.sendMail(mailOptions);
+  return sendMail(
+    process.env.EMAIL_TO_ADMIN,
+    "New Contact Form Submission",
+    `New contact message from ${name}. \n\nContact Number: ${phone}, \nEmail: ${email}\n\nMessage:\n${message}`,
+    process.env.EMAIL_USER_CONTACT
+  );
 }
 
 module.exports = {
