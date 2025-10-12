@@ -95,7 +95,7 @@ export default function TodaysBirthdays() {
                                 </div>
                             ))
                     ) : (
-                        <p className="no-data">No archived batches found.</p>
+                        <p className="no-data">No student to be wished.</p>
                     )}
                 </div>
             </div>

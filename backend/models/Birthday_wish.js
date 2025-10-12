@@ -9,10 +9,9 @@ const birthdayWishSchema = new Schema({
   },
   wishedOn: {
     type: Date,
-    default: Date.now,
+    default: Date.now,       // store as JS Date
     required: true,
-    // TTL index: auto-delete 24 hours after creation
-    expires: 60 * 60 * 24, // seconds = 24 hours
+    expires: 60 * 60 * 24,  // auto-delete after 24 hours
   },
 });
 

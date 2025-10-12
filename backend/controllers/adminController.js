@@ -1725,41 +1725,34 @@ exports.uploadExcelSheet = async (req, res) => {
 //  Get today's birthdays
 exports.getTodaysBirthdays = async (req, res) => {
   try {
-    // Current IST date
     const nowIST = DateTime.now().setZone("Asia/Kolkata");
-    const todayDay = nowIST.toFormat("dd");
-    const todayMonth = nowIST.toFormat("MM");
-    const todayFull = nowIST.toFormat("dd-MM-yyyy");
+    const todayDay = nowIST.day;
+    const todayMonth = nowIST.month;
 
-    // Fetch all students (large DB but filtered in memory)
-    const students = await Student.find({}).lean();
+    // Today's start and end in IST for BirthdayWish
+    const startOfDay = nowIST.startOf("day").toJSDate();
+    const endOfDay = nowIST.endOf("day").toJSDate();
 
-    // Get today's birthdays
-    const todaysStudents = students.filter((s) => {
-      if (!s.dob) return false;
-      const [day, month] = s.dob.split("-");
-      return day === todayDay && month === todayMonth;
-    });
+    const students = await Student.find({ dob: { $exists: true, $ne: null } });
 
-    // Get wishes already sent today
-    const wished = await BirthdayWish.find({ wishedOn: todayFull }).lean();
-    const wishedIds = new Set(wished.map((w) => w.studentId.toString()));
+    const todaysBirthdays = await Promise.all(
+      students.map(async (s) => {
+        const [day, month, year] = s.dob.split("-");
+        if (parseInt(day) === todayDay && parseInt(month) === todayMonth) {
+          // Check if already wished today
+          const wished = await BirthdayWish.exists({
+            studentId: s._id,
+            wishedOn: { $gte: startOfDay, $lte: endOfDay },
+          });
+          return { ...s.toObject(), wished: !!wished };
+        }
+        return null;
+      })
+    );
 
-    // Combine with status
-    const result = todaysStudents.map((s) => ({
-      _id: s._id,
-      name: s.name,
-      dob: s.dob,
-      class: s.class,
-      phone: s.phone,
-      wished: wishedIds.has(s._id.toString()),
-    }));
+    const filtered = todaysBirthdays.filter(Boolean);
 
-    res.json({
-      date: todayFull,
-      totalBirthdays: result.length,
-      students: result,
-    });
+    res.json({ students: filtered, totalBirthdays: filtered.length });
   } catch (err) {
     console.error("Error fetching birthdays:", err);
     res.status(500).json({ message: "Failed to fetch today's birthdays." });
@@ -1773,19 +1766,25 @@ exports.markBirthdayWished = async (req, res) => {
     if (!studentId)
       return res.status(400).json({ message: "studentId required" });
 
-    const nowIST = DateTime.now().setZone("Asia/Kolkata").startOf("day").toJSDate();
+    const nowIST = DateTime.now().setZone("Asia/Kolkata");
+    const startOfDay = nowIST.startOf("day").toJSDate();
+    const endOfDay = nowIST.endOf("day").toJSDate();
 
-    // Check if already wished today
+    // Check if already wished
     const existing = await BirthdayWish.findOne({
       studentId,
-      wishedOn: { $gte: nowIST },
+      wishedOn: { $gte: startOfDay, $lte: endOfDay },
     });
+
     if (existing) {
       return res.json({ message: "Already wished", wished: true });
     }
 
-    // Save new record (will auto-delete after 24h)
-    await BirthdayWish.create({ studentId, wishedOn: new Date() });
+    await BirthdayWish.create({
+      studentId,
+      wishedOn: nowIST.toJSDate(), // Store IST timestamp
+    });
+
     res.json({ message: "Wish marked as sent", wished: true });
   } catch (err) {
     console.error("Error marking wish:", err);
