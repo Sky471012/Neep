@@ -1773,20 +1773,19 @@ exports.markBirthdayWished = async (req, res) => {
     if (!studentId)
       return res.status(400).json({ message: "studentId required" });
 
-    const nowIST = DateTime.now().setZone("Asia/Kolkata");
-    const todayFull = nowIST.toFormat("dd-MM-yyyy");
+    const nowIST = DateTime.now().setZone("Asia/Kolkata").startOf("day").toJSDate();
 
-    // Check if already wished
+    // Check if already wished today
     const existing = await BirthdayWish.findOne({
       studentId,
-      wishedOn: todayFull,
+      wishedOn: { $gte: nowIST },
     });
     if (existing) {
       return res.json({ message: "Already wished", wished: true });
     }
 
-    // Save new record
-    await BirthdayWish.create({ studentId, wishedOn: todayFull });
+    // Save new record (will auto-delete after 24h)
+    await BirthdayWish.create({ studentId, wishedOn: new Date() });
     res.json({ message: "Wish marked as sent", wished: true });
   } catch (err) {
     console.error("Error marking wish:", err);

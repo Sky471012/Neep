@@ -8,8 +8,11 @@ const birthdayWishSchema = new Schema({
     required: true,
   },
   wishedOn: {
-    type: String,
+    type: Date,
+    default: Date.now,
     required: true,
+    // TTL index: auto-delete 24 hours after creation
+    expires: 60 * 60 * 24, // seconds = 24 hours
   },
 });
 
