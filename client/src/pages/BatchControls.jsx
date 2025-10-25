@@ -1551,7 +1551,7 @@ export default function BatchControls() {
             {studentTests.length === 0 ? (
               <p>No test records found for this batch.</p>
             ) : (
-              <table className="table">
+              <table className="table table-colored">
                 <thead>
                   <tr>
                     <th style={{ padding: "10px 20px" }}>Test Name</th>
@@ -1766,7 +1766,7 @@ export default function BatchControls() {
                         Maximum Marks :- {selectedTest.maxMarks}
                       </span>
 
-                      <table className="table table-bordered">
+                      <table className="table table-colored">
                         <thead>
                           <tr>
                             <th style={{ padding: "10px 20px" }}>Student Name</th>

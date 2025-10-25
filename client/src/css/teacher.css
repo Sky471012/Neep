@@ -206,10 +206,6 @@ body {
   border-bottom: none;
 }
 
-.schedule-card .table tbody tr:hover {
-  background-color: #f8fafc;
-}
-
 /* Batches Section */
 .batches-section {
   background: white;

@@ -1,7 +1,7 @@
 **Future Scope:-**
 1. Test edit option **(done)**
-2. Table color in timetable **(monu)**
-3. DateFilter in fee-tracking **(monu)**
+2. Table color in timetable **(done)**
+3. DateFilter in fee-tracking **(future)**
 4. Today's class(schedule):- Completed(red), Running(dot with ongoing and green) and Upcoming(green) **(future)**
 5. Students:- Guardian name and School(govt or private) **(done)**
 6. Teachers:- Address, birthday, Aadhar no., Qualification, Experience **(monu)**
@@ -26,3 +26,6 @@ Need help by Whatsapp on student login
 Search in fee 
 Online & cash total fee
 Student Birthday
+
+Added Guardian name and School(govt or private) in student profile 
+Assign batches to teacher in teacher profile

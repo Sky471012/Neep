@@ -556,7 +556,7 @@ export default function Student() {
                 <h3 className="modal-title">
                     All Tests of {batchesRecords.find((b) => b.batchId === showModalTwo)?.batchName}
                 </h3>
-                <table className="table">
+                <table className="table table-colored">
                     <thead>
                         <tr>
                             <th style={{ padding: "10px 20px" }}>Test Name</th>
@@ -600,7 +600,7 @@ export default function Student() {
                 <h3 className="modal-title">Timetable for {batchesRecords.find((b) => b.batchId === showModalThree)?.batchName}</h3>
                 {timetableRecords[showModalThree]?.length > 0 ? (
                     <div style={{ maxHeight: "67vh", overflowY: "auto" }}>
-                        <table className="table">
+                        <table className="table table-colored">
                             <thead>
                                 <tr>
                                     <th style={{ padding: "10px 20px" }}>Weekday</th>
