@@ -1423,6 +1423,12 @@ export default function BatchControls() {
                   value={newStudentData.phone}
                   onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
                 />
+                <input
+                  className="form-control mb-2"
+                  placeholder="Guardian's Name..."
+                  value={newStudentData.guardianName || ""}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, guardianName: e.target.value })}
+                />
                 <select
                   className="form-select mb-2"
                   value={newStudentData.class}
@@ -1438,6 +1444,17 @@ export default function BatchControls() {
                       {cls}
                     </option>
                   ))}
+                </select>
+                <select
+                  className="form-select mb-2"
+                  value={newStudentData.schoolType || ""}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, schoolType: e.target.value })}
+                >
+                  <option value="" disabled hidden>
+                    Select School Type
+                  </option>
+                  <option value="Government">Government</option>
+                  <option value="Private">Private</option>
                 </select>
                 <div className="form-group">
                   <DatePicker

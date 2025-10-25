@@ -34,6 +34,8 @@ export default function Admin() {
     studentPhone: "",
     studentAddress: "",
     studentClass: "",
+    studentGuardian: "",
+    studentSchoolType: "",
     teacherName: "",
     teacherEmail: "",
     teacherPhone: "",
@@ -109,7 +111,7 @@ export default function Admin() {
     }
   }
 
-  const createStudent = async (name, phone, dob, address, className, dateOfJoining) => {
+  const createStudent = async (name, phone, dob, address, className, dateOfJoining, guardianName, schoolType) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentCreate`, {
         method: "POST",
@@ -124,6 +126,8 @@ export default function Admin() {
           address,
           class: className,
           dateOfJoining,
+          guardianName,
+          schoolType
         }),
       })
       const data = await res.json()
@@ -137,6 +141,8 @@ export default function Admin() {
         studentPhone: "",
         studentAddress: "",
         studentClass: "",
+        studentGuardian: "",
+        studentSchoolType: "",
       })
       setDob(new Date())
       setDateOfJoining(new Date())
@@ -224,6 +230,8 @@ export default function Admin() {
       credentials.studentAddress,
       credentials.studentClass,
       formattedJoining,
+      credentials.studentGuardian,
+      credentials.studentSchoolType
     )
   }
 
@@ -421,7 +429,7 @@ export default function Admin() {
           <h3 className="modal-title mb-2">Adding a Student</h3>
           <form onSubmit={handleStudentFormSubmit}>
             <div className="form-group">
-              <label>Name:</label>
+              <label>Name: <span className="text-danger">*</span></label>
               <input
                 type="text"
                 className="form-control"
@@ -433,7 +441,7 @@ export default function Admin() {
               />
             </div>
             <div className="form-group">
-              <label>Phone:</label>
+              <label>Phone: <span className="text-danger">*</span></label>
               <input
                 type="tel"
                 className="form-control"
@@ -445,7 +453,18 @@ export default function Admin() {
               />
             </div>
             <div className="form-group">
-              <label>DOB (dd-mm-yyyy):</label>
+              <label>Guardian Name:</label>
+              <input
+                type="text"
+                className="form-control"
+                name="studentGuardian"
+                placeholder="Write Guardian's Name..."
+                value={credentials.studentGuardian || ""}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>DOB (dd-mm-yyyy): <span className="text-danger">*</span></label>
               <DatePicker
                 className="datePicker"
                 dateFormat="dd-MM-yyyy"
@@ -463,7 +482,7 @@ export default function Admin() {
               />
             </div>
             <div className="form-group">
-              <label>Address:</label>
+              <label>Address: <span className="text-danger">*</span></label>
               <input
                 type="text"
                 className="form-control"
@@ -475,7 +494,7 @@ export default function Admin() {
               />
             </div>
             <div className="form-group">
-              <label>Class:</label>
+              <label>Class: <span className="text-danger">*</span></label>
               <select
                 className="form-select"
                 name="studentClass"
@@ -492,7 +511,20 @@ export default function Admin() {
               </select>
             </div>
             <div className="form-group">
-              <label>Date of Joining (dd-mm-yyyy):</label>
+              <label>School Type:</label>
+              <select
+                className="form-select"
+                name="schoolType"
+                value={credentials.studentSchoolType || ""}
+                onChange={handleInputChange}
+              >
+                <option value="">Select School Type</option>
+                <option value="Government">Government</option>
+                <option value="Private">Private</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Date of Joining (dd-mm-yyyy): <span className="text-danger">*</span></label>
               <DatePicker
                 className="datePicker"
                 dateFormat="dd-MM-yyyy"

@@ -29,6 +29,8 @@ exports.loginStudent = async (req, res) => {
         class: student.class,
         fee: student.fee,
         dateOfJoining: student.dateOfJoining,
+        guardianName: student.guardianName,
+        schoolType: student.schoolType,
       },
     });
   } catch (err) {

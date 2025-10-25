@@ -457,6 +457,8 @@ exports.addStudentByCreating = async (req, res) => {
       address: req.body.address.trim(),
       class: req.body.class.trim(),
       dateOfJoining: req.body.dateOfJoining.trim(), // must be DD-MM-YYYY
+      guardianName: req.body.guardianName?.trim() || "",  // optional
+      schoolType: req.body.schoolType || "NA",
     });
 
     const batchStudent = await BatchStudent.create({
@@ -737,6 +739,8 @@ exports.createStudent = async (req, res) => {
       address,
       class: studentClass,
       dateOfJoining,
+      guardianName,
+      schoolType,
     } = req.body;
 
     // Check if student exists
@@ -789,6 +793,8 @@ exports.createStudent = async (req, res) => {
       address: address.trim(),
       class: studentClass,
       dateOfJoining: dateOfJoining.trim(),
+      guardianName: guardianName ? guardianName.trim() : "",
+      schoolType: schoolType || "NA",
     });
 
     res.status(200).json(student);
@@ -1277,6 +1283,8 @@ exports.editStudent = async (req, res) => {
       address,
       class: studentClass,
       dateOfJoining,
+      guardianName,
+      schoolType,
     } = req.body;
 
     // Validate required fields
@@ -1341,6 +1349,8 @@ exports.editStudent = async (req, res) => {
         address: address.trim(),
         class: studentClass,
         dateOfJoining: dateOfJoining.trim(),
+        guardianName: guardianName?.trim() || "",
+        schoolType: schoolType || "NA",
       },
       {
         new: true, // Return updated document
@@ -1596,6 +1606,8 @@ exports.addTeacherToBatches = async (req, res) => {
   }
 };
 
+
+
 // Fee tracking
 exports.getUnpaidInstallments = async (req, res) => {
   try {
@@ -1660,6 +1672,8 @@ exports.getPaidInstallments = async (req, res) => {
   }
 };
 
+
+
 // today's classes
 exports.getTodaysClasses = async (req, res) => {
   try {
@@ -1709,6 +1723,8 @@ exports.getTodaysClasses = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch today's classes." });
   }
 };
+
+
 
 // Upload excel
 exports.uploadExcelSheet = async (req, res) => {
@@ -1770,6 +1786,8 @@ exports.uploadExcelSheet = async (req, res) => {
   }
 };
 
+
+
 //  Get today's birthdays
 exports.getTodaysBirthdays = async (req, res) => {
   try {
@@ -1806,6 +1824,8 @@ exports.getTodaysBirthdays = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch today's birthdays." });
   }
 };
+
+
 
 // Mark wish as sent
 exports.markBirthdayWished = async (req, res) => {

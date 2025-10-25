@@ -33,6 +33,15 @@ const studentSchema = new Schema({
     type: String,
     required: true,
   },
+  guardianName: {
+    type: String,
+    required: false,
+  },
+  schoolType: {
+    type: String,
+    enum: ["Government", "Private", "NA"],
+    required: false,
+  },
 });
 
 module.exports = model("Student", studentSchema);

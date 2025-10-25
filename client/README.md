@@ -3,7 +3,7 @@
 2. Table color in timetable **(monu)**
 3. DateFilter in fee-tracking **(monu)**
 4. Today's class(schedule):- Completed(red), Running(dot with ongoing and green) and Upcoming(green) **(future)**
-5. Students:- Guardian name and School(govt or private) **(monu)**
+5. Students:- Guardian name and School(govt or private) **(done)**
 6. Teachers:- Address, birthday, Aadhar no., Qualification, Experience **(monu)**
 7. Archive batches hide in student and teacher pages **(done)**
 8. Update timetable in teacher **(done)**
