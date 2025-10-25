@@ -10,7 +10,7 @@
 9. Teacher Attendance **(future)**
 10. Search in fee and online & cash total fee **(done)**
 11. Student Birthday **(done)**
-12. Assign batch to teacher **(monu)**
+12. Assign batch to teacher **(done)**
 13. Change system of mark attendance **(done)**
 14. Whatsapp on student login **(done)**
 15. Alabatic batch in student and teacher batches and in attendance and show students **(done)**

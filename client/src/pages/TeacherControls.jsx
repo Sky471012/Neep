@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import ModalOne from "../modals/ModalOne";
 
 
 export default function TeacherControls() {
@@ -12,7 +13,11 @@ export default function TeacherControls() {
     const [teacher, setTeacher] = useState({});
     const [batches, setBatches] = useState([]);
     const [batchSearch, setBatchSearch] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [allBatches, setAllBatches] = useState([]);
+    const [selectedToAdd, setSelectedToAdd] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
+    const [modalOne, setModalOne] = useState(false);
     const [editForm, setEditForm] = useState({
         name: '',
         email: '',
@@ -42,6 +47,14 @@ export default function TeacherControls() {
                 .then(res => res.json())
                 .then(data => setBatches(data.batches || []))
                 .catch(err => console.error("Batches fetch error:", err));
+
+            // Fetch all batches
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => setAllBatches(data || {}))
+                .catch(err => console.error("All batches fetch error:", err));
         }
     }, [teacherId]);
 
@@ -158,6 +171,56 @@ export default function TeacherControls() {
         }
     };
 
+    const filteredBatches = allBatches.filter((b) => {
+        const alreadyInBatch = batches.some((bt) => bt._id === b._id);
+        const searchLower = searchTerm.toLowerCase();
+        const nameMatch = b.name.toLowerCase().includes(searchLower);
+        return !alreadyInBatch && nameMatch;
+    });
+
+     const toggleSelectBatch = (batchId) => {
+        setSelectedToAdd((prev) =>
+            prev.includes(batchId)
+                ? prev.filter((id) => id !== batchId)
+                : [...prev, batchId]
+        );
+    };
+
+    const handleAddToSelectedBatches = async () => {
+        if (selectedToAdd.length === 0) {
+            return alert("Please select at least one batch.");
+        }
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addTeacherToBatches`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    teacherId,
+                    batchIds: selectedToAdd,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Failed to Assign to batches.");
+                return;
+            }
+
+            setModalOne(false);
+            setBatches((prev) => [...prev, ...data.assignedBatches]);
+            setSelectedToAdd([]);
+            setSearchTerm("");
+        } catch (err) {
+            console.error("Assign to batches error:", err);
+            alert("Error while assigning to batches.");
+        }
+    };
+
 
     return (<>
 
@@ -179,6 +242,13 @@ export default function TeacherControls() {
                                 </button>
                                 <ul className="dropdown-menu dropdown-menu-end shadow">
                                     <li>
+                                        <button
+                                            className="dropdown-item"
+                                            onClick={() => setModalOne(true)}
+                                        >
+                                            Assign to Batches
+                                        </button>
+                                    </li><li>
                                         <button
                                             className="dropdown-item"
                                             onClick={handleEditClick}
@@ -409,6 +479,48 @@ export default function TeacherControls() {
                         </table>
                     </div>
                 </div>
+
+                <ModalOne
+                    isOpen={modalOne}
+                    onClose={() => {
+                        setModalOne(false);
+                        setSearchTerm("");
+                    }}
+                >
+                    <div className="addToBatch-box">
+                        <h3 className="modal-title">Assign Teacher to Batches</h3>
+                        <input
+                            type="text"
+                            className="form-control mb-3"
+                            placeholder="Search by name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <div style={{ maxHeight: "45vh", overflowY: "auto", margin: "10px" }}>
+                            {filteredBatches
+                                ?.slice() // make a shallow copy so original array isn’t mutated
+                                .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
+                                .map((batch) => (
+                                    <div key={batch._id} className="d-flex align-items-center mb-1 text-break w-100">
+                                        <input
+                                            className="checkbox"
+                                            type="checkbox"
+                                            id={batch._id}
+                                            checked={selectedToAdd.includes(batch._id)}
+                                            onChange={() => toggleSelectBatch(batch._id)}
+                                        />
+                                        <label htmlFor={batch._id}>
+                                            <div className="d-flex">{batch.name} <div className="dot"></div> Class: {batch.class}</div>
+                                        </label>
+                                    </div>
+                                ))}
+                        </div>
+                        <button className="btn btn-primary mt-3" style={{ width: "100%" }} onClick={handleAddToSelectedBatches}>
+                            Assign to selected Batches
+                        </button>
+                    </div>
+                </ModalOne>
+
             </div>
         </div>
 

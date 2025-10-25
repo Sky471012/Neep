@@ -58,6 +58,7 @@ router.post('/teacherCreate', adminController.createTeacher);
 router.delete('/teacherDelete/:teacherId', adminController.deleteTeacher);
 router.delete('/removeTeacher', adminController.removeTeacherFromBatch);
 router.put('/editTeacherProfile/:teacherId', adminController.editTeacher);
+router.post('/addTeacherToBatches', adminController.addTeacherToBatches);
 
 
 // Fee tracking

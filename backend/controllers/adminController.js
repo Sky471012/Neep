@@ -1548,6 +1548,54 @@ exports.editTeacher = async (req, res) => {
   }
 };
 
+exports.addTeacherToBatches = async (req, res) => {
+  try {
+    const { batchIds, teacherId } = req.body;
+
+    if (!Array.isArray(batchIds)) {
+      return res.status(400).json({ message: "Invalid batchIds array." });
+    }
+
+    // Validate teacher exists
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      return res.status(404).json({ message: "Teacher not found." });
+    }
+
+    // Step 1: Fetch batch names
+    const batches = await Batch.find({ _id: { $in: batchIds } });
+    if (batches.length === 0) {
+      return res.status(404).json({ message: "No valid batches found." });
+    }
+
+    // Step 2: Prepare bulk operations (update if exists, insert if not)
+    const bulkOps = batches.map((batch) => ({
+      updateOne: {
+        filter: { batchId: batch._id }, // find by batchId (unique)
+        update: {
+          $set: {
+            teacherId: teacher._id,
+            batchName: batch.name,
+          },
+        },
+        upsert: true, // create new if doesn't exist
+      },
+    }));
+
+    // Step 3: Execute bulkWrite
+    await BatchTeacher.bulkWrite(bulkOps);
+
+    // Step 4: Return response
+    return res.status(200).json({
+      message: "Batches successfully assigned or reassigned to teacher.",
+      assignedBatches: batches,
+    });
+  } catch (err) {
+    console.error("Assign Batches Error:", err);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 // Fee tracking
 exports.getUnpaidInstallments = async (req, res) => {
   try {

@@ -28,7 +28,6 @@ export default function StudentControls() {
     const [modalTwo, setModalTwo] = useState(false);
     const [modalThree, setModalThree] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedTest, setSelectedTest] = useState(null);
     const [selectedBatch, setSelectedBatch] = useState(null);
     const [selectedToAdd, setSelectedToAdd] = useState([]);
     const [isEditingFee, setIsEditingFee] = useState(false);
