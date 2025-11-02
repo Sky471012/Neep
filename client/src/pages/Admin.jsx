@@ -39,6 +39,11 @@ export default function Admin() {
     teacherName: "",
     teacherEmail: "",
     teacherPhone: "",
+    teacherDob: "",
+    teacherAddress: "",
+    teacherQualification: "",
+    teacherAadhar: "",
+    teacherExperience: "",
   })
 
   // Group classes by timing
@@ -153,7 +158,7 @@ export default function Admin() {
     }
   }
 
-  const createTeacher = async (teacherName, teacherEmail, teacherPhone) => {
+  const createTeacher = async (teacherName, teacherEmail, teacherPhone, teacherDob, teacherAddress, teacherQualification, teacherAadhar, teacherExperience) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherCreate`, {
         method: "POST",
@@ -165,6 +170,11 @@ export default function Admin() {
           name: teacherName,
           email: teacherEmail,
           phone: teacherPhone,
+          dob: teacherDob,
+          address: teacherAddress,
+          qualification: teacherQualification,
+          aadhar: teacherAadhar,
+          experience: Number(teacherExperience),
         }),
       })
       const data = await res.json()
@@ -178,6 +188,11 @@ export default function Admin() {
         teacherName: "",
         teacherEmail: "",
         teacherPhone: "",
+        teacherDob: "",
+        teacherAddress: "",
+        teacherQualification: "",
+        teacherAadhar: "",
+        teacherExperience: "",
       }))
     } catch (error) {
       console.error("Error creating teacher:", error)
@@ -236,9 +251,18 @@ export default function Admin() {
   }
 
   const handleTeacherFormSubmit = (e) => {
-    e.preventDefault()
-    createTeacher(credentials.teacherName, credentials.teacherEmail, credentials.teacherPhone)
-  }
+    e.preventDefault();
+    createTeacher(
+      credentials.teacherName,
+      credentials.teacherEmail,
+      credentials.teacherPhone,
+      credentials.teacherDob,
+      credentials.teacherAddress,
+      credentials.teacherQualification,
+      credentials.teacherAadhar,
+      credentials.teacherExperience
+    );
+  };
 
   const groupedClasses = groupClassesByTiming(todaysClasses)
 
@@ -429,7 +453,7 @@ export default function Admin() {
           <h3 className="modal-title mb-2">Adding a Student</h3>
           <form onSubmit={handleStudentFormSubmit}>
             <div className="form-group">
-              <label>Name: <span className="text-danger">*</span></label>
+              <label>Name <span className="text-danger">*</span></label>
               <input
                 type="text"
                 className="form-control"
@@ -441,7 +465,7 @@ export default function Admin() {
               />
             </div>
             <div className="form-group">
-              <label>Phone: <span className="text-danger">*</span></label>
+              <label>Phone <span className="text-danger">*</span></label>
               <input
                 type="tel"
                 className="form-control"
@@ -453,7 +477,7 @@ export default function Admin() {
               />
             </div>
             <div className="form-group">
-              <label>Guardian Name:</label>
+              <label>Guardian Name</label>
               <input
                 type="text"
                 className="form-control"
@@ -464,7 +488,7 @@ export default function Admin() {
               />
             </div>
             <div className="form-group">
-              <label>DOB (dd-mm-yyyy): <span className="text-danger">*</span></label>
+              <label>DOB (dd-mm-yyyy) <span className="text-danger">*</span></label>
               <DatePicker
                 className="datePicker"
                 dateFormat="dd-MM-yyyy"
@@ -482,7 +506,7 @@ export default function Admin() {
               />
             </div>
             <div className="form-group">
-              <label>Address: <span className="text-danger">*</span></label>
+              <label>Address <span className="text-danger">*</span></label>
               <input
                 type="text"
                 className="form-control"
@@ -494,7 +518,7 @@ export default function Admin() {
               />
             </div>
             <div className="form-group">
-              <label>Class: <span className="text-danger">*</span></label>
+              <label>Class <span className="text-danger">*</span></label>
               <select
                 className="form-select"
                 name="studentClass"
@@ -511,7 +535,7 @@ export default function Admin() {
               </select>
             </div>
             <div className="form-group">
-              <label>School Type:</label>
+              <label>School Type</label>
               <select
                 className="form-select"
                 name="schoolType"
@@ -524,7 +548,7 @@ export default function Admin() {
               </select>
             </div>
             <div className="form-group">
-              <label>Date of Joining (dd-mm-yyyy): <span className="text-danger">*</span></label>
+              <label>Date of Joining (dd-mm-yyyy) <span className="text-danger">*</span></label>
               <DatePicker
                 className="datePicker"
                 dateFormat="dd-MM-yyyy"
@@ -553,7 +577,7 @@ export default function Admin() {
           <h3 className="modal-title">Adding a Teacher</h3>
           <form onSubmit={handleTeacherFormSubmit}>
             <div className="form-group">
-              <label htmlFor="teacherName">Teacher Name</label>
+              <label htmlFor="teacherName">Teacher Name <span className="text-danger">*</span></label>
               <input
                 type="text"
                 id="teacherName"
@@ -563,7 +587,7 @@ export default function Admin() {
                 required
                 placeholder="Write Teacher Name..."
               />
-              <label htmlFor="teacherEmail">Teacher Email</label>
+              <label htmlFor="teacherEmail">Teacher Email <span className="text-danger">*</span></label>
               <input
                 type="email"
                 id="teacherEmail"
@@ -573,7 +597,7 @@ export default function Admin() {
                 required
                 placeholder="Write Teacher Email..."
               />
-              <label htmlFor="teacherPhone">Teacher Phone</label>
+              <label htmlFor="teacherPhone">Teacher Phone <span className="text-danger">*</span></label>
               <input
                 type="tel"
                 id="teacherPhone"
@@ -583,7 +607,74 @@ export default function Admin() {
                 required
                 placeholder="Write Teacher Phone..."
               />
+              <label htmlFor="teacherDob">Date of Birth</label>
+              <DatePicker
+                selected={
+                  credentials.teacherDob
+                    ? parse(credentials.teacherDob, "dd-MM-yyyy", new Date())
+                    : null
+                }
+                onChange={(date) =>
+                  setCredentials({
+                    ...credentials,
+                    teacherDob: format(date, "dd-MM-yyyy"),
+                  })
+                }
+                dateFormat="dd-MM-yyyy"
+                className="datePicker"
+                placeholderText="Select DOB..."
+                showYearDropdown
+                dropdownMode="select"
+                yearDropdownItemNumber={10}
+                scrollableYearDropdown
+                maxDate={new Date()}
+                openToDate={new Date("1990-01-01")}
+                minDate={new Date("1955-01-01")}
+              />
+
+              <label htmlFor="teacherAddress">Address</label>
+              <input
+                type="text"
+                id="teacherAddress"
+                name="teacherAddress"
+                value={credentials.teacherAddress}
+                onChange={handleInputChange}
+                placeholder="Enter Address..."
+              />
+
+              <label htmlFor="teacherQualification">Qualification</label>
+              <input
+                type="text"
+                id="teacherQualification"
+                name="teacherQualification"
+                value={credentials.teacherQualification}
+                onChange={handleInputChange}
+                placeholder="Enter Qualification..."
+              />
+
+              <label htmlFor="teacherAadhar">Aadhar Number</label>
+              <input
+                type="text"
+                id="teacherAadhar"
+                name="teacherAadhar"
+                value={credentials.teacherAadhar}
+                onChange={handleInputChange}
+                placeholder="Enter 12-digit Aadhar..."
+                maxLength={12}
+              />
+
+              <label htmlFor="teacherExperience">Experience (in years)</label>
+              <input
+                type="number"
+                id="teacherExperience"
+                name="teacherExperience"
+                value={credentials.teacherExperience}
+                onChange={handleInputChange}
+                placeholder="Enter Experience..."
+                min="0"
+              />
             </div>
+
             <button className="btn btn-success mt-2" type="submit" style={{ width: "100%" }}>
               Add Teacher
             </button>

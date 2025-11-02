@@ -457,7 +457,7 @@ exports.addStudentByCreating = async (req, res) => {
       address: req.body.address.trim(),
       class: req.body.class.trim(),
       dateOfJoining: req.body.dateOfJoining.trim(), // must be DD-MM-YYYY
-      guardianName: req.body.guardianName?.trim() || "",  // optional
+      guardianName: req.body.guardianName?.trim() || "", // optional
       schoolType: req.body.schoolType || "NA",
     });
 
@@ -612,18 +612,14 @@ exports.editMarks = async (req, res) => {
       // Non-empty -> must be a number within [0, maxMarks]
       const n = Number(marksScored);
       if (Number.isNaN(n)) {
-        return res
-          .status(400)
-          .json({
-            message: "marksScored must be a number or empty to mark absent",
-          });
+        return res.status(400).json({
+          message: "marksScored must be a number or empty to mark absent",
+        });
       }
       if (n < 0 || n > test.maxMarks) {
-        return res
-          .status(400)
-          .json({
-            message: `marksScored must be between 0 and ${test.maxMarks}`,
-          });
+        return res.status(400).json({
+          message: `marksScored must be between 0 and ${test.maxMarks}`,
+        });
       }
       test.absent = false;
       test.marksScored = n;
@@ -1428,9 +1424,17 @@ exports.getTeacherBatches = async (req, res) => {
 
 exports.createTeacher = async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      dob,
+      address,
+      qualification,
+      aadhar,
+      experience,
+    } = req.body;
 
-    // Basic validation
     if (!name || !email || !phone) {
       return res
         .status(400)
@@ -1438,13 +1442,12 @@ exports.createTeacher = async (req, res) => {
     }
 
     const trimmedEmail = email.trim();
-
     const existingTeacher = await Teacher.findOne({ email: trimmedEmail });
 
     if (existingTeacher) {
-      return res.status(400).json({
-        message: "Teacher with the same email already exists.",
-      });
+      return res
+        .status(400)
+        .json({ message: "Teacher with the same email already exists." });
     }
 
     const teacher = await Teacher.create({
@@ -1452,9 +1455,14 @@ exports.createTeacher = async (req, res) => {
       email: trimmedEmail,
       phone: phone.trim(),
       role: "Teacher",
+      dob: dob?.trim() || "",
+      address: address?.trim() || "",
+      qualification: qualification?.trim() || "",
+      aadhar: aadhar?.trim() || "",
+      experience: experience ? Number(experience) : 0,
     });
 
-    res.json(teacher);
+    res.status(201).json({ message: "Teacher created successfully.", teacher });
   } catch (err) {
     console.error("Teacher creation error:", err);
     res.status(500).json({ error: err.message });
@@ -1500,7 +1508,7 @@ exports.removeTeacherFromBatch = async (req, res) => {
 exports.editTeacher = async (req, res) => {
   try {
     const { teacherId } = req.params;
-    const { name, email, phone } = req.body;
+    const { name, email, phone, dob, address, qualification, aadhar, experience } = req.body;
 
     // Validate input
     if (!name || !email || !phone) {
@@ -1536,6 +1544,11 @@ exports.editTeacher = async (req, res) => {
         name: name.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
+        dob: dob?.trim() || null,
+        address: address?.trim() || "",
+        qualification: qualification?.trim() || "",
+        aadhar: aadhar || null,
+        experience: experience || null,
       },
       {
         new: true, // Return updated document
@@ -1606,8 +1619,6 @@ exports.addTeacherToBatches = async (req, res) => {
   }
 };
 
-
-
 // Fee tracking
 exports.getUnpaidInstallments = async (req, res) => {
   try {
@@ -1672,8 +1683,6 @@ exports.getPaidInstallments = async (req, res) => {
   }
 };
 
-
-
 // today's classes
 exports.getTodaysClasses = async (req, res) => {
   try {
@@ -1723,8 +1732,6 @@ exports.getTodaysClasses = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch today's classes." });
   }
 };
-
-
 
 // Upload excel
 exports.uploadExcelSheet = async (req, res) => {
@@ -1786,8 +1793,6 @@ exports.uploadExcelSheet = async (req, res) => {
   }
 };
 
-
-
 //  Get today's birthdays
 exports.getTodaysBirthdays = async (req, res) => {
   try {
@@ -1824,8 +1829,6 @@ exports.getTodaysBirthdays = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch today's birthdays." });
   }
 };
-
-
 
 // Mark wish as sent
 exports.markBirthdayWished = async (req, res) => {

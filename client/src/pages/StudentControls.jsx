@@ -935,7 +935,7 @@ export default function StudentControls() {
                                             }}
                                             dateFormat="dd-MM-yyyy"
                                             className="form-control d-inline-block ms-2"
-                                            placeholderText="Select date of birth"
+                                            placeholderText="DD-MM-YYYY"
                                             showYearDropdown
                                             yearDropdownItemNumber={10}
                                             scrollableYearDropdown
