@@ -1,6 +1,7 @@
 const Batch = require("../models/Batch");
 const BatchStudent = require("../models/Batch_students");
 const Attendance = require("../models/Attendance");
+const AttendanceTeacher = require("../models/Attendance_Teacher");
 const Timetable = require("../models/TimeTable");
 const Test = require("../models/Test");
 const Fee = require("../models/Fee");
@@ -1418,6 +1419,32 @@ exports.getTeacherBatches = async (req, res) => {
     }).select("name");
 
     res.json({ batches });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getTeacherAttendance = async (req, res) => {
+ try {
+    const { batchId } = req.params;
+
+    const attendance = await AttendanceTeacher.find({ batchId });
+
+    res.json({ attendance });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.markTeacherAttendance = async (req, res) => {
+  const { teacherId, batchId, date, status } = req.body;
+  try {
+    const record = await AttendanceTeacher.findOneAndUpdate(
+      { batchId, date },
+      { teacherId, batchId, date, status, markedBy: req.user.id },
+      { upsert: true, new: true }
+    );
+    res.json(record);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

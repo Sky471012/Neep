@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import ModalOne from "../modals/ModalOne";
+import ModalTwo from "../modals/ModalTwo";
+import ModalThree from "../modals/ModalThree";
 import DatePicker from "react-datepicker";
 
 
@@ -13,17 +15,39 @@ export default function TeacherControls() {
 
     const [teacher, setTeacher] = useState({});
     const [batches, setBatches] = useState([]);
+    const [attendance, setAttendance] = useState([]);
+    const [activeBatch, setActiveBatch] = useState(null);
     const [batchSearch, setBatchSearch] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [allBatches, setAllBatches] = useState([]);
     const [selectedToAdd, setSelectedToAdd] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [modalOne, setModalOne] = useState(false);
+    const [modalTwo, setModalTwo] = useState(false);
+    const [openModalThree, setOpenModalThree] = useState(false);
+    const [attendanceMap, setAttendanceMap] = useState({});
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [attendanceDraft, setAttendanceDraft] = useState({});
     const [editForm, setEditForm] = useState({
         name: '',
         email: '',
         phone: ''
     });
+
+    const academicYearStart = new Date().getMonth() < 3 ? new Date().getFullYear() - 1 : new Date().getFullYear();
+
+    const allMonths = [
+        "April", "May", "June", "July", "August", "September",
+        "October", "November", "December", "January", "February", "March"
+    ];
+
+    function getAcademicMonthIndex(month) {
+        // Convert calendar month (0–11) to academic month index (0–11)
+        return month >= 3 ? month - 3 : month + 9;
+    }
+
+    const today = new Date();
+    const [activeMonthIndex, setActiveMonthIndex] = useState(getAcademicMonthIndex(today.getMonth()));
 
 
     useEffect(() => {
@@ -48,6 +72,14 @@ export default function TeacherControls() {
                 .then(res => res.json())
                 .then(data => setBatches(data.batches || []))
                 .catch(err => console.error("Batches fetch error:", err));
+
+            // Fetch teacher attendance
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherAttendance/${teacherId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => setAttendance(data.attendance || []))
+                .catch(err => console.error("Attendance fetch error:", err));
 
             // Fetch all batches
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
@@ -230,6 +262,133 @@ export default function TeacherControls() {
             alert("Error while assigning to batches.");
         }
     };
+
+    const showAttendance = async (batch) => {
+        setActiveBatch(batch);
+        setModalTwo(true);
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherAttendance/${batch._id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+
+            const newMap = {};
+            data.attendance?.forEach((record) => {
+                const date = new Date(record.date);
+                const formattedDate = date.toISOString().split("T")[0];
+                const key = `${record.teacherId}_${formattedDate}`;
+                newMap[key] = record.status;
+            });
+
+            setAttendanceMap((prev) => ({ ...prev, ...newMap }));
+        } catch (err) {
+            console.error("Failed to fetch Teacher attendance:", err);
+            alert("Error fetching attendance");
+        }
+    };
+
+    const preloadAttendanceForDate = async (dateObj) => {
+        const token = localStorage.getItem("authToken");
+        const dateOnly = new Date(dateObj.toDateString());
+
+        if (!activeBatch?._id) return; // safety check
+
+        try {
+            const res = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherAttendance/${activeBatch._id}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to fetch attendance");
+
+            const rec = (data.attendance || []).find((r) => {
+                const rd = new Date(r.date);
+                return (
+                    r.batchId === activeBatch._id &&
+                    rd.getFullYear() === dateOnly.getFullYear() &&
+                    rd.getMonth() === dateOnly.getMonth() &&
+                    rd.getDate() === dateOnly.getDate()
+                );
+            });
+
+            // Set state for this single batch
+            setAttendanceDraft({
+                [activeBatch._id]: rec?.status || undefined
+            });
+
+        } catch (err) {
+            console.error("Preload attendance error:", err);
+        }
+    };
+
+    const openModalThreeHandler = () => {
+        const date = selectedDate || new Date();
+        setOpenModalThree(true);
+        setSelectedDate(date);
+        preloadAttendanceForDate(date);
+    };
+
+    const closeAttendanceModalHandler = () => {
+        setOpenModalThree(false);
+    };
+
+    const setDraftStatus = (batchId, status) => {
+        setAttendanceDraft(prev => {
+            const next = { ...prev };
+            if (status === 'present' || status === 'absent') {
+                next[batchId] = status;
+            } else {
+                delete next[batchId];
+            }
+            return next;
+        });
+    };
+
+    const saveAttendanceForBatch = async (dateObj) => {
+    if (!dateObj) {
+        alert("Please select a date first.");
+        return;
+    }
+
+    if (!activeBatch?._id) {
+        alert("No active batch selected.");
+        return;
+    }
+
+    const token = localStorage.getItem("authToken");
+    const dateOnly = new Date(dateObj.toDateString());
+    const dateISO = dateOnly.toISOString();
+
+    const status = attendanceDraft[activeBatch._id] ?? "present"; // default present
+
+    try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendanceTeacher/mark`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                teacherId, // from useParams
+                batchId: activeBatch._id,
+                date: dateISO,
+                status
+            })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to mark attendance");
+
+        // Optional: update UI instantly
+        setAttendanceDraft({});
+        closeAttendanceModalHandler();
+    } catch (err) {
+        console.error("Teacher attendance error:", err);
+        alert("Failed to mark attendance. Please try again.");
+    }
+};
 
 
     return (<>
@@ -560,7 +719,7 @@ export default function TeacherControls() {
                                     </svg>
                                     <div className="detail-label">{teacher.address || 'NA'}</div>
                                 </div>
-                                
+
                                 <div className="detail-item p-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-4 h-4" viewBox="0 0 640 640"><path d="M271.2 56C265.1 49.8 256.2 47.3 247.8 49.6C239.4 51.9 232.9 58.4 230.8 66.8L215.5 127C214.4 131.4 209.9 134 205.6 132.7L145.8 115.9C137.4 113.5 128.4 115.9 122.3 122C116.2 128.1 113.8 137.1 116.2 145.5L133.1 205.3C134.3 209.6 131.7 214.1 127.4 215.2L67.1 230.5C58.7 232.6 52.1 239.2 49.8 247.6C47.5 256 50 264.9 56.2 271L100.7 314.3C103.9 317.4 103.9 322.6 100.7 325.8L56.3 369.1C50.1 375.2 47.6 384.1 49.9 392.5C52.2 400.9 58.8 407.4 67.2 409.6L127.4 424.9C131.8 426 134.4 430.5 133.1 434.8L116.2 494.5C113.8 502.9 116.2 511.9 122.3 518C128.4 524.1 137.4 526.5 145.8 524.1L205.6 507.2C209.9 506 214.4 508.6 215.5 512.9L230.8 573.1C232.9 581.5 239.5 588.1 247.9 590.4C256.3 592.7 265.2 590.2 271.3 584L314.6 539.5C317.7 536.3 322.9 536.3 326.1 539.5L369.3 584C375.4 590.2 384.3 592.7 392.7 590.4C401.1 588.1 407.6 581.5 409.8 573.1L425.1 513C426.2 508.6 430.7 506 435 507.3L494.8 524.2C503.2 526.6 512.2 524.2 518.3 518.1C524.4 512 526.8 503 524.4 494.6L507.5 434.8C506.3 430.5 508.9 426 513.2 424.9L573.4 409.6C581.8 407.5 588.4 400.9 590.7 392.5C593 384.1 590.5 375.1 584.3 369.1L539.8 325.8C536.6 322.7 536.6 317.5 539.8 314.3L584.3 271C590.5 264.9 593 256 590.7 247.6C588.4 239.2 581.8 232.7 573.4 230.5L513.2 215.2C508.8 214.1 506.2 209.6 507.5 205.3L524.4 145.5C526.8 137.1 524.4 128.1 518.3 122C512.2 115.9 503.2 113.5 494.8 115.9L435 132.8C430.7 134 426.2 131.4 425.1 127.1L409.8 66.8C407.7 58.4 401.1 51.8 392.7 49.5C384.3 47.2 375.4 49.7 369.3 55.9L326 100.5C322.9 103.7 317.7 103.7 314.5 100.5L271.2 56z" /></svg>
                                     <div className="detail-label">Qualification: {teacher.qualification || 'NA'}</div>
@@ -614,19 +773,44 @@ export default function TeacherControls() {
                                     .sort((a, b) => a.name.localeCompare(b.name)) // sort alphabetically
                                     .map((b) => (
                                         <tr key={b._id}>
-                                            <td style={{ width: "40%" }}>
+                                            <td style={{ width: "50%" }}>
                                                 {b.name}
                                                 <Link className="ms-2 text-primary" to={`/batch/${b._id}`}>
                                                     <i className="bi bi-box-arrow-up-right"></i>
                                                 </Link>
                                             </td>
-                                            <td style={{ width: "30%", textAlign: "right" }}>
-                                                <button
-                                                    className="btn btn-outline-danger btn-sm"
-                                                    onClick={() => removeTeacher(b._id, teacherId)}
-                                                >
-                                                    Remove
-                                                </button>
+                                            <td style={{ width: "50%", textAlign: "right" }}>
+                                                <div className="d-none d-sm-flex justify-content-end gap-2">
+                                                    <button className="btn btn-outline-success btn-sm" onClick={() => { setActiveBatch(b); openModalThreeHandler(); }}>
+                                                        Mark Attendance
+                                                    </button>
+                                                    <button className="btn btn-outline-primary btn-sm" onClick={() => showAttendance(b)}>
+                                                        Show Attendance
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-outline-danger btn-sm"
+                                                        onClick={() => removeTeacher(b._id, teacherId)}
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+
+                                                <div className="d-sm-none">
+                                                    <div className="d-flex gap-2 mb-2">
+                                                        <button className="btn btn-outline-success btn-sm flex-fill" onClick={() => { setActiveBatch(b); openModalThreeHandler(); }}>
+                                                            Mark Attendance
+                                                        </button>
+                                                        <button className="btn btn-outline-primary btn-sm flex-fill" onClick={() => showAttendance(b)}>
+                                                            Show Attendance
+                                                        </button>
+                                                    </div>
+                                                    <button
+                                                        className="btn btn-outline-danger btn-sm w-100"
+                                                        onClick={() => removeTeacher(b._id, teacherId)}
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -675,6 +859,165 @@ export default function TeacherControls() {
                         </button>
                     </div>
                 </ModalOne>
+
+                <ModalTwo
+                    isOpen={modalTwo}
+                    onClose={() => {
+                        setModalTwo(false);
+                        setActiveBatch(null);
+                    }}
+                >
+                    {activeBatch && (<>
+                        <h3 className="modal-title mb-0 mt-2">Attendance in {activeBatch.name}</h3>
+                        <div id={`carousel-${activeBatch._id}`} className="carousel slide p-1 mt-2" style={{ backgroundColor: "#d4d4d4ff" }}>
+                            <div className="carousel-inner">
+                                {allMonths.map((month, monthIdx) => {
+                                    let calendarMonth, calendarYear;
+                                    if (monthIdx <= 8) {
+                                        calendarMonth = monthIdx + 3;
+                                        calendarYear = academicYearStart;
+                                    } else {
+                                        calendarMonth = monthIdx - 9;
+                                        calendarYear = academicYearStart + 1;
+                                    }
+
+                                    const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+                                    return (
+                                        <div
+                                            key={month}
+                                            className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`}
+                                        >
+                                            <h6 className="month-title">{month} {calendarYear}</h6>
+                                            <div className="calendar-grid">
+                                                {[...Array(daysInMonth)].map((_, d) => {
+                                                    const date = new Date(calendarYear, calendarMonth, d + 1);
+                                                    const formatted = date.toISOString().split("T")[0];
+                                                    const key = `${teacherId}_${formatted}`;
+                                                    const status = attendanceMap[key];
+
+                                                    return (
+                                                        <div
+                                                            key={d}
+                                                            className={`date-box ${status === "present"
+                                                                ? "present"
+                                                                : status === "absent"
+                                                                    ? "absent"
+                                                                    : ""
+                                                                }`}
+                                                            title={`${month} ${d + 1}, ${calendarYear} - ${status || "No record"}`}
+                                                        >
+                                                            {d + 1}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="calendar-controls">
+                                <button
+                                    className="calendar-button ms-1 mb-1"
+                                    onClick={() =>
+                                        setActiveMonthIndex((prev) => (prev - 1 + 12) % 12)
+                                    }
+                                >
+                                    ‹ Previous
+                                </button>
+                                <button
+                                    className="calendar-button mb-1 me-1"
+                                    onClick={() =>
+                                        setActiveMonthIndex((prev) => (prev + 1) % 12)
+                                    }
+                                >
+                                    Next ›
+                                </button>
+                            </div>
+                        </div>
+                    </>)}
+                </ModalTwo>
+
+                <ModalThree
+                    isOpen={openModalThree}
+                    onClose={closeAttendanceModalHandler}
+                >
+                    <div className="attendance-form" style={{minHeight:"450px"}}>
+                        <h3 className="modal-title">Mark Attendance of <br />{teacher.name}</h3>
+
+                        <DatePicker
+                            className="datePicker mt-1 mb-2"
+                            dateFormat="dd-MM-yyyy"
+                            selected={selectedDate}
+                            onChange={(date) => {
+                                setSelectedDate(date);
+                                preloadAttendanceForDate(date);
+                            }}
+                            placeholderText="Select date"
+                            required
+                            showYearDropdown
+                            dropdownMode="select"
+                            yearDropdownItemNumber={10}
+                            scrollableYearDropdown
+                            maxDate={new Date()}
+                            openToDate={new Date()}
+                            minDate={new Date("1995-01-01")}
+                        />
+
+                        <div style={{ maxHeight: "55vh", overflowY: "auto", margin: "10px 0" }}>
+                            <table className="table table-bordered mt-3">
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: "40%", padding: "10px 20px" }}>Batch</th>
+                                        <th style={{ width: "60%", padding: "10px 20px" }}>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style={{ width: "40%", wordWrap: "break-word" }}>
+                                            {activeBatch?.name}
+                                        </td>
+                                        <td style={{ width: "60%" }}>
+                                            <div className="d-flex gap-2 align-items-center flex-wrap" role="group" aria-label="attendance">
+                                                <button
+                                                    type="button"
+                                                    className={`btn btn-sm ${attendanceDraft[activeBatch?._id] === "present"
+                                                        ? "btn-success"
+                                                        : "btn-outline-success"
+                                                        }`}
+                                                    onClick={() => setDraftStatus(activeBatch._id, "present")}
+                                                >
+                                                    Present
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className={`btn btn-sm ${attendanceDraft[activeBatch?._id] === "absent"
+                                                        ? "btn-danger"
+                                                        : "btn-outline-danger"
+                                                        }`}
+                                                    onClick={() => setDraftStatus(activeBatch._id, "absent")}
+                                                >
+                                                    Absent
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="d-flex justify-content-between align-items-center mt-2">
+                            <button
+                                className="btn btn-primary m-auto"
+                                disabled={!selectedDate}
+                                onClick={() => saveAttendanceForBatch(selectedDate)}
+                            >
+                                Mark Attendance
+                            </button>
+                        </div>
+                    </div>
+                </ModalThree>
 
             </div>
         </div>

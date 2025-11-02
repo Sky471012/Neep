@@ -54,6 +54,8 @@ router.put('/editStudntProfile/:studentId', adminController.editStudent);
 router.get('/teachers', adminController.getTeachers);
 router.get('/getTeacherDetails/:teacherId', adminController.getTeacher);
 router.get('/teacherBatches/:teacherId', adminController.getTeacherBatches);
+router.get('/teacherAttendance/:batchId', adminController.getTeacherAttendance);
+router.post('/attendanceTeacher/mark', adminController.markTeacherAttendance);
 router.post('/teacherCreate', adminController.createTeacher);
 router.delete('/teacherDelete/:teacherId', adminController.deleteTeacher);
 router.delete('/removeTeacher', adminController.removeTeacherFromBatch);
