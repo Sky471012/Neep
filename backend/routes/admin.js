@@ -75,5 +75,7 @@ router.post('/upload', upload.single("file"), adminController.uploadExcelSheet);
 // Today's Birthdays
 router.get("/birthday/today", adminController.getTodaysBirthdays);
 router.post("/birthday/wish", adminController.markBirthdayWished);
+router.get("/birthdayTeacher/today", adminController.getTodaysTeacherBirthdays);
+router.post("/birthdayTeacher/wish", adminController.markTeacherBirthdayWished);
 
 module.exports = router;

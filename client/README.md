@@ -2,7 +2,7 @@
 1. Test edit option **(done)**
 2. Table color in timetable **(done)**
 3. DateFilter in fee-tracking **(future)**
-4. Today's class(schedule):- Completed(red), Running(dot with ongoing and green) and Upcoming(green) **(drpped)**
+4. Today's class(schedule):- Completed(red), Running(dot with ongoing and green) and Upcoming(green) **(dropped)**
 5. Students:- Guardian name and School(govt or private) **(done)**
 6. Teachers:- Address, birthday, Aadhar no., Qualification, Experience **(done)**
 7. Archive batches hide in student and teacher pages **(done)**
@@ -19,6 +19,7 @@
 18. Remove test
 19. test list accorrding to date of joining
 20. test according to date
+21. teacher birthday **(done)**
 
 
 

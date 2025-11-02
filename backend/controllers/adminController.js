@@ -9,6 +9,7 @@ const Student = require("../models/Student");
 const Teacher = require("../models/Admins_teachers");
 const BatchTeacher = require("../models/Batch_teachers");
 const BirthdayWish = require("../models/Birthday_wish");
+const TeacherBirthdayWish = require("../models/Birthday_Teacher_wish");
 const XLSX = require("xlsx");
 const { DateTime } = require("luxon");
 const mongoose = require("mongoose");
@@ -1853,6 +1854,75 @@ exports.markBirthdayWished = async (req, res) => {
 
     await BirthdayWish.create({
       studentId,
+      wishedOn: nowIST.toJSDate(), // Store IST timestamp
+    });
+
+    res.json({ message: "Wish marked as sent", wished: true });
+  } catch (err) {
+    console.error("Error marking wish:", err);
+    res.status(500).json({ message: "Failed to mark wish." });
+  }
+};
+
+exports.getTodaysTeacherBirthdays = async (req, res) => {
+  try {
+    const nowIST = DateTime.now().setZone("Asia/Kolkata");
+    const todayDay = nowIST.day;
+    const todayMonth = nowIST.month;
+
+    // Today's start and end in IST for BirthdayWish
+    const startOfDay = nowIST.startOf("day").toJSDate();
+    const endOfDay = nowIST.endOf("day").toJSDate();
+
+    const teachers = await Teacher.find({ dob: { $exists: true, $ne: null } });
+
+    const todaysTeachersBirthdays = await Promise.all(
+      teachers.map(async (s) => {
+        const [day, month, year] = s.dob.split("-");
+        if (parseInt(day) === todayDay && parseInt(month) === todayMonth) {
+          // Check if already wished today
+          const wished = await TeacherBirthdayWish.exists({
+            teacherId: s._id,
+            wishedOn: { $gte: startOfDay, $lte: endOfDay },
+          });
+          return { ...s.toObject(), wished: !!wished };
+        }
+        return null;
+      })
+    );
+
+    const filtered = todaysTeachersBirthdays.filter(Boolean);
+
+    res.json({ teachers: filtered, totalTeachersBirthdays: filtered.length });
+  } catch (err) {
+    console.error("Error fetching birthdays:", err);
+    res.status(500).json({ message: "Failed to fetch today's birthdays." });
+  }
+};
+
+// Mark wish as sent
+exports.markTeacherBirthdayWished = async (req, res) => {
+  try {
+    const { teacherId } = req.body;
+    if (!teacherId)
+      return res.status(400).json({ message: "teacherId required" });
+
+    const nowIST = DateTime.now().setZone("Asia/Kolkata");
+    const startOfDay = nowIST.startOf("day").toJSDate();
+    const endOfDay = nowIST.endOf("day").toJSDate();
+
+    // Check if already wished
+    const existing = await TeacherBirthdayWish.findOne({
+      teacherId,
+      wishedOn: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    if (existing) {
+      return res.json({ message: "Already wished", wished: true });
+    }
+
+    await TeacherBirthdayWish.create({
+      teacherId,
       wishedOn: nowIST.toJSDate(), // Store IST timestamp
     });
 
