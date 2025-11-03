@@ -2,8 +2,12 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import Navbar from "../components/Navbar"
+import ModalOne from "../modals/ModalOne";
+import ModalTwo from "../modals/ModalTwo";
+import ModalThree from "../modals/ModalThree";
 import "@fortawesome/fontawesome-free/css/all.css"
 import "../css/admin.css"
+import DatePicker from "react-datepicker";
 
 export default function FeeTracking() {
 
@@ -22,6 +26,15 @@ export default function FeeTracking() {
   const [unpaidSearch, setUnpaidSearch] = useState("");
   const [upcomingSearch, setUpcomingSearch] = useState("");
   const [paidSearch, setPaidSearch] = useState("");
+  const [modalOne, setModalOne] = useState(false);
+  const [modalTwo, setModalTwo] = useState(false);
+  const [modalThree, setModalThree] = useState(false);
+  const [fromDateUnpaid, setFromDateUnpaid] = useState(null);
+  const [toDateUnpaid, setToDateUnpaid] = useState(null);
+  const [fromDateUpcoming, setFromDateUpcoming] = useState(null);
+  const [toDateUpcoming, setToDateUpcoming] = useState(null);
+  const [fromDatePaid, setFromDatePaid] = useState(null);
+  const [toDatePaid, setToDatePaid] = useState(null);
 
   const getDaysOverdue = (dueDate) => {
     const due = new Date(dueDate);
@@ -112,20 +125,32 @@ export default function FeeTracking() {
 
 
   // Compute filtered lists & totals before return
-  const filteredUnpaid = unpaidInstallments.filter(
-    (inst) => !selectedUnpaidClass || inst.studentId?.class === selectedUnpaidClass
-  );
+  const filteredUnpaid = unpaidInstallments.filter((inst) => {
+    const matchClass = !selectedUnpaidClass || inst.studentId?.class === selectedUnpaidClass;
+    const matchDate =
+      (!fromDateUnpaid || new Date(inst.dueDate) >= fromDateUnpaid) &&
+      (!toDateUnpaid || new Date(inst.dueDate) <= toDateUnpaid);
+    return matchClass && matchDate;
+  });
   const unpaidTotal = filteredUnpaid.reduce((sum, inst) => sum + (inst.amount || 0), 0);
 
-  const filteredUpcoming = upcomingInstallments.filter(
-    (inst) => !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass
-  );
+  const filteredUpcoming = upcomingInstallments.filter((inst) => {
+    const matchClass = !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass;
+    const matchDate =
+      (!fromDateUpcoming || new Date(inst.dueDate) >= fromDateUpcoming) &&
+      (!toDateUpcoming || new Date(inst.dueDate) <= toDateUpcoming);
+    return matchClass && matchDate;
+  });
   const upcomingTotal = filteredUpcoming.reduce((sum, inst) => sum + (inst.amount || 0), 0);
 
-  const filteredPaid = paidInstallments.filter((inst) =>
-    (!selectedPaidClass || inst.studentId?.class === selectedPaidClass) &&
-    (!medium || inst.method?.toLowerCase() === medium.toLowerCase())
-  );
+  const filteredPaid = paidInstallments.filter((inst) => {
+    const matchClass = !selectedPaidClass || inst.studentId?.class === selectedPaidClass;
+    const matchMedium = !medium || inst.method?.toLowerCase() === medium.toLowerCase();
+    const matchDate =
+      (!fromDatePaid || new Date(inst.paidDate) >= fromDatePaid) &&
+      (!toDatePaid || new Date(inst.paidDate) <= toDatePaid);
+    return matchClass && matchMedium && matchDate;
+  });
   const paidTotal = filteredPaid.reduce((sum, inst) => sum + (inst.amount || 0), 0);
 
   return (
@@ -211,6 +236,14 @@ export default function FeeTracking() {
                         </button>
                       </li>
                       <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => { setModalOne(true) }}
+                        >
+                          Filter by Date
+                        </button>
+                      </li>
+                      <li>
                         <div className="dropdown-item p-2">
                           Filter by Class:
                           <ul className="list-unstyled border mt-1">
@@ -226,15 +259,15 @@ export default function FeeTracking() {
                                 </li>
                               )
                             )}
-                            <li>
-                              <button
-                                className="btn btn-sm text-start text-danger w-100"
-                                onClick={() => setSelectedUnpaidClass(null)}
-                              >
-                                Clear Filter
-                              </button>
-                            </li>
                           </ul>
+                          <li>
+                            <button
+                              className="btn btn-sm text-start text-danger w-100"
+                              onClick={() => { setSelectedUnpaidClass(null); setFromDateUnpaid(null); setToDateUnpaid(null) }}
+                            >
+                              Clear Filters
+                            </button>
+                          </li>
                         </div>
                       </li>
                     </ul>
@@ -320,6 +353,14 @@ export default function FeeTracking() {
                         </button>
                       </li>
                       <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => { setModalTwo(true) }}
+                        >
+                          Filter by Date
+                        </button>
+                      </li>
+                      <li>
                         <div className="dropdown-item p-2">
                           Filter by Class:
                           <ul className="list-unstyled border mt-1">
@@ -335,15 +376,15 @@ export default function FeeTracking() {
                                 </li>
                               )
                             )}
-                            <li>
-                              <button
-                                className="btn btn-sm text-start text-danger w-100"
-                                onClick={() => setSelectedUpcomingClass(null)}
-                              >
-                                Clear Filter
-                              </button>
-                            </li>
                           </ul>
+                          <li>
+                            <button
+                              className="btn btn-sm text-start text-danger w-100"
+                              onClick={() => { setSelectedUpcomingClass(null); setFromDateUpcoming(null); setToDateUpcoming(null) }}
+                            >
+                              Clear Filter
+                            </button>
+                          </li>
                         </div>
                       </li>
                     </ul>
@@ -446,6 +487,14 @@ export default function FeeTracking() {
                         </button>
                       </li>
                       <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => { setModalThree(true) }}
+                        >
+                          Filter by Date
+                        </button>
+                      </li>
+                      <li>
                         <div className="dropdown-item p-2">
                           Filter by Class:
                           <ul className="list-unstyled border mt-1">
@@ -461,15 +510,15 @@ export default function FeeTracking() {
                                 </li>
                               )
                             )}
-                            <li>
-                              <button
-                                className="btn btn-sm text-start text-danger w-100"
-                                onClick={() => setSelectedPaidClass(null)}
-                              >
-                                Clear Filter
-                              </button>
-                            </li>
                           </ul>
+                          <li>
+                            <button
+                              className="btn btn-sm text-start text-danger w-100"
+                              onClick={() => { setSelectedPaidClass(null); setFromDatePaid(null); setToDatePaid(null) }}
+                            >
+                              Clear Filter
+                            </button>
+                          </li>
                         </div>
                       </li>
                     </ul>
@@ -506,6 +555,160 @@ export default function FeeTracking() {
           )}
         </div>
       </div>
+
+      <ModalOne
+        isOpen={modalOne}
+        onClose={() => {
+          setModalOne(false);
+          setSearchTerm("");
+        }}
+      >
+        <div className="addToBatch-box d-flex flex-column" style={{ minHeight: "520px" }}>
+          <h3 className="modal-title">Filter by Date</h3>
+
+          <div className="mb-3">
+            <label className="form-label">From:</label>
+            <DatePicker
+              selected={fromDateUnpaid}
+              onChange={(date) => setFromDateUnpaid(date)}
+              scrollableYearDropdown
+              className="form-control"
+              dateFormat="dd-MM-yyyy"
+              showYearDropdown
+              yearDropdownItemNumber={10}
+              dropdownMode="select"
+              placeholderText="DD-MM-YYYY"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">To:</label>
+            <DatePicker
+              selected={toDateUnpaid}
+              onChange={(date) => setToDateUnpaid(date)}
+              scrollableYearDropdown
+              className="form-control"
+              dateFormat="dd-MM-yyyy"
+              showYearDropdown
+              yearDropdownItemNumber={10}
+              dropdownMode="select"
+              placeholderText="DD-MM-YYYY"
+            />
+          </div>
+
+          <button
+            className="btn btn-primary mt-5 m-auto"
+            onClick={() => {
+              setModalOne(false);
+            }}
+          >
+            Apply Filter
+          </button>
+        </div>
+      </ModalOne>
+
+      <ModalTwo
+        isOpen={modalTwo}
+        onClose={() => {
+          setModalTwo(false);
+          setSearchTerm("");
+        }}
+      >
+        <div className="addToBatch-box d-flex flex-column" style={{ minHeight: "520px" }}>
+          <h3 className="modal-title">Filter by Date</h3>
+
+          <div className="mb-3">
+            <label className="form-label">From:</label>
+            <DatePicker
+              selected={fromDateUpcoming}
+              onChange={(date) => setFromDateUpcoming(date)}
+              scrollableYearDropdown
+              className="form-control"
+              dateFormat="dd-MM-yyyy"
+              showYearDropdown
+              yearDropdownItemNumber={10}
+              dropdownMode="select"
+              placeholderText="DD-MM-YYYY"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">To:</label>
+            <DatePicker
+              selected={toDateUpcoming}
+              onChange={(date) => setToDateUpcoming(date)}
+              scrollableYearDropdown
+              className="form-control"
+              dateFormat="dd-MM-yyyy"
+              showYearDropdown
+              yearDropdownItemNumber={10}
+              dropdownMode="select"
+              placeholderText="DD-MM-YYYY"
+            />
+          </div>
+
+          <button
+            className="btn btn-primary mt-5 m-auto"
+            onClick={() => {
+              setModalTwo(false);
+            }}
+          >
+            Apply Filter
+          </button>
+        </div>
+      </ModalTwo>
+
+      <ModalThree
+        isOpen={modalThree}
+        onClose={() => {
+          setModalThree(false);
+          setSearchTerm("");
+        }}
+      >
+        <div className="addToBatch-box d-flex flex-column" style={{ minHeight: "520px" }}>
+          <h3 className="modal-title">Filter by Date</h3>
+
+          <div className="mb-3">
+            <label className="form-label">From:</label>
+            <DatePicker
+              selected={fromDatePaid}
+              onChange={(date) => setFromDatePaid(date)}
+              scrollableYearDropdown
+              className="form-control"
+              dateFormat="dd-MM-yyyy"
+              showYearDropdown
+              yearDropdownItemNumber={10}
+              dropdownMode="select"
+              placeholderText="DD-MM-YYYY"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">To:</label>
+            <DatePicker
+              selected={toDatePaid}
+              onChange={(date) => setToDatePaid(date)}
+              scrollableYearDropdown
+              className="form-control"
+              dateFormat="dd-MM-yyyy"
+              showYearDropdown
+              yearDropdownItemNumber={10}
+              dropdownMode="select"
+              placeholderText="DD-MM-YYYY"
+            />
+          </div>
+
+          <button
+            className="btn btn-primary mt-5 m-auto"
+            onClick={() => {
+              setModalThree(false);
+            }}
+          >
+            Apply Filter
+          </button>
+        </div>
+      </ModalThree>
+
     </>
   );
 
