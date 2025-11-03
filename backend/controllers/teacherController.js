@@ -1,4 +1,5 @@
 const Attendance = require("../models/Attendance");
+const AttendanceTeacher = require("../models/Attendance_Teacher");
 const BatchesTeacher = require("../models/Batch_teachers");
 const BatchStudent = require("../models/Batch_students");
 const Batch = require("../models/Batch");
@@ -87,6 +88,15 @@ exports.getTimetable = async (req, res) => {
     });
 
     res.json({ timetable: sortedTimetable });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getAttendance = async (req, res) => {
+  try {
+    const records = await AttendanceTeacher.find({ teacherId: req.user.id });
+    res.json(records);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

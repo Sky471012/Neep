@@ -7,6 +7,7 @@ import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
 import ModalFour from "../modals/ModalFour";
 import ModalFive from "../modals/ModalFive";
+import ModalSix from "../modals/ModalSix";
 import "react-datepicker/dist/react-datepicker.css";
 import '../css/teacher.css';
 
@@ -22,6 +23,7 @@ export default function Teacher() {
     const [openModalThree, setOpenModalThree] = useState({});
     const [openModalFour, setOpenModalFour] = useState({});
     const [showModalFiveFor, setShowModalFiveFor] = useState(null);
+    const [showModalSix, setShowModalSix] = useState(null);
     const [selectedDates, setSelectedDates] = useState({});
     const [markedStatus, setMarkedStatus] = useState({});
     const [testFormData, setTestFormData] = useState({});
@@ -31,12 +33,14 @@ export default function Teacher() {
         testDate: null
     });
     const [attendanceMap, setAttendanceMap] = useState({});
+    const [attendanceMap1, setAttendanceMap1] = useState({});
     const [activeStudentAttendance, setActiveStudentAttendance] = useState(null);
     const [batchSearch, setBatchSearch] = useState("");
     const [todaysClasses, setTodaysClasses] = useState([]);
     const [selectedTest, setSelectedTest] = useState(null);
     const [attendanceDraft, setAttendanceDraft] = useState({});
     const [editingMarks, setEditingMarks] = useState({});
+    const [attendanceRecords, setAttendanceRecords] = useState([]);
 
     const allMonths = [
         "April", "May", "June", "July", "August", "September",
@@ -86,6 +90,24 @@ export default function Teacher() {
                 })
                 .then((data) => setTodaysClasses(Array.isArray(data.classes) ? data.classes : []))
                 .catch((err) => console.error("Schedule fetch error:", err));
+
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    setAttendanceRecords(data);
+                    const newMap = {};
+                    data.forEach((record) => {
+                        // Fix: Ensure proper date formatting
+                        const date = new Date(record.date);
+                        const formattedDate = date.toISOString().split('T')[0];
+                        const key = `${record.batchId}_${formattedDate}`;
+                        newMap[key] = record.status;
+                    });
+                    setAttendanceMap1(newMap);
+                })
+                .catch(err => console.error("Attendance fetch error:", err));
         }
     }, []);
 
@@ -417,15 +439,15 @@ export default function Teacher() {
                                     <div className="detail-label">Address: {teacher.address || "NA"}</div>
                                 </div>
                                 <div className="detail-item">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-4 h-4" viewBox="0 0 640 640"><path d="M271.2 56C265.1 49.8 256.2 47.3 247.8 49.6C239.4 51.9 232.9 58.4 230.8 66.8L215.5 127C214.4 131.4 209.9 134 205.6 132.7L145.8 115.9C137.4 113.5 128.4 115.9 122.3 122C116.2 128.1 113.8 137.1 116.2 145.5L133.1 205.3C134.3 209.6 131.7 214.1 127.4 215.2L67.1 230.5C58.7 232.6 52.1 239.2 49.8 247.6C47.5 256 50 264.9 56.2 271L100.7 314.3C103.9 317.4 103.9 322.6 100.7 325.8L56.3 369.1C50.1 375.2 47.6 384.1 49.9 392.5C52.2 400.9 58.8 407.4 67.2 409.6L127.4 424.9C131.8 426 134.4 430.5 133.1 434.8L116.2 494.5C113.8 502.9 116.2 511.9 122.3 518C128.4 524.1 137.4 526.5 145.8 524.1L205.6 507.2C209.9 506 214.4 508.6 215.5 512.9L230.8 573.1C232.9 581.5 239.5 588.1 247.9 590.4C256.3 592.7 265.2 590.2 271.3 584L314.6 539.5C317.7 536.3 322.9 536.3 326.1 539.5L369.3 584C375.4 590.2 384.3 592.7 392.7 590.4C401.1 588.1 407.6 581.5 409.8 573.1L425.1 513C426.2 508.6 430.7 506 435 507.3L494.8 524.2C503.2 526.6 512.2 524.2 518.3 518.1C524.4 512 526.8 503 524.4 494.6L507.5 434.8C506.3 430.5 508.9 426 513.2 424.9L573.4 409.6C581.8 407.5 588.4 400.9 590.7 392.5C593 384.1 590.5 375.1 584.3 369.1L539.8 325.8C536.6 322.7 536.6 317.5 539.8 314.3L584.3 271C590.5 264.9 593 256 590.7 247.6C588.4 239.2 581.8 232.7 573.4 230.5L513.2 215.2C508.8 214.1 506.2 209.6 507.5 205.3L524.4 145.5C526.8 137.1 524.4 128.1 518.3 122C512.2 115.9 503.2 113.5 494.8 115.9L435 132.8C430.7 134 426.2 131.4 425.1 127.1L409.8 66.8C407.7 58.4 401.1 51.8 392.7 49.5C384.3 47.2 375.4 49.7 369.3 55.9L326 100.5C322.9 103.7 317.7 103.7 314.5 100.5L271.2 56z"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-4 h-4" viewBox="0 0 640 640"><path d="M271.2 56C265.1 49.8 256.2 47.3 247.8 49.6C239.4 51.9 232.9 58.4 230.8 66.8L215.5 127C214.4 131.4 209.9 134 205.6 132.7L145.8 115.9C137.4 113.5 128.4 115.9 122.3 122C116.2 128.1 113.8 137.1 116.2 145.5L133.1 205.3C134.3 209.6 131.7 214.1 127.4 215.2L67.1 230.5C58.7 232.6 52.1 239.2 49.8 247.6C47.5 256 50 264.9 56.2 271L100.7 314.3C103.9 317.4 103.9 322.6 100.7 325.8L56.3 369.1C50.1 375.2 47.6 384.1 49.9 392.5C52.2 400.9 58.8 407.4 67.2 409.6L127.4 424.9C131.8 426 134.4 430.5 133.1 434.8L116.2 494.5C113.8 502.9 116.2 511.9 122.3 518C128.4 524.1 137.4 526.5 145.8 524.1L205.6 507.2C209.9 506 214.4 508.6 215.5 512.9L230.8 573.1C232.9 581.5 239.5 588.1 247.9 590.4C256.3 592.7 265.2 590.2 271.3 584L314.6 539.5C317.7 536.3 322.9 536.3 326.1 539.5L369.3 584C375.4 590.2 384.3 592.7 392.7 590.4C401.1 588.1 407.6 581.5 409.8 573.1L425.1 513C426.2 508.6 430.7 506 435 507.3L494.8 524.2C503.2 526.6 512.2 524.2 518.3 518.1C524.4 512 526.8 503 524.4 494.6L507.5 434.8C506.3 430.5 508.9 426 513.2 424.9L573.4 409.6C581.8 407.5 588.4 400.9 590.7 392.5C593 384.1 590.5 375.1 584.3 369.1L539.8 325.8C536.6 322.7 536.6 317.5 539.8 314.3L584.3 271C590.5 264.9 593 256 590.7 247.6C588.4 239.2 581.8 232.7 573.4 230.5L513.2 215.2C508.8 214.1 506.2 209.6 507.5 205.3L524.4 145.5C526.8 137.1 524.4 128.1 518.3 122C512.2 115.9 503.2 113.5 494.8 115.9L435 132.8C430.7 134 426.2 131.4 425.1 127.1L409.8 66.8C407.7 58.4 401.1 51.8 392.7 49.5C384.3 47.2 375.4 49.7 369.3 55.9L326 100.5C322.9 103.7 317.7 103.7 314.5 100.5L271.2 56z" /></svg>
                                     <div className="detail-label">Qualifications: {teacher.qualification || "NA"}</div>
                                 </div>
                                 <div className="detail-item">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-4 h-4" viewBox="0 0 640 640"><path d="M32 160C32 124.7 60.7 96 96 96L544 96C579.3 96 608 124.7 608 160L32 160zM32 208L608 208L608 480C608 515.3 579.3 544 544 544L96 544C60.7 544 32 515.3 32 480L32 208zM279.3 480C299.5 480 314.6 460.6 301.7 445C287 427.3 264.8 416 240 416L176 416C151.2 416 129 427.3 114.3 445C101.4 460.6 116.5 480 136.7 480L279.2 480zM208 376C238.9 376 264 350.9 264 320C264 289.1 238.9 264 208 264C177.1 264 152 289.1 152 320C152 350.9 177.1 376 208 376zM392 272C378.7 272 368 282.7 368 296C368 309.3 378.7 320 392 320L504 320C517.3 320 528 309.3 528 296C528 282.7 517.3 272 504 272L392 272zM392 368C378.7 368 368 378.7 368 392C368 405.3 378.7 416 392 416L504 416C517.3 416 528 405.3 528 392C528 378.7 517.3 368 504 368L392 368z"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-4 h-4" viewBox="0 0 640 640"><path d="M32 160C32 124.7 60.7 96 96 96L544 96C579.3 96 608 124.7 608 160L32 160zM32 208L608 208L608 480C608 515.3 579.3 544 544 544L96 544C60.7 544 32 515.3 32 480L32 208zM279.3 480C299.5 480 314.6 460.6 301.7 445C287 427.3 264.8 416 240 416L176 416C151.2 416 129 427.3 114.3 445C101.4 460.6 116.5 480 136.7 480L279.2 480zM208 376C238.9 376 264 350.9 264 320C264 289.1 238.9 264 208 264C177.1 264 152 289.1 152 320C152 350.9 177.1 376 208 376zM392 272C378.7 272 368 282.7 368 296C368 309.3 378.7 320 392 320L504 320C517.3 320 528 309.3 528 296C528 282.7 517.3 272 504 272L392 272zM392 368C378.7 368 368 378.7 368 392C368 405.3 378.7 416 392 416L504 416C517.3 416 528 405.3 528 392C528 378.7 517.3 368 504 368L392 368z" /></svg>
                                     <div className="detail-label">Aadhar: {teacher.aadhar || "NA"}</div>
                                 </div>
                                 <div className="detail-item">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-4 h-4" viewBox="0 0 640 640"><path d="M341.9 38.1C328.5 29.9 311.6 29.9 298.2 38.1C273.8 53 258.7 57 230.1 56.4C214.4 56 199.8 64.5 192.2 78.3C178.5 103.4 167.4 114.5 142.3 128.2C128.5 135.7 120.1 150.4 120.4 166.1C121.1 194.7 117 209.8 102.1 234.2C93.9 247.6 93.9 264.5 102.1 277.9C117 302.3 121 317.4 120.4 346C120 361.7 128.5 376.3 142.3 383.9C164.4 396 175.6 406 187.4 425.4L138.7 522.5C132.8 534.4 137.6 548.8 149.4 554.7L235.4 597.7C246.9 603.4 260.9 599.1 267.1 587.9L319.9 492.8L372.7 587.9C378.9 599.1 392.9 603.5 404.4 597.7L490.4 554.7C502.3 548.8 507.1 534.4 501.1 522.5L452.5 425.3C464.2 405.9 475.5 395.9 497.6 383.8C511.4 376.3 519.8 361.6 519.5 345.9C518.8 317.3 522.9 302.2 537.8 277.8C546 264.4 546 247.5 537.8 234.1C522.9 209.7 518.9 194.6 519.5 166C519.9 150.3 511.4 135.7 497.6 128.1C472.5 114.4 461.4 103.3 447.7 78.2C440.2 64.4 425.5 56 409.8 56.3C381.2 57 366.1 52.9 341.7 38zM320 160C373 160 416 203 416 256C416 309 373 352 320 352C267 352 224 309 224 256C224 203 267 160 320 160z"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-4 h-4" viewBox="0 0 640 640"><path d="M341.9 38.1C328.5 29.9 311.6 29.9 298.2 38.1C273.8 53 258.7 57 230.1 56.4C214.4 56 199.8 64.5 192.2 78.3C178.5 103.4 167.4 114.5 142.3 128.2C128.5 135.7 120.1 150.4 120.4 166.1C121.1 194.7 117 209.8 102.1 234.2C93.9 247.6 93.9 264.5 102.1 277.9C117 302.3 121 317.4 120.4 346C120 361.7 128.5 376.3 142.3 383.9C164.4 396 175.6 406 187.4 425.4L138.7 522.5C132.8 534.4 137.6 548.8 149.4 554.7L235.4 597.7C246.9 603.4 260.9 599.1 267.1 587.9L319.9 492.8L372.7 587.9C378.9 599.1 392.9 603.5 404.4 597.7L490.4 554.7C502.3 548.8 507.1 534.4 501.1 522.5L452.5 425.3C464.2 405.9 475.5 395.9 497.6 383.8C511.4 376.3 519.8 361.6 519.5 345.9C518.8 317.3 522.9 302.2 537.8 277.8C546 264.4 546 247.5 537.8 234.1C522.9 209.7 518.9 194.6 519.5 166C519.9 150.3 511.4 135.7 497.6 128.1C472.5 114.4 461.4 103.3 447.7 78.2C440.2 64.4 425.5 56 409.8 56.3C381.2 57 366.1 52.9 341.7 38zM320 160C373 160 416 203 416 256C416 309 373 352 320 352C267 352 224 309 224 256C224 203 267 160 320 160z" /></svg>
                                     <div className="detail-label">Experience (yrs): {teacher.experience ? `${teacher.experience}+` : "NA"}</div>
                                 </div>
                             </div>
@@ -494,8 +516,9 @@ export default function Teacher() {
 
                                             return (
                                                 <div className="batch-card">
-                                                    <div className="batch-header">
+                                                    <div className="batch-header d-flex justify-content-between align-items-center">
                                                         <h5 className="batch-name">{batch.batchName}</h5>
+                                                        <button onClick={() => setShowModalSix(batch.batchId)} className="btn btn-sm btn-success">My Attendance</button>
                                                     </div>
 
                                                     <div className="batch-actions">
@@ -949,6 +972,81 @@ export default function Teacher() {
                                                             )}
                                                         </div>
                                                     </ModalFive>
+
+                                                    <ModalSix
+                                                        isOpen={showModalSix !== null}
+                                                        onClose={() => setShowModalSix(null)}
+                                                    >
+                                                        {showModalSix && (<>
+                                                            <h3 className="modal-title mb-0">{batchesRecords.find((b) => b.batchId === showModalSix)?.batchName}</h3>
+                                                            <div id={`carousel-${showModalSix}`} className="carousel slide p-1 mt-2" style={{ backgroundColor: "#d4d4d4ff" }}>
+                                                                <div className="carousel-inner">
+                                                                    {allMonths.map((month, idx) => {
+                                                                        let calendarMonth, calendarYear;
+                                                                        if (idx <= 8) {
+                                                                            calendarMonth = idx + 3;
+                                                                            calendarYear = academicYearStart;
+                                                                        } else {
+                                                                            calendarMonth = idx - 9;
+                                                                            calendarYear = academicYearStart + 1;
+                                                                        }
+                                                                        const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+                                                                        return (
+                                                                            <div
+                                                                                className={`carousel-item ${idx === activeMonthIndex ? "active" : ""}`}
+                                                                                key={month}
+                                                                            >
+                                                                                <h6 className="month-title">{month} {calendarYear}</h6>
+                                                                                <div className="calendar-grid">
+                                                                                    {[...Array(daysInMonth)].map((_, dateIdx) => {
+                                                                                        const date = new Date(calendarYear, calendarMonth, dateIdx + 1);
+                                                                                        const fullDate = date.toISOString().split('T')[0];
+                                                                                        const key = `${showModalSix}_${fullDate}`;
+                                                                                        const status = attendanceMap1[key];
+
+                                                                                        return (
+                                                                                            <div
+                                                                                                key={dateIdx}
+                                                                                                className={`date-box ${status === "present"
+                                                                                                    ? "present"
+                                                                                                    : status === "absent"
+                                                                                                        ? "absent"
+                                                                                                        : ""
+                                                                                                    }`}
+                                                                                                title={`${month} ${dateIdx + 1}, ${calendarYear} - ${status || 'No record'}`}
+                                                                                            >
+                                                                                                {dateIdx + 1}
+                                                                                            </div>
+                                                                                        );
+                                                                                    })}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+
+                                                                <div className="calendar-controls">
+                                                                    <button
+                                                                        className="calendar-button ms-1 mb-1"
+                                                                        type="button"
+                                                                        data-bs-target={`#carousel-${showModalSix}`}
+                                                                        data-bs-slide="prev"
+                                                                    >
+                                                                        ‹ Previous
+                                                                    </button>
+                                                                    <button
+                                                                        className="calendar-button mb-1 me-1"
+                                                                        type="button"
+                                                                        data-bs-target={`#carousel-${showModalSix}`}
+                                                                        data-bs-slide="next"
+                                                                    >
+                                                                        Next ›
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </>)}
+                                                    </ModalSix>
 
                                                 </div>
                                             );

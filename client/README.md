@@ -7,13 +7,13 @@
 6. Teachers:- Address, birthday, Aadhar no., Qualification, Experience **(done)**
 7. Archive batches hide in student and teacher pages **(done)**
 8. Update timetable in teacher **(done)**
-9. Teacher Attendance **(future)**
+9. Teacher Attendance **(done)**
 10. Search in fee and online & cash total fee **(done)**
 11. Student Birthday **(done)**
 12. Assign batch to teacher **(done)**
 13. Change system of mark attendance **(done)**
 14. Whatsapp on student login **(done)**
-15. Alabatic batch in student and teacher batches and in attendance and show students **(done)**
+15. Alabatic batch in student and teacher batches and in attendance and show        students **(done)**
 16. Enquiry system (converted and lost) **(future)**
 17. Study material and chat **(future)**
 18. Remove test
