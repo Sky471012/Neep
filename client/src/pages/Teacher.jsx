@@ -745,7 +745,7 @@ export default function Teacher() {
                                                             <h2 className="modal-title">Timetable for {batch.batchName}</h2>
                                                             {timetable[batchId]?.length > 0 ? (
                                                                 <div style={{ maxHeight: "67vh", overflowY: "auto" }}>
-                                                                    <table className="table table-bordered text-center mt-3">
+                                                                    <table className="table table-colored text-center mt-3">
                                                                         <thead className="table">
                                                                             <tr>
                                                                                 <th style={{ padding: "10px 20px" }}>Weekday</th>

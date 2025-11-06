@@ -60,10 +60,7 @@ export default function Login() {
   // Student login handler
   const handleStudentSubmit = async (e) => {
     e.preventDefault();
-    if (!dob) {
-      alert("Please select your date of birth");
-      return;
-    }
+    if (!dob) return alert("Please select your date of birth");
 
     const formattedDob =
       ("0" + dob.getDate()).slice(-2) +
@@ -72,35 +69,73 @@ export default function Login() {
       "-" +
       dob.getFullYear();
 
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
+      // Step 1: initial login request
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/student`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             phone: studentCredentials.phone,
             dob: formattedDob,
+            selectedBranch: localStorage.getItem("selectedBranch") || null,
           }),
         }
       );
-      const data = await response.json();
 
-      if (!response.ok) {
-        alert(data.message || "Failed to login");
-        setIsLoading(false);
+      const data = await response.json();
+      setIsLoading(false);
+
+      if (!response.ok) return alert(data.message || "Login failed");
+
+      // Step 2: multiple branches 
+      if (data.multipleBranches) {
+        // Show branch selection
+        const chosen = prompt(
+          `Account exists in multiple branches:\n${data.branches.map(b => b.name).join("\n")}\nEnter branch name:`
+        );
+
+        const selected = data.branches.find(b => b.name === chosen);
+        if (!selected) return alert("Invalid branch selected");
+
+        // Resubmit with chosen branch
+        const finalizeRes = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/student`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              phone: studentCredentials.phone,
+              dob: formattedDob,
+              selectedBranch: selected.key, // send key here
+            }),
+          }
+        );
+
+        const finalizeData = await finalizeRes.json();
+        if (!finalizeRes.ok) return alert(finalizeData.message || "Login failed");
+
+        localStorage.setItem("role", "student");
+        localStorage.setItem("authToken", finalizeData.authToken);
+        localStorage.setItem("branch", finalizeData.branch);
+        localStorage.setItem("user", JSON.stringify(finalizeData.student));
+        navigate("/student");
         return;
       }
 
+      // Step 4: single branch → normal login
       localStorage.setItem("role", "student");
       localStorage.setItem("authToken", data.authToken);
+      localStorage.setItem("branch", data.branch);
       localStorage.setItem("user", JSON.stringify(data.student));
       navigate("/student");
     } catch (err) {
       setIsLoading(false);
       console.error(err);
-      alert("Something went wrong");
+      alert("Something went wrong during login");
     }
   };
 
@@ -142,9 +177,6 @@ export default function Login() {
         return;
       }
 
-      if (isResend) {
-        setOtp("");
-      }
       setShowOtpSection(true);
       setCanResend(false);
       setResendTimer(30);
@@ -173,36 +205,81 @@ export default function Login() {
 
     try {
       setIsLoading(true);
+
+      // 🔹 First request — verify OTP across all branches
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/verify-otp`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, otp }),
         }
       );
+
       const data = await response.json();
+      setIsLoading(false);
 
       if (!response.ok) {
         alert(data.message || "OTP verification failed.");
-      } else {
-        if (data.user.role === "Teacher") {
-          localStorage.setItem("role", "teacher");
-          navigate("/teacher");
-        } else if (data.user.role === "Admin") {
-          localStorage.setItem("role", "admin");
-          navigate("/admin");
-        } else {
-          alert("Unknown role. Contact support.");
-        }
-        localStorage.setItem("authToken", data.authToken);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        return;
       }
-      setIsLoading(false);
+
+      // 🔹 Case 1: Multiple branches found
+      if (data.multipleBranches && data.branches?.length > 1) {
+        const chosen = prompt(
+          `Your account exists in multiple branches:\n${data.branches.join("\n")}\nEnter the branch name to continue:`
+        );
+
+        if (!chosen || !data.branches.includes(chosen)) {
+          alert("Invalid branch selected");
+          return;
+        }
+
+        // 🔁 Second call to backend with chosen branch
+        const finalizeRes = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/verify-otp`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, otp, branch: chosen }),
+          }
+        );
+
+        const finalizeData = await finalizeRes.json();
+
+        if (!finalizeRes.ok) {
+          alert(finalizeData.message || "Failed to finalize login.");
+          return;
+        }
+
+        saveLogin(finalizeData);
+        return;
+      }
+
+      // 🔹 Case 2: Single branch
+      saveLogin(data);
     } catch (err) {
       setIsLoading(false);
-      console.error(err);
+      console.error("Verify OTP error:", err);
       alert("Something went wrong during OTP verification.");
+    }
+  };
+
+  // ✅ Helper function to store info and navigate
+  const saveLogin = (data) => {
+    localStorage.setItem("authToken", data.authToken);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem("branch", data.branch);
+    localStorage.setItem("role", data.user.role.toLowerCase());
+
+    const selectedBranch = localStorage.getItem("branch") || data.branch;
+
+    if (data.user.role === "Teacher") {
+      navigate("/teacher");
+    } else if (data.user.role === "Admin") {
+      navigate("/admin");
+    } else {
+      alert("Unknown role. Contact support.");
     }
   };
 
@@ -224,7 +301,7 @@ export default function Login() {
         >
           <div className="login-page-box">
             <img
-            style={{ height: "80px", margin:"auto", marginBottom: "20px"}}
+              style={{ height: "80px", margin: "auto", marginBottom: "20px" }}
               src={logo}
               className="logo"
             />

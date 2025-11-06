@@ -1,10 +1,11 @@
-const Attendance = require('../models/Attendance');
-const Fee = require('../models/Fee');
-const Installment = require('../models/Installment');
-const BatchesStudent = require('../models/Batch_students');
-const Batch = require('../models/Batch');
-const Test = require('../models/Test');
-const Timetable = require('../models/TimeTable');
+const mongoose = require("mongoose");
+const AttendanceModel = require("../models/Attendance");
+const TestModel = require("../models/Test");
+const TimetableModel = require("../models/TimeTable");
+const FeeModel = require("../models/Fee");
+const InstallmentModel = require("../models/Installment");
+const BatchModel = require("../models/Batch");
+const BatchesStudentModel = require("../models/Batch_students");
 
 function convertTo24Hour(time12h) {
   const [time, modifier] = time12h.split(" ");
@@ -20,6 +21,7 @@ function convertTo24Hour(time12h) {
 
 exports.getAttendance = async (req, res) => {
   try {
+    const Attendance = req.db.model("Attendance", AttendanceModel.schema);
     const records = await Attendance.find({ studentId: req.user.id });
     res.json(records);
   } catch (err) {
@@ -29,6 +31,7 @@ exports.getAttendance = async (req, res) => {
 
 exports.getTest = async (req, res) => {
   try {
+    const Test = req.db.model("Test", TestModel.schema);
     const tests = await Test.find({ studentId: req.user.id });
     res.json(tests);
   } catch (err) {
@@ -40,6 +43,7 @@ exports.getTimetable = async (req, res) => {
   const { batchId } = req.body;
 
   try {
+    const Timetable = req.db.model("TimeTable", TimetableModel.schema);
     const timetable = await Timetable.find({ batchId }).populate("batchId");
 
     const formatted = timetable.map((cls) => {
@@ -69,6 +73,9 @@ exports.getTimetable = async (req, res) => {
 
 exports.getFeeStatus = async (req, res) => {
   try {
+    const Fee = req.db.model("Fee", FeeModel.schema);
+    const Installment = req.db.model("Installment", InstallmentModel.schema);
+
     const studentId = req.user.id;
 
     const fee = await Fee.findOne({ studentId });
@@ -86,6 +93,8 @@ exports.getFeeStatus = async (req, res) => {
 
 exports.getbatches = async (req, res) => {
   try {
+    const BatchesStudent = req.db.model("batch_student", BatchesStudentModel.schema);
+    const Batch = req.db.model("Batch", BatchModel.schema);
     // Step 1: Get all batch mappings for the student
     const studentBatches = await BatchesStudent.find({ studentId: req.user.id });
 

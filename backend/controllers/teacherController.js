@@ -1,11 +1,12 @@
-const Attendance = require("../models/Attendance");
-const AttendanceTeacher = require("../models/Attendance_Teacher");
-const BatchesTeacher = require("../models/Batch_teachers");
-const BatchStudent = require("../models/Batch_students");
-const Batch = require("../models/Batch");
-const Student = require("../models/Student");
-const Timetable = require("../models/TimeTable");
-const Test = require("../models/Test");
+const mongoose = require("mongoose");
+const AttendanceModel = require("../models/Attendance");
+const AttendanceTeacherModel = require("../models/Attendance_Teacher");
+const BatchesTeacherModel = require("../models/Batch_teachers");
+const BatchStudentModel = require("../models/Batch_students");
+const BatchModel = require("../models/Batch");
+const StudentModel = require("../models/Student");
+const TimetableModel = require("../models/TimeTable");
+const TestModel = require("../models/Test");
 
 function convertTo24Hour(time12h) {
   const [time, modifier] = time12h.split(' ');
@@ -19,6 +20,9 @@ function convertTo24Hour(time12h) {
 
 exports.getBatches = async (req, res) => {
   try {
+    const BatchesTeacher = req.db.model("batch_teacher", BatchesTeacherModel.schema);
+    const Batch = req.db.model("Batch", BatchModel.schema);
+
     // Step 1: Get all teacher's batch mappings
     const teacherBatches = await BatchesTeacher.find({
       teacherId: req.user.id,
@@ -49,6 +53,8 @@ exports.getBatches = async (req, res) => {
 exports.getBatchStudents = async (req, res) => {
   try {
     const { batchId } = req.params;
+    const BatchStudent = req.db.model("batch_student", BatchStudentModel.schema);
+    const Student = req.db.model("Student", StudentModel.schema);
 
     // Step 1: Get all studentIds in that batch
     const batchLinks = await BatchStudent.find({ batchId });
@@ -69,6 +75,7 @@ exports.getBatchStudents = async (req, res) => {
 exports.getTimetable = async (req, res) => {
   try {
     const { batchId } = req.params;
+    const Timetable = req.db.model("Timetable", TimetableModel.schema);
 
     const timetable = await Timetable.find({ batchId });
 
@@ -95,6 +102,7 @@ exports.getTimetable = async (req, res) => {
 
 exports.getAttendance = async (req, res) => {
   try {
+    const AttendanceTeacher = req.db.model("Attendance_Teacher", AttendanceTeacherModel.schema);
     const records = await AttendanceTeacher.find({ teacherId: req.user.id });
     res.json(records);
   } catch (err) {
@@ -105,6 +113,7 @@ exports.getAttendance = async (req, res) => {
 exports.getStudentsAttendance = async (req, res) => {
   try {
     const { studentId } = req.params;
+    const Attendance = req.db.model("Attendance", AttendanceModel.schema);
 
     const attendance = await Attendance.find({ studentId });
 
@@ -117,6 +126,8 @@ exports.getStudentsAttendance = async (req, res) => {
 exports.markAttendance = async (req, res) => {
   const { studentId, batchId, date, status } = req.body;
   try {
+    const Attendance = req.db.model("Attendance", AttendanceModel.schema);
+
     const record = await Attendance.findOneAndUpdate(
       { studentId, date },
       { studentId, batchId, date, status, markedBy: req.user.id },
@@ -132,6 +143,8 @@ exports.addTest = async (req, res) => {
   const { studentId, batchId, name, maxMarks, marksScored, date, absent: absentFromClient } = req.body;
 
   try {
+    const Test = req.db.model("Test", TestModel.schema);
+
     // Check if test already exists
     const existingTest = await Test.findOne({ studentId, batchId, name, date });
 
@@ -171,6 +184,7 @@ exports.addTest = async (req, res) => {
 exports.getTest = async (req, res) => {
   try {
     const { batchId } = req.params;
+    const Test = req.db.model("Test", TestModel.schema);
 
     const test = await Test.find({ batchId });
 
@@ -182,6 +196,10 @@ exports.getTest = async (req, res) => {
 
 exports.getTodaysClassesForTeacher = async (req, res) => {
   try {
+    const BatchesTeacher = req.db.model("batch_teacher", BatchesTeacherModel.schema);
+    const Batch = req.db.model("Batch", BatchModel.schema);
+    const Timetable = req.db.model("Timetable", TimetableModel.schema);
+
     const teacherId = req.user.id;
     const today = new Intl.DateTimeFormat("en-US", {
       weekday: "long",
@@ -254,6 +272,8 @@ exports.editMarks = async (req, res) => {
   try {
     const { testId } = req.params;
     const { marksScored } = req.body; // may be "" (mark absent) or a number-like string
+
+    const Test = req.db.model("Test", TestModel.schema);
 
     const test = await Test.findById(testId);
     if (!test) return res.status(404).json({ message: 'Test not found' });

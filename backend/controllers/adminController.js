@@ -1,19 +1,37 @@
-const Batch = require("../models/Batch");
-const BatchStudent = require("../models/Batch_students");
-const Attendance = require("../models/Attendance");
-const AttendanceTeacher = require("../models/Attendance_Teacher");
-const Timetable = require("../models/TimeTable");
-const Test = require("../models/Test");
-const Fee = require("../models/Fee");
-const Installment = require("../models/Installment");
-const Student = require("../models/Student");
-const Teacher = require("../models/Admins_teachers");
-const BatchTeacher = require("../models/Batch_teachers");
-const BirthdayWish = require("../models/Birthday_wish");
-const TeacherBirthdayWish = require("../models/Birthday_Teacher_wish");
+const BatchModel = require("../models/Batch");
+const BatchStudentModel = require("../models/Batch_students");
+const AttendanceModel = require("../models/Attendance");
+const AttendanceTeacherModel = require("../models/Attendance_Teacher");
+const TimetableModel = require("../models/TimeTable");
+const TestModel = require("../models/Test");
+const FeeModel = require("../models/Fee");
+const InstallmentModel = require("../models/Installment");
+const StudentModel = require("../models/Student");
+const TeacherModel = require("../models/Admins_teachers");
+const BatchTeacherModel = require("../models/Batch_teachers");
+const BirthdayWishModel = require("../models/Birthday_wish");
+const TeacherBirthdayWishModel = require("../models/Birthday_Teacher_wish");
 const XLSX = require("xlsx");
 const { DateTime } = require("luxon");
 const mongoose = require("mongoose");
+
+function getModels(req) {
+  return {
+    Batch: req.db.model("Batch", BatchModel.schema),
+    BatchStudent: req.db.model("batch_student", BatchStudentModel.schema),
+    Attendance: req.db.model("Attendance", AttendanceModel.schema),
+    AttendanceTeacher: req.db.model("Attendance_Teacher", AttendanceTeacherModel.schema),
+    Timetable: req.db.model("Timetable", TimetableModel.schema),
+    Test: req.db.model("Test", TestModel.schema),
+    Fee: req.db.model("Fee", FeeModel.schema),
+    Installment: req.db.model("Installment", InstallmentModel.schema),
+    Student: req.db.model("Student", StudentModel.schema),
+    Teacher: req.db.model("Teacher", TeacherModel.schema),
+    BatchTeacher: req.db.model("batch_teacher", BatchTeacherModel.schema),
+    BirthdayWish: req.db.model("BirthdayWish", BirthdayWishModel.schema),
+    TeacherBirthdayWish: req.db.model("TeacherBirthdayWish", TeacherBirthdayWishModel.schema),
+  };
+}
 
 function convertTo24Hour(time12h) {
   const [time, modifier] = time12h.split(" ");
@@ -30,6 +48,7 @@ function convertTo24Hour(time12h) {
 // Batch Management
 exports.getBatches = async (req, res) => {
   try {
+    const { Batch } = getModels(req);
     const batches = await Batch.find({ archive: false }); // Only unarchived batches
     res.json(batches);
   } catch (err) {
@@ -39,6 +58,7 @@ exports.getBatches = async (req, res) => {
 
 exports.getArchivedBatches = async (req, res) => {
   try {
+    const { Batch } = getModels(req);
     const archivedBatches = await Batch.find({ archive: true }); // Only archived batches
     res.json(archivedBatches);
   } catch (err) {
@@ -48,6 +68,7 @@ exports.getArchivedBatches = async (req, res) => {
 
 exports.getBatch = async (req, res) => {
   try {
+    const { Batch } = getModels(req);
     const { batchId } = req.params;
 
     const batch = await Batch.findById(batchId);
@@ -59,6 +80,7 @@ exports.getBatch = async (req, res) => {
 
 exports.getBatchStudents = async (req, res) => {
   try {
+    const { BatchStudent, Student } = getModels(req);
     const { batchId } = req.params;
 
     // Step 1: Get all studentIds in that batch
@@ -79,6 +101,7 @@ exports.getBatchStudents = async (req, res) => {
 
 exports.getBatchTimetable = async (req, res) => {
   try {
+    const { Timetable } = getModels(req);
     const { batchId } = req.params;
 
     const timetable = await Timetable.find({ batchId });
@@ -107,6 +130,7 @@ exports.getBatchTimetable = async (req, res) => {
 
 exports.getBatchTeacher = async (req, res) => {
   try {
+    const { BatchTeacher, Teacher } = getModels(req);
     const { batchId } = req.params;
 
     const batchLink = await BatchTeacher.find({ batchId });
@@ -125,6 +149,7 @@ exports.getBatchTeacher = async (req, res) => {
 
 exports.getStudentsAttendance = async (req, res) => {
   try {
+    const { Attendance } = getModels(req);
     const { studentId } = req.params;
 
     const attendance = await Attendance.find({ studentId });
@@ -137,6 +162,7 @@ exports.getStudentsAttendance = async (req, res) => {
 
 exports.getStudentstests = async (req, res) => {
   try {
+    const { Test } = getModels(req);
     const { studentId } = req.params;
 
     const tests = await Test.find({ studentId });
@@ -148,6 +174,7 @@ exports.getStudentstests = async (req, res) => {
 };
 
 exports.markAttendance = async (req, res) => {
+  const { Attendance } = getModels(req);
   const { studentId, batchId, date, status } = req.body;
   try {
     const record = await Attendance.findOneAndUpdate(
@@ -162,6 +189,8 @@ exports.markAttendance = async (req, res) => {
 };
 
 exports.addTest = async (req, res) => {
+  
+  const { Test } = getModels(req);
   const {
     studentId,
     batchId,
@@ -218,6 +247,7 @@ exports.addTest = async (req, res) => {
 };
 
 exports.createBatch = async (req, res) => {
+  const { Batch } = getModels(req);
   try {
     const name = req.body.name?.trim();
     const startDate = req.body.startDate?.trim();
@@ -257,6 +287,7 @@ exports.createBatch = async (req, res) => {
 };
 
 exports.updateTimetable = async (req, res) => {
+  const { Timetable } = getModels(req);
   try {
     const { batchId } = req.params;
     const { timetable } = req.body;
@@ -281,6 +312,7 @@ exports.updateTimetable = async (req, res) => {
 };
 
 exports.removeStudent = async (req, res) => {
+  const { BatchStudent, Attendance, Test } = getModels(req);
   const { batchId, studentId } = req.body;
 
   if (!batchId || !studentId) {
@@ -305,6 +337,7 @@ exports.removeStudent = async (req, res) => {
 };
 
 exports.deleteBatch = async (req, res) => {
+  const { Batch, BatchTeacher, BatchStudent, Attendance, Timetable, Test } = getModels(req);
   try {
     const batchId = req.params.batchId;
 
@@ -345,6 +378,7 @@ exports.deleteBatch = async (req, res) => {
 };
 
 exports.assignTeacher = async (req, res) => {
+  const { Batch, Teacher, BatchTeacher } = getModels(req);
   try {
     const { batchId, teacherId } = req.params;
 
@@ -391,6 +425,7 @@ exports.assignTeacher = async (req, res) => {
 };
 
 exports.addStudentsToBatch = async (req, res) => {
+  const { Batch, BatchStudent, Student } = getModels(req);
   try {
     const { batchId, studentIds } = req.body;
 
@@ -438,6 +473,7 @@ exports.addStudentsToBatch = async (req, res) => {
 };
 
 exports.addStudentByCreating = async (req, res) => {
+  const { Student, BatchStudent } = getModels(req);
   const { batchId } = req.params;
 
   try {
@@ -479,6 +515,7 @@ exports.addStudentByCreating = async (req, res) => {
 };
 
 exports.toggleArchiveStatus = async (req, res) => {
+  const { Batch } = getModels(req);
   try {
     const batchId = req.params.batchId;
     const { archive } = req.body;
@@ -500,6 +537,7 @@ exports.toggleArchiveStatus = async (req, res) => {
 };
 
 exports.editBatch = async (req, res) => {
+  const { Batch, BatchTeacher, BatchStudent } = getModels(req);
   try {
     const { batchId } = req.params;
     const { name, class: batchClass, startDate } = req.body;
@@ -583,6 +621,7 @@ exports.editBatch = async (req, res) => {
 };
 
 exports.getTest = async (req, res) => {
+  const { Test } = getModels(req);
   try {
     const { batchId } = req.params;
 
@@ -595,6 +634,7 @@ exports.getTest = async (req, res) => {
 };
 
 exports.editMarks = async (req, res) => {
+  const { Test } = getModels(req);
   try {
     const { testId } = req.params;
     const { marksScored } = req.body; // may be "" (mark absent) or a number-like string
@@ -637,6 +677,7 @@ exports.editMarks = async (req, res) => {
 
 // Student Management
 exports.getStudents = async (req, res) => {
+  const { Student } = getModels(req);
   try {
     const students = await Student.find();
     res.json(students);
@@ -646,6 +687,7 @@ exports.getStudents = async (req, res) => {
 };
 
 exports.getStudent = async (req, res) => {
+  const { Student } = getModels(req);
   try {
     const { studentId } = req.params;
 
@@ -657,6 +699,7 @@ exports.getStudent = async (req, res) => {
 };
 
 exports.getStudentBatches = async (req, res) => {
+  const { BatchStudent, Batch } = getModels(req);
   try {
     const { studentId } = req.params;
 
@@ -678,6 +721,7 @@ exports.getStudentBatches = async (req, res) => {
 };
 
 exports.getStudentFee = async (req, res) => {
+  const { Fee } = getModels(req);
   try {
     const { studentId } = req.params;
 
@@ -690,6 +734,7 @@ exports.getStudentFee = async (req, res) => {
 };
 
 exports.getStudentInstallments = async (req, res) => {
+  const { Installment } = getModels(req);
   try {
     const { studentId } = req.params;
 
@@ -702,6 +747,7 @@ exports.getStudentInstallments = async (req, res) => {
 };
 
 exports.getStudentsAllTests = async (req, res) => {
+  const { Test } = getModels(req);
   try {
     const { studentId } = req.params;
 
@@ -729,6 +775,7 @@ exports.getStudentsAllTests = async (req, res) => {
 };
 
 exports.createStudent = async (req, res) => {
+  const { Student } = getModels(req);
   try {
     const {
       name,
@@ -803,6 +850,7 @@ exports.createStudent = async (req, res) => {
 };
 
 exports.deleteStudent = async (req, res) => {
+  const { Student, BatchStudent, Attendance, Fee, Installment } = getModels(req);
   try {
     const studentId = req.params.studentId;
 
@@ -838,6 +886,7 @@ exports.deleteStudent = async (req, res) => {
 };
 
 exports.addStudentToBatch = async (req, res) => {
+  const { Batch, BatchStudent, Student } = getModels(req);
   try {
     const studentId = req.params.studentId;
     const batchId = req.params.batchId;
@@ -877,6 +926,7 @@ exports.addStudentToBatch = async (req, res) => {
 };
 
 exports.updateFee = async (req, res) => {
+  const { Fee } = getModels(req);
   const { studentId } = req.params;
   const { amount } = req.body;
 
@@ -904,6 +954,7 @@ exports.updateFee = async (req, res) => {
 };
 
 exports.addInstallment = async (req, res) => {
+  const { Installment, Fee } = getModels(req);
   try {
     const { studentId, feeId, installmentNo, amount, dueDate } = req.body;
 
@@ -930,6 +981,7 @@ exports.addInstallment = async (req, res) => {
 };
 
 exports.removeInstallment = async (req, res) => {
+  const { Installment } = getModels(req);
   try {
     const installmentId = req.params.installmentId;
 
@@ -998,6 +1050,7 @@ exports.removeInstallment = async (req, res) => {
 };
 
 exports.redistributeInstallment = async (req, res) => {
+  const { Installment } = getModels(req);
   const installmentId = req.params.installmentId;
   const { amount } = req.body;
 
@@ -1020,6 +1073,7 @@ exports.redistributeInstallment = async (req, res) => {
 };
 
 exports.createFeeWithInstallments = async (req, res) => {
+  const { Student, Fee, Installment } = getModels(req);
   try {
     const { studentId, amount, numberOfInstallments } = req.body;
 
@@ -1109,6 +1163,7 @@ exports.createFeeWithInstallments = async (req, res) => {
 };
 
 exports.deleteFeeStructure = async (req, res) => {
+  const { Fee, Installment } = getModels(req);
   try {
     const { studentId } = req.params;
 
@@ -1135,6 +1190,7 @@ exports.deleteFeeStructure = async (req, res) => {
 };
 
 exports.markInstallmentPaid = async (req, res) => {
+  const { Installment } = getModels(req);
   const { id } = req.params;
   const { paidDate, method } = req.body;
 
@@ -1157,6 +1213,7 @@ exports.markInstallmentPaid = async (req, res) => {
 };
 
 exports.updateInstallment = async (req, res) => {
+  const { Installment, Fee } = getModels(req);
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -1222,6 +1279,7 @@ exports.updateInstallment = async (req, res) => {
 };
 
 exports.addStudentToBatches = async (req, res) => {
+  const { Batch, BatchStudent, Student } = getModels(req);
   try {
     const { batchIds, studentId } = req.body;
 
@@ -1272,6 +1330,7 @@ exports.addStudentToBatches = async (req, res) => {
 };
 
 exports.editStudent = async (req, res) => {
+  const { Student } = getModels(req);
   try {
     const { studentId } = req.params;
     const {
@@ -1384,6 +1443,7 @@ exports.editStudent = async (req, res) => {
 
 // Teacher Management
 exports.getTeachers = async (req, res) => {
+  const { Teacher } = getModels(req);
   try {
     const teachers = await Teacher.find();
     res.json(teachers);
@@ -1393,6 +1453,7 @@ exports.getTeachers = async (req, res) => {
 };
 
 exports.getTeacher = async (req, res) => {
+  const { Teacher } = getModels(req);
   try {
     const { teacherId } = req.params;
 
@@ -1404,6 +1465,7 @@ exports.getTeacher = async (req, res) => {
 };
 
 exports.getTeacherBatches = async (req, res) => {
+  const { BatchTeacher, Batch } = getModels(req);
   try {
     const { teacherId } = req.params;
 
@@ -1425,6 +1487,7 @@ exports.getTeacherBatches = async (req, res) => {
 };
 
 exports.getTeacherAttendance = async (req, res) => {
+  const { AttendanceTeacher } = getModels(req);
  try {
     const { batchId } = req.params;
 
@@ -1437,6 +1500,7 @@ exports.getTeacherAttendance = async (req, res) => {
 };
 
 exports.markTeacherAttendance = async (req, res) => {
+  const { AttendanceTeacher } = getModels(req);
   const { teacherId, batchId, date, status } = req.body;
   try {
     const record = await AttendanceTeacher.findOneAndUpdate(
@@ -1451,6 +1515,7 @@ exports.markTeacherAttendance = async (req, res) => {
 };
 
 exports.createTeacher = async (req, res) => {
+  const { Teacher, BatchTeacher } = getModels(req);
   try {
     const {
       name,
@@ -1498,6 +1563,7 @@ exports.createTeacher = async (req, res) => {
 };
 
 exports.deleteTeacher = async (req, res) => {
+  const { Teacher, BatchTeacher } = getModels(req);
   try {
     const teacherId = req.params.teacherId;
 
@@ -1518,6 +1584,7 @@ exports.deleteTeacher = async (req, res) => {
 };
 
 exports.removeTeacherFromBatch = async (req, res) => {
+  const { BatchTeacher } = getModels(req);
   const { batchId, teacherId } = req.body;
 
   if (!batchId || !teacherId) {
@@ -1534,6 +1601,7 @@ exports.removeTeacherFromBatch = async (req, res) => {
 };
 
 exports.editTeacher = async (req, res) => {
+  const { Teacher } = getModels(req);
   try {
     const { teacherId } = req.params;
     const { name, email, phone, dob, address, qualification, aadhar, experience } = req.body;
@@ -1600,6 +1668,7 @@ exports.editTeacher = async (req, res) => {
 };
 
 exports.addTeacherToBatches = async (req, res) => {
+  const { Batch, BatchTeacher, Teacher } = getModels(req);
   try {
     const { batchIds, teacherId } = req.body;
 
@@ -1649,6 +1718,7 @@ exports.addTeacherToBatches = async (req, res) => {
 
 // Fee tracking
 exports.getUnpaidInstallments = async (req, res) => {
+  const { Installment } = getModels(req);
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -1668,6 +1738,7 @@ exports.getUnpaidInstallments = async (req, res) => {
 };
 
 exports.getUpcomingInstallments = async (req, res) => {
+  const { Installment } = getModels(req);
   try {
     const tomorrow = new Date();
     tomorrow.setHours(0, 0, 0, 0); // Set to start of today
@@ -1688,6 +1759,7 @@ exports.getUpcomingInstallments = async (req, res) => {
 };
 
 exports.getPaidInstallments = async (req, res) => {
+  const { Installment } = getModels(req);
   try {
     const installments = await Installment.find({
       paidDate: { $ne: null },
@@ -1713,6 +1785,7 @@ exports.getPaidInstallments = async (req, res) => {
 
 // today's classes
 exports.getTodaysClasses = async (req, res) => {
+  const { Timetable } = getModels(req);
   try {
     const today = new Intl.DateTimeFormat("en-US", {
       weekday: "long",
@@ -1763,6 +1836,7 @@ exports.getTodaysClasses = async (req, res) => {
 
 // Upload excel
 exports.uploadExcelSheet = async (req, res) => {
+  const { Student } = getModels(req);
   try {
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
@@ -1823,6 +1897,8 @@ exports.uploadExcelSheet = async (req, res) => {
 
 //  Get today's birthdays
 exports.getTodaysBirthdays = async (req, res) => {
+  const { Student, BirthdayWish, Teacher, TeacherBirthdayWish } = getModels(req);
+  
   try {
     const nowIST = DateTime.now().setZone("Asia/Kolkata");
     const todayDay = nowIST.day;
@@ -1860,6 +1936,7 @@ exports.getTodaysBirthdays = async (req, res) => {
 
 // Mark wish as sent
 exports.markBirthdayWished = async (req, res) => {
+  const { BirthdayWish } = getModels(req);
   try {
     const { studentId } = req.body;
     if (!studentId)
@@ -1892,6 +1969,7 @@ exports.markBirthdayWished = async (req, res) => {
 };
 
 exports.getTodaysTeacherBirthdays = async (req, res) => {
+  const { Teacher, TeacherBirthdayWish } = getModels(req);
   try {
     const nowIST = DateTime.now().setZone("Asia/Kolkata");
     const todayDay = nowIST.day;
@@ -1929,6 +2007,7 @@ exports.getTodaysTeacherBirthdays = async (req, res) => {
 
 // Mark wish as sent
 exports.markTeacherBirthdayWished = async (req, res) => {
+  const { TeacherBirthdayWish } = getModels(req);
   try {
     const { teacherId } = req.body;
     if (!teacherId)

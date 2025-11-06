@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const branchMiddleware = require("../middleware/branchMiddleware");
 const studentController = require('../controllers/studentController');
 const { verifyToken, isStudent } = require('../middleware/authMiddleware');
 
-router.use(verifyToken, isStudent);
+router.use(verifyToken, isStudent, branchMiddleware);
 
 router.get('/attendance', studentController.getAttendance);
 router.get('/test', studentController.getTest);

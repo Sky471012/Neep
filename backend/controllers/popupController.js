@@ -4,7 +4,7 @@ const Popup = require("../models/Popup");
 exports.getPopup = async (req, res) => {
   try {
     const popup = await Popup.findOne();
-  res.json(popup);
+    res.json(popup);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -14,12 +14,17 @@ exports.getPopup = async (req, res) => {
 exports.updatePopup = async (req, res) => {
   try {
     const { description } = req.body;
-    const imageUrl = `/uploads/${req.file.filename}`;
+
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
+    }
 
     let popup = await Popup.findOne();
+
     if (popup) {
-      popup.imageUrl = imageUrl;
-      popup.description = description;
+      if (imageUrl) popup.imageUrl = imageUrl; // Update image only if new one uploaded
+      if (description) popup.description = description;
     } else {
       popup = new Popup({ imageUrl, description });
     }
@@ -27,6 +32,6 @@ exports.updatePopup = async (req, res) => {
     await popup.save();
     res.status(200).json({ success: true, popup });
   } catch (error) {
-    res.status(500).json({ message: 'Server error while updating popup.' });
+    res.status(500).json({ message: "Server error while updating popup." });
   }
 };

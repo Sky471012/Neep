@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const branchMiddleware = require("../middleware/branchMiddleware");
 const teacherController = require('../controllers/teacherController');
 const { verifyToken, isTeacher } = require('../middleware/authMiddleware');
 
-router.use(verifyToken, isTeacher);
+router.use(verifyToken, isTeacher, branchMiddleware);
 
 router.get('/batches', teacherController.getBatches);
 router.get('/batchStudents/:batchId', teacherController.getBatchStudents);
@@ -12,8 +13,8 @@ router.post('/attendance/mark', teacherController.markAttendance);
 router.get('/timetable/:batchId', teacherController.getTimetable);
 router.post('/test/add', teacherController.addTest);
 router.get('/getTest/:batchId', teacherController.getTest);
-router.get('/today/timetable', teacherController.getTodaysClassesForTeacher );
-router.patch('/editMarks/:testId', teacherController.editMarks );
+router.get('/today/timetable', teacherController.getTodaysClassesForTeacher);
+router.patch('/editMarks/:testId', teacherController.editMarks);
 router.get('/attendance', teacherController.getAttendance);
 
 module.exports = router;

@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const branchMiddleware = require("../middleware/branchMiddleware");
 const adminController = require('../controllers/adminController');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 const upload = require("../middleware/upload");
 
-router.use(verifyToken, isAdmin);
+router.use(verifyToken, isAdmin, branchMiddleware);
 
 // Batch Management
 router.get('/batches', adminController.getBatches);
@@ -21,7 +22,7 @@ router.post('/batchCreate', adminController.createBatch);
 router.post('/updateTimetable/:batchId', adminController.updateTimetable);
 router.delete('/batchDelete/:batchId', adminController.deleteBatch);
 router.delete('/removeStudent', adminController.removeStudent);
-router.post('/assignTeacher/:batchId/:teacherId', adminController.assignTeacher)
+router.post('/assignTeacher/:batchId/:teacherId', adminController.assignTeacher);
 router.post('/addStudents', adminController.addStudentsToBatch);
 router.post('/addStudentByCreating/:batchId', adminController.addStudentByCreating);
 router.put('/:batchId/archive', adminController.toggleArchiveStatus);

@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const popupController = require('../controllers/popupController');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
+const branchMiddleware = require('../middleware/branchMiddleware');
 
 // Multer setup for file upload
 const storage = multer.diskStorage({
@@ -15,6 +16,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.get('/getPopup', popupController.getPopup);
-router.post('/uploadPopup', verifyToken, isAdmin, upload.single('image'), popupController.updatePopup);
+router.post('/uploadPopup', verifyToken, isAdmin, branchMiddleware, upload.single('image'), popupController.updatePopup);
 
 module.exports = router;
