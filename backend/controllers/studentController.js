@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const StudentModel = require("../models/Student");
 const AttendanceModel = require("../models/Attendance");
 const TestModel = require("../models/Test");
 const TimetableModel = require("../models/TimeTable");
@@ -117,5 +118,36 @@ exports.getbatches = async (req, res) => {
   } catch (err) {
     console.error("Error fetching student batches:", err);
     res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getProfile = async (req, res) => {
+  try {
+    const Student = req.db.model("Student", StudentModel.schema);
+
+    const student = await Student.findOne({ phone: req.user.phone, dob: req.user.dob });
+
+    if (!student) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+
+    res.json({
+      success: true,
+      student: {
+        id: student._id,
+        name: student.name,
+        phone: student.phone,
+        dob: student.dob,
+        address: student.address,
+        class: student.class,
+        fee: student.fee,
+        dateOfJoining: student.dateOfJoining,
+        guardianName: student.guardianName || "N/A",
+        schoolType: student.schoolType || "N/A",
+      },
+    });
+  } catch (err) {
+    console.error("Error fetching student profile:", err);
+    res.status(500).json({ success: false, error: err.message });
   }
 };

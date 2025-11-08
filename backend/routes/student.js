@@ -11,5 +11,6 @@ router.get('/test', studentController.getTest);
 router.post('/timetable', studentController.getTimetable);
 router.get('/fee-status', studentController.getFeeStatus);
 router.get('/batches', studentController.getbatches);
+router.get('/profile', studentController.getProfile);
 
 module.exports = router;

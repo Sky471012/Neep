@@ -9,6 +9,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../css/login.css';
 import logo from "/logo_rectangle.jpg";
+import BranchSelectModal from '../modals/BranchSelectModal.jsx';
 
 export default function Login() {
   // Generic login management
@@ -26,6 +27,9 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const [canResend, setCanResend] = useState(true);
+  const [showBranchModal, setShowBranchModal] = useState(false);
+  const [branchOptions, setBranchOptions] = useState([]);
+
 
   // Timer for resend cooldown
   useEffect(() => {
@@ -93,36 +97,8 @@ export default function Login() {
 
       // Step 2: multiple branches 
       if (data.multipleBranches) {
-        // Show branch selection
-        const chosen = prompt(
-          `Account exists in multiple branches:\n${data.branches.map(b => b.name).join("\n")}\nEnter branch name:`
-        );
-
-        const selected = data.branches.find(b => b.name === chosen);
-        if (!selected) return alert("Invalid branch selected");
-
-        // Resubmit with chosen branch
-        const finalizeRes = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/student`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              phone: studentCredentials.phone,
-              dob: formattedDob,
-              selectedBranch: selected.key, // send key here
-            }),
-          }
-        );
-
-        const finalizeData = await finalizeRes.json();
-        if (!finalizeRes.ok) return alert(finalizeData.message || "Login failed");
-
-        localStorage.setItem("role", "student");
-        localStorage.setItem("authToken", finalizeData.authToken);
-        localStorage.setItem("branch", finalizeData.branch);
-        localStorage.setItem("user", JSON.stringify(finalizeData.student));
-        navigate("/student");
+        setBranchOptions(data.branches);
+        setShowBranchModal(true);
         return;
       }
 
@@ -131,6 +107,12 @@ export default function Login() {
       localStorage.setItem("authToken", data.authToken);
       localStorage.setItem("branch", data.branch);
       localStorage.setItem("user", JSON.stringify(data.student));
+      if (data.branches && data.branches.length > 0) {
+        localStorage.setItem("branches", JSON.stringify(data.branches));
+      } else {
+        localStorage.setItem("branches", JSON.stringify([data.branch]));
+      }
+      window.dispatchEvent(new Event("storage"));
       navigate("/student");
     } catch (err) {
       setIsLoading(false);
@@ -226,33 +208,13 @@ export default function Login() {
 
       // 🔹 Case 1: Multiple branches found
       if (data.multipleBranches && data.branches?.length > 1) {
-        const chosen = prompt(
-          `Your account exists in multiple branches:\n${data.branches.join("\n")}\nEnter the branch name to continue:`
+        setBranchOptions(
+          data.branches.map((branch) => ({
+            key: branch,
+            name: branch,
+          }))
         );
-
-        if (!chosen || !data.branches.includes(chosen)) {
-          alert("Invalid branch selected");
-          return;
-        }
-
-        // 🔁 Second call to backend with chosen branch
-        const finalizeRes = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/verify-otp`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, otp, branch: chosen }),
-          }
-        );
-
-        const finalizeData = await finalizeRes.json();
-
-        if (!finalizeRes.ok) {
-          alert(finalizeData.message || "Failed to finalize login.");
-          return;
-        }
-
-        saveLogin(finalizeData);
+        setShowBranchModal(true);
         return;
       }
 
@@ -281,6 +243,12 @@ export default function Login() {
     } else {
       alert("Unknown role. Contact support.");
     }
+    if (data.branches && data.branches.length > 0) {
+      localStorage.setItem("branches", JSON.stringify(data.branches));
+    } else {
+      localStorage.setItem("branches", JSON.stringify([data.branch]));
+    }
+    window.dispatchEvent(new Event("storage"));
   };
 
   const handleChangeEmail = () => {
@@ -288,6 +256,100 @@ export default function Login() {
     setOtp('');
     setCanResend(true);
     setResendTimer(0);
+  };
+
+  const handleBranchSelect = async (selectedBranch) => {
+    console.log("Selected branch:", selectedBranch);
+    setShowBranchModal(false);
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/verify-otp`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email.trim(),   // ✅ backend expects 'email'
+            otp: otp.trim(),       // ✅ backend expects 'otp'
+            branch: selectedBranch // ✅ backend expects 'branch'
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to verify OTP for selected branch");
+        return;
+      }
+
+      // ✅ Successful login
+      localStorage.setItem("authToken", data.authToken);
+      localStorage.setItem("branch", data.branch);
+      localStorage.setItem("role", data.user.role.toLowerCase());
+      localStorage.setItem("user", JSON.stringify(data.user));
+      if (data.branches && data.branches.length > 0) {
+        localStorage.setItem("branches", JSON.stringify(data.branches));
+      } else {
+        localStorage.setItem("branches", JSON.stringify([data.branch]));
+      }
+      window.dispatchEvent(new Event("storage"));
+
+      if (data.user.role === "Admin") navigate("/admin");
+      else navigate("/teacher");
+
+    } catch (err) {
+      console.error("Branch selection error:", err);
+      alert("Error logging in with selected branch.");
+    }
+  };
+
+  const handleStudentBranchSelect = async (selectedBranch) => {
+    setShowBranchModal(false);
+    const formattedDob =
+      ("0" + dob.getDate()).slice(-2) +
+      "-" +
+      ("0" + (dob.getMonth() + 1)).slice(-2) +
+      "-" +
+      dob.getFullYear();
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/student`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phone: studentCredentials.phone,
+            dob: formattedDob,
+            selectedBranch, // ✅ send the branch name back to backend
+          }),
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.message || "Failed to log in with selected branch");
+        return;
+      }
+
+      // ✅ Successful login
+      localStorage.setItem("role", "student");
+      localStorage.setItem("authToken", data.authToken);
+      localStorage.setItem("branch", data.branch);
+      localStorage.setItem("user", JSON.stringify(data.student));
+      if (data.branches && data.branches.length > 0) {
+        localStorage.setItem("branches", JSON.stringify(data.branches));
+      } else {
+        localStorage.setItem("branches", JSON.stringify([data.branch]));
+      }
+      window.dispatchEvent(new Event("storage"));
+
+      navigate("/student");
+    } catch (err) {
+      console.error("Student branch selection error:", err);
+      alert("Error logging in with selected branch.");
+    }
   };
 
   return (
@@ -473,6 +535,19 @@ export default function Login() {
       <Call />
       <Instagram />
       <Footer />
+
+      {showBranchModal && (
+        <BranchSelectModal
+          branches={branchOptions}
+          onSelect={(branch) =>
+            loginType === "student"
+              ? handleStudentBranchSelect(branch)
+              : handleBranchSelect(branch)
+          }
+          onClose={() => setShowBranchModal(false)}
+        />
+      )}
+
     </div>
   );
 }

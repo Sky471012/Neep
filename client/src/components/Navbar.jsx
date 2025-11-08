@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, matchPath } from "react-router-dom";
 import logo from "/logo_rectangle-1.png";
+import BranchSelectModal from "../modals/BranchSelectModal";
 
 export default function Navbar() {
   const authToken = localStorage.getItem("authToken");
@@ -10,6 +11,31 @@ export default function Navbar() {
   const [activeSection, setActiveSection] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
+  const [showBranchModal, setShowBranchModal] = useState(false);
+  const [hasMultipleBranches, setHasMultipleBranches] = useState(false);
+
+  // 🔹 Recheck branches whenever the route changes
+  useEffect(() => {
+    const storedBranches = JSON.parse(localStorage.getItem("branches") || "[]");
+    setHasMultipleBranches(Array.isArray(storedBranches) && storedBranches.length > 1);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const updateBranches = () => {
+      const storedBranches = JSON.parse(localStorage.getItem("branches") || "[]");
+      setHasMultipleBranches(Array.isArray(storedBranches) && storedBranches.length > 1);
+    };
+
+    // Run initially
+    updateBranches();
+
+    // Also run whenever localStorage changes
+    window.addEventListener("storage", updateBranches);
+
+    return () => {
+      window.removeEventListener("storage", updateBranches);
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -76,12 +102,22 @@ export default function Navbar() {
   return (
     <>
       <nav className={`navbar ${scrolled || isDashboardRoute ? "navbar-scrolled" : ""}`}>
-        <Link to="/#home"><img className="logo" src={logo}/></Link>
+        <Link to="/#home"><img className="logo" src={logo} /></Link>
         <ul className="nav-links">
           <li><Link to="/all-courses" className={isRouteActive("/all-courses") ? "active" : ""}>Courses</Link></li>
           <li><Link to="/#reviews" className={isAnchorActive("reviews") ? "active" : ""} onClick={() => handleAnchorClick("reviews")}>Student Reviews</Link></li>
           <li><Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link></li>
           <li><Link to="/contactus" className={isRouteActive("/contactus") ? "active" : ""}>Contact Us</Link></li>
+
+          {hasMultipleBranches && (
+            <li><button
+              className="switch-branch-btn"
+              onClick={() => setShowBranchModal(true)}
+            >
+              <i className="bi bi-arrow-left-right me-1"></i>Switch Center
+            </button></li>
+          )}
+
 
           {authToken && role === "student" && (
             <>
@@ -127,6 +163,15 @@ export default function Navbar() {
         <Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link>
         <Link to="/contactus" className={isRouteActive("/contactus") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Contact Us</Link>
 
+        {hasMultipleBranches && (
+          <button
+            className={`switch-branch-btn ${isAnchorActive("home") ? "active" : ""}`}
+            onClick={() => { setSidebarOpen(false); setShowBranchModal(true); }}
+          >
+            <i className="bi bi-arrow-left-right me-1"></i>Switch Center
+          </button>
+        )}
+
         {authToken && role === "student" && (
           <>
             <Link to="/student" className={isRouteActive("/student") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Student Portal</Link>
@@ -157,6 +202,67 @@ export default function Navbar() {
       {/* Overlay */}
       {sidebarOpen && (
         <div className="overlay active" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {showBranchModal && (
+        <BranchSelectModal
+          branches={JSON.parse(localStorage.getItem("branches") || "[]")}
+          onSelect={async (branch) => {
+            try {
+              const authToken = localStorage.getItem("authToken");
+
+              const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/switch-branch`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${authToken}`,
+                },
+                body: JSON.stringify({ branch }),
+              });
+
+              const data = await res.json();
+
+              if (!data.success) {
+                alert(data.message || "Failed to switch branch");
+                return;
+              }
+
+              localStorage.setItem("authToken", data.authToken);
+              localStorage.setItem("branch", data.branch);
+
+              // ✅ Fetch latest student data for this branch before reload
+              if (localStorage.getItem("role") === "student") {
+                const token = data.authToken;
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/profile`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                })
+                  .then(res => res.json())
+                  .then(profile => {
+                    if (profile.success) {
+                      localStorage.setItem("user", JSON.stringify(profile.student));
+                    }
+                    // Proceed to reload only after updating student data
+                    setShowBranchModal(false);
+                    setTimeout(() => window.location.reload(), 400);
+                    window.dispatchEvent(new Event("branchChanged"));
+                  })
+                  .catch(err => {
+                    console.error("Profile fetch after branch switch failed:", err);
+                    setTimeout(() => window.location.reload(), 400);
+                  });
+              } else {
+                // For admin/teacher
+                setShowBranchModal(false);
+                setTimeout(() => window.location.reload(), 400);
+                window.dispatchEvent(new Event("branchChanged"));
+              }
+            } catch (err) {
+              console.error("Switch branch error:", err);
+              alert("Error switching branch");
+            }
+          }}
+          onClose={() => setShowBranchModal(false)}
+        />
       )}
 
       {/* Styles */}
@@ -289,6 +395,45 @@ export default function Navbar() {
           transform: none;
         }
 
+        /* Make any button inside nav-links match the anchor styling */
+        .nav-links li button {
+          background: none;
+          color: var(--gray-800);
+          font-weight: 700;
+          padding: 0.5rem 1rem;
+          border-radius: var(--radius-sm);
+          transition: var(--transition);
+          display: inline-block;
+          border: none;
+          cursor: pointer;
+          font-family: inherit;
+        }
+
+        .nav-links li button:hover {
+          background: var(--bg-hover);
+          color: var(--primary);
+        }
+
+        .nav-links li button.active {
+          background: none;
+          color: var(--primary);
+          box-shadow: none;
+          position: relative;
+          font-weight: 700;
+        }
+
+        .nav-links li button.active:after {
+          content: "";
+          display: block;
+          position: absolute;
+          bottom: 0;
+          left: 1rem;
+          right: 1rem;
+          height: 2px;
+          background: var(--primary);
+          border-radius: 1px;
+        }
+
         .navbar-scrolled {
           padding: 0.4rem 2rem;
           box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
@@ -366,6 +511,31 @@ export default function Navbar() {
           height: 60%;
           background: var(--primary);
           border-radius: 0 2px 2px 0;
+        }
+
+        /* Make the Switch button visually consistent with other nav/sidebar items */
+        .sidebar button.switch-branch-btn {
+          display: block;
+          width: 100%;
+          text-align: left;
+          background: none;
+          color: var(--gray-800);
+          border: none;
+          padding: 0.75rem 1rem;
+          border-radius: var(--radius-sm);
+          font-weight: 700;
+          cursor: pointer;
+          transition: var(--transition);
+        }
+
+        .sidebar button.switch-branch-btn:hover {
+          background: var(--bg-hover);
+          color: var(--primary);
+        }
+
+        .sidebar button.switch-branch-btn.active {
+          color: var(--primary)!important;
+          background: none;
         }
 
         .sidebar a:active {

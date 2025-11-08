@@ -20,7 +20,6 @@ async function sendMail(to, subject, text, senderEmail) {
       }
     );
 
-    console.log("Brevo API response:", response.data);
   } catch (error) {
     console.error(
       "Email sending failed:",

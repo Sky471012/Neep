@@ -26,7 +26,7 @@ function getModels(req) {
     Fee: req.db.model("Fee", FeeModel.schema),
     Installment: req.db.model("Installment", InstallmentModel.schema),
     Student: req.db.model("Student", StudentModel.schema),
-    Teacher: req.db.model("Teacher", TeacherModel.schema),
+    Teacher: req.db.model("AdminTeacher", TeacherModel.schema),
     BatchTeacher: req.db.model("batch_teacher", BatchTeacherModel.schema),
     BirthdayWish: req.db.model("BirthdayWish", BirthdayWishModel.schema),
     TeacherBirthdayWish: req.db.model("TeacherBirthdayWish", TeacherBirthdayWishModel.schema),

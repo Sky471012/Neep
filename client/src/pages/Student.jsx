@@ -64,6 +64,7 @@ export default function Student() {
     useEffect(() => {
         const storedStudent = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
+        const branch = localStorage.getItem("branch");
 
         if (storedStudent && token) {
             setStudent(JSON.parse(storedStudent));
@@ -116,7 +117,7 @@ export default function Student() {
                 })
                 .catch(err => console.error("Fee status fetch error:", err));
         }
-    }, []);
+    }, [localStorage.getItem("branch")]);
 
     function fetchTimetable(batchId) {
         const token = localStorage.getItem("authToken");

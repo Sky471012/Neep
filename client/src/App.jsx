@@ -38,6 +38,20 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    // A universal event handler for branch switching
+    const handleBranchChange = () => {
+      console.log("Branch changed globally → reloading app...");
+      window.location.reload();
+    };
+
+    // Listen for our custom event (not the native storage event)
+    window.addEventListener("branchChanged", handleBranchChange);
+
+    return () => {
+      window.removeEventListener("branchChanged", handleBranchChange);
+    };
+  }, []);
 
   function ScrollToHashElement() {
     const { hash } = useLocation();

@@ -100,6 +100,15 @@ td {
   color: #2c3e50;
 }
 
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 85vw;
+  width: 600px;
+  text-align: center;
+}
+
 .btn {
   font-weight: bold;
 }

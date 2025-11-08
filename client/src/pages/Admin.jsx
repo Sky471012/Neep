@@ -287,7 +287,7 @@ export default function Admin() {
                       <div className="timing-header">{timing}</div>
                       <div className="timing-classes">
                         {classes.map((entry, index) => (
-                          <Link to={`/batch/${entry.batch.id}`} className="class-link">
+                          <Link key={entry.batch.id || index} to={`/batch/${entry.batch.id}`} className="class-link">
                             <div key={index} className="class-info">
                               <span>
                                 {entry.batch.name}

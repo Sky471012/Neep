@@ -260,14 +260,12 @@ export default function FeeTracking() {
                               )
                             )}
                           </ul>
-                          <li>
                             <button
                               className="btn btn-sm text-start text-danger w-100"
                               onClick={() => { setSelectedUnpaidClass(null); setFromDateUnpaid(null); setToDateUnpaid(null) }}
                             >
                               Clear Filters
                             </button>
-                          </li>
                         </div>
                       </li>
                     </ul>
@@ -377,14 +375,12 @@ export default function FeeTracking() {
                               )
                             )}
                           </ul>
-                          <li>
                             <button
                               className="btn btn-sm text-start text-danger w-100"
                               onClick={() => { setSelectedUpcomingClass(null); setFromDateUpcoming(null); setToDateUpcoming(null) }}
                             >
                               Clear Filter
                             </button>
-                          </li>
                         </div>
                       </li>
                     </ul>
@@ -511,14 +507,12 @@ export default function FeeTracking() {
                               )
                             )}
                           </ul>
-                          <li>
                             <button
                               className="btn btn-sm text-start text-danger w-100"
                               onClick={() => { setSelectedPaidClass(null); setFromDatePaid(null); setToDatePaid(null) }}
                             >
                               Clear Filter
                             </button>
-                          </li>
                         </div>
                       </li>
                     </ul>
