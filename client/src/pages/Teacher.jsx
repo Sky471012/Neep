@@ -41,6 +41,7 @@ export default function Teacher() {
     const [attendanceDraft, setAttendanceDraft] = useState({});
     const [editingMarks, setEditingMarks] = useState({});
     const [attendanceRecords, setAttendanceRecords] = useState([]);
+    const [testSearchQuery, setTestSearchQuery] = useState("");
 
     const allMonths = [
         "April", "May", "June", "July", "August", "September",
@@ -375,6 +376,32 @@ export default function Teacher() {
         } catch (err) {
             console.error(err);
             alert(err.message || "Failed to update marks");
+        }
+    };
+
+    const handleDeleteTestGroup = async (batchId, test) => {
+        if (!window.confirm(`Are you sure you want to delete the test "${test.name}" dated ${test.date} for the whole batch? This cannot be undone.`)) return;
+        const token = localStorage.getItem('authToken');
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/deleteTest`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ batchId, name: test.name, date: test.date }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Failed to delete test');
+
+            // remove all test entries matching this name+date from local state for this batch
+            setTests(prev => {
+                const list = prev[batchId] || [];
+                const filtered = list.filter(t => !(t.name === test.name && t.date === test.date));
+                return { ...prev, [batchId]: filtered };
+            });
+
+            setSelectedTest(null);
+        } catch (err) {
+            console.error('Delete test group error:', err);
+            alert(err.message || 'Failed to delete test');
         }
     };
 
@@ -858,6 +885,13 @@ export default function Teacher() {
                                                                         {!selectedTest ? (
                                                                             <div>
                                                                                 <h3 className="modal-title">Tests for {batch.batchName}</h3>
+                                                                                <input
+                                                                                    type="search"
+                                                                                    placeholder="Search tests with name..."
+                                                                                    className="search-input"
+                                                                                    value={testSearchQuery}
+                                                                                    onChange={(e) => setTestSearchQuery(e.target.value)}
+                                                                                />
                                                                                 <ul className="list-group">
                                                                                     {Array.from(
                                                                                         new Map(
@@ -865,6 +899,10 @@ export default function Teacher() {
                                                                                         ).values()
                                                                                     )
                                                                                         .slice() // copy so original isn't mutated
+                                                                                        .filter(
+                                                                                            (test) =>
+                                                                                                test.name.toLowerCase().includes(testSearchQuery.toLowerCase())
+                                                                                        )
                                                                                         .sort((a, b) => new Date(a.date) - new Date(b.date)) // 🔥 ascending order
                                                                                         .map((test, idx) => (
                                                                                             <li key={idx} className="list-group-item d-flex justify-content-between align-items-center">
@@ -884,9 +922,10 @@ export default function Teacher() {
                                                                             </div>
                                                                         ) : (
                                                                             <div style={{ height: "85vh", overflowY: "auto" }}>
-                                                                                <h3 className="modal-title" style={{ textAlign: "left" }}><button style={{ border: "none", background: "transparent" }} onClick={() => setSelectedTest(null)}><i className="fas fa-arrow-left"></i></button>{selectedTest.name}</h3>
+                                                                                <h3 className="modal-title" style={{ textAlign: "left", textWrap: "wrap" }}><button style={{ border: "none", background: "transparent" }} onClick={() => setSelectedTest(null)}><i className="fas fa-arrow-left"></i></button>{selectedTest.name}</h3>
+                                                                                <button className="btn btn-outline-danger" onClick={() => handleDeleteTestGroup(batchId, selectedTest)} style={{ position: "absolute", right: "45px" }}><i className="bi bi-trash"></i></button>
                                                                                 <span style={{ textAlign: "left", marginBottom: "1rem" }}>Date :- {selectedTest.date} <br /> Maximum Marks :- {selectedTest.maxMarks}</span>
-                                                                                <table className="table table-bordered">
+                                                                                <table className="table table-colored">
                                                                                     <thead>
                                                                                         <tr>
                                                                                             <th style={{ padding: "10px 20px" }}>Student Name</th>

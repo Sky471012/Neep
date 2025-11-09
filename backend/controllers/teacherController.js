@@ -9,18 +9,23 @@ const TimetableModel = require("../models/TimeTable");
 const TestModel = require("../models/Test");
 
 function convertTo24Hour(time12h) {
-  const [time, modifier] = time12h.split(' ');
-  let [hours, minutes] = time.split(':').map(Number);
+  const [time, modifier] = time12h.split(" ");
+  let [hours, minutes] = time.split(":").map(Number);
 
-  if (modifier === 'PM' && hours !== 12) hours += 12;
-  if (modifier === 'AM' && hours === 12) hours = 0;
+  if (modifier === "PM" && hours !== 12) hours += 12;
+  if (modifier === "AM" && hours === 12) hours = 0;
 
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
 }
 
 exports.getBatches = async (req, res) => {
   try {
-    const BatchesTeacher = req.db.model("batch_teacher", BatchesTeacherModel.schema);
+    const BatchesTeacher = req.db.model(
+      "batch_teacher",
+      BatchesTeacherModel.schema
+    );
     const Batch = req.db.model("Batch", BatchModel.schema);
 
     // Step 1: Get all teacher's batch mappings
@@ -53,7 +58,10 @@ exports.getBatches = async (req, res) => {
 exports.getBatchStudents = async (req, res) => {
   try {
     const { batchId } = req.params;
-    const BatchStudent = req.db.model("batch_student", BatchStudentModel.schema);
+    const BatchStudent = req.db.model(
+      "batch_student",
+      BatchStudentModel.schema
+    );
     const Student = req.db.model("Student", StudentModel.schema);
 
     // Step 1: Get all studentIds in that batch
@@ -81,7 +89,8 @@ exports.getTimetable = async (req, res) => {
 
     const sortedTimetable = timetable.map((entry) => {
       const sortedClassTimings = [...entry.classTimings].sort((a, b) => {
-        const parseTime = (timeStr) => new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);
+        const parseTime = (timeStr) =>
+          new Date(`1970-01-01T${convertTo24Hour(timeStr)}:00`);
         return parseTime(a.startTime) - parseTime(b.startTime);
       });
 
@@ -102,7 +111,10 @@ exports.getTimetable = async (req, res) => {
 
 exports.getAttendance = async (req, res) => {
   try {
-    const AttendanceTeacher = req.db.model("Attendance_Teacher", AttendanceTeacherModel.schema);
+    const AttendanceTeacher = req.db.model(
+      "Attendance_Teacher",
+      AttendanceTeacherModel.schema
+    );
     const records = await AttendanceTeacher.find({ teacherId: req.user.id });
     res.json(records);
   } catch (err) {
@@ -140,7 +152,15 @@ exports.markAttendance = async (req, res) => {
 };
 
 exports.addTest = async (req, res) => {
-  const { studentId, batchId, name, maxMarks, marksScored, date, absent: absentFromClient } = req.body;
+  const {
+    studentId,
+    batchId,
+    name,
+    maxMarks,
+    marksScored,
+    date,
+    absent: absentFromClient,
+  } = req.body;
 
   try {
     const Test = req.db.model("Test", TestModel.schema);
@@ -151,12 +171,14 @@ exports.addTest = async (req, res) => {
     if (existingTest) {
       return res.status(200).json({
         message: "Test already exists. No changes made.",
-        test: existingTest
+        test: existingTest,
       });
     }
-    
-    const inferredAbsent = marksScored === null || marksScored === undefined || marksScored === "";
-    const absent = typeof absentFromClient === "boolean" ? absentFromClient : inferredAbsent;
+
+    const inferredAbsent =
+      marksScored === null || marksScored === undefined || marksScored === "";
+    const absent =
+      typeof absentFromClient === "boolean" ? absentFromClient : inferredAbsent;
 
     // Create new test
     const newTest = new Test({
@@ -166,7 +188,7 @@ exports.addTest = async (req, res) => {
       maxMarks,
       marksScored: absent ? 0 : Number(marksScored),
       absent,
-      date
+      date,
     });
 
     await newTest.save();
@@ -196,7 +218,10 @@ exports.getTest = async (req, res) => {
 
 exports.getTodaysClassesForTeacher = async (req, res) => {
   try {
-    const BatchesTeacher = req.db.model("batch_teacher", BatchesTeacherModel.schema);
+    const BatchesTeacher = req.db.model(
+      "batch_teacher",
+      BatchesTeacherModel.schema
+    );
     const Batch = req.db.model("Batch", BatchModel.schema);
     const Timetable = req.db.model("Timetable", TimetableModel.schema);
 
@@ -223,7 +248,10 @@ exports.getTodaysClassesForTeacher = async (req, res) => {
     const activeBatchIds = activeBatches.map((b) => b._id);
 
     if (activeBatchIds.length === 0) {
-      return res.json({ message: "All assigned batches are archived", classes: [] });
+      return res.json({
+        message: "All assigned batches are archived",
+        classes: [],
+      });
     }
 
     // Find today's classes for active batches
@@ -276,20 +304,32 @@ exports.editMarks = async (req, res) => {
     const Test = req.db.model("Test", TestModel.schema);
 
     const test = await Test.findById(testId);
-    if (!test) return res.status(404).json({ message: 'Test not found' });
+    if (!test) return res.status(404).json({ message: "Test not found" });
 
     // If empty or null -> Absent
-    if (marksScored === '' || marksScored === null || typeof marksScored === 'undefined') {
+    if (
+      marksScored === "" ||
+      marksScored === null ||
+      typeof marksScored === "undefined"
+    ) {
       test.absent = true;
       test.marksScored = null; // safe even if previously set
     } else {
       // Non-empty -> must be a number within [0, maxMarks]
       const n = Number(marksScored);
       if (Number.isNaN(n)) {
-        return res.status(400).json({ message: 'marksScored must be a number or empty to mark absent' });
+        return res
+          .status(400)
+          .json({
+            message: "marksScored must be a number or empty to mark absent",
+          });
       }
       if (n < 0 || n > test.maxMarks) {
-        return res.status(400).json({ message: `marksScored must be between 0 and ${test.maxMarks}` });
+        return res
+          .status(400)
+          .json({
+            message: `marksScored must be between 0 and ${test.maxMarks}`,
+          });
       }
       test.absent = false;
       test.marksScored = n;
@@ -298,7 +338,38 @@ exports.editMarks = async (req, res) => {
     await test.save();
     return res.json({ test });
   } catch (err) {
-    console.error('Update marks error:', err);
-    return res.status(500).json({ message: 'Failed to update marks' });
+    console.error("Update marks error:", err);
+    return res.status(500).json({ message: "Failed to update marks" });
+  }
+};
+
+exports.deleteTest = async (req, res) => {
+  try {
+    const { batchId, name, date } = req.body;
+    const Test = req.db.model("Test", TestModel.schema);
+    if (!batchId || !name || !date) {
+      return res
+        .status(400)
+        .json({
+          message: "Provide testId OR batchId, name and date to delete tests",
+        });
+    }
+
+    const docs = await Test.find({ batchId, name, date });
+    if (!docs || docs.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No tests found for the specified batch/name/date" });
+    }
+
+    const del = await Test.deleteMany({ batchId, name, date });
+    return res.json({
+      message: "Tests deleted successfully",
+      deletedCount: del.deletedCount,
+      deletedTests: docs,
+    });
+  } catch (err) {
+    console.error("Delete test error:", err);
+    res.status(500).json({ message: "Failed to delete test" });
   }
 };

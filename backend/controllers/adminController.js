@@ -683,6 +683,37 @@ exports.editMarks = async (req, res) => {
   }
 };
 
+exports.deleteTest = async (req, res) => {
+  try {
+    const { batchId, name, date } = req.body;
+    const Test = req.db.model("Test", TestModel.schema);
+    if (!batchId || !name || !date) {
+      return res
+        .status(400)
+        .json({
+          message: "Provide testId OR batchId, name and date to delete tests",
+        });
+    }
+
+    const docs = await Test.find({ batchId, name, date });
+    if (!docs || docs.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No tests found for the specified batch/name/date" });
+    }
+
+    const del = await Test.deleteMany({ batchId, name, date });
+    return res.json({
+      message: "Tests deleted successfully",
+      deletedCount: del.deletedCount,
+      deletedTests: docs,
+    });
+  } catch (err) {
+    console.error("Delete test error:", err);
+    res.status(500).json({ message: "Failed to delete test" });
+  }
+};
+
 // Student Management
 exports.getStudents = async (req, res) => {
   const { Student } = getModels(req);

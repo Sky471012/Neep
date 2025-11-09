@@ -16,8 +16,8 @@
 15. Alabatic batch in student and teacher batches and in attendance and show students **(done)**
 16. Enquiry system (converted and lost) **(done)**
 17. Study material and chat **(future)**
-18. Remove test and search option
-19. test list accorrding to date of joining
+18. Remove test and search option **(done)**
+19. test list accorrding to date of joining **(dropped)**
 20. test according to date
 21. teacher birthday **(done)**
 

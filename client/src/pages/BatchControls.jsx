@@ -68,6 +68,7 @@ export default function BatchControls() {
     startDate: '',
     class: '',
   });
+  const [testSearchQuery, setTestSearchQuery] = useState("");
 
   const classOptions = ["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"];
 
@@ -737,6 +738,39 @@ export default function BatchControls() {
     } catch (err) {
       console.error("Edit marks error:", err);
       alert("Failed to update marks.");
+    }
+  };
+
+  const handleDeleteTestGroup = async (batchId, test) => {
+    if (!window.confirm(`Are you sure you want to delete the test "${test.name}" dated ${test.date} for the whole batch? This cannot be undone.`)) return;
+    const token = localStorage.getItem('authToken');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/deleteTest`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ batchId, name: test.name, date: test.date }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to delete test');
+
+      // remove all test entries matching this name+date from local state for this batch
+      setTests(prev => {
+        const list = prev[batchId] || [];
+        const filtered = list.filter(t => !(t.name === test.name && t.date === test.date));
+        return { ...prev, [batchId]: filtered };
+      });
+
+      // Also remove from the aggregated `alltests` cache so the All Tests modal updates
+      setAllTests(prev => {
+        const list = prev[batchId] || [];
+        const filtered = list.filter(t => !(t.name === test.name && t.date === test.date));
+        return { ...prev, [batchId]: filtered };
+      });
+
+      setSelectedTest(null);
+    } catch (err) {
+      console.error('Delete test group error:', err);
+      alert(err.message || 'Failed to delete test');
     }
   };
 
@@ -1730,23 +1764,34 @@ export default function BatchControls() {
                 <div>
                   {!selectedTest ? (
                     <div>
-                      <h5 className="mb-3">Tests for {batch.name}</h5>
+                      <h5 className="mb-3 text-center">Tests for {batch.name}</h5>
+                      <input
+                        type="search"
+                        placeholder="Search tests with name..."
+                        className="search-input"
+                        value={testSearchQuery}
+                        onChange={(e) => setTestSearchQuery(e.target.value)}
+                      />
                       <ul className="list-group">
-                        {uniqueTestHeaders.map((test, idx) => (
-                          <li
-                            key={`${test.name}_${test.date}_${idx}`}
-                            className="list-group-item d-flex justify-content-between align-items-center"
-                          >
-                            <span>{test.name} <small className="text-muted">({test.date})</small></span>
-                            <button
-                              className="text-primary"
-                              style={{ border: "none", background: "transparent", fontSize: "13px" }}
-                              onClick={() => setSelectedTest(test)}
+                        {uniqueTestHeaders
+                          .filter(
+                            (test) =>
+                              test.name.toLowerCase().includes(testSearchQuery.toLowerCase())
+                          ).map((test, idx) => (
+                            <li
+                              key={`${test.name}_${test.date}_${idx}`}
+                              className="list-group-item d-flex justify-content-between align-items-center"
                             >
-                              View<i className="bi bi-arrow-right ms-1"></i>
-                            </button>
-                          </li>
-                        ))}
+                              <span>{test.name} <small className="text-muted">({test.date})</small></span>
+                              <button
+                                className="text-primary"
+                                style={{ border: "none", background: "transparent", fontSize: "13px" }}
+                                onClick={() => setSelectedTest(test)}
+                              >
+                                View<i className="bi bi-arrow-right ms-1"></i>
+                              </button>
+                            </li>
+                          ))}
                       </ul>
                     </div>
                   ) : (
@@ -1760,7 +1805,7 @@ export default function BatchControls() {
                         </button>
                         {selectedTest.name}
                       </h3>
-
+                      <button className="btn btn-outline-danger" onClick={() => handleDeleteTestGroup(batchId, selectedTest)} style={{ position: "absolute", right: "45px" }}><i className="bi bi-trash"></i></button>
                       <span style={{ textAlign: "left", marginBottom: "1rem", display: "inline-block" }}>
                         Date :- {selectedTest.date} <br />
                         Maximum Marks :- {selectedTest.maxMarks}
