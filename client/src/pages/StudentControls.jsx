@@ -79,6 +79,22 @@ export default function StudentControls() {
         return `${day}-${month}-${year}`;
     }
 
+    // Robust parser for dd-MM-yyyy and ISO-like date strings. Returns timestamp or Infinity.
+    function parseDateToTime(dateStr) {
+        if (!dateStr) return Infinity;
+        const ddmmyyyy = /^([0-3]?\d)-([0-1]?\d)-(\d{4})$/;
+        const m = String(dateStr).trim().match(ddmmyyyy);
+        if (m) {
+            const dd = Number(m[1]);
+            const mm = Number(m[2]);
+            const yyyy = Number(m[3]);
+            const dt = new Date(yyyy, mm - 1, dd);
+            return isNaN(dt.getTime()) ? Infinity : dt.getTime();
+        }
+        const parsed = Date.parse(dateStr);
+        return isNaN(parsed) ? Infinity : parsed;
+    }
+
 
     useEffect(() => {
         const token = localStorage.getItem("authToken");
@@ -1618,7 +1634,6 @@ export default function StudentControls() {
                         onClose={() => setModalThree(false)}
                     >
                         <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
-                            <h3 className="modal-title" >Showing Scores of {student.name}</h3>
 
                             <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
                                 {tests.length === 0 ? (
@@ -1626,25 +1641,35 @@ export default function StudentControls() {
                                 ) : (
                                     <>
                                         {/* Step 1: Show batches */}
-                                        {!selectedBatch && (
-                                            <ul className="list-group">
-                                                {[...new Set(tests.map(t => t.batchId))].map(batchId => {
-                                                    const batchName = tests.find(t => t.batchId === batchId)?.batchName || "Unknown Batch";
-                                                    return (
-                                                        <li key={batchId} className="list-group-item d-flex justify-content-between align-items-center">
-                                                            <span>{batchName}</span>
-                                                            <button
-                                                                className="text-primary"
-                                                                onClick={() => setSelectedBatch(batchId)}
-                                                                style={{ border: "none", background: "transparent", fontSize: "13px" }}
-                                                            >
-                                                                View<i className="bi bi-arrow-right ms-1"></i>
-                                                            </button>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        )}
+                                        {!selectedBatch &&
+                                            (<>
+                                                <h5 className="modal-title" >Showing Scores of {student.name}</h5>
+                                                <ul className="list-group">
+                                                    {(() => {
+                                                        // Build unique list of batches with names, then sort by batchName
+                                                        const batches = Array.from(new Set(tests.map(t => t.batchId)))
+                                                            .map(batchId => ({
+                                                                batchId,
+                                                                batchName: tests.find(t => t.batchId === batchId)?.batchName || "Unknown Batch"
+                                                            }));
+
+                                                        batches.sort((a, b) => a.batchName.localeCompare(b.batchName));
+
+                                                        return batches.map(({ batchId, batchName }) => (
+                                                            <li key={batchId} className="list-group-item d-flex justify-content-between align-items-center">
+                                                                <span>{batchName}</span>
+                                                                <button
+                                                                    className="text-primary"
+                                                                    onClick={() => setSelectedBatch(batchId)}
+                                                                    style={{ border: "none", background: "transparent", fontSize: "13px" }}
+                                                                >
+                                                                    View<i className="bi bi-arrow-right ms-1"></i>
+                                                                </button>
+                                                            </li>
+                                                        ));
+                                                    })()}
+                                                </ul>
+                                            </>)}
 
                                         {/* Step 2: Show all tests of selected batch */}
                                         {selectedBatch && (
@@ -1659,7 +1684,7 @@ export default function StudentControls() {
                                                     Test Scores in {tests.find(t => t.batchId === selectedBatch)?.batchName}
                                                 </h3>
 
-                                                <table className="table table-bordered mt-3">
+                                                <table className="table table-colored mt-3">
                                                     <thead>
                                                         <tr>
                                                             <th>Test Name</th>
@@ -1671,6 +1696,8 @@ export default function StudentControls() {
                                                     <tbody>
                                                         {tests
                                                             .filter(t => t.batchId === selectedBatch)
+                                                            .slice() // copy to avoid mutating original
+                                                            .sort((a, b) => parseDateToTime(a.date) - parseDateToTime(b.date))
                                                             .map(test => (
                                                                 <tr key={test._id}>
                                                                     <td>{test.name}</td>

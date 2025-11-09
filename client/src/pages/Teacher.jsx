@@ -59,6 +59,23 @@ export default function Teacher() {
     const currentYear = now.getFullYear();
     const academicYearStart = jsMonth >= 3 ? currentYear : currentYear - 1;
 
+    // Parse date strings used in tests. Accepts dd-MM-yyyy or ISO-like strings.
+    // Returns milliseconds since epoch, or Infinity when invalid/missing so they sort last.
+    function parseDateToTime(dateStr) {
+        if (!dateStr) return Infinity;
+        const ddmmyyyy = /^([0-3]?\d)-([0-1]?\d)-(\d{4})$/;
+        const m = String(dateStr).trim().match(ddmmyyyy);
+        if (m) {
+            const dd = Number(m[1]);
+            const mm = Number(m[2]);
+            const yyyy = Number(m[3]);
+            const dt = new Date(yyyy, mm - 1, dd);
+            return isNaN(dt.getTime()) ? Infinity : dt.getTime();
+        }
+        const parsed = Date.parse(dateStr);
+        return isNaN(parsed) ? Infinity : parsed;
+    }
+
     // --- All your useEffect and handler functions remain exactly the same ---
     useEffect(() => {
         const storedTeacher = localStorage.getItem("user");
@@ -903,7 +920,7 @@ export default function Teacher() {
                                                                                             (test) =>
                                                                                                 test.name.toLowerCase().includes(testSearchQuery.toLowerCase())
                                                                                         )
-                                                                                        .sort((a, b) => new Date(a.date) - new Date(b.date)) // 🔥 ascending order
+                                                                                        .sort((a, b) => parseDateToTime(a.date) - parseDateToTime(b.date)) // ascending by parsed date
                                                                                         .map((test, idx) => (
                                                                                             <li key={idx} className="list-group-item d-flex justify-content-between align-items-center">
                                                                                                 <span>

@@ -98,6 +98,22 @@ export default function BatchControls() {
   const today = new Date();
   const [activeMonthIndex, setActiveMonthIndex] = useState(getAcademicMonthIndex(today.getMonth()));
 
+  // Robust parser for dd-MM-yyyy and ISO-like date strings. Returns timestamp or Infinity.
+  function parseDateToTime(dateStr) {
+    if (!dateStr) return Infinity;
+    const ddmmyyyy = /^([0-3]?\d)-([0-1]?\d)-(\d{4})$/;
+    const m = String(dateStr).trim().match(ddmmyyyy);
+    if (m) {
+      const dd = Number(m[1]);
+      const mm = Number(m[2]);
+      const yyyy = Number(m[3]);
+      const dt = new Date(yyyy, mm - 1, dd);
+      return isNaN(dt.getTime()) ? Infinity : dt.getTime();
+    }
+    const parsed = Date.parse(dateStr);
+    return isNaN(parsed) ? Infinity : parsed;
+  }
+
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -1596,10 +1612,7 @@ export default function BatchControls() {
                 </thead>
                 <tbody>
                   {studentTests
-                    .sort((a, b) => {
-                      const parseDate = (d) => new Date(d.split("-").reverse().join("-"));
-                      return parseDate(b.date) - parseDate(a.date); // latest first
-                    })
+                    .sort((a, b) => parseDateToTime(a.date) - parseDateToTime(b.date))
                     .map((test) => (
                       <tr key={test._id}>
                         <td>{test.name}</td>
@@ -1754,12 +1767,7 @@ export default function BatchControls() {
                     { name: t.name, date: t.date, maxMarks: t.maxMarks }
                   ])
                 ).values()
-              ).sort((a, b) => {
-                const pa = new Date(a.date.split('-').reverse().join('-'));
-                const pb = new Date(b.date.split('-').reverse().join('-'));
-                return pb - pa; // latest first
-              });
-
+              ).sort((a, b) => parseDateToTime(a.date) - parseDateToTime(b.date))
               return (
                 <div>
                   {!selectedTest ? (

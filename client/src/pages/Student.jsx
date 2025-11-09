@@ -61,6 +61,26 @@ export default function Student() {
         return `${day}-${month}-${year}`;
     }
 
+    // Parse date strings used in tests. Accepts dd-MM-yyyy or ISO-like strings.
+    // Returns milliseconds since epoch, or Infinity when invalid/missing so they sort last.
+    function parseDateToTime(dateStr) {
+        if (!dateStr) return Infinity;
+        // dd-mm-yyyy (e.g. 05-11-2025)
+        const ddmmyyyy = /^([0-3]?\d)-([0-1]?\d)-(\d{4})$/;
+        const m = String(dateStr).trim().match(ddmmyyyy);
+        if (m) {
+            const dd = Number(m[1]);
+            const mm = Number(m[2]);
+            const yyyy = Number(m[3]);
+            const dt = new Date(yyyy, mm - 1, dd);
+            return isNaN(dt.getTime()) ? Infinity : dt.getTime();
+        }
+
+        // Try native parse for ISO or other formats
+        const parsed = Date.parse(dateStr);
+        return isNaN(parsed) ? Infinity : parsed;
+    }
+
     useEffect(() => {
         const storedStudent = localStorage.getItem("user");
         const token = localStorage.getItem("authToken");
@@ -568,9 +588,9 @@ export default function Student() {
                     </thead>
                     <tbody>
                         {testRecords
-                            .filter(test => test.batchId === showModalTwo)
-                            .sort((a, b) => new Date(a.date) - new Date(b.date))
-                            .map((test, index) => (
+                                    .filter(test => test.batchId === showModalTwo)
+                                    .sort((a, b) => parseDateToTime(a.date) - parseDateToTime(b.date))
+                                    .map((test, index) => (
                                 <tr key={index}>
                                     <td>{test.name}</td>
                                     <td>{test.date}</td>
