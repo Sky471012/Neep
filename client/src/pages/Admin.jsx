@@ -384,6 +384,13 @@ export default function Admin() {
               </div>
               <h3>Birthday Alerts</h3>
             </Link>
+
+            <Link to='/all-enquiries' className="dashboard-card all-enquiries">
+              <div className="card-icon">
+                <i className="fas fa-question-circle"></i>
+              </div>
+              <h3>All Enquiries</h3>
+            </Link>
           </div>
         </div>
       </div>

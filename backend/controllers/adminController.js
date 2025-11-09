@@ -11,6 +11,7 @@ const TeacherModel = require("../models/Admins_teachers");
 const BatchTeacherModel = require("../models/Batch_teachers");
 const BirthdayWishModel = require("../models/Birthday_wish");
 const TeacherBirthdayWishModel = require("../models/Birthday_Teacher_wish");
+const EnquiryModel = require("../models/Enquiry");
 const XLSX = require("xlsx");
 const { DateTime } = require("luxon");
 const mongoose = require("mongoose");
@@ -20,7 +21,10 @@ function getModels(req) {
     Batch: req.db.model("Batch", BatchModel.schema),
     BatchStudent: req.db.model("batch_student", BatchStudentModel.schema),
     Attendance: req.db.model("Attendance", AttendanceModel.schema),
-    AttendanceTeacher: req.db.model("Attendance_Teacher", AttendanceTeacherModel.schema),
+    AttendanceTeacher: req.db.model(
+      "Attendance_Teacher",
+      AttendanceTeacherModel.schema
+    ),
     Timetable: req.db.model("Timetable", TimetableModel.schema),
     Test: req.db.model("Test", TestModel.schema),
     Fee: req.db.model("Fee", FeeModel.schema),
@@ -29,7 +33,11 @@ function getModels(req) {
     Teacher: req.db.model("AdminTeacher", TeacherModel.schema),
     BatchTeacher: req.db.model("batch_teacher", BatchTeacherModel.schema),
     BirthdayWish: req.db.model("BirthdayWish", BirthdayWishModel.schema),
-    TeacherBirthdayWish: req.db.model("TeacherBirthdayWish", TeacherBirthdayWishModel.schema),
+    TeacherBirthdayWish: req.db.model(
+      "TeacherBirthdayWish",
+      TeacherBirthdayWishModel.schema
+    ),
+    Enquiry: req.db.model("Enquiry", EnquiryModel.schema),
   };
 }
 
@@ -189,7 +197,6 @@ exports.markAttendance = async (req, res) => {
 };
 
 exports.addTest = async (req, res) => {
-  
   const { Test } = getModels(req);
   const {
     studentId,
@@ -337,7 +344,8 @@ exports.removeStudent = async (req, res) => {
 };
 
 exports.deleteBatch = async (req, res) => {
-  const { Batch, BatchTeacher, BatchStudent, Attendance, Timetable, Test } = getModels(req);
+  const { Batch, BatchTeacher, BatchStudent, Attendance, Timetable, Test } =
+    getModels(req);
   try {
     const batchId = req.params.batchId;
 
@@ -850,7 +858,8 @@ exports.createStudent = async (req, res) => {
 };
 
 exports.deleteStudent = async (req, res) => {
-  const { Student, BatchStudent, Attendance, Fee, Installment } = getModels(req);
+  const { Student, BatchStudent, Attendance, Fee, Installment } =
+    getModels(req);
   try {
     const studentId = req.params.studentId;
 
@@ -1488,7 +1497,7 @@ exports.getTeacherBatches = async (req, res) => {
 
 exports.getTeacherAttendance = async (req, res) => {
   const { AttendanceTeacher } = getModels(req);
- try {
+  try {
     const { batchId } = req.params;
 
     const attendance = await AttendanceTeacher.find({ batchId });
@@ -1604,7 +1613,16 @@ exports.editTeacher = async (req, res) => {
   const { Teacher } = getModels(req);
   try {
     const { teacherId } = req.params;
-    const { name, email, phone, dob, address, qualification, aadhar, experience } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      dob,
+      address,
+      qualification,
+      aadhar,
+      experience,
+    } = req.body;
 
     // Validate input
     if (!name || !email || !phone) {
@@ -1897,8 +1915,9 @@ exports.uploadExcelSheet = async (req, res) => {
 
 //  Get today's birthdays
 exports.getTodaysBirthdays = async (req, res) => {
-  const { Student, BirthdayWish, Teacher, TeacherBirthdayWish } = getModels(req);
-  
+  const { Student, BirthdayWish, Teacher, TeacherBirthdayWish } =
+    getModels(req);
+
   try {
     const nowIST = DateTime.now().setZone("Asia/Kolkata");
     const todayDay = nowIST.day;
@@ -2036,5 +2055,214 @@ exports.markTeacherBirthdayWished = async (req, res) => {
   } catch (err) {
     console.error("Error marking wish:", err);
     res.status(500).json({ message: "Failed to mark wish." });
+  }
+};
+
+// Enquiries
+exports.getAllEnquiries = async (req, res) => {
+  const { Enquiry } = getModels(req);
+  try {
+    // Determine current academic/session window: April 1 -> next year's March 31
+    const today = new Date();
+    const month = today.getMonth() + 1; // 1-12
+    const year = today.getFullYear();
+
+    let sessionStart, sessionEnd;
+    if (month >= 4) {
+      // Current session: Apr 1 this year -> Mar 31 next year
+      sessionStart = new Date(year, 3, 1, 0, 0, 0, 0); // April is monthIndex 3
+      sessionEnd = new Date(year + 1, 2, 31, 23, 59, 59, 999); // March 31 next year
+    } else {
+      // Current session runs from Apr 1 last year -> Mar 31 this year
+      sessionStart = new Date(year - 1, 3, 1, 0, 0, 0, 0);
+      sessionEnd = new Date(year, 2, 31, 23, 59, 59, 999);
+    }
+
+    // Helper: parse DD-MM-YYYY or ISO-like date strings to Date object
+    const parseToDate = (str) => {
+      if (!str) return null;
+      if (typeof str !== 'string') return null;
+      // If already ISO or contains 'T' etc. try Date constructor
+      if (str.includes('T') || str.includes('/')) {
+        const d = new Date(str);
+        return isNaN(d) ? null : d;
+      }
+      // Expecting DD-MM-YYYY
+      const parts = str.split('-');
+      if (parts.length === 3) {
+        const [dd, mm, yyyy] = parts.map((p) => parseInt(p, 10));
+        if (Number.isFinite(dd) && Number.isFinite(mm) && Number.isFinite(yyyy)) {
+          const d = new Date(yyyy, mm - 1, dd);
+          return isNaN(d) ? null : d;
+        }
+      }
+      // Fallback: attempt Date constructor
+      const d = new Date(str);
+      return isNaN(d) ? null : d;
+    };
+
+    const enquiries = await Enquiry.find();
+
+    // Filter enquiries whose enquiryDate falls within the session window
+    const enquiriesInSession = enquiries.filter((enq) => {
+      const d = parseToDate(enq.enquiryDate);
+      if (!d) return false;
+      return d >= sessionStart && d <= sessionEnd;
+    });
+
+    res.json(enquiriesInSession);
+  } catch (err) {
+    console.error("Error fetching enquiries:", err);
+    res.status(500).json({ message: "Failed to fetch enquiries." });
+  }
+};
+
+exports.createEnquiry = async (req, res) => {
+  const { Enquiry } = getModels(req);
+  try {
+    const studentName = req.body.studentName?.trim();
+    const phone = req.body.phone?.trim();
+    const enquiryDate = req.body.enquiryDate?.trim();
+    const followupDate = req.body.followupDate?.trim();
+    const classSubject = req.body.classSubject?.trim();
+    const followupType = req.body.followupType?.trim();
+    const notes = req.body.notes?.trim() || "";
+
+    // Basic required validation
+    if (
+      !studentName ||
+      !phone ||
+      !enquiryDate ||
+      !followupDate ||
+      !classSubject ||
+      !followupType
+    ) {
+      return res.status(400).json({ message: "Missing required fields." });
+    }
+
+    // Validate date format DD-MM-YYYY (consistent with other models)
+    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
+    if (!dateRegex.test(enquiryDate) || !dateRegex.test(followupDate)) {
+      return res
+        .status(400)
+        .json({ message: "Dates must be in DD-MM-YYYY format." });
+    }
+
+    // Validate followupType
+    const allowedFollowup = ["demo", "call"];
+    if (!allowedFollowup.includes(followupType)) {
+      return res
+        .status(400)
+        .json({ message: `followupType must be one of: ${allowedFollowup.join(", ")}` });
+    }
+
+    const newEnquiry = await Enquiry.create({
+      studentName,
+      phone,
+      enquiryDate,
+      followupDate,
+      classSubject,
+      followupType,
+      notes,
+    });
+
+    res.status(201).json({ message: "Enquiry created", enquiry: newEnquiry });
+  } catch (err) {
+    console.error("Error creating enquiry:", err);
+    res.status(500).json({ message: "Failed to create enquiry." });
+  }
+};
+
+exports.deleteEnquiry = async (req, res) => {
+  const { Enquiry } = getModels(req);
+  try {
+    const { enquiryId } = req.params;
+    if (!enquiryId) {
+      return res.status(400).json({ message: "enquiryId is required" });
+    }
+
+    const deletedEnquiry = await Enquiry.findByIdAndDelete(enquiryId);
+    if (!deletedEnquiry) {
+      return res.status(404).json({ message: "Enquiry not found" });
+    }
+
+    res.json({ message: "Enquiry deleted successfully", enquiry: deletedEnquiry });
+  } catch (err) {
+    console.error("Error deleting enquiry:", err);
+    res.status(500).json({ message: "Failed to delete enquiry." });
+  }
+};
+
+exports.getEnquiry = async (req, res) => {
+  const { Enquiry } = getModels(req);
+  try {
+    const { enquiryId } = req.params;
+    if (!enquiryId) {
+      return res.status(400).json({ message: "enquiryId is required" });
+    }
+
+    const enquiry = await Enquiry.findById(enquiryId);
+    if (!enquiry) {
+      return res.status(404).json({ message: "Enquiry not found" });
+    }
+
+    res.json(enquiry);
+  } catch (err) {
+    console.error("Error fetching enquiry:", err);
+    res.status(500).json({ message: "Failed to fetch enquiry." });
+  }
+};
+
+exports.updateEnquiryStatus = async (req, res) => {
+  const { Enquiry } = getModels(req);
+  try {
+    const { enquiryId } = req.params;
+    const { status } = req.body;
+
+    if (!enquiryId) {
+      return res.status(400).json({ message: "enquiryId is required" });
+    }
+
+    const updatedEnquiry = await Enquiry.findByIdAndUpdate(
+      enquiryId,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedEnquiry) {
+      return res.status(404).json({ message: "Enquiry not found" });
+    }
+
+    res.json({ message: "Enquiry status updated", enquiry: updatedEnquiry });
+  } catch (err) {
+    console.error("Error updating enquiry status:", err);
+    res.status(500).json({ message: "Failed to update enquiry status." });
+  }
+};
+
+exports.editEnquiry = async (req, res) => {
+  const { Enquiry } = getModels(req);
+  try {
+    const { enquiryId } = req.params;
+    const { studentName, phone, enquiryDate, followupDate, classSubject, followupType, notes } = req.body;
+
+    if (!enquiryId) {
+      return res.status(400).json({ message: "enquiryId is required" });
+    }
+
+    const updatedEnquiry = await Enquiry.findByIdAndUpdate(
+      enquiryId,
+      { studentName, phone, enquiryDate, followupDate, classSubject, followupType, notes },
+      { new: true }
+    );
+
+    if (!updatedEnquiry) {
+      return res.status(404).json({ message: "Enquiry not found" });
+    }
+
+    res.json({ message: "Enquiry updated successfully", enquiry: updatedEnquiry });
+  } catch (err) {
+    console.error("Error updating enquiry:", err);
+    res.status(500).json({ message: "Failed to update enquiry." });
   }
 };

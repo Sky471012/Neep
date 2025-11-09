@@ -81,4 +81,12 @@ router.post("/birthday/wish", adminController.markBirthdayWished);
 router.get("/birthdayTeacher/today", adminController.getTodaysTeacherBirthdays);
 router.post("/birthdayTeacher/wish", adminController.markTeacherBirthdayWished);
 
+// Enquiries
+router.get('/allEnquiries', adminController.getAllEnquiries);
+router.post('/enquiryCreate', adminController.createEnquiry);
+router.delete('/enquiryDelete/:enquiryId', adminController.deleteEnquiry);
+router.get('/getEnquiry/:enquiryId', adminController.getEnquiry);
+router.post('/enquiryStatus/:enquiryId', adminController.updateEnquiryStatus);
+router.put('/editEnquiry/:enquiryId', adminController.editEnquiry);
+
 module.exports = router;

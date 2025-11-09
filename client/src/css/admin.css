@@ -281,6 +281,13 @@ body {
   background: #fef2f2;
 }
 
+.dashboard-card.all-enquiries {
+  border-color: #c103a5;
+}
+.dashboard-card.all-enquiries:hover {
+  background: #feebfb;
+}
+
 /* Data Section Styles */
 .data-section {
   padding: 2rem;

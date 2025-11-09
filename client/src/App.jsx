@@ -21,6 +21,8 @@ import BatchControls from './pages/BatchControls';
 import TeacherControls from './pages/TeacherControls';
 import StudentControls from './pages/StudentControls';
 import TodaysBirthdays from './pages/TodaysBirthdays';
+import AllEnquiries from './pages/AllEnquiries';
+import Enquiry from './pages/Enquiry';
 
 function App() {
 
@@ -91,10 +93,12 @@ function App() {
             <Route exact path='/all-teachers' element={<AllTeachers />} />
             <Route exact path='/all-archived-batches' element={<AllArchivedBatches />} />
             <Route exact path='/todaysBirthdays' element={<TodaysBirthdays />} />
+            <Route exact path='/all-enquiries' element={<AllEnquiries />} />
             <Route exact path='/fee-tracking' element={<FeeTracking />} />
             <Route path="/batch/:batchId" element={<BatchControls />} />
             <Route path="/teacher/:teacherId" element={<TeacherControls />} />
             <Route path="/student/:studentId" element={<StudentControls />} />
+            <Route path="/enquiry/:enquiryId" element={<Enquiry />} />
           </Routes>
           <ToastContainer
             position="bottom-center"
