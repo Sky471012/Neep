@@ -22,6 +22,24 @@
 21. teacher birthday **(done)**
 
 
+1. Test edit option **(done)**
+2. Table color in timetable **(done)**
+3. DateFilter in fee-tracking **(done)**
+4. Today's class(schedule):- Completed(red), Running(dot with ongoing and green) and Upcoming(green) **(dropped)**
+5. Students:- Guardian name and School(govt or private) **(done)**
+6. Teachers:- Address, birthday, Aadhar no., Qualification, Experience **(done)**
+7. Student Birthday **(done)**
+8. Teacher birthday **(done)**
+9. Teacher Attendance **(done)**
+10. Search option in fee and online & cash filter in paid fee tracking **(done)**
+11. Sort test list according to date **(done)**
+12. Assign batch to teacher from teacher's page in one go **(done)**
+13. Delete test and search option in test **(done)**
+14. Need help by Whatsapp on student login **(done)**
+15. Alabatic batch in student and teacher batches and in attendance and show students **(done)**
+16. Enquiry system (converted and lost) **(done)**
+17. Study material and chat **(future)**
+
 
 Need help by Whatsapp on student login
 Search in fee 

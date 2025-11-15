@@ -11,7 +11,6 @@ export default function Enquiry() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [updating, setUpdating] = useState(false);
-    const [copiedPhone, setCopiedPhone] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [isEditingInfo, setIsEditingInfo] = useState(false);
     // notes are view-only now (no inline edit)
@@ -104,28 +103,7 @@ export default function Enquiry() {
         }
     };
 
-    const copyPhoneToClipboard = async () => {
-        if (!enquiry || !enquiry.phone) return;
-        try {
-            await navigator.clipboard.writeText(enquiry.phone);
-            setCopiedPhone(true);
-            setTimeout(() => setCopiedPhone(false), 2000);
-        } catch (err) {
-            // Fallback for older browsers
-            try {
-                const ta = document.createElement('textarea');
-                ta.value = enquiry.phone;
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-                setCopiedPhone(true);
-                setTimeout(() => setCopiedPhone(false), 2000);
-            } catch (err2) {
-                console.error('Copy failed', err2);
-            }
-        }
-    };
+    // NOTE: copy logic is called inline from the button click handler below.
 
     // prepare edit forms when entering edit mode
     useEffect(() => {
@@ -370,18 +348,25 @@ export default function Enquiry() {
                                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
                                         <i className="fas fa-phone" style={{ width: '20px', marginRight: '0.75rem' }}></i>
                                         <span style={{ fontSize: '0.95rem' }}>{enquiry.phone}</span>
-                                        <button
-                                            type="button"
-                                            aria-label="Copy phone"
-                                            onClick={copyPhoneToClipboard}
-                                            style={{ padding: '0', background: "none", border: "none", marginLeft: '0.5rem', color: 'white', cursor: 'pointer' }}
-                                        >
-                                            <i className="fas fa-copy"></i>
-                                        </button>
-                                        {copiedPhone && (
-                                            <span style={{ marginLeft: '0.5rem', fontSize: '0.85rem', color: 'white', opacity: 0.95 }}>
-                                                Copied!
-                                            </span>
+                                        {enquiry.phone ? (
+                                            <a
+                                                href={`tel:${enquiry.phone}`}
+                                                aria-label="make call"
+                                                title="Make Call"
+                                                style={{ padding: '0', background: "none", border: "none", marginLeft: '0.5rem', color: 'white', cursor: 'pointer', textDecoration: 'none' }}
+                                            >
+                                                <i className="bi bi-telephone-outbound"></i>
+                                            </a>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                aria-label="make call"
+                                                title="Make Call"
+                                                style={{ padding: '0', background: "none", border: "none", marginLeft: '0.5rem', color: 'white', cursor: 'not-allowed' }}
+                                                disabled
+                                            >
+                                                <i className="bi bi-telephone-outbound"></i>
+                                            </button>
                                         )}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
