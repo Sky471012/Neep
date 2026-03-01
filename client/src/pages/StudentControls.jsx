@@ -43,6 +43,7 @@ export default function StudentControls() {
     const [editedMethod, setEditedMethod] = useState("Cash");
     const [batchSearch, setBatchSearch] = useState("");
     const [isEditing, setIsEditing] = useState(false);
+    const [copied, setCopied] = useState(false);
     const hasFee = Boolean(fee && fee._id);
     const [editForm, setEditForm] = useState({
         name: '',
@@ -1133,7 +1134,29 @@ export default function StudentControls() {
                                     <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
-                                    <div className="detail-label">Phone: {student.phone}</div>
+                                    <div className="detail-label" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                        <span style={{ whiteSpace: "nowrap" }}>Phone: {student.phone}</span>
+                                        {student.phone && (
+                                            <span style={{ display: "inline-flex", gap: "0.4rem", flexShrink: 0 }}>
+                                                <a
+                                                    title="Call"
+                                                    href={`tel:+91${student.phone}`}
+                                                    className="phone-action-btn"
+                                                >
+                                                    <i className="bi bi-telephone-outbound"></i>
+                                                </a>
+                                                <a
+                                                    title="WhatsApp"
+                                                    href={`https://wa.me/91${student.phone}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="phone-action-btn phone-action-btn-wa"
+                                                >
+                                                    <i className="bi bi-whatsapp"></i>
+                                                </a>
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="detail-item p-1">
