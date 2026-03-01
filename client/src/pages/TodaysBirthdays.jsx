@@ -142,7 +142,7 @@ export default function TodaysBirthdays() {
         <div className="data-section">
             <div className="section-header mx-2">
                 <div className="d-flex">
-                    <h2 className="batches-title">Birthday Alerts ({totalBirthdays + totalTeachersBirthdays})</h2>
+                    <h2 className="batches-title">Birthday Alerts</h2>
                 </div>
             </div>
 
@@ -151,13 +151,13 @@ export default function TodaysBirthdays() {
                     className={activeTab === "students" ? "students-btn active" : "students-btn"}
                     onClick={() => { setActiveTab("students"); setSubTab("today"); }}
                 >
-                    Students ({totalBirthdays})
+                    Students ({totalBirthdays + upcomingStudents.length})
                 </button>
                 <button
                     className={activeTab === "teachers" ? "teachers-btn active" : "teachers-btn"}
                     onClick={() => { setActiveTab("teachers"); setSubTab("today"); }}
                 >
-                    Teachers ({totalTeachersBirthdays})
+                    Teachers ({totalTeachersBirthdays + upcomingTeachers.length})
                 </button>
             </div>
 
@@ -167,13 +167,13 @@ export default function TodaysBirthdays() {
                     className={subTab === "today" ? "sub-tab sub-tab-today active" : "sub-tab sub-tab-today"}
                     onClick={() => setSubTab("today")}
                 >
-                    Today
+                    Today ({activeTab === "students" ? birthdays.length : teachersBirthdays.length})
                 </button>
                 <button
                     className={subTab === "upcoming" ? "sub-tab sub-tab-upcoming active" : "sub-tab sub-tab-upcoming"}
                     onClick={() => setSubTab("upcoming")}
                 >
-                    Upcoming
+                    Upcoming ({activeTab === "students" ? upcomingStudents.length : upcomingTeachers.length})
                 </button>
             </div>
 
