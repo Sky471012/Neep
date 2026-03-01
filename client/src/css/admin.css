@@ -713,6 +713,7 @@ select {
   padding: 10px;
 }
 
+/* Primary tab buttons — base */
 .students-btn {
   background: #bbf7d0;
   color: #166534;
@@ -739,6 +740,28 @@ select {
   opacity: 1;
 }
 
+/* When Students tab is active */
+.tabs-student-active .students-btn {
+  border-top: 2px solid #166534;
+  border-left: 2px solid #166534;
+  border-right: 2px solid #166534;
+}
+
+.tabs-student-active .teachers-btn {
+  border-bottom: 2px solid #166534;
+}
+
+/* When Teachers tab is active */
+.tabs-teacher-active .teachers-btn {
+  border-top: 2px solid #1e40af;
+  border-left: 2px solid #1e40af;
+  border-right: 2px solid #1e40af;
+}
+
+.tabs-teacher-active .students-btn {
+  border-bottom: 2px solid #1e40af;
+}
+
 /* Secondary sub-tabs (Today / Upcoming) */
 .birthday-sub-tabs {
   display: flex;
@@ -753,20 +776,46 @@ select {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: #e9ecef;
-  color: #6c757d;
-  border-bottom: 2px solid transparent;
-}
-
-.birthday-sub-tabs .sub-tab:hover {
-  background: #dee2e6;
-  color: #495057;
+  opacity: 0.5;
 }
 
 .birthday-sub-tabs .sub-tab.active {
-  background: #fff;
-  color: #212529;
-  border-bottom: 2px solid #166534;
+  opacity: 1;
+}
+
+.sub-tab-today {
+  background: #ffd5d5!important;
+  color: #b91c1c!important;
+}
+
+.sub-tab-upcoming {
+  background: #d4fcff!important;
+  color: #155e75!important;
+}
+
+/* Student variant sub-tabs */
+.sub-tabs-student {
+  border-left: 2px solid #166534!important;
+  border-right: 2px solid #166534!important;
+}
+
+/* Teacher variant sub-tabs */
+.sub-tabs-teacher {
+  border-left: 2px solid #1e40af!important;
+  border-right: 2px solid #1e40af!important;
+}
+
+/* Content container borders */
+.birthday-content-student {
+  border-left: 2px solid #166534!important;
+  border-right: 2px solid #166534!important;
+  border-bottom: 2px solid #166534!important;
+}
+
+.birthday-content-teacher {
+  border-left: 2px solid #1e40af!important;
+  border-right: 2px solid #1e40af!important;
+  border-bottom: 2px solid #1e40af!important;
 }
 
 /* Responsive Design */

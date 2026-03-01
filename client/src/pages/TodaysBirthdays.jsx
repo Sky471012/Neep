@@ -146,7 +146,7 @@ export default function TodaysBirthdays() {
                 </div>
             </div>
 
-            <div className="birthday-tabs">
+            <div className={`birthday-tabs ${activeTab === "students" ? "tabs-student-active" : "tabs-teacher-active"}`}>
                 <button
                     className={activeTab === "students" ? "students-btn active" : "students-btn"}
                     onClick={() => { setActiveTab("students"); setSubTab("today"); }}
@@ -162,15 +162,15 @@ export default function TodaysBirthdays() {
             </div>
 
             {/* Secondary Tabs */}
-            <div className="birthday-sub-tabs">
+            <div className={`birthday-sub-tabs ${activeTab === "students" ? "sub-tabs-student" : "sub-tabs-teacher"}`}>
                 <button
-                    className={subTab === "today" ? "sub-tab active" : "sub-tab"}
+                    className={subTab === "today" ? "sub-tab sub-tab-today active" : "sub-tab sub-tab-today"}
                     onClick={() => setSubTab("today")}
                 >
                     Today
                 </button>
                 <button
-                    className={subTab === "upcoming" ? "sub-tab active" : "sub-tab"}
+                    className={subTab === "upcoming" ? "sub-tab sub-tab-upcoming active" : "sub-tab sub-tab-upcoming"}
                     onClick={() => setSubTab("upcoming")}
                 >
                     Upcoming
@@ -179,7 +179,7 @@ export default function TodaysBirthdays() {
 
             {/* ===== STUDENTS TAB ===== */}
             {activeTab === "students" && subTab === "today" && (
-                <div className='data-grid-container pt-3' style={{borderTopLeftRadius:"0", borderTopRightRadius:"0", overflowY:"auto"}}>
+                <div className='data-grid-container pt-3 birthday-content-student' style={{borderTopLeftRadius:"0", borderTopRightRadius:"0", overflowY:"auto"}}>
                     <div className="data-grid">
                         {birthdays.length > 0 ? (
                             birthdays
@@ -201,7 +201,7 @@ export default function TodaysBirthdays() {
             )}
 
             {activeTab === "students" && subTab === "upcoming" && (
-                <div className='data-grid-container pt-3' style={{borderTopLeftRadius:"0", borderTopRightRadius:"0", overflowY:"auto"}}>
+                <div className='data-grid-container pt-3 birthday-content-student' style={{borderTopLeftRadius:"0", borderTopRightRadius:"0", overflowY:"auto"}}>
                     <div className="data-grid">
                         {upcomingStudents.length > 0 ? (
                             upcomingStudents.map((student, index) => (
@@ -220,7 +220,7 @@ export default function TodaysBirthdays() {
 
             {/* ===== TEACHERS TAB ===== */}
             {activeTab === "teachers" && subTab === "today" && (
-                <div className='data-grid-container pt-3' style={{borderTopLeftRadius:"0", borderTopRightRadius:"0"}}>
+                <div className='data-grid-container pt-3 birthday-content-teacher' style={{borderTopLeftRadius:"0", borderTopRightRadius:"0", overflowY:"auto"}}>
                     <div className="data-grid">
                         {teachersBirthdays.length > 0 ? (
                             teachersBirthdays
@@ -242,7 +242,7 @@ export default function TodaysBirthdays() {
             )}
 
             {activeTab === "teachers" && subTab === "upcoming" && (
-                <div className='data-grid-container pt-3' style={{borderTopLeftRadius:"0", borderTopRightRadius:"0"}}>
+                <div className='data-grid-container pt-3 birthday-content-teacher' style={{borderTopLeftRadius:"0", borderTopRightRadius:"0", overflowY:"auto"}}>
                     <div className="data-grid">
                         {upcomingTeachers.length > 0 ? (
                             upcomingTeachers.map((teacher, index) => (
