@@ -33,6 +33,7 @@ export default function TeacherControls() {
         email: '',
         phone: ''
     });
+    const [loading, setLoading] = useState(true);
 
     const academicYearStart = new Date().getMonth() < 3 ? new Date().getFullYear() - 1 : new Date().getFullYear();
 
@@ -57,37 +58,37 @@ export default function TeacherControls() {
         if (storedTeacher && token) {
             setTeacher(JSON.parse(storedTeacher));
 
-            // Fetch teacher details
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getTeacherDetails/${teacherId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => setTeacher(data || {}))
-                .catch(err => console.error("Teacher fetch error:", err));
+            Promise.all([
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getTeacherDetails/${teacherId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => setTeacher(data || {}))
+                    .catch(err => console.error("Teacher fetch error:", err)),
 
-            // Fetch teacher batches
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherBatches/${teacherId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => setBatches(data.batches || []))
-                .catch(err => console.error("Batches fetch error:", err));
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherBatches/${teacherId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => setBatches(data.batches || []))
+                    .catch(err => console.error("Batches fetch error:", err)),
 
-            // Fetch teacher attendance
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherAttendance/${teacherId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => setAttendance(data.attendance || []))
-                .catch(err => console.error("Attendance fetch error:", err));
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherAttendance/${teacherId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => setAttendance(data.attendance || []))
+                    .catch(err => console.error("Attendance fetch error:", err)),
 
-            // Fetch all batches
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => setAllBatches(data || {}))
-                .catch(err => console.error("All batches fetch error:", err));
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => setAllBatches(data || {}))
+                    .catch(err => console.error("All batches fetch error:", err)),
+            ]).finally(() => setLoading(false));
+        } else {
+            setLoading(false);
         }
     }, [teacherId]);
 
@@ -390,6 +391,8 @@ export default function TeacherControls() {
     }
 };
 
+
+    if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading teacher details...</p></div></div>);
 
     return (<>
 

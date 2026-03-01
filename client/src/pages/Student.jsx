@@ -25,6 +25,7 @@ export default function Student() {
     const [showModalThree, setShowModalThree] = useState(null);
     const [showModalFour, setShowModalFour] = useState(null);
     const [batchSearch, setBatchSearch] = useState("");
+    const [loading, setLoading] = useState(true);
 
 
     const jsMonth = new Date().getMonth(); // 0 = Jan ... 11 = Dec
@@ -89,53 +90,50 @@ export default function Student() {
         if (storedStudent && token) {
             setStudent(JSON.parse(storedStudent));
 
-            //fetching batches
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/batches`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-                .then(res => res.json())
-                .then(setBatchesRecords)
-                .catch(err => console.error("Batches fetch error:", err));
-
-
-            //fetching attendance
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/attendance`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-                .then(res => res.json())
-                .then(data => {
-                    setAttendanceRecords(data);
-                    const newMap = {};
-                    data.forEach((record) => {
-                        // Fix: Ensure proper date formatting
-                        const date = new Date(record.date);
-                        const formattedDate = date.toISOString().split('T')[0];
-                        const key = `${record.batchId}_${formattedDate}`;
-                        newMap[key] = record.status;
-                    });
-                    setAttendanceMap(newMap);
+            Promise.all([
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/batches`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 })
-                .catch(err => console.error("Attendance fetch error:", err));
+                    .then(res => res.json())
+                    .then(setBatchesRecords)
+                    .catch(err => console.error("Batches fetch error:", err)),
 
-            //fetching test
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/test`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-                .then(res => res.json())
-                .then(setTestRecords)
-                .catch(err => console.error("Test fetch error:", err));
-
-
-            //fetching fee
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/fee-status`, {
-                headers: { 'Authorization': `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => {
-                    setFeeRecord(data.fee || null);
-                    setInstallments(Array.isArray(data.installments) ? data.installments : []);
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/attendance`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 })
-                .catch(err => console.error("Fee status fetch error:", err));
+                    .then(res => res.json())
+                    .then(data => {
+                        setAttendanceRecords(data);
+                        const newMap = {};
+                        data.forEach((record) => {
+                            const date = new Date(record.date);
+                            const formattedDate = date.toISOString().split('T')[0];
+                            const key = `${record.batchId}_${formattedDate}`;
+                            newMap[key] = record.status;
+                        });
+                        setAttendanceMap(newMap);
+                    })
+                    .catch(err => console.error("Attendance fetch error:", err)),
+
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/test`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                    .then(res => res.json())
+                    .then(setTestRecords)
+                    .catch(err => console.error("Test fetch error:", err)),
+
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/fee-status`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        setFeeRecord(data.fee || null);
+                        setInstallments(Array.isArray(data.installments) ? data.installments : []);
+                    })
+                    .catch(err => console.error("Fee status fetch error:", err)),
+            ]).finally(() => setLoading(false));
+        } else {
+            setLoading(false);
         }
     }, [localStorage.getItem("branch")]);
 
@@ -318,6 +316,8 @@ export default function Student() {
 
     const totalFee = feeRecord?.totalAmount || 0;
     const balance = totalFee - totalPaid;
+
+    if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading student data...</p></div></div>);
 
     return (<>
 

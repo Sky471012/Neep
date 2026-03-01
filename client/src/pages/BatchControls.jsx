@@ -69,6 +69,7 @@ export default function BatchControls() {
     class: '',
   });
   const [testSearchQuery, setTestSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const classOptions = ["Kids", "English Spoken", "9", "10", "11", "12", "Entrance Exams", "Graduation"];
 
@@ -119,53 +120,51 @@ export default function BatchControls() {
     const token = localStorage.getItem("authToken");
 
     if (token) {
-      // Get Batch Details
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getBatchDetails/${batchId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.json())
-        .then(data => setBatch(data || {}))
-        .catch(err => console.error("Batch fetch error:", err));
+      Promise.all([
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getBatchDetails/${batchId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then(res => res.json())
+          .then(data => setBatch(data || {}))
+          .catch(err => console.error("Batch fetch error:", err)),
 
-      // Get Batch Students
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchStudents/${batchId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.json())
-        .then(data => setStudents(data.students || []))
-        .catch(err => console.error("Batch students fetch error:", err));
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchStudents/${batchId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then(res => res.json())
+          .then(data => setStudents(data.students || []))
+          .catch(err => console.error("Batch students fetch error:", err)),
 
-      // Get Assigned Teacher for Batch
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.json())
-        .then(data => setTeacher(data.teacher?.[0] || null))
-        .catch(err => console.error("Assigned teacher fetch error:", err));
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then(res => res.json())
+          .then(data => setTeacher(data.teacher?.[0] || null))
+          .catch(err => console.error("Assigned teacher fetch error:", err)),
 
-      // Get All Teachers List
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.json())
-        .then(data => setTeachersList(data || []))
-        .catch(err => console.error("Teachers list fetch error:", err));
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then(res => res.json())
+          .then(data => setTeachersList(data || []))
+          .catch(err => console.error("Teachers list fetch error:", err)),
 
-      // Get Timetable
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchTimetable/${batchId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.json())
-        .then(data => setTimetable(data.timetable || []))
-        .catch(err => console.error("Timetable fetch error:", err));
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchTimetable/${batchId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then(res => res.json())
+          .then(data => setTimetable(data.timetable || []))
+          .catch(err => console.error("Timetable fetch error:", err)),
 
-      // Get All Students
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.json())
-        .then(data => setAllStudents(data || {}))
-        .catch(err => console.error("All students fetch error:", err));
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then(res => res.json())
+          .then(data => setAllStudents(data || {}))
+          .catch(err => console.error("All students fetch error:", err)),
+      ]).finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, [batchId]);
 
@@ -789,6 +788,8 @@ export default function BatchControls() {
       alert(err.message || 'Failed to delete test');
     }
   };
+
+  if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading batch details...</p></div></div>);
 
   return (<>
     <Navbar />

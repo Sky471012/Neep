@@ -10,6 +10,7 @@ export default function AllStudents() {
     const [admin, setAdmin] = useState(null)
     const [studentsRecords, setStudentsRecords] = useState([])
     const [studentSearchQuery, setStudentSearchQuery] = useState("")
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 
@@ -22,6 +23,7 @@ export default function AllStudents() {
             } catch (err) {
                 console.error("Failed to parse admin JSON:", err)
                 localStorage.removeItem("admin")
+                setLoading(false);
                 return
             }
             const headers = { Authorization: `Bearer ${token}` }
@@ -33,9 +35,14 @@ export default function AllStudents() {
                 })
                 .then(setStudentsRecords)
                 .catch((err) => console.error("Students fetch error:", err))
+                .finally(() => setLoading(false))
+        } else {
+            setLoading(false);
         }
     }, [])
 
+
+    if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading students...</p></div></div>);
 
     return (<>
 

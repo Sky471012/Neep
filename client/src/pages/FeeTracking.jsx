@@ -35,6 +35,7 @@ export default function FeeTracking() {
   const [toDateUpcoming, setToDateUpcoming] = useState(null);
   const [fromDatePaid, setFromDatePaid] = useState(null);
   const [toDatePaid, setToDatePaid] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const getDaysOverdue = (dueDate) => {
     const due = new Date(dueDate);
@@ -94,32 +95,31 @@ export default function FeeTracking() {
     const token = localStorage.getItem("authToken")
     const headers = { Authorization: `Bearer ${token}` }
 
-    // Fetch unpaid installments
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/unpaid`, { headers })
-      .then((res) => res.json())
-      .then((data) => {
-        const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-        setUnpaidInstallments(sorted)
-      })
-      .catch((err) => console.error("Error loading unpaid installments:", err))
+    Promise.all([
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/unpaid`, { headers })
+        .then((res) => res.json())
+        .then((data) => {
+          const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+          setUnpaidInstallments(sorted)
+        })
+        .catch((err) => console.error("Error loading unpaid installments:", err)),
 
-    // Fetch upcoming installments
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/upcoming`, { headers })
-      .then((res) => res.json())
-      .then((data) => {
-        const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-        setUpcomingInstallments(sorted)
-      })
-      .catch((err) => console.error("Error loading upcoming installments:", err))
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/upcoming`, { headers })
+        .then((res) => res.json())
+        .then((data) => {
+          const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+          setUpcomingInstallments(sorted)
+        })
+        .catch((err) => console.error("Error loading upcoming installments:", err)),
 
-    // Fetch paid installments
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/paid`, { headers })
-      .then((res) => res.json())
-      .then((data) => {
-        const sorted = data.installments.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
-        setPaidInstallments(sorted)
-      })
-      .catch((err) => console.error("Error loading paid installments:", err))
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/paid`, { headers })
+        .then((res) => res.json())
+        .then((data) => {
+          const sorted = data.installments.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
+          setPaidInstallments(sorted)
+        })
+        .catch((err) => console.error("Error loading paid installments:", err)),
+    ]).finally(() => setLoading(false));
 
   }, []);
 
@@ -152,6 +152,8 @@ export default function FeeTracking() {
     return matchClass && matchMedium && matchDate;
   });
   const paidTotal = filteredPaid.reduce((sum, inst) => sum + (inst.amount || 0), 0);
+
+  if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading fee tracking...</p></div></div>);
 
   return (
     <>

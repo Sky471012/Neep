@@ -42,6 +42,7 @@ export default function Teacher() {
     const [editingMarks, setEditingMarks] = useState({});
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [testSearchQuery, setTestSearchQuery] = useState("");
+    const [loading, setLoading] = useState(true);
 
     const allMonths = [
         "April", "May", "June", "July", "August", "September",
@@ -86,46 +87,50 @@ export default function Teacher() {
                 setTeacher(JSON.parse(storedTeacher));
             } catch (err) {
                 console.error("Failed to parse teacher JSON:", err);
+                setLoading(false);
                 return;
             }
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/batches`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then((res) => {
-                    if (!res.ok) throw new Error("Failed to fetch batches");
-                    return res.json();
+            Promise.all([
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/batches`, {
+                    headers: { Authorization: `Bearer ${token}` },
                 })
-                .then(setBatchesRecords)
-                .catch((err) => console.error("Batches fetch error:", err));
+                    .then((res) => {
+                        if (!res.ok) throw new Error("Failed to fetch batches");
+                        return res.json();
+                    })
+                    .then(setBatchesRecords)
+                    .catch((err) => console.error("Batches fetch error:", err)),
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/today/timetable`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then((res) => {
-                    if (!res.ok) throw new Error("Failed to fetch schedule");
-                    return res.json();
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/today/timetable`, {
+                    headers: { Authorization: `Bearer ${token}` },
                 })
-                .then((data) => setTodaysClasses(Array.isArray(data.classes) ? data.classes : []))
-                .catch((err) => console.error("Schedule fetch error:", err));
+                    .then((res) => {
+                        if (!res.ok) throw new Error("Failed to fetch schedule");
+                        return res.json();
+                    })
+                    .then((data) => setTodaysClasses(Array.isArray(data.classes) ? data.classes : []))
+                    .catch((err) => console.error("Schedule fetch error:", err)),
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-                .then(res => res.json())
-                .then(data => {
-                    setAttendanceRecords(data);
-                    const newMap = {};
-                    data.forEach((record) => {
-                        // Fix: Ensure proper date formatting
-                        const date = new Date(record.date);
-                        const formattedDate = date.toISOString().split('T')[0];
-                        const key = `${record.batchId}_${formattedDate}`;
-                        newMap[key] = record.status;
-                    });
-                    setAttendanceMap1(newMap);
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 })
-                .catch(err => console.error("Attendance fetch error:", err));
+                    .then(res => res.json())
+                    .then(data => {
+                        setAttendanceRecords(data);
+                        const newMap = {};
+                        data.forEach((record) => {
+                            const date = new Date(record.date);
+                            const formattedDate = date.toISOString().split('T')[0];
+                            const key = `${record.batchId}_${formattedDate}`;
+                            newMap[key] = record.status;
+                        });
+                        setAttendanceMap1(newMap);
+                    })
+                    .catch(err => console.error("Attendance fetch error:", err)),
+            ]).finally(() => setLoading(false));
+        } else {
+            setLoading(false);
         }
     }, []);
 
@@ -428,7 +433,7 @@ export default function Teacher() {
     const openTestModal = (batchId) => setOpenModalFour((prev) => ({ ...prev, [batchId]: true }));
     const closeTestModal = (batchId) => setOpenModalFour((prev) => ({ ...prev, [batchId]: false }));
 
-    if (!teacher) return <p>Loading teacher data...</p>;
+    if (loading || !teacher) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading teacher data...</p></div></div>);
 
     return (
         <>

@@ -15,6 +15,7 @@ export default function AllEnquiries() {
     const [openModalOne, setOpenModalOne] = useState(false);
     const [sortOrder, setSortOrder] = useState("oldest"); // "oldest" | "newest"
     const [statusFilter, setStatusFilter] = useState("all"); // "all" | "converted" | "lost" | "unmarked"
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 
@@ -27,6 +28,7 @@ export default function AllEnquiries() {
             } catch (err) {
                 console.error("Failed to parse admin JSON:", err)
                 localStorage.removeItem("admin")
+                setLoading(false);
                 return
             }
             const headers = { Authorization: `Bearer ${token}` }
@@ -38,6 +40,9 @@ export default function AllEnquiries() {
                 })
                 .then(setEnquiriesRecords)
                 .catch((err) => console.error("Enquiries fetch error:", err))
+                .finally(() => setLoading(false))
+        } else {
+            setLoading(false);
         }
     }, [])
 
@@ -139,6 +144,8 @@ export default function AllEnquiries() {
         navigate(`/enquiry/${enquiryId}`);
     }
 
+
+    if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading enquiries...</p></div></div>);
 
     return (<>
 

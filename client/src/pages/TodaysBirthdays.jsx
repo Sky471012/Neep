@@ -15,6 +15,7 @@ export default function TodaysBirthdays() {
     const [upcomingTeachers, setUpcomingTeachers] = useState([]);
     const [activeTab, setActiveTab] = useState("students");
     const [subTab, setSubTab] = useState("today");
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 
@@ -22,36 +23,33 @@ export default function TodaysBirthdays() {
         const token = localStorage.getItem("authToken")
         const headers = { Authorization: `Bearer ${token}` }
 
+        Promise.all([
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthday/today`, { headers })
+                .then((res) => res.json())
+                .then((data) => {
+                    setBirthdays(data.students);
+                    setTotalBirthdays(data.totalBirthdays);
+                })
+                .catch((err) => console.error("Error fetching birthdays", err)),
 
-        // Fetch today's Students birthdays directly
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthday/today`, { headers })
-            .then((res) => res.json())
-            .then((data) => {
-                setBirthdays(data.students);
-                setTotalBirthdays(data.totalBirthdays);
-            })
-            .catch((err) => console.error("Error fetching birthdays", err));
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthdayTeacher/today`, { headers })
+                .then((res) => res.json())
+                .then((data) => {
+                    setTeachersBirthdays(data.teachers);
+                    setTotalTeachersBirthdays(data.totalTeachersBirthdays);
+                })
+                .catch((err) => console.error("Error fetching birthdays", err)),
 
-        // Fetch today's Teachers birthdays directly
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthdayTeacher/today`, { headers })
-            .then((res) => res.json())
-            .then((data) => {
-                setTeachersBirthdays(data.teachers);
-                setTotalTeachersBirthdays(data.totalTeachersBirthdays);
-            })
-            .catch((err) => console.error("Error fetching birthdays", err));
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthday/upcoming`, { headers })
+                .then((res) => res.json())
+                .then((data) => setUpcomingStudents(data.students || []))
+                .catch((err) => console.error("Error fetching upcoming student birthdays", err)),
 
-        // Fetch upcoming Students birthdays (next 7 days)
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthday/upcoming`, { headers })
-            .then((res) => res.json())
-            .then((data) => setUpcomingStudents(data.students || []))
-            .catch((err) => console.error("Error fetching upcoming student birthdays", err));
-
-        // Fetch upcoming Teachers birthdays (next 7 days)
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthdayTeacher/upcoming`, { headers })
-            .then((res) => res.json())
-            .then((data) => setUpcomingTeachers(data.teachers || []))
-            .catch((err) => console.error("Error fetching upcoming teacher birthdays", err));
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthdayTeacher/upcoming`, { headers })
+                .then((res) => res.json())
+                .then((data) => setUpcomingTeachers(data.teachers || []))
+                .catch((err) => console.error("Error fetching upcoming teacher birthdays", err)),
+        ]).finally(() => setLoading(false));
 
     }, []);
 
@@ -134,6 +132,8 @@ export default function TodaysBirthdays() {
         }
     };
 
+
+    if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading birthdays...</p></div></div>);
 
     return (<>
 

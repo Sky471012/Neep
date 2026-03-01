@@ -44,6 +44,7 @@ export default function StudentControls() {
     const [batchSearch, setBatchSearch] = useState("");
     const [isEditing, setIsEditing] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [loading, setLoading] = useState(true);
     const hasFee = Boolean(fee && fee._id);
     const [editForm, setEditForm] = useState({
         name: '',
@@ -101,53 +102,51 @@ export default function StudentControls() {
         const token = localStorage.getItem("authToken");
 
         if (token && studentId) {
-            // Fetch student details
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getStudentDetails/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => setStudent(data || {}))
-                .catch(err => console.error("Student details fetch error:", err));
+            Promise.all([
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getStudentDetails/${studentId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => setStudent(data || {}))
+                    .catch(err => console.error("Student details fetch error:", err)),
 
-            // Fetch student's batches
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentBatches/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => setBatches(data.batches || []))
-                .catch(err => console.error("Student batches fetch error:", err));
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentBatches/${studentId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => setBatches(data.batches || []))
+                    .catch(err => console.error("Student batches fetch error:", err)),
 
-            // Fetch fee info
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => setFee(Array.isArray(data.fee) ? data.fee[0] : {}))
-                .catch(err => console.error("Fee fetch error:", err));
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/${studentId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => setFee(Array.isArray(data.fee) ? data.fee[0] : {}))
+                    .catch(err => console.error("Fee fetch error:", err)),
 
-            // Fetch all batches
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => setAllBatches(data || {}))
-                .catch(err => console.error("All batches fetch error:", err));
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => setAllBatches(data || {}))
+                    .catch(err => console.error("All batches fetch error:", err)),
 
-            // Fetch installments
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/installments/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => setInstallments(Array.isArray(data) ? data : data.installments || []))
-                .catch(err => console.error("Installments fetch error:", err));
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/installments/${studentId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => setInstallments(Array.isArray(data) ? data : data.installments || []))
+                    .catch(err => console.error("Installments fetch error:", err)),
 
-            // Fetch alltests
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/allTests/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => setTests(Array.isArray(data) ? data : data.tests || []))
-                .catch(err => console.error("Tests fetch error:", err));
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/allTests/${studentId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then(res => res.json())
+                    .then(data => setTests(Array.isArray(data) ? data : data.tests || []))
+                    .catch(err => console.error("Tests fetch error:", err)),
+            ]).finally(() => setLoading(false));
+        } else {
+            setLoading(false);
         }
     }, [studentId]);
 
@@ -813,6 +812,8 @@ export default function StudentControls() {
             alert('Error updating profile');
         }
     };
+
+    if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading student details...</p></div></div>);
 
     return (<>
 

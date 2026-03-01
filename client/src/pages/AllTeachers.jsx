@@ -10,6 +10,7 @@ export default function AllTeachers() {
     const [admin, setAdmin] = useState(null)
     const [teachersRecords, setTeachersRecords] = useState([])
     const [teacherSearchQuery, setTeacherSearchQuery] = useState("")
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 
@@ -22,6 +23,7 @@ export default function AllTeachers() {
             } catch (err) {
                 console.error("Failed to parse admin JSON:", err)
                 localStorage.removeItem("admin")
+                setLoading(false);
                 return
             }
             const headers = { Authorization: `Bearer ${token}` }
@@ -33,9 +35,14 @@ export default function AllTeachers() {
                 })
                 .then(setTeachersRecords)
                 .catch((err) => console.error("Teachers fetch error:", err))
+                .finally(() => setLoading(false))
+        } else {
+            setLoading(false);
         }
     }, [])
 
+
+    if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading teachers...</p></div></div>);
 
     return (<>
 

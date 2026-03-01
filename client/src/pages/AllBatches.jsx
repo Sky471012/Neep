@@ -9,6 +9,7 @@ export default function AllBatches() {
     const [admin, setAdmin] = useState(null)
     const [batchesRecords, setBatchesRecords] = useState([])
     const [batchSearchQuery, setBatchSearchQuery] = useState("")
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 
@@ -21,6 +22,7 @@ export default function AllBatches() {
             } catch (err) {
                 console.error("Failed to parse admin JSON:", err)
                 localStorage.removeItem("admin")
+                setLoading(false);
                 return
             }
             const headers = { Authorization: `Bearer ${token}` }
@@ -32,12 +34,17 @@ export default function AllBatches() {
                 })
                 .then(setBatchesRecords)
                 .catch((err) => console.error("Batches fetch error:", err))
+                .finally(() => setLoading(false))
+        } else {
+            setLoading(false);
         }
     }, [])
 
 
+    if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading batches...</p></div></div>);
+
     return (<>
-    
+
         <Navbar />
 
         <div className="data-section">

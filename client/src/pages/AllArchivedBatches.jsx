@@ -9,6 +9,7 @@ export default function AllArchivedBatches() {
     const [admin, setAdmin] = useState(null)
     const [archivedBatchesRecords, setArchivedBatchesRecords] = useState([])
     const [archivedBatchSearchQuery, setArchivedBatchSearchQuery] = useState("")
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 
@@ -21,6 +22,7 @@ export default function AllArchivedBatches() {
             } catch (err) {
                 console.error("Failed to parse admin JSON:", err)
                 localStorage.removeItem("admin")
+                setLoading(false);
                 return
             }
             const headers = { Authorization: `Bearer ${token}` }
@@ -32,9 +34,14 @@ export default function AllArchivedBatches() {
                 })
                 .then(setArchivedBatchesRecords)
                 .catch((err) => console.error("Archived Batches fetch error:", err))
+                .finally(() => setLoading(false))
+        } else {
+            setLoading(false);
         }
     }, [])
 
+
+    if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading archived batches...</p></div></div>);
 
     return (<>
 

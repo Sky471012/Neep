@@ -29,6 +29,7 @@ export default function Admin() {
   const [dateOfJoining, setDateOfJoining] = useState(new Date())
   const [startDate, setStartDate] = useState(new Date())
   const [todaysClasses, setTodaysClasses] = useState([])
+  const [loading, setLoading] = useState(true);
   const [credentials, setCredentials] = useState({
     studentName: "",
     studentPhone: "",
@@ -81,7 +82,10 @@ export default function Admin() {
         })
         .then((data) => setTodaysClasses(data.classes))
         .catch((err) => console.error("Error loading timetable", err))
+        .finally(() => setLoading(false))
 
+    } else {
+      setLoading(false);
     }
   }, [])
 
@@ -265,6 +269,8 @@ export default function Admin() {
   };
 
   const groupedClasses = groupClassesByTiming(todaysClasses)
+
+  if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading dashboard...</p></div></div>);
 
   return (
     <>
