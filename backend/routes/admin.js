@@ -81,6 +81,8 @@ router.get("/birthday/today", adminController.getTodaysBirthdays);
 router.post("/birthday/wish", adminController.markBirthdayWished);
 router.get("/birthdayTeacher/today", adminController.getTodaysTeacherBirthdays);
 router.post("/birthdayTeacher/wish", adminController.markTeacherBirthdayWished);
+router.get("/birthday/upcoming", adminController.getUpcomingBirthdays);
+router.get("/birthdayTeacher/upcoming", adminController.getUpcomingTeacherBirthdays);
 
 // Enquiries
 router.get('/allEnquiries', adminController.getAllEnquiries);

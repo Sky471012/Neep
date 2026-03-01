@@ -2089,6 +2089,62 @@ exports.markTeacherBirthdayWished = async (req, res) => {
   }
 };
 
+// Upcoming Student Birthdays (next 7 days, excluding today)
+exports.getUpcomingBirthdays = async (req, res) => {
+  const { Student } = getModels(req);
+  try {
+    const nowIST = DateTime.now().setZone("Asia/Kolkata");
+    const students = await Student.find({ dob: { $exists: true, $ne: null } });
+
+    const upcoming = [];
+    for (const s of students) {
+      const [day, month] = s.dob.split("-").map(Number);
+      if (!day || !month) continue;
+      for (let d = 1; d <= 7; d++) {
+        const future = nowIST.plus({ days: d });
+        if (future.day === day && future.month === month) {
+          upcoming.push({ ...s.toObject(), birthdayDate: `${String(day).padStart(2, "0")}-${String(month).padStart(2, "0")}`, daysAway: d });
+          break;
+        }
+      }
+    }
+
+    upcoming.sort((a, b) => a.daysAway - b.daysAway);
+    res.json({ students: upcoming, total: upcoming.length });
+  } catch (err) {
+    console.error("Error fetching upcoming birthdays:", err);
+    res.status(500).json({ message: "Failed to fetch upcoming birthdays." });
+  }
+};
+
+// Upcoming Teacher Birthdays (next 7 days, excluding today)
+exports.getUpcomingTeacherBirthdays = async (req, res) => {
+  const { Teacher } = getModels(req);
+  try {
+    const nowIST = DateTime.now().setZone("Asia/Kolkata");
+    const teachers = await Teacher.find({ dob: { $exists: true, $ne: null } });
+
+    const upcoming = [];
+    for (const t of teachers) {
+      const [day, month] = t.dob.split("-").map(Number);
+      if (!day || !month) continue;
+      for (let d = 1; d <= 7; d++) {
+        const future = nowIST.plus({ days: d });
+        if (future.day === day && future.month === month) {
+          upcoming.push({ ...t.toObject(), birthdayDate: `${String(day).padStart(2, "0")}-${String(month).padStart(2, "0")}`, daysAway: d });
+          break;
+        }
+      }
+    }
+
+    upcoming.sort((a, b) => a.daysAway - b.daysAway);
+    res.json({ teachers: upcoming, total: upcoming.length });
+  } catch (err) {
+    console.error("Error fetching upcoming teacher birthdays:", err);
+    res.status(500).json({ message: "Failed to fetch upcoming teacher birthdays." });
+  }
+};
+
 // Enquiries
 exports.getAllEnquiries = async (req, res) => {
   const { Enquiry } = getModels(req);

@@ -705,6 +705,36 @@ select {
   opacity: 1;
 }
 
+/* Secondary sub-tabs (Today / Upcoming) */
+.birthday-sub-tabs {
+  display: flex;
+  width: 100%;
+}
+
+.birthday-sub-tabs .sub-tab {
+  flex: 1;
+  border: none;
+  padding: 10px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #e9ecef;
+  color: #6c757d;
+  border-bottom: 2px solid transparent;
+}
+
+.birthday-sub-tabs .sub-tab:hover {
+  background: #dee2e6;
+  color: #495057;
+}
+
+.birthday-sub-tabs .sub-tab.active {
+  background: #fff;
+  color: #212529;
+  border-bottom: 2px solid #166534;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .admin-sidebar {
