@@ -9,7 +9,7 @@ const OurCourses = () => {
       title: "Foundation Mathematics for JEE",
       batchName: "AADHARSHEELA",
       facultyName: "Mr. Mohan Verma",
-      facultyExperience: "17+ Years",
+      facultyExperience: "18+ Years",
       description:
         "Comprehensive foundation course for JEE aspirants focusing on conceptual clarity and problem-solving in Mathematics.",
     },
@@ -18,7 +18,7 @@ const OurCourses = () => {
       title: "Foundation Physics for JEE/NEET",
       batchName: "AADHARSHEELA",
       facultyName: "Mr. Digvijay",
-      facultyExperience: "11+ Years",
+      facultyExperience: "12+ Years",
       description:
         "Strong foundation in Physics concepts tailored for both JEE and NEET aspirants with conceptual and numerical approach.",
     },
@@ -26,8 +26,8 @@ const OurCourses = () => {
       id: 3,
       title: "Foundation Chemistry for JEE/NEET",
       batchName: "AADHARSHEELA",
-      facultyName: "Mr. Pankaj and Mr. Prem",
-      facultyExperience: "15+ Years & 21+ Years",
+      facultyName: "Mr. Pankaj",
+      facultyExperience: "16+ Years",
       description:
         "In-depth foundation course in Chemistry to prepare students for JEE and NEET with focus on theory and applications.",
     },
@@ -35,8 +35,8 @@ const OurCourses = () => {
       id: 4,
       title: "Foundation Biology for NEET",
       batchName: "AADHARSHEELA",
-      facultyName: "Mr. Riyaz and Mr. Vijay",
-      facultyExperience: "14+ Years & 8+ Years",
+      facultyName: "Mr. Vijay",
+      facultyExperience: "9+ Years",
       description:
         "Biology foundation tailored for NEET aspirants, covering essential topics with dual faculty guidance.",
     },
@@ -45,7 +45,7 @@ const OurCourses = () => {
       title: "CA Foundation (Special Mathematics and Statistics)",
       batchName: "UDAN-FOR-CA",
       facultyName: "Mr. Mohan Verma",
-      facultyExperience: "17+ Years",
+      facultyExperience: "18+ Years",
       description:
         "Specialized preparation for CA Foundation Mathematics and Statistics with real-world examples and conceptual clarity.",
     }
