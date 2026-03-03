@@ -13,7 +13,7 @@ const AllCourses = () => {
       title: "Foundation Mathematics for JEE",
       batchName: "AADHARSHEELA",
       facultyName: "Mr. Mohan Verma",
-      facultyExperience: "17+ Years",
+      facultyExperience: "18+ Years",
       description:
         "Comprehensive foundation course for JEE aspirants focusing on conceptual clarity and problem-solving in Mathematics.",
     },
@@ -22,7 +22,7 @@ const AllCourses = () => {
       title: "Foundation Physics for JEE/NEET",
       batchName: "AADHARSHEELA",
       facultyName: "Mr. Digvijay",
-      facultyExperience: "11+ Years",
+      facultyExperience: "12+ Years",
       description:
         "Strong foundation in Physics concepts tailored for both JEE and NEET aspirants with conceptual and numerical approach.",
     },
@@ -30,8 +30,8 @@ const AllCourses = () => {
       id: 3,
       title: "Foundation Chemistry for JEE/NEET",
       batchName: "AADHARSHEELA",
-      facultyName: "Mr. Pankaj and Mr. Prem",
-      facultyExperience: "15+ Years & 21+ Years",
+      facultyName: "Mr. Pankaj",
+      facultyExperience: "16+ Years",
       description:
         "In-depth foundation course in Chemistry to prepare students for JEE and NEET with focus on theory and applications.",
     },
@@ -39,8 +39,8 @@ const AllCourses = () => {
       id: 4,
       title: "Foundation Biology for NEET",
       batchName: "AADHARSHEELA",
-      facultyName: "Mr. Riyaz and Mr. Vijay",
-      facultyExperience: "14+ Years & 8+ Years",
+      facultyName: "Mr. Vijay",
+      facultyExperience: "9+ Years",
       description:
         "Biology foundation tailored for NEET aspirants, covering essential topics with dual faculty guidance.",
     },
@@ -49,7 +49,7 @@ const AllCourses = () => {
       title: "CA Foundation (Special Mathematics and Statistics)",
       batchName: "UDAN-FOR-CA",
       facultyName: "Mr. Mohan Verma",
-      facultyExperience: "17+ Years",
+      facultyExperience: "18+ Years",
       description:
         "Specialized preparation for CA Foundation Mathematics and Statistics with real-world examples and conceptual clarity.",
     },
@@ -58,7 +58,7 @@ const AllCourses = () => {
       title: "CA Foundation (Special Economics)",
       batchName: "UDAN-FOR-CA",
       facultyName: "Mr. Mohan Verma",
-      facultyExperience: "17+ Years",
+      facultyExperience: "18+ Years",
       description:
         "Focused course on Economics for CA Foundation including both micro and macro economics with exam-oriented teaching.",
     },
@@ -67,7 +67,7 @@ const AllCourses = () => {
       title: "CA Foundation (Special Accounts and Law)",
       batchName: "UDAN-FOR-CA",
       facultyName: "Mr. Anuj Rajput",
-      facultyExperience: "23+ Years",
+      facultyExperience: "24+ Years",
       description:
         "Comprehensive Accounts and Law course for CA Foundation aspirants, with practical approach and case studies.",
     },
@@ -85,7 +85,7 @@ const AllCourses = () => {
       title: "Mathematics (11th and 12th)",
       batchName: "MATHEMATICS BY MOHAN SIR",
       facultyName: "Mr. Mohan Verma",
-      facultyExperience: "17+ Years",
+      facultyExperience: "18+ Years",
       description:
         "Detailed and structured Mathematics course for Classes 11 & 12 focusing on NCERT and competitive exam preparation.",
     },
@@ -94,7 +94,7 @@ const AllCourses = () => {
       title: "Physics (11th and 12th)",
       batchName: "PHYSICS BY DIGVIJAY SIR",
       facultyName: "Mr. Digvijay",
-      facultyExperience: "11+ Years",
+      facultyExperience: "12+ Years",
       description:
         "Concept-driven Physics course for Classes 11 & 12 with practical insights and problem-solving sessions.",
     },
@@ -102,8 +102,8 @@ const AllCourses = () => {
       id: 11,
       title: "Chemistry (11th and 12th)",
       batchName: "CHEMISTRY BY EXPERTS",
-      facultyName: "Dr. Pankaj and Mr. Prem",
-      facultyExperience: "15+ Years & 21+ Years",
+      facultyName: "Dr. Pankaj",
+      facultyExperience: "16+ Years",
       description:
         "Balanced approach to Chemistry for Classes 11 & 12 including physical, organic, and inorganic sections.",
     },
@@ -112,7 +112,7 @@ const AllCourses = () => {
       title: "Biology (11th and 12th)",
       batchName: "BIOLOGY BY VIJAY SIR",
       facultyName: "Mr. Vijay",
-      facultyExperience: "8+ Years",
+      facultyExperience: "9+ Years",
       description:
         "Complete Biology course for Classes 11 & 12 with focus on NCERT and NEET preparation.",
     },
@@ -121,7 +121,7 @@ const AllCourses = () => {
       title: "Economics (11th and 12th)",
       batchName: "ECO. BY MOHAN SIR",
       facultyName: "Mr. Mohan Verma",
-      facultyExperience: "17+ Years",
+      facultyExperience: "18+ Years",
       description:
         "Detailed Economics course for senior secondary students covering both micro and macro concepts.",
     },
@@ -130,7 +130,7 @@ const AllCourses = () => {
       title: "Accountancy (11th and 12th)",
       batchName: "ACC. BY ANUJ SIR",
       facultyName: "Mr. Anuj Rajput",
-      facultyExperience: "23+ Years",
+      facultyExperience: "24+ Years",
       description:
         "Advanced Accounts course for Classes 11 & 12 with deep conceptual learning and practical illustrations.",
     },
@@ -139,7 +139,7 @@ const AllCourses = () => {
       title: "Business Studies (11th and 12th)",
       batchName: "B.ST BY ANUJ SIR",
       facultyName: "Mr. Anuj Rajput",
-      facultyExperience: "23+ Years",
+      facultyExperience: "24+ Years",
       description:
         "Structured Business Studies course for senior secondary students with focus on case studies and concepts.",
     },
@@ -148,7 +148,7 @@ const AllCourses = () => {
       title: "Humanities (11th and 12th)",
       batchName: "ARTS BY SHUBHAM SIR",
       facultyName: "Mr. Shubham Rawat",
-      facultyExperience: "8+ Years",
+      facultyExperience: "9+ Years",
       description:
         "Complete Humanities package for Classes 11 & 12 covering political science, history, and geography.",
     }
