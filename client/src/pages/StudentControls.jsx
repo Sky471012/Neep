@@ -1119,7 +1119,7 @@ export default function StudentControls() {
                             </div>
                         </>
                     ) : (
-                        // View Mode - unchanged
+                        // View Mode
                         <>
                             <div className="profile-header">
                                 <div className="profile-avatar">

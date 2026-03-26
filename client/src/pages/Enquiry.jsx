@@ -348,26 +348,48 @@ export default function Enquiry() {
                                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
                                         <i className="fas fa-phone" style={{ width: '20px', marginRight: '0.75rem' }}></i>
                                         <span style={{ fontSize: '0.95rem' }}>{enquiry.phone}</span>
-                                        {enquiry.phone ? (
+                                        {enquiry.phone ? (<>
                                             <a
                                                 href={`tel:${enquiry.phone}`}
                                                 aria-label="make call"
                                                 title="Make Call"
-                                                style={{ padding: '0', background: "none", border: "none", marginLeft: '0.5rem', color: 'white', cursor: 'pointer', textDecoration: 'none' }}
+                                                className="phone-action-btn ms-2"
+                                                style={{color:"white"}}
                                             >
                                                 <i className="bi bi-telephone-outbound"></i>
                                             </a>
-                                        ) : (
+                                            <a
+                                                title="WhatsApp"
+                                                href={`https://wa.me/91${enquiry.phone}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="phone-action-btn phone-action-btn-wa ms-2"
+                                                style={{color:"white"}}
+                                            >
+                                                <i className="bi bi-whatsapp"></i>
+                                            </a>
+                                        </>) : (<>
                                             <button
                                                 type="button"
                                                 aria-label="make call"
                                                 title="Make Call"
-                                                style={{ padding: '0', background: "none", border: "none", marginLeft: '0.5rem', color: 'white', cursor: 'not-allowed' }}
+                                                className="phone-action-btn ms-2"
+                                                style={{color:"white"}}
                                                 disabled
                                             >
                                                 <i className="bi bi-telephone-outbound"></i>
                                             </button>
-                                        )}
+                                            <button
+                                                type="button"
+                                                title="WhatsApp"
+                                                aria-label="make call"
+                                                disabled
+                                                className="phone-action-btn phone-action-btn-wa ms-2"
+                                                style={{color:"white"}}
+                                            >
+                                                <i className="bi bi-whatsapp"></i>
+                                            </button>
+                                        </>)}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
                                         <i className="fas fa-book" style={{ width: '20px', marginRight: '0.75rem' }}></i>
