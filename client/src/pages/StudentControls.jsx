@@ -285,7 +285,8 @@ export default function StudentControls() {
 
         doc.text(`Notes: Received by ${method.toLowerCase()}`, 20, doc.lastAutoTable.finalY + 20);
         doc.setFontSize(10);
-        doc.text("This is a computer generated pay receipt and does not require a signature", 20, doc.lastAutoTable.finalY + 30);
+        doc.text("This is a computer generated pay receipt and does not require a signature.", 20, doc.lastAutoTable.finalY + 30);
+        doc.text("The submitted fee will not be subject to refund or adjustment.", 20, doc.lastAutoTable.finalY + 37);
 
         doc.save(`${student.name}_Installment${record.installmentNo}_Receipt.pdf`);
     }
