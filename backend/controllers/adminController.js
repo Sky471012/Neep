@@ -1254,7 +1254,7 @@ exports.markInstallmentPaid = async (req, res) => {
 
 exports.updateInstallment = async (req, res) => {
   const { Installment, Fee } = getModels(req);
-  const session = await mongoose.startSession();
+  const session = await req.db.startSession();
   session.startTransaction();
   try {
     const { id } = req.params;
