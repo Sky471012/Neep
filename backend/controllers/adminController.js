@@ -2149,55 +2149,8 @@ exports.getUpcomingTeacherBirthdays = async (req, res) => {
 exports.getAllEnquiries = async (req, res) => {
   const { Enquiry } = getModels(req);
   try {
-    // Determine current academic/session window: April 1 -> next year's March 31
-    const today = new Date();
-    const month = today.getMonth() + 1; // 1-12
-    const year = today.getFullYear();
-
-    let sessionStart, sessionEnd;
-    if (month >= 4) {
-      // Current session: Apr 1 this year -> Mar 31 next year
-      sessionStart = new Date(year, 3, 1, 0, 0, 0, 0); // April is monthIndex 3
-      sessionEnd = new Date(year + 1, 2, 31, 23, 59, 59, 999); // March 31 next year
-    } else {
-      // Current session runs from Apr 1 last year -> Mar 31 this year
-      sessionStart = new Date(year - 1, 3, 1, 0, 0, 0, 0);
-      sessionEnd = new Date(year, 2, 31, 23, 59, 59, 999);
-    }
-
-    // Helper: parse DD-MM-YYYY or ISO-like date strings to Date object
-    const parseToDate = (str) => {
-      if (!str) return null;
-      if (typeof str !== 'string') return null;
-      // If already ISO or contains 'T' etc. try Date constructor
-      if (str.includes('T') || str.includes('/')) {
-        const d = new Date(str);
-        return isNaN(d) ? null : d;
-      }
-      // Expecting DD-MM-YYYY
-      const parts = str.split('-');
-      if (parts.length === 3) {
-        const [dd, mm, yyyy] = parts.map((p) => parseInt(p, 10));
-        if (Number.isFinite(dd) && Number.isFinite(mm) && Number.isFinite(yyyy)) {
-          const d = new Date(yyyy, mm - 1, dd);
-          return isNaN(d) ? null : d;
-        }
-      }
-      // Fallback: attempt Date constructor
-      const d = new Date(str);
-      return isNaN(d) ? null : d;
-    };
-
     const enquiries = await Enquiry.find();
-
-    // Filter enquiries whose enquiryDate falls within the session window
-    const enquiriesInSession = enquiries.filter((enq) => {
-      const d = parseToDate(enq.enquiryDate);
-      if (!d) return false;
-      return d >= sessionStart && d <= sessionEnd;
-    });
-
-    res.json(enquiriesInSession);
+    res.json(enquiries);
   } catch (err) {
     console.error("Error fetching enquiries:", err);
     res.status(500).json({ message: "Failed to fetch enquiries." });
