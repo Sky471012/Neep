@@ -253,8 +253,14 @@ export default function Navbar() {
               } else {
                 // For admin/teacher
                 setShowBranchModal(false);
-                setTimeout(() => window.location.reload(), 400);
                 window.dispatchEvent(new Event("branchChanged"));
+                const currentRole = localStorage.getItem("role");
+                if (currentRole === "admin") {
+                  navigate("/admin");
+                  setTimeout(() => window.location.reload(), 100);
+                } else {
+                  setTimeout(() => window.location.reload(), 400);
+                }
               }
             } catch (err) {
               console.error("Switch branch error:", err);
