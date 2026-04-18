@@ -35,4 +35,7 @@ const testSchema = new Schema({
   },
 });
 
+testSchema.index({ studentId: 1 });
+testSchema.index({ batchId: 1, studentId: 1 });
+
 module.exports = model("Test", testSchema);

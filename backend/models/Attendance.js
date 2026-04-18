@@ -29,4 +29,7 @@ const attendanceSchema = new Schema({
   },
 });
 
+attendanceSchema.index({ studentId: 1 });
+attendanceSchema.index({ batchId: 1, date: 1 });
+
 module.exports = mongoose.model("Attendance", attendanceSchema);

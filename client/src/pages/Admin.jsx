@@ -551,7 +551,7 @@ export default function Admin() {
               <label>School Type</label>
               <select
                 className="form-select"
-                name="schoolType"
+                name="studentSchoolType"
                 value={credentials.studentSchoolType || ""}
                 onChange={handleInputChange}
               >

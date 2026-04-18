@@ -35,4 +35,8 @@ const installmentSchema = new Schema({
   },
 });
 
+installmentSchema.index({ studentId: 1 });
+installmentSchema.index({ feeId: 1 });
+installmentSchema.index({ dueDate: 1, paidDate: 1 });
+
 module.exports = model("Installment", installmentSchema);

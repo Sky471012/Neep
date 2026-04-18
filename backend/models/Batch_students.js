@@ -19,4 +19,7 @@ const batch_studentSchema = new Schema({
   },
 });
 
+batch_studentSchema.index({ batchId: 1 });
+batch_studentSchema.index({ studentId: 1 });
+
 module.exports = mongoose.model("batch_student", batch_studentSchema);

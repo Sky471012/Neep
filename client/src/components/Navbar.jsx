@@ -256,8 +256,7 @@ export default function Navbar() {
                 window.dispatchEvent(new Event("branchChanged"));
                 const currentRole = localStorage.getItem("role");
                 if (currentRole === "admin") {
-                  navigate("/admin");
-                  setTimeout(() => window.location.reload(), 100);
+                  window.location.href = "/admin";
                 } else {
                   setTimeout(() => window.location.reload(), 400);
                 }

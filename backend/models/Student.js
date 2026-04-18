@@ -44,4 +44,7 @@ const studentSchema = new Schema({
   },
 });
 
+studentSchema.index({ phone: 1 });
+studentSchema.index({ dob: 1 });
+
 module.exports = model("Student", studentSchema);
