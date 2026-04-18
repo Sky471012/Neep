@@ -78,8 +78,8 @@ export default function AllStudents() {
                                     student.class.toLowerCase().includes(studentSearchQuery.toLowerCase()),
                             )
                             .sort((a, b) => a.name.localeCompare(b.name)) // sort alphabetically
-                            .map((student, index) => (
-                                <Link key={index} to={`/student/${student._id}`} className="data-card">
+                            .map((student) => (
+                                <Link key={student._id} to={`/student/${student._id}`} className="data-card">
                                     <h5 className="card-title">{student.name}</h5>
                                     <span className="card-subtitle">Phone: {student.phone}</span>
                                     <span className="card-code">Class: {student.class}</span>

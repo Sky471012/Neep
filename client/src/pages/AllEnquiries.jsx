@@ -239,8 +239,8 @@ export default function AllEnquiries() {
                                 return sortOrder === 'oldest' ? ta - tb : tb - ta;
                             });
 
-                            return sorted.map((enq, index) => (
-                                <div key={index} onClick={() => goToEnquiry(enq._id)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') goToEnquiry(enq._id) }} style={{ cursor: 'pointer' }} className="data-card">
+                            return sorted.map((enq) => (
+                                <div key={enq._id} onClick={() => goToEnquiry(enq._id)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') goToEnquiry(enq._id) }} style={{ cursor: 'pointer' }} className="data-card">
                                     <h5 className="card-title">{enq.studentName}</h5>
                                     <span className="card-subtitle">Phone: {enq.phone}</span>
                                     <span className="card-subtitle">Enquired on: {enq.enquiryDate || "-"}</span>

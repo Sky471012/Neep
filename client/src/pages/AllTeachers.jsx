@@ -78,8 +78,8 @@ export default function AllTeachers() {
                                     teacher.phone.includes(teacherSearchQuery),
                             )
                             .sort((a, b) => a.name.localeCompare(b.name)) // sort alphabetically
-                            .map((teacher, index) => (
-                                <Link key={index} to={`/teacher/${teacher._id}`} className="data-card">
+                            .map((teacher) => (
+                                <Link key={teacher._id} to={`/teacher/${teacher._id}`} className="data-card">
                                     <h5 className="card-title">{teacher.name}</h5>
                                     <span className="card-subtitle">Phone: {teacher.phone}</span>
                                 </Link>

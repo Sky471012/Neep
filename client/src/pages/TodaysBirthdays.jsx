@@ -184,8 +184,8 @@ export default function TodaysBirthdays() {
                         {birthdays.length > 0 ? (
                             birthdays
                                 .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((student, index) => (
-                                    <div className="data-card d-flex justify-content-between align-items-start" key={index} >
+                                .map((student) => (
+                                    <div className="data-card d-flex justify-content-between align-items-start" key={student._id} >
                                         <div>
                                             <h5 className="card-title">{student.name}</h5>
                                             <span className="card-subtitle">Class: {student.class}</span>
@@ -204,8 +204,8 @@ export default function TodaysBirthdays() {
                 <div className='data-grid-container pt-3 birthday-content-student' style={{borderTopLeftRadius:"0", borderTopRightRadius:"0", overflowY:"auto"}}>
                     <div className="data-grid">
                         {upcomingStudents.length > 0 ? (
-                            upcomingStudents.map((student, index) => (
-                                    <div className="data-card" key={index}>
+                            upcomingStudents.map((student) => (
+                                    <div className="data-card" key={student._id}>
                                         <h5 className="card-title">{student.name}</h5>
                                         <span className="card-subtitle">Class: {student.class}</span>
                                         <span className="card-subtitle" style={{ marginTop: "4px" }}>DOB: {student.dob}</span>
@@ -225,8 +225,8 @@ export default function TodaysBirthdays() {
                         {teachersBirthdays.length > 0 ? (
                             teachersBirthdays
                                 .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((teacher, index) => (
-                                    <div className="data-card d-flex justify-content-between align-items-start" key={index} >
+                                .map((teacher) => (
+                                    <div className="data-card d-flex justify-content-between align-items-start" key={teacher._id} >
                                         <div>
                                             <h5 className="card-title">{teacher.name}</h5>
                                             <span className="card-subtitle">Phone: {teacher.phone}</span>
@@ -245,8 +245,8 @@ export default function TodaysBirthdays() {
                 <div className='data-grid-container pt-3 birthday-content-teacher' style={{borderTopLeftRadius:"0", borderTopRightRadius:"0", overflowY:"auto"}}>
                     <div className="data-grid">
                         {upcomingTeachers.length > 0 ? (
-                            upcomingTeachers.map((teacher, index) => (
-                                    <div className="data-card" key={index}>
+                            upcomingTeachers.map((teacher) => (
+                                    <div className="data-card" key={teacher._id}>
                                         <h5 className="card-title">{teacher.name}</h5>
                                         <span className="card-subtitle">Phone: {teacher.phone}</span>
                                         <span className="card-subtitle" style={{ marginTop: "4px" }}>DOB: {teacher.dob}</span>
