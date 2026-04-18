@@ -292,8 +292,6 @@ body {
   transform: translateY(-50%);
   color: #6b7280;
   pointer-events: none;
-  width: 16px;
-  height: 16px;
 }
 
 .search-input {
