@@ -1814,18 +1814,14 @@ exports.getPaidInstallments = async (req, res) => {
       paidDate: { $ne: null },
     })
       .populate("studentId")
-      .populate("feeId");
+      .populate("feeId")
+      .sort({ paidDate: -1 });
 
-    // Sort by paidDate descending (most recently paid first)
-    const sorted = installments.sort(
-      (a, b) => new Date(b.paidDate) - new Date(a.paidDate)
-    );
-
-    const totalPaidAmount = sorted.reduce((sum, inst) => {
+    const totalPaidAmount = installments.reduce((sum, inst) => {
       return sum + (inst.amount || 0);
     }, 0);
 
-    res.json({ installments: sorted, totalPaidAmount });
+    res.json({ installments, totalPaidAmount });
   } catch (err) {
     console.error("Error fetching paid installments:", err);
     res.status(500).json({ message: "Server error", error: err.message });
