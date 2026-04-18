@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const compression = require('compression');
 const path = require('path');
 const mongoDB = require("./db")
 require('dotenv').config();
@@ -8,6 +9,7 @@ require('dotenv').config();
 mongoDB();
 
 app.use(cors());
+app.use(compression());
 
 app.use(express.json());
 
