@@ -1,28 +1,29 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import './App.css'
 import './index.css'
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Home from './pages/Home'
 import Preloader from './components/Preloader'
-import Login from './pages/Login';
-import AllCourses from './pages/AllCourses';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Contactus from './pages/Contactus';
-import Student from './pages/Student';
-import Teacher from './pages/Teacher';
-import Admin from './pages/Admin';
-import AllBatches from './pages/AllBatches';
-import AllStudents from './pages/AllStudents';
-import AllTeachers from './pages/AllTeachers';
-import AllArchivedBatches from './pages/AllArchivedBatches';
-import FeeTracking from './pages/FeeTracking';
-import BatchControls from './pages/BatchControls';
-import TeacherControls from './pages/TeacherControls';
-import StudentControls from './pages/StudentControls';
-import TodaysBirthdays from './pages/TodaysBirthdays';
-import AllEnquiries from './pages/AllEnquiries';
-import Enquiry from './pages/Enquiry';
+
+const Login = lazy(() => import('./pages/Login'));
+const AllCourses = lazy(() => import('./pages/AllCourses'));
+const Contactus = lazy(() => import('./pages/Contactus'));
+const Student = lazy(() => import('./pages/Student'));
+const Teacher = lazy(() => import('./pages/Teacher'));
+const Admin = lazy(() => import('./pages/Admin'));
+const AllBatches = lazy(() => import('./pages/AllBatches'));
+const AllStudents = lazy(() => import('./pages/AllStudents'));
+const AllTeachers = lazy(() => import('./pages/AllTeachers'));
+const AllArchivedBatches = lazy(() => import('./pages/AllArchivedBatches'));
+const FeeTracking = lazy(() => import('./pages/FeeTracking'));
+const BatchControls = lazy(() => import('./pages/BatchControls'));
+const TeacherControls = lazy(() => import('./pages/TeacherControls'));
+const StudentControls = lazy(() => import('./pages/StudentControls'));
+const TodaysBirthdays = lazy(() => import('./pages/TodaysBirthdays'));
+const AllEnquiries = lazy(() => import('./pages/AllEnquiries'));
+const Enquiry = lazy(() => import('./pages/Enquiry'));
 
 function App() {
 
@@ -80,26 +81,28 @@ function App() {
       ) : (
         <BrowserRouter>
           <ScrollToHashElement />
-          <Routes>
-            <Route exact path='/' element={<Home />} />
-            <Route exact path='/login' element={<Login />} />
-            <Route exact path='/all-courses' element={<AllCourses />} />
-            <Route exact path='/contactus' element={<Contactus />} />
-            <Route exact path='/student' element={<Student />} />
-            <Route exact path='/teacher' element={<Teacher />} />
-            <Route exact path='/admin' element={<Admin />} />
-            <Route exact path='/all-batches' element={<AllBatches />} />
-            <Route exact path='/all-students' element={<AllStudents />} />
-            <Route exact path='/all-teachers' element={<AllTeachers />} />
-            <Route exact path='/all-archived-batches' element={<AllArchivedBatches />} />
-            <Route exact path='/todaysBirthdays' element={<TodaysBirthdays />} />
-            <Route exact path='/all-enquiries' element={<AllEnquiries />} />
-            <Route exact path='/fee-tracking' element={<FeeTracking />} />
-            <Route path="/batch/:batchId" element={<BatchControls />} />
-            <Route path="/teacher/:teacherId" element={<TeacherControls />} />
-            <Route path="/student/:studentId" element={<StudentControls />} />
-            <Route path="/enquiry/:enquiryId" element={<Enquiry />} />
-          </Routes>
+          <Suspense fallback={null}>
+            <Routes>
+              <Route exact path='/' element={<Home />} />
+              <Route exact path='/login' element={<Login />} />
+              <Route exact path='/all-courses' element={<AllCourses />} />
+              <Route exact path='/contactus' element={<Contactus />} />
+              <Route exact path='/student' element={<Student />} />
+              <Route exact path='/teacher' element={<Teacher />} />
+              <Route exact path='/admin' element={<Admin />} />
+              <Route exact path='/all-batches' element={<AllBatches />} />
+              <Route exact path='/all-students' element={<AllStudents />} />
+              <Route exact path='/all-teachers' element={<AllTeachers />} />
+              <Route exact path='/all-archived-batches' element={<AllArchivedBatches />} />
+              <Route exact path='/todaysBirthdays' element={<TodaysBirthdays />} />
+              <Route exact path='/all-enquiries' element={<AllEnquiries />} />
+              <Route exact path='/fee-tracking' element={<FeeTracking />} />
+              <Route path="/batch/:batchId" element={<BatchControls />} />
+              <Route path="/teacher/:teacherId" element={<TeacherControls />} />
+              <Route path="/student/:studentId" element={<StudentControls />} />
+              <Route path="/enquiry/:enquiryId" element={<Enquiry />} />
+            </Routes>
+          </Suspense>
           <ToastContainer
             position="bottom-center"
             autoClose={1500}
