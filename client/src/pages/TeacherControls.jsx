@@ -73,13 +73,6 @@ export default function TeacherControls() {
                     .then(data => setBatches(data.batches || []))
                     .catch(err => console.error("Batches fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherAttendance/${teacherId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                })
-                    .then(res => res.json())
-                    .then(data => setAttendance(data.attendance || []))
-                    .catch(err => console.error("Attendance fetch error:", err)),
-
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
                     headers: { Authorization: `Bearer ${token}` },
                 })
@@ -307,6 +300,7 @@ export default function TeacherControls() {
             const rec = (data.attendance || []).find((r) => {
                 const rd = new Date(r.date);
                 return (
+                    r.teacherId === teacherId &&
                     r.batchId === activeBatch._id &&
                     rd.getFullYear() === dateOnly.getFullYear() &&
                     rd.getMonth() === dateOnly.getMonth() &&

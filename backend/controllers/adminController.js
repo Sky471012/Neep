@@ -1544,7 +1544,7 @@ exports.markTeacherAttendance = async (req, res) => {
   const { teacherId, batchId, date, status } = req.body;
   try {
     const record = await AttendanceTeacher.findOneAndUpdate(
-      { batchId, date },
+      { teacherId, batchId, date },
       { teacherId, batchId, date, status, markedBy: req.user.id },
       { upsert: true, new: true }
     );
