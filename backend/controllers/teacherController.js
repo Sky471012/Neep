@@ -141,7 +141,7 @@ exports.markAttendance = async (req, res) => {
     const Attendance = req.db.model("Attendance", AttendanceModel.schema);
 
     const record = await Attendance.findOneAndUpdate(
-      { studentId, date },
+      { studentId, batchId, date },
       { studentId, batchId, date, status, markedBy: req.user.id },
       { upsert: true, new: true }
     );
