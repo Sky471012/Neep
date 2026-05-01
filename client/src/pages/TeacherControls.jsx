@@ -269,9 +269,10 @@ export default function TeacherControls() {
 
             const newMap = {};
             data.attendance?.forEach((record) => {
+                if (record.teacherId !== teacherId) return;
                 const date = new Date(record.date);
                 const formattedDate = date.toISOString().split("T")[0];
-                const key = `${record.teacherId}_${formattedDate}`;
+                const key = `${record.batchId}_${record.teacherId}_${formattedDate}`;
                 newMap[key] = record.status;
             });
 
@@ -910,7 +911,7 @@ export default function TeacherControls() {
                                                 {[...Array(daysInMonth)].map((_, d) => {
                                                     const date = new Date(calendarYear, calendarMonth, d + 1);
                                                     const formatted = date.toISOString().split("T")[0];
-                                                    const key = `${teacherId}_${formatted}`;
+                                                    const key = `${activeBatch._id}_${teacherId}_${formatted}`;
                                                     const status = attendanceMap[key];
 
                                                     return (

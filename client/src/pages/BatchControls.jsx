@@ -13,6 +13,7 @@ import ModalFive from "../modals/ModalFive";
 import ModalSix from "../modals/ModalSix";
 import ModalSeven from "../modals/ModalSeven";
 import ModalEight from "../modals/ModalEight";
+import ModalNine from "../modals/ModalNine";
 
 export default function BatchControls() {
   const { batchId } = useParams();
@@ -33,6 +34,8 @@ export default function BatchControls() {
   const [modalSix, setModalSix] = useState(false);
   const [modalSeven, setModalSeven] = useState(false);
   const [modalEight, setModalEight] = useState(false);
+  const [modalNine, setModalNine] = useState(false);
+  const [teacherAttendanceDraft, setTeacherAttendanceDraft] = useState(undefined);
   const [studentTests, setStudentTests] = useState([]);
   const [selectedTest, setSelectedTest] = useState(null);
   const [allStudents, setAllStudents] = useState({});
@@ -428,6 +431,89 @@ export default function BatchControls() {
 
   const closeAttendanceModalHandler = () => {
     setOpenModalOne(false);
+  };
+
+  const preloadTeacherAttendanceForDate = async (dateObj) => {
+    const token = localStorage.getItem("authToken");
+    if (!token || !dateObj || !teacher?._id) return;
+
+    const dateOnly = new Date(dateObj.toDateString());
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherAttendance/${batchId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to fetch attendance");
+
+      const rec = (data.attendance || []).find((r) => {
+        const rd = new Date(r.date);
+        return (
+          r.teacherId === teacher._id &&
+          r.batchId === batchId &&
+          rd.getFullYear() === dateOnly.getFullYear() &&
+          rd.getMonth() === dateOnly.getMonth() &&
+          rd.getDate() === dateOnly.getDate()
+        );
+      });
+
+      setTeacherAttendanceDraft(rec?.status || undefined);
+    } catch (err) {
+      console.error("Preload teacher attendance error:", err);
+    }
+  };
+
+  const openModalNineHandler = () => {
+    if (!teacher?._id) {
+      alert("No teacher assigned to this batch.");
+      return;
+    }
+    const date = selectedDate || new Date();
+    setSelectedDate(date);
+    setModalNine(true);
+    preloadTeacherAttendanceForDate(date);
+  };
+
+  const closeTeacherAttendanceModalHandler = () => {
+    setModalNine(false);
+    setTeacherAttendanceDraft(undefined);
+  };
+
+  const saveTeacherAttendance = async (dateObj) => {
+    if (!dateObj) {
+      alert("Please select a date first.");
+      return;
+    }
+    if (!teacher?._id) {
+      alert("No teacher assigned to this batch.");
+      return;
+    }
+
+    const token = localStorage.getItem("authToken");
+    const dateOnly = new Date(dateObj.toDateString());
+    const dateISO = dateOnly.toISOString();
+    const status = teacherAttendanceDraft ?? "present";
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendanceTeacher/mark`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          teacherId: teacher._id,
+          batchId,
+          date: dateISO,
+          status,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to mark attendance");
+
+      closeTeacherAttendanceModalHandler();
+    } catch (err) {
+      console.error("Teacher attendance error:", err);
+      alert("Failed to mark attendance. Please try again.");
+    }
   };
 
   const updateTimetable = async (finalTimetable) => {
@@ -827,7 +913,12 @@ export default function BatchControls() {
                   </li>
                   <li>
                     <button className="dropdown-item" onClick={openModalOneHandler}>
-                      Mark / Change Attendance
+                      Student Attendance
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={openModalNineHandler}>
+                      Teacher Attendance
                     </button>
                   </li>
                   <li>
@@ -1900,6 +1991,79 @@ export default function BatchControls() {
             })()}
           </div>
         </ModalEight>
+
+        {/* Teacher Attendance Modal */}
+        <ModalNine isOpen={modalNine} onClose={closeTeacherAttendanceModalHandler}>
+          <div className="attendance-form" style={{ minHeight: "450px" }}>
+            <h3 className="modal-title">Mark Attendance for {batch.name}</h3>
+
+            <div className="text-center mb-2 mt-1" style={{ fontWeight: 500 }}>
+              Teacher: {teacher?.name || "Not assigned"}
+            </div>
+
+            <DatePicker
+              className="datePicker mt-1 mb-2"
+              dateFormat="dd-MM-yyyy"
+              selected={selectedDate}
+              onChange={(date) => { setSelectedDate(date); preloadTeacherAttendanceForDate(date); }}
+              placeholderText="Select date"
+              required
+              showYearDropdown
+              dropdownMode="select"
+              yearDropdownItemNumber={10}
+              scrollableYearDropdown
+              maxDate={new Date()}
+              openToDate={new Date()}
+              minDate={new Date("1995-01-01")}
+            />
+
+            <div style={{ maxHeight: "55vh", overflowY: "auto", margin: "10px 0" }}>
+              <table className="table table-bordered mt-3">
+                <thead>
+                  <tr>
+                    <th style={{ width: "40%", padding: "10px 20px" }}>Teacher</th>
+                    <th style={{ width: "60%", padding: "10px 20px" }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ width: "40%", wordWrap: "break-word" }}>
+                      {teacher?.name || "—"}
+                    </td>
+                    <td style={{ width: "60%" }}>
+                      <div className="d-flex gap-2 align-items-center flex-wrap" role="group" aria-label="attendance">
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${(teacherAttendanceDraft ?? "present") === "present" ? "btn-success" : "btn-outline-success"}`}
+                          onClick={() => setTeacherAttendanceDraft("present")}
+                        >
+                          Present
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${teacherAttendanceDraft === "absent" ? "btn-danger" : "btn-outline-danger"}`}
+                          onClick={() => setTeacherAttendanceDraft("absent")}
+                        >
+                          Absent
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="d-flex justify-content-between align-items-center mt-2">
+              <button
+                className="btn btn-primary m-auto"
+                disabled={!selectedDate || !teacher?._id}
+                onClick={() => saveTeacherAttendance(selectedDate)}
+              >
+                Mark Attendance
+              </button>
+            </div>
+          </div>
+        </ModalNine>
 
       </div>
     </div>
