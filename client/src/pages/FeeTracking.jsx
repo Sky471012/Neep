@@ -78,11 +78,11 @@ export default function FeeTracking() {
       : `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
   }
 
-  const sortInstallments = (data, order) => {
+  const sortInstallments = (data, order, dateField = "dueDate") => {
     return [...data].sort((a, b) =>
       order === "asc"
-        ? new Date(a.dueDate) - new Date(b.dueDate)
-        : new Date(b.dueDate) - new Date(a.dueDate)
+        ? new Date(a[dateField]) - new Date(b[dateField])
+        : new Date(b[dateField]) - new Date(a[dateField])
     );
   };
 
@@ -115,7 +115,7 @@ export default function FeeTracking() {
       fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/paid`, { headers })
         .then((res) => res.json())
         .then((data) => {
-          const sorted = data.installments.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
+          const sorted = data.installments.sort((a, b) => new Date(b.paidDate) - new Date(a.paidDate))
           setPaidInstallments(sorted)
         })
         .catch((err) => console.error("Error loading paid installments:", err)),
@@ -464,7 +464,7 @@ export default function FeeTracking() {
                         <button
                           className="dropdown-item"
                           onClick={() => {
-                            const sorted = sortInstallments(paidInstallments, "asc");
+                            const sorted = sortInstallments(paidInstallments, "asc", "paidDate");
                             setPaidInstallments(sorted);
                             setPaidSortOrder("asc");
                           }}
@@ -476,7 +476,7 @@ export default function FeeTracking() {
                         <button
                           className="dropdown-item"
                           onClick={() => {
-                            const sorted = sortInstallments(paidInstallments, "desc");
+                            const sorted = sortInstallments(paidInstallments, "desc", "paidDate");
                             setPaidInstallments(sorted);
                             setPaidSortOrder("desc");
                           }}
