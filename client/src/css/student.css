@@ -386,8 +386,6 @@ body {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
-  border-bottom: 1px solid #f1f5f9;
 }
 
 .batch-avatar {
