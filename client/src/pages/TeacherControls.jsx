@@ -888,7 +888,7 @@ export default function TeacherControls() {
                 >
                     {activeBatch && (<>
                         <h3 className="modal-title mb-0 mt-2">Attendance in {activeBatch.name}</h3>
-                        <div id={`carousel-${activeBatch._id}`} className="carousel calendar-carousel slide mt-2">
+                        <div id={`carousel-${activeBatch._id}`} className="carousel calendar-carousel calendar-static slide mt-2">
                             <div className="carousel-inner">
                                 {allMonths.map((month, monthIdx) => {
                                     let calendarMonth, calendarYear;

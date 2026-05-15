@@ -42,6 +42,7 @@ export default function Teacher() {
     const [editingMarks, setEditingMarks] = useState({});
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [testSearchQuery, setTestSearchQuery] = useState("");
+    const [studentSearchQuery, setStudentSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
 
     const allMonths = [
@@ -566,140 +567,192 @@ export default function Teacher() {
 
                                             return (
                                                 <div className="batch-card">
-                                                    <div className="batch-header d-flex justify-content-between align-items-center">
-                                                        <h5 className="batch-name">{batch.batchName}</h5>
-                                                        <button onClick={() => setShowModalSix(batch.batchId)} className="btn btn-sm btn-success">My Attendance</button>
+                                                    <div className="batch-header">
+                                                        <div className="batch-avatar">
+                                                            {(batch.batchName?.trim()?.charAt(0) || "?").toUpperCase()}
+                                                        </div>
+                                                        <div className="batch-name-block">
+                                                            <span className="batch-eyebrow">Batch</span>
+                                                            <h5 className="batch-name">{batch.batchName}</h5>
+                                                        </div>
                                                     </div>
 
                                                     <div className="batch-actions">
                                                         <button className="action-button-t students" onClick={() => setShowModalOneFor(batchId)}>
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-                                                            </svg>
-                                                            Show Students
+                                                            <span className="tile-icon">
+                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 0 0-3-3.87M9 20H2v-2a4 4 0 0 1 3-3.87m12-3.13a4 4 0 1 0-5-5m-5 5a4 4 0 1 0-5-5m5 5a4 4 0 1 0 8 0 4 4 0 0 0-8 0z" />
+                                                                </svg>
+                                                            </span>
+                                                            <span className="tile-label">Students</span>
                                                         </button>
 
                                                         <button className="action-button-t attendance" onClick={() => openAttendanceModal(batchId)}>
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v8a1 1 0 01-1 1h-3v2a1 1 0 01-1-1H9a1 1 0 01-1-1v-2H5a1 1 0 01-1-1V8a1 1 0 011-1h3z" />
-                                                            </svg>
-                                                            Mark Attendance
+                                                            <span className="tile-icon">
+                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-5 8 2 2 4-4" />
+                                                                </svg>
+                                                            </span>
+                                                            <span className="tile-label">Mark</span>
                                                         </button>
-                                                    </div>
 
-                                                    <div className="batch-actions">
                                                         <button className="action-button-t timetable" onClick={() => openTimetableModal(batchId)}>
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 1.5v-1.5m0 0c0-.621.504-1.125 1.125-1.125m0 0h7.5" />
-                                                            </svg>
-                                                            Show Timetable
+                                                            <span className="tile-icon">
+                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+                                                                </svg>
+                                                            </span>
+                                                            <span className="tile-label">Timetable</span>
                                                         </button>
-                                                    </div>
 
-                                                    <div className="batch-actions">
                                                         <button className="action-button-t add-test" onClick={() => openTestModal(batchId)}>
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                            </svg>
-                                                            Add Test
+                                                            <span className="tile-icon">
+                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                                </svg>
+                                                            </span>
+                                                            <span className="tile-label">Add Test</span>
                                                         </button>
 
                                                         <button className="action-button-t show-tests" onClick={() => setShowModalFiveFor(batchId)}>
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                                            </svg>
-                                                            Show Tests
+                                                            <span className="tile-icon">
+                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                                                                </svg>
+                                                            </span>
+                                                            <span className="tile-label">Tests</span>
+                                                        </button>
+
+                                                        <button className="action-button-t my-attendance" onClick={() => setShowModalSix(batch.batchId)} title="View my attendance">
+                                                            <span className="tile-icon">
+                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+                                                                </svg>
+                                                            </span>
+                                                            <span className="tile-label">My Attendance</span>
                                                         </button>
                                                     </div>
 
                                                     {/* ====== MODALS WITH THEIR CONTENT RESTORED ====== */}
-                                                    <ModalOne isOpen={showModalOneFor === batchId} onClose={() => setShowModalOneFor(null)}>
-                                                        <div className="student-list">
-                                                            <h3 className="modal-title">{batch.batchName}</h3>
-                                                            <ul className="mt-3" style={{ maxHeight: "67vh", overflowY: "auto", margin: "10px 0" }}>
-                                                                {students[batchId]
-                                                                    ?.slice() // make a shallow copy so original array isn’t mutated
-                                                                    .sort((a, b) => a.name.localeCompare(b.name)) // alphabetical sort
-                                                                    .map((student) => (
-                                                                        <li key={student._id} className="mb-2 border rounded ps-2 pe-2 p-1">
-                                                                            <div className="d-flex align-items-center justify-content-between">
-                                                                                <span className="text-break" style={{ maxWidth: '160px' }}>{student.name}</span>
-                                                                                <button
-                                                                                    className="btn btn-sm btn-primary"
-                                                                                    onClick={() => {
-                                                                                        if (activeStudentAttendance === student._id) {
-                                                                                            setActiveStudentAttendance(null);
-                                                                                        } else {
+                                                    <ModalOne
+                                                        isOpen={showModalOneFor === batchId}
+                                                        onClose={() => {
+                                                            setShowModalOneFor(null);
+                                                            setActiveStudentAttendance(null);
+                                                            setStudentSearchQuery("");
+                                                        }}
+                                                    >
+                                                        <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
+                                                            {!activeStudentAttendance ? (
+                                                                <div>
+                                                                    <h3 className="modal-title">Students of {batch.batchName}</h3>
+                                                                    <input
+                                                                        type="search"
+                                                                        placeholder="Search students with name..."
+                                                                        className="search-input"
+                                                                        value={studentSearchQuery}
+                                                                        onChange={(e) => setStudentSearchQuery(e.target.value)}
+                                                                    />
+                                                                    <ul className="list-group" style={{ maxHeight: "67vh", overflowY: "auto", margin: "10px 0" }}>
+                                                                        {students[batchId]
+                                                                            ?.slice()
+                                                                            .sort((a, b) => a.name.localeCompare(b.name))
+                                                                            .filter((student) =>
+                                                                                student.name.toLowerCase().includes(studentSearchQuery.toLowerCase())
+                                                                            )
+                                                                            .map((student) => (
+                                                                                <li key={student._id} className="list-group-item d-flex justify-content-between align-items-center">
+                                                                                    <span className="text-break">{student.name}</span>
+                                                                                    <button
+                                                                                        className="text-primary"
+                                                                                        style={{ border: "none", background: "transparent", fontSize: "13px" }}
+                                                                                        onClick={() => {
                                                                                             setActiveStudentAttendance(student._id);
                                                                                             showStudentAttendance(student._id, batchId);
-                                                                                        }
-                                                                                    }}
+                                                                                        }}
+                                                                                    >
+                                                                                        View<i className="bi bi-arrow-right ms-1"></i>
+                                                                                    </button>
+                                                                                </li>
+                                                                            ))}
+                                                                    </ul>
+                                                                </div>
+                                                            ) : (
+                                                                (() => {
+                                                                    const selectedStudent = students[batchId]?.find(
+                                                                        (s) => s._id === activeStudentAttendance
+                                                                    );
+                                                                    return (
+                                                                        <div style={{ maxHeight: "85vh", overflowY: "auto" }}>
+                                                                            <h3 className="modal-title" style={{ textAlign: "left", textWrap: "wrap" }}>
+                                                                                <button
+                                                                                    style={{ border: "none", background: "transparent" }}
+                                                                                    onClick={() => setActiveStudentAttendance(null)}
                                                                                 >
-                                                                                    {activeStudentAttendance === student._id ? "Hide Attendance" : "Show Attendance"}
+                                                                                    <i className="fas fa-arrow-left"></i>
                                                                                 </button>
-                                                                            </div>
-
-                                                                            {activeStudentAttendance === student._id && (
-                                                                                <div className="attendance-calendar mt-2">
-                                                                                    <div id={`carousel-${student._id}`} className="carousel calendar-carousel slide">
-                                                                                        <div className="carousel-inner">
-                                                                                            {allMonths.map((month, monthIdx) => {
-                                                                                                let calendarMonth, calendarYear;
-                                                                                                if (monthIdx <= 8) {
-                                                                                                    calendarMonth = monthIdx + 3;
-                                                                                                    calendarYear = academicYearStart;
-                                                                                                } else {
-                                                                                                    calendarMonth = monthIdx - 9;
-                                                                                                    calendarYear = academicYearStart + 1;
-                                                                                                }
-                                                                                                const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-                                                                                                const firstDayOffset = new Date(calendarYear, calendarMonth, 1).getDay();
-                                                                                                const today = new Date();
-                                                                                                const isCurrentMonth =
-                                                                                                    today.getFullYear() === calendarYear && today.getMonth() === calendarMonth;
-                                                                                                return (
-                                                                                                    <div className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`} key={month}>
-                                                                                                        <h6 className="month-title">{month} {calendarYear}</h6>
-                                                                                                        <div className="weekday-header">
-                                                                                                            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                                                                                                                <span key={d}>{d}</span>
-                                                                                                            ))}
-                                                                                                        </div>
-                                                                                                        <div className="calendar-grid">
-                                                                                                            {[...Array(firstDayOffset)].map((_, i) => (
-                                                                                                                <div key={`empty-${i}`} className="date-box empty" />
-                                                                                                            ))}
-                                                                                                            {[...Array(daysInMonth)].map((_, d) => {
-                                                                                                                const date = new Date(calendarYear, calendarMonth, d + 1);
-                                                                                                                const formatted = date.toISOString().split('T')[0];
-                                                                                                                const key = `${batchId}_${formatted}`;
-                                                                                                                const status = attendanceMap[key];
-                                                                                                                const isToday = isCurrentMonth && today.getDate() === d + 1;
-                                                                                                                return (
-                                                                                                                    <div
-                                                                                                                        key={d}
-                                                                                                                        className={`date-box ${status === "present" ? "present" : status === "absent" ? "absent" : ""} ${isToday ? "today" : ""}`}
-                                                                                                                        title={`${month} ${d + 1}, ${calendarYear} - ${status || 'No record'}`}
-                                                                                                                    >
-                                                                                                                        {d + 1}
-                                                                                                                    </div>
-                                                                                                                );
-                                                                                                            })}
-                                                                                                        </div>
+                                                                                {selectedStudent?.name || "Student"}
+                                                                            </h3>
+                                                                            <div className="attendance-calendar mt-2">
+                                                                                <div id={`carousel-${activeStudentAttendance}`} className="carousel calendar-carousel slide">
+                                                                                    <div className="carousel-inner">
+                                                                                        {allMonths.map((month, monthIdx) => {
+                                                                                            let calendarMonth, calendarYear;
+                                                                                            if (monthIdx <= 8) {
+                                                                                                calendarMonth = monthIdx + 3;
+                                                                                                calendarYear = academicYearStart;
+                                                                                            } else {
+                                                                                                calendarMonth = monthIdx - 9;
+                                                                                                calendarYear = academicYearStart + 1;
+                                                                                            }
+                                                                                            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                                                                                            const firstDayOffset = new Date(calendarYear, calendarMonth, 1).getDay();
+                                                                                            const today = new Date();
+                                                                                            const isCurrentMonth =
+                                                                                                today.getFullYear() === calendarYear && today.getMonth() === calendarMonth;
+                                                                                            return (
+                                                                                                <div className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`} key={month}>
+                                                                                                    <h6 className="month-title">{month} {calendarYear}</h6>
+                                                                                                    <div className="weekday-header">
+                                                                                                        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                                                                                                            <span key={d}>{d}</span>
+                                                                                                        ))}
                                                                                                     </div>
-                                                                                                );
-                                                                                            })}
-                                                                                        </div>
-                                                                                        <div className="calendar-controls">
-                                                                                            <button className="calendar-button" type="button" data-bs-target={`#carousel-${student._id}`} data-bs-slide="prev">‹ Previous</button>
-                                                                                            <button className="calendar-button" type="button" data-bs-target={`#carousel-${student._id}`} data-bs-slide="next">Next ›</button>
-                                                                                        </div>
+                                                                                                    <div className="calendar-grid">
+                                                                                                        {[...Array(firstDayOffset)].map((_, i) => (
+                                                                                                            <div key={`empty-${i}`} className="date-box empty" />
+                                                                                                        ))}
+                                                                                                        {[...Array(daysInMonth)].map((_, d) => {
+                                                                                                            const date = new Date(calendarYear, calendarMonth, d + 1);
+                                                                                                            const formatted = date.toISOString().split('T')[0];
+                                                                                                            const key = `${batchId}_${formatted}`;
+                                                                                                            const status = attendanceMap[key];
+                                                                                                            const isToday = isCurrentMonth && today.getDate() === d + 1;
+                                                                                                            return (
+                                                                                                                <div
+                                                                                                                    key={d}
+                                                                                                                    className={`date-box ${status === "present" ? "present" : status === "absent" ? "absent" : ""} ${isToday ? "today" : ""}`}
+                                                                                                                    title={`${month} ${d + 1}, ${calendarYear} - ${status || 'No record'}`}
+                                                                                                                >
+                                                                                                                    {d + 1}
+                                                                                                                </div>
+                                                                                                            );
+                                                                                                        })}
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            );
+                                                                                        })}
+                                                                                    </div>
+                                                                                    <div className="calendar-controls">
+                                                                                        <button className="calendar-button" type="button" data-bs-target={`#carousel-${activeStudentAttendance}`} data-bs-slide="prev">‹ Previous</button>
+                                                                                        <button className="calendar-button" type="button" data-bs-target={`#carousel-${activeStudentAttendance}`} data-bs-slide="next">Next ›</button>
                                                                                     </div>
                                                                                 </div>
-                                                                            )}
-                                                                        </li>
-                                                                    ))}
-                                                            </ul>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })()
+                                                            )}
                                                         </div>
                                                     </ModalOne>
 
