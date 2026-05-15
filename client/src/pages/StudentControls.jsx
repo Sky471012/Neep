@@ -1371,6 +1371,8 @@ export default function StudentControls() {
                                                         showYearDropdown
                                                         yearDropdownItemNumber={10}
                                                         dropdownMode="select"
+                                                        portalId="datepicker-portal"
+                                                        popperProps={{ strategy: "fixed" }}
                                                     />
                                                 ) : (
                                                     <span className="ic-value">{formatDateToDDMMYYYY(record.dueDate) || "--"}</span>
@@ -1391,6 +1393,8 @@ export default function StudentControls() {
                                                         yearDropdownItemNumber={10}
                                                         showYearDropdown
                                                         dropdownMode="select"
+                                                        portalId="datepicker-portal"
+                                                        popperProps={{ strategy: "fixed" }}
                                                     />
                                                 </div>
                                             ) : (
@@ -1406,6 +1410,8 @@ export default function StudentControls() {
                                                             yearDropdownItemNumber={10}
                                                             showYearDropdown
                                                             dropdownMode="select"
+                                                            portalId="datepicker-portal"
+                                                            popperProps={{ strategy: "fixed" }}
                                                         />
                                                     ) : (
                                                         <span className="ic-value">{formatDateToDDMMYYYY(record.paidDate) || "--"}</span>
