@@ -279,6 +279,7 @@ export default function Teacher() {
     const showStudentAttendance = async (studentId, batchId) => {
         if (activeStudentAttendance === studentId) return;
         const token = localStorage.getItem("authToken");
+        setAttendanceMap({});
         try {
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/${studentId}`, { headers: { Authorization: `Bearer ${token}` } });
             const data = await res.json();
@@ -295,7 +296,7 @@ export default function Teacher() {
                 const key = `${record.batchId}_${formattedDate}`;
                 newMap[key] = record.status;
             });
-            setAttendanceMap((prev) => ({ ...prev, ...newMap }));
+            setAttendanceMap(newMap);
         } catch (err) {
             console.error("Failed to fetch student attendance:", err);
             alert("Error fetching attendance");
@@ -639,8 +640,8 @@ export default function Teacher() {
                                                                             </div>
 
                                                                             {activeStudentAttendance === student._id && (
-                                                                                <div className="attendance-calendar mt-2 border rounded" style={{ backgroundColor: "#d4d4d4ff" }}>
-                                                                                    <div id={`carousel-${student._id}`} className="carousel slide">
+                                                                                <div className="attendance-calendar mt-2">
+                                                                                    <div id={`carousel-${student._id}`} className="carousel calendar-carousel slide">
                                                                                         <div className="carousel-inner">
                                                                                             {allMonths.map((month, monthIdx) => {
                                                                                                 let calendarMonth, calendarYear;
@@ -652,19 +653,32 @@ export default function Teacher() {
                                                                                                     calendarYear = academicYearStart + 1;
                                                                                                 }
                                                                                                 const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                                                                                                const firstDayOffset = new Date(calendarYear, calendarMonth, 1).getDay();
+                                                                                                const today = new Date();
+                                                                                                const isCurrentMonth =
+                                                                                                    today.getFullYear() === calendarYear && today.getMonth() === calendarMonth;
                                                                                                 return (
                                                                                                     <div className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`} key={month}>
-                                                                                                        <h6>{month} {calendarYear}</h6>
+                                                                                                        <h6 className="month-title">{month} {calendarYear}</h6>
+                                                                                                        <div className="weekday-header">
+                                                                                                            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                                                                                                                <span key={d}>{d}</span>
+                                                                                                            ))}
+                                                                                                        </div>
                                                                                                         <div className="calendar-grid">
+                                                                                                            {[...Array(firstDayOffset)].map((_, i) => (
+                                                                                                                <div key={`empty-${i}`} className="date-box empty" />
+                                                                                                            ))}
                                                                                                             {[...Array(daysInMonth)].map((_, d) => {
                                                                                                                 const date = new Date(calendarYear, calendarMonth, d + 1);
                                                                                                                 const formatted = date.toISOString().split('T')[0];
                                                                                                                 const key = `${batchId}_${formatted}`;
                                                                                                                 const status = attendanceMap[key];
+                                                                                                                const isToday = isCurrentMonth && today.getDate() === d + 1;
                                                                                                                 return (
                                                                                                                     <div
                                                                                                                         key={d}
-                                                                                                                        className={`date-box ${status === "present" ? "present" : status === "absent" ? "absent" : ""}`}
+                                                                                                                        className={`date-box ${status === "present" ? "present" : status === "absent" ? "absent" : ""} ${isToday ? "today" : ""}`}
                                                                                                                         title={`${month} ${d + 1}, ${calendarYear} - ${status || 'No record'}`}
                                                                                                                     >
                                                                                                                         {d + 1}
@@ -676,9 +690,9 @@ export default function Teacher() {
                                                                                                 );
                                                                                             })}
                                                                                         </div>
-                                                                                        <div className="calendar-controls d-flex justify-content-between mt-2">
-                                                                                            <button className="btn btn-outline-secondary btn-sm" type="button" data-bs-target={`#carousel-${student._id}`} data-bs-slide="prev">‹ Prev</button>
-                                                                                            <button className="btn btn-outline-secondary btn-sm" type="button" data-bs-target={`#carousel-${student._id}`} data-bs-slide="next">Next ›</button>
+                                                                                        <div className="calendar-controls">
+                                                                                            <button className="calendar-button" type="button" data-bs-target={`#carousel-${student._id}`} data-bs-slide="prev">‹ Previous</button>
+                                                                                            <button className="calendar-button" type="button" data-bs-target={`#carousel-${student._id}`} data-bs-slide="next">Next ›</button>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
@@ -794,7 +808,7 @@ export default function Teacher() {
                                                             <h2 className="modal-title">Timetable for {batch.batchName}</h2>
                                                             {timetable[batchId]?.length > 0 ? (
                                                                 <div style={{ maxHeight: "67vh", overflowY: "auto" }}>
-                                                                    <table className="table table-colored text-center mt-3">
+                                                                    <table className="table table-colored mt-3">
                                                                         <thead className="table">
                                                                             <tr>
                                                                                 <th style={{ padding: "10px 20px" }}>Weekday</th>
@@ -1040,7 +1054,7 @@ export default function Teacher() {
                                                     >
                                                         {showModalSix && (<>
                                                             <h3 className="modal-title mb-0">{batchesRecords.find((b) => b.batchId === showModalSix)?.batchName}</h3>
-                                                            <div id={`carousel-${showModalSix}`} className="carousel slide p-1 mt-2" style={{ backgroundColor: "#d4d4d4ff" }}>
+                                                            <div id={`carousel-${showModalSix}`} className="carousel calendar-carousel slide mt-2">
                                                                 <div className="carousel-inner">
                                                                     {allMonths.map((month, idx) => {
                                                                         let calendarMonth, calendarYear;
@@ -1052,6 +1066,10 @@ export default function Teacher() {
                                                                             calendarYear = academicYearStart + 1;
                                                                         }
                                                                         const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                                                                        const firstDayOffset = new Date(calendarYear, calendarMonth, 1).getDay();
+                                                                        const today = new Date();
+                                                                        const isCurrentMonth =
+                                                                            today.getFullYear() === calendarYear && today.getMonth() === calendarMonth;
 
                                                                         return (
                                                                             <div
@@ -1059,12 +1077,21 @@ export default function Teacher() {
                                                                                 key={month}
                                                                             >
                                                                                 <h6 className="month-title">{month} {calendarYear}</h6>
+                                                                                <div className="weekday-header">
+                                                                                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                                                                                        <span key={d}>{d}</span>
+                                                                                    ))}
+                                                                                </div>
                                                                                 <div className="calendar-grid">
+                                                                                    {[...Array(firstDayOffset)].map((_, i) => (
+                                                                                        <div key={`empty-${i}`} className="date-box empty" />
+                                                                                    ))}
                                                                                     {[...Array(daysInMonth)].map((_, dateIdx) => {
                                                                                         const date = new Date(calendarYear, calendarMonth, dateIdx + 1);
                                                                                         const fullDate = date.toISOString().split('T')[0];
                                                                                         const key = `${showModalSix}_${fullDate}`;
                                                                                         const status = attendanceMap1[key];
+                                                                                        const isToday = isCurrentMonth && today.getDate() === dateIdx + 1;
 
                                                                                         return (
                                                                                             <div
@@ -1074,7 +1101,7 @@ export default function Teacher() {
                                                                                                     : status === "absent"
                                                                                                         ? "absent"
                                                                                                         : ""
-                                                                                                    }`}
+                                                                                                    } ${isToday ? "today" : ""}`}
                                                                                                 title={`${month} ${dateIdx + 1}, ${calendarYear} - ${status || 'No record'}`}
                                                                                             >
                                                                                                 {dateIdx + 1}
@@ -1089,7 +1116,7 @@ export default function Teacher() {
 
                                                                 <div className="calendar-controls">
                                                                     <button
-                                                                        className="calendar-button ms-1 mb-1"
+                                                                        className="calendar-button"
                                                                         type="button"
                                                                         data-bs-target={`#carousel-${showModalSix}`}
                                                                         data-bs-slide="prev"
@@ -1097,7 +1124,7 @@ export default function Teacher() {
                                                                         ‹ Previous
                                                                     </button>
                                                                     <button
-                                                                        className="calendar-button mb-1 me-1"
+                                                                        className="calendar-button"
                                                                         type="button"
                                                                         data-bs-target={`#carousel-${showModalSix}`}
                                                                         data-bs-slide="next"

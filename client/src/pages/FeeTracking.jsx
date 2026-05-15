@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar"
 import ModalOne from "../modals/ModalOne";
 import ModalTwo from "../modals/ModalTwo";
 import ModalThree from "../modals/ModalThree";
+import ModalFour from "../modals/ModalFour";
 import "@fortawesome/fontawesome-free/css/all.css"
 import "../css/admin.css"
 import DatePicker from "react-datepicker";
@@ -29,12 +30,25 @@ export default function FeeTracking() {
   const [modalOne, setModalOne] = useState(false);
   const [modalTwo, setModalTwo] = useState(false);
   const [modalThree, setModalThree] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingInst, setEditingInst] = useState(null);
+  const [editingSource, setEditingSource] = useState(null); // "unpaid" | "upcoming"
+  const [editedAmount, setEditedAmount] = useState(0);
+  const [editedDueDate, setEditedDueDate] = useState(null);
+  const [editedPaidDate, setEditedPaidDate] = useState(null);
+  const [editedMethod, setEditedMethod] = useState("Cash");
   const [fromDateUnpaid, setFromDateUnpaid] = useState(null);
   const [toDateUnpaid, setToDateUnpaid] = useState(null);
   const [fromDateUpcoming, setFromDateUpcoming] = useState(null);
   const [toDateUpcoming, setToDateUpcoming] = useState(null);
   const [fromDatePaid, setFromDatePaid] = useState(null);
   const [toDatePaid, setToDatePaid] = useState(null);
+  const [draftFromDateUnpaid, setDraftFromDateUnpaid] = useState(null);
+  const [draftToDateUnpaid, setDraftToDateUnpaid] = useState(null);
+  const [draftFromDateUpcoming, setDraftFromDateUpcoming] = useState(null);
+  const [draftToDateUpcoming, setDraftToDateUpcoming] = useState(null);
+  const [draftFromDatePaid, setDraftFromDatePaid] = useState(null);
+  const [draftToDatePaid, setDraftToDatePaid] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const getDaysOverdue = (dueDate) => {
@@ -124,12 +138,28 @@ export default function FeeTracking() {
   }, []);
 
 
+  const startOfDay = (d) => {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  };
+  const endOfDay = (d) => {
+    const x = new Date(d);
+    x.setHours(23, 59, 59, 999);
+    return x;
+  };
+  const inDateRange = (value, from, to) => {
+    if (!value) return !from && !to;
+    const d = new Date(value);
+    return (!from || d >= startOfDay(from)) && (!to || d <= endOfDay(to));
+  };
+
   // Compute filtered lists & totals before return
   const filteredUnpaid = unpaidInstallments.filter((inst) => {
     const matchClass = !selectedUnpaidClass || inst.studentId?.class === selectedUnpaidClass;
     const matchDate =
-      (!fromDateUnpaid || new Date(inst.dueDate) >= fromDateUnpaid) &&
-      (!toDateUnpaid || new Date(inst.dueDate) <= toDateUnpaid);
+      (!fromDateUnpaid && !toDateUnpaid) ||
+      inDateRange(inst.dueDate, fromDateUnpaid, toDateUnpaid);
     return matchClass && matchDate;
   });
   const unpaidTotal = filteredUnpaid.reduce((sum, inst) => sum + (inst.amount || 0), 0);
@@ -137,8 +167,8 @@ export default function FeeTracking() {
   const filteredUpcoming = upcomingInstallments.filter((inst) => {
     const matchClass = !selectedUpcomingClass || inst.studentId?.class === selectedUpcomingClass;
     const matchDate =
-      (!fromDateUpcoming || new Date(inst.dueDate) >= fromDateUpcoming) &&
-      (!toDateUpcoming || new Date(inst.dueDate) <= toDateUpcoming);
+      (!fromDateUpcoming && !toDateUpcoming) ||
+      inDateRange(inst.dueDate, fromDateUpcoming, toDateUpcoming);
     return matchClass && matchDate;
   });
   const upcomingTotal = filteredUpcoming.reduce((sum, inst) => sum + (inst.amount || 0), 0);
@@ -147,11 +177,109 @@ export default function FeeTracking() {
     const matchClass = !selectedPaidClass || inst.studentId?.class === selectedPaidClass;
     const matchMedium = !medium || inst.method?.toLowerCase() === medium.toLowerCase();
     const matchDate =
-      (!fromDatePaid || new Date(inst.paidDate) >= fromDatePaid) &&
-      (!toDatePaid || new Date(inst.paidDate) <= toDatePaid);
+      (!fromDatePaid && !toDatePaid) ||
+      inDateRange(inst.paidDate, fromDatePaid, toDatePaid);
     return matchClass && matchMedium && matchDate;
   });
   const paidTotal = filteredPaid.reduce((sum, inst) => sum + (inst.amount || 0), 0);
+
+  const openEditModal = (inst, source) => {
+    setEditingInst(inst);
+    setEditingSource(source);
+    setEditedAmount(inst.amount || 0);
+    setEditedDueDate(inst.dueDate ? new Date(inst.dueDate) : new Date());
+    const parsedPaid = inst.paidDate ? new Date(inst.paidDate) : null;
+    setEditedPaidDate(parsedPaid && !isNaN(parsedPaid) ? parsedPaid : null);
+    setEditedMethod(inst.method || "Cash");
+    setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setEditingInst(null);
+    setEditingSource(null);
+    setEditedAmount(0);
+    setEditedDueDate(null);
+    setEditedPaidDate(null);
+    setEditedMethod("Cash");
+  };
+
+  const handleSaveEditedInstallment = async () => {
+    if (!editingInst) return;
+    const token = localStorage.getItem("authToken");
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/updateInstallment/${editingInst._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            amount: editedAmount,
+            dueDate: editedDueDate?.toISOString().split("T")[0],
+            paidDate: editedPaidDate?.toISOString().split("T")[0] || null,
+            method: editedPaidDate ? editedMethod : null,
+          }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Failed to update installment");
+        return;
+      }
+
+      const newDueDateStr = editedDueDate?.toISOString().split("T")[0];
+      const newPaidDateStr = editedPaidDate?.toISOString().split("T")[0] || null;
+      const updated = {
+        ...editingInst,
+        amount: editedAmount,
+        dueDate: newDueDateStr,
+        paidDate: newPaidDateStr,
+        method: newPaidDateStr ? editedMethod : null,
+      };
+
+      // Apply redistribution returned by the server to keep other unpaid
+      // installments in sync without a refetch.
+      const redistributedMap = new Map(
+        (data.redistributed || []).map((r) => [String(r._id), r.amount])
+      );
+      const applyRedistribution = (list) =>
+        list.map((i) =>
+          redistributedMap.has(String(i._id))
+            ? { ...i, amount: redistributedMap.get(String(i._id)) }
+            : i
+        );
+
+      const removeFrom = (list, id) => list.filter((i) => i._id !== id);
+      const today = startOfDay(new Date());
+      const isPaid = !!newPaidDateStr;
+      const isOverdue = !isPaid && new Date(newDueDateStr) < today;
+      const destination = isPaid ? "paid" : isOverdue ? "unpaid" : "upcoming";
+
+      setUnpaidInstallments((prev) => {
+        let next = applyRedistribution(removeFrom(prev, updated._id));
+        if (destination === "unpaid") next = sortInstallments([...next, updated], unpaidSortOrder);
+        return next;
+      });
+      setUpcomingInstallments((prev) => {
+        let next = applyRedistribution(removeFrom(prev, updated._id));
+        if (destination === "upcoming") next = sortInstallments([...next, updated], upcomingSortOrder);
+        return next;
+      });
+      setPaidInstallments((prev) => {
+        let next = removeFrom(prev, updated._id);
+        if (destination === "paid") next = sortInstallments([...next, updated], paidSortOrder, "paidDate");
+        return next;
+      });
+
+      closeEditModal();
+    } catch (err) {
+      console.error("Error updating installment:", err);
+      alert("Something went wrong while updating installment.");
+    }
+  };
 
   if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading fee tracking...</p></div></div>);
 
@@ -192,19 +320,21 @@ export default function FeeTracking() {
           {activeFeeTab === "unpaid" && (
             <div className="unpaid">
 
-              <div style={{ width: "96%", margin: "10px auto 30px", display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e5e7eb", background: "#f9fafb", padding: "3px 15px", borderRadius: "5px" }}>
-                <span><i className="bi bi-search"></i></span>
+              <div className="fee-search">
+                <i className="bi bi-search"></i>
                 <input
                   type="search"
                   placeholder="Search by Student's Name..."
-                  style={{ outline: "none", border: "none", background: "#f9fafb", boxShadow: "none" }}
                   value={unpaidSearch}
                   onChange={(e) => setUnpaidSearch(e.target.value)}
                 />
               </div>
 
               <h4>Unpaid</h4>
-              <div className="fee-amount">₹ {unpaidTotal}</div>
+              <div className="fee-amount">₹ {unpaidTotal.toLocaleString("en-IN")}</div>
+              <div className="fee-summary-count">
+                {filteredUnpaid.length} {filteredUnpaid.length === 1 ? "installment" : "installments"}
+              </div>
               <div className="installments-section">
                 <div className="installments-header">
                   <span>Installments</span>
@@ -240,7 +370,11 @@ export default function FeeTracking() {
                       <li>
                         <button
                           className="dropdown-item"
-                          onClick={() => { setModalOne(true) }}
+                          onClick={() => {
+                            setDraftFromDateUnpaid(fromDateUnpaid);
+                            setDraftToDateUnpaid(toDateUnpaid);
+                            setModalOne(true);
+                          }}
                         >
                           Filter by Date
                         </button>
@@ -264,7 +398,7 @@ export default function FeeTracking() {
                           </ul>
                             <button
                               className="btn btn-sm text-start text-danger w-100"
-                              onClick={() => { setSelectedUnpaidClass(null); setFromDateUnpaid(null); setToDateUnpaid(null) }}
+                              onClick={() => { setSelectedUnpaidClass(null); setFromDateUnpaid(null); setToDateUnpaid(null); setDraftFromDateUnpaid(null); setDraftToDateUnpaid(null); }}
                             >
                               Clear Filters
                             </button>
@@ -282,10 +416,15 @@ export default function FeeTracking() {
                     .map((inst) => {
                       const student = inst.studentId;
                       return (
-                        <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                        <div key={inst._id} className="installment-item">
                           <div className="installment-header">
                             <h5>{student?.name || "Unknown"}</h5>
-                            <span className="amount">₹ {inst.amount || 0}/-</span>
+                            <div className="d-flex align-items-center gap-2">
+                              <span className="amount">₹ {inst.amount || 0}/-</span>
+                              <Link to={`/student/${student._id}`} className="installment-link" title="Open student page">
+                                <i className="bi bi-box-arrow-up-right"></i>
+                              </Link>
+                            </div>
                           </div>
                           <div className="installment-details">
                             <div className="d-flex">
@@ -293,9 +432,20 @@ export default function FeeTracking() {
                                 <br />
                                 Installment #: {inst.installmentNo || 0}</span>
                             </div>
-                            <span className="overdue">{getDaysOverdue(inst.dueDate)}</span>
+                            <div className="d-flex flex-column align-items-end gap-1">
+                              <button
+                                type="button"
+                                className="installment-edit-btn"
+                                title="Edit installment"
+                                onClick={() => openEditModal(inst, "unpaid")}
+                              >
+                                <i className="bi bi-pencil-square"></i>
+                                <span>Edit</span>
+                              </button>
+                              <span className="overdue">{getDaysOverdue(inst.dueDate)}</span>
+                            </div>
                           </div>
-                        </Link>
+                        </div>
                       );
                     })}
                 </div>
@@ -307,19 +457,21 @@ export default function FeeTracking() {
           {activeFeeTab === "upcoming" && (
             <div className="upcoming">
 
-              <div style={{ width: "96%", margin: "10px auto 30px", display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e5e7eb", background: "#f9fafb", padding: "3px 15px", borderRadius: "5px" }}>
-                <span><i className="bi bi-search"></i></span>
+              <div className="fee-search">
+                <i className="bi bi-search"></i>
                 <input
                   type="search"
                   placeholder="Search by Student's Name..."
-                  style={{ outline: "none", border: "none", background: "#f9fafb", boxShadow: "none" }}
                   value={upcomingSearch}
                   onChange={(e) => setUpcomingSearch(e.target.value)}
                 />
               </div>
 
               <h4>Upcoming</h4>
-              <div className="fee-amount">₹ {upcomingTotal}</div>
+              <div className="fee-amount">₹ {upcomingTotal.toLocaleString("en-IN")}</div>
+              <div className="fee-summary-count">
+                {filteredUpcoming.length} {filteredUpcoming.length === 1 ? "installment" : "installments"}
+              </div>
               <div className="installments-section">
                 <div className="installments-header">
                   <span>Installments</span>
@@ -355,7 +507,11 @@ export default function FeeTracking() {
                       <li>
                         <button
                           className="dropdown-item"
-                          onClick={() => { setModalTwo(true) }}
+                          onClick={() => {
+                            setDraftFromDateUpcoming(fromDateUpcoming);
+                            setDraftToDateUpcoming(toDateUpcoming);
+                            setModalTwo(true);
+                          }}
                         >
                           Filter by Date
                         </button>
@@ -379,7 +535,7 @@ export default function FeeTracking() {
                           </ul>
                             <button
                               className="btn btn-sm text-start text-danger w-100"
-                              onClick={() => { setSelectedUpcomingClass(null); setFromDateUpcoming(null); setToDateUpcoming(null) }}
+                              onClick={() => { setSelectedUpcomingClass(null); setFromDateUpcoming(null); setToDateUpcoming(null); setDraftFromDateUpcoming(null); setDraftToDateUpcoming(null); }}
                             >
                               Clear Filter
                             </button>
@@ -397,10 +553,15 @@ export default function FeeTracking() {
                     .map((inst) => {
                       const student = inst.studentId;
                       return (
-                        <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                        <div key={inst._id} className="installment-item">
                           <div className="installment-header">
                             <h5>{student?.name || "Unknown"}</h5>
-                            <span className="amount">₹ {inst.amount || 0}/-</span>
+                            <div className="d-flex align-items-center gap-2">
+                              <span className="amount">₹ {inst.amount || 0}/-</span>
+                              <Link to={`/student/${student._id}`} className="installment-link" title="Open student page">
+                                <i className="bi bi-box-arrow-up-right"></i>
+                              </Link>
+                            </div>
                           </div>
                           <div className="installment-details">
                             <div className="d-flex">
@@ -408,9 +569,20 @@ export default function FeeTracking() {
                                 <br />
                                 Installment #: {inst.installmentNo || 0}</span>
                             </div>
-                            <span className="upcoming-date">{getDaysLeft(inst.dueDate)}</span>
+                            <div className="d-flex flex-column align-items-end gap-1">
+                              <button
+                                type="button"
+                                className="installment-edit-btn"
+                                title="Edit installment"
+                                onClick={() => openEditModal(inst, "upcoming")}
+                              >
+                                <i className="bi bi-pencil-square"></i>
+                                <span>Edit</span>
+                              </button>
+                              <span className="upcoming-date">{getDaysLeft(inst.dueDate)}</span>
+                            </div>
                           </div>
-                        </Link>
+                        </div>
                       );
                     })}
                 </div>
@@ -422,19 +594,21 @@ export default function FeeTracking() {
           {activeFeeTab === "paid" && (
             <div className="paid">
 
-              <div style={{ width: "96%", margin: "10px auto 30px", display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e5e7eb", background: "#f9fafb", padding: "3px 15px", borderRadius: "5px" }}>
-                <span><i className="bi bi-search"></i></span>
+              <div className="fee-search">
+                <i className="bi bi-search"></i>
                 <input
                   type="search"
                   placeholder="Search by Student's Name..."
-                  style={{ outline: "none", border: "none", background: "#f9fafb", boxShadow: "none" }}
                   value={paidSearch}
                   onChange={(e) => setPaidSearch(e.target.value)}
                 />
               </div>
 
               <h4>Paid</h4>
-              <div className="fee-amount">₹ {paidTotal}</div>
+              <div className="fee-amount">₹ {paidTotal.toLocaleString("en-IN")}</div>
+              <div className="fee-summary-count">
+                {filteredPaid.length} {filteredPaid.length === 1 ? "installment" : "installments"}
+              </div>
               <div className="medium-container">
                 <button
                   type="button"
@@ -487,7 +661,11 @@ export default function FeeTracking() {
                       <li>
                         <button
                           className="dropdown-item"
-                          onClick={() => { setModalThree(true) }}
+                          onClick={() => {
+                            setDraftFromDatePaid(fromDatePaid);
+                            setDraftToDatePaid(toDatePaid);
+                            setModalThree(true);
+                          }}
                         >
                           Filter by Date
                         </button>
@@ -511,7 +689,7 @@ export default function FeeTracking() {
                           </ul>
                             <button
                               className="btn btn-sm text-start text-danger w-100"
-                              onClick={() => { setSelectedPaidClass(null); setFromDatePaid(null); setToDatePaid(null) }}
+                              onClick={() => { setSelectedPaidClass(null); setFromDatePaid(null); setToDatePaid(null); setDraftFromDatePaid(null); setDraftToDatePaid(null); }}
                             >
                               Clear Filter
                             </button>
@@ -529,10 +707,15 @@ export default function FeeTracking() {
                     .map((inst) => {
                       const student = inst.studentId;
                       return (
-                        <Link key={inst._id} to={`/student/${student._id}`} className="installment-item">
+                        <div key={inst._id} className="installment-item">
                           <div className="installment-header">
                             <h5>{student?.name || "Unknown"}</h5>
-                            <span className="amount">₹ {inst.amount || 0}/-</span>
+                            <div className="d-flex align-items-center gap-2">
+                              <span className="amount">₹ {inst.amount || 0}/-</span>
+                              <Link to={`/student/${student._id}`} className="installment-link" title="Open student page">
+                                <i className="bi bi-box-arrow-up-right"></i>
+                              </Link>
+                            </div>
                           </div>
                           <div className="installment-details">
                             <div className="d-flex">
@@ -542,7 +725,7 @@ export default function FeeTracking() {
                             </div>
                             <span className="paid-date">{getDaysSincePaid(inst.paidDate)}</span>
                           </div>
-                        </Link>
+                        </div>
                       );
                     })}
                 </div>
@@ -556,17 +739,18 @@ export default function FeeTracking() {
         isOpen={modalOne}
         onClose={() => {
           setModalOne(false);
-          setSearchTerm("");
+          setDraftFromDateUnpaid(fromDateUnpaid);
+          setDraftToDateUnpaid(toDateUnpaid);
         }}
       >
-        <div className="addToBatch-box d-flex flex-column" style={{ minHeight: "520px" }}>
+        <div className="addToBatch-box d-flex flex-column">
           <h3 className="modal-title">Filter by Date</h3>
 
           <div className="mb-3">
             <label className="form-label">From:</label>
             <DatePicker
-              selected={fromDateUnpaid}
-              onChange={(date) => setFromDateUnpaid(date)}
+              selected={draftFromDateUnpaid}
+              onChange={(date) => setDraftFromDateUnpaid(date)}
               scrollableYearDropdown
               className="form-control"
               dateFormat="dd-MM-yyyy"
@@ -580,8 +764,8 @@ export default function FeeTracking() {
           <div className="mb-3">
             <label className="form-label">To:</label>
             <DatePicker
-              selected={toDateUnpaid}
-              onChange={(date) => setToDateUnpaid(date)}
+              selected={draftToDateUnpaid}
+              onChange={(date) => setDraftToDateUnpaid(date)}
               scrollableYearDropdown
               className="form-control"
               dateFormat="dd-MM-yyyy"
@@ -593,8 +777,10 @@ export default function FeeTracking() {
           </div>
 
           <button
-            className="btn btn-primary mt-5 m-auto"
+            className="btn btn-primary mt-4 m-auto"
             onClick={() => {
+              setFromDateUnpaid(draftFromDateUnpaid);
+              setToDateUnpaid(draftToDateUnpaid);
               setModalOne(false);
             }}
           >
@@ -607,17 +793,18 @@ export default function FeeTracking() {
         isOpen={modalTwo}
         onClose={() => {
           setModalTwo(false);
-          setSearchTerm("");
+          setDraftFromDateUpcoming(fromDateUpcoming);
+          setDraftToDateUpcoming(toDateUpcoming);
         }}
       >
-        <div className="addToBatch-box d-flex flex-column" style={{ minHeight: "520px" }}>
+        <div className="addToBatch-box d-flex flex-column">
           <h3 className="modal-title">Filter by Date</h3>
 
           <div className="mb-3">
             <label className="form-label">From:</label>
             <DatePicker
-              selected={fromDateUpcoming}
-              onChange={(date) => setFromDateUpcoming(date)}
+              selected={draftFromDateUpcoming}
+              onChange={(date) => setDraftFromDateUpcoming(date)}
               scrollableYearDropdown
               className="form-control"
               dateFormat="dd-MM-yyyy"
@@ -631,8 +818,8 @@ export default function FeeTracking() {
           <div className="mb-3">
             <label className="form-label">To:</label>
             <DatePicker
-              selected={toDateUpcoming}
-              onChange={(date) => setToDateUpcoming(date)}
+              selected={draftToDateUpcoming}
+              onChange={(date) => setDraftToDateUpcoming(date)}
               scrollableYearDropdown
               className="form-control"
               dateFormat="dd-MM-yyyy"
@@ -643,9 +830,37 @@ export default function FeeTracking() {
             />
           </div>
 
+          <div className="d-flex gap-2 mb-2">
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary flex-fill"
+              onClick={() => {
+                const t = startOfDay(new Date());
+                t.setDate(t.getDate() + 1);
+                setDraftFromDateUpcoming(t);
+                setDraftToDateUpcoming(t);
+              }}
+            >
+              Tomorrow
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary flex-fill"
+              onClick={() => {
+                const t = startOfDay(new Date());
+                setDraftFromDateUpcoming(t);
+                setDraftToDateUpcoming(t);
+              }}
+            >
+              Today
+            </button>
+          </div>
+
           <button
-            className="btn btn-primary mt-5 m-auto"
+            className="btn btn-primary mt-4 m-auto"
             onClick={() => {
+              setFromDateUpcoming(draftFromDateUpcoming);
+              setToDateUpcoming(draftToDateUpcoming);
               setModalTwo(false);
             }}
           >
@@ -658,17 +873,18 @@ export default function FeeTracking() {
         isOpen={modalThree}
         onClose={() => {
           setModalThree(false);
-          setSearchTerm("");
+          setDraftFromDatePaid(fromDatePaid);
+          setDraftToDatePaid(toDatePaid);
         }}
       >
-        <div className="addToBatch-box d-flex flex-column" style={{ minHeight: "520px" }}>
+        <div className="addToBatch-box d-flex flex-column">
           <h3 className="modal-title">Filter by Date</h3>
 
           <div className="mb-3">
             <label className="form-label">From:</label>
             <DatePicker
-              selected={fromDatePaid}
-              onChange={(date) => setFromDatePaid(date)}
+              selected={draftFromDatePaid}
+              onChange={(date) => setDraftFromDatePaid(date)}
               scrollableYearDropdown
               className="form-control"
               dateFormat="dd-MM-yyyy"
@@ -682,8 +898,8 @@ export default function FeeTracking() {
           <div className="mb-3">
             <label className="form-label">To:</label>
             <DatePicker
-              selected={toDatePaid}
-              onChange={(date) => setToDatePaid(date)}
+              selected={draftToDatePaid}
+              onChange={(date) => setDraftToDatePaid(date)}
               scrollableYearDropdown
               className="form-control"
               dateFormat="dd-MM-yyyy"
@@ -694,9 +910,37 @@ export default function FeeTracking() {
             />
           </div>
 
+          <div className="d-flex gap-2 mb-2">
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary flex-fill"
+              onClick={() => {
+                const t = startOfDay(new Date());
+                t.setDate(t.getDate() - 1);
+                setDraftFromDatePaid(t);
+                setDraftToDatePaid(t);
+              }}
+            >
+              Yesterday
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary flex-fill"
+              onClick={() => {
+                const t = startOfDay(new Date());
+                setDraftFromDatePaid(t);
+                setDraftToDatePaid(t);
+              }}
+            >
+              Today
+            </button>
+          </div>
+
           <button
-            className="btn btn-primary mt-5 m-auto"
+            className="btn btn-primary mt-4 m-auto"
             onClick={() => {
+              setFromDatePaid(draftFromDatePaid);
+              setToDatePaid(draftToDatePaid);
               setModalThree(false);
             }}
           >
@@ -704,6 +948,112 @@ export default function FeeTracking() {
           </button>
         </div>
       </ModalThree>
+
+      <ModalFour isOpen={editModalOpen} onClose={closeEditModal}>
+        <div className="addToBatch-box" style={{ minWidth: "320px" }}>
+          <h3 className="modal-title mb-3">
+            Installment {editingInst?.installmentNo ?? ""}
+            {editingInst?.studentId?.name ? ` - ${editingInst.studentId.name}` : ""}
+          </h3>
+
+          <div className="mb-2 d-flex align-items-center">
+            <label className="me-2 mb-0" style={{ minWidth: "90px" }}>Amount: ₹</label>
+            <input
+              type="number"
+              className="form-control"
+              value={editedAmount}
+              onChange={(e) => setEditedAmount(Number(e.target.value))}
+            />
+          </div>
+
+          <div className="mb-2 d-flex align-items-center">
+            <label className="me-2 mb-0" style={{ minWidth: "90px" }}>Due Date:</label>
+            <DatePicker
+              scrollableYearDropdown
+              selected={editedDueDate}
+              onChange={(date) => setEditedDueDate(date)}
+              dateFormat="dd-MM-yyyy"
+              className="form-control"
+              showYearDropdown
+              yearDropdownItemNumber={10}
+              dropdownMode="select"
+              isClearable
+              portalId="datepicker-portal"
+              popperProps={{ strategy: "fixed" }}
+            />
+          </div>
+
+          <div className="mb-2 d-flex align-items-center">
+            <label className="me-2 mb-0" style={{ minWidth: "90px" }}>Paid Date:</label>
+            <DatePicker
+              scrollableYearDropdown
+              selected={editedPaidDate}
+              onChange={(date) => setEditedPaidDate(date)}
+              dateFormat="dd-MM-yyyy"
+              className="form-control"
+              placeholderText="Not paid"
+              showYearDropdown
+              yearDropdownItemNumber={10}
+              dropdownMode="select"
+              isClearable
+              portalId="datepicker-portal"
+              popperProps={{ strategy: "fixed" }}
+            />
+          </div>
+
+          <div className="mb-3 d-flex align-items-center">
+            <label className="me-2 mb-0" style={{ minWidth: "90px" }}>Method:</label>
+            <select
+              className="form-select"
+              value={editedMethod}
+              onChange={(e) => setEditedMethod(e.target.value)}
+              disabled={!editedPaidDate}
+            >
+              <option value="Cash">Cash</option>
+              <option value="Online">Online</option>
+            </select>
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center mt-3">
+            <span
+              className={`fw-bold ${editedPaidDate ? "text-success" : "text-warning"}`}
+            >
+              {editedPaidDate ? "Paid" : "Due"}
+            </span>
+            <div className="d-flex gap-2">
+              <button
+                type="button"
+                className="btn btn-outline-warning btn-sm"
+                onClick={() => {
+                  if (editedPaidDate) {
+                    setEditedPaidDate(null);
+                    setEditedMethod("Cash");
+                  } else {
+                    setEditedPaidDate(new Date());
+                    setEditedMethod("Cash");
+                  }
+                }}
+              >
+                {editedPaidDate ? "Mark as Due" : "Mark as Paid"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-success btn-sm"
+                onClick={handleSaveEditedInstallment}
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={closeEditModal}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </ModalFour>
 
     </>
   );

@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { format } from "date-fns"
 import axios from "axios"
 import { parse } from "date-fns";
@@ -30,6 +30,59 @@ export default function Admin() {
   const [startDate, setStartDate] = useState(new Date())
   const [todaysClasses, setTodaysClasses] = useState([])
   const [loading, setLoading] = useState(true);
+  const [istNowMinutes, setIstNowMinutes] = useState(() => {
+    const d = new Date();
+    return (d.getUTCHours() * 60 + d.getUTCMinutes() + 330) % 1440;
+  });
+
+  useEffect(() => {
+    const tick = () => {
+      const d = new Date();
+      setIstNowMinutes((d.getUTCHours() * 60 + d.getUTCMinutes() + 330) % 1440);
+    };
+    const id = setInterval(tick, 30 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const parseTimeToMinutes = (str) => {
+    const m = str.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return null;
+    let h = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    const period = m[3].toUpperCase();
+    if (period === "PM" && h !== 12) h += 12;
+    if (period === "AM" && h === 12) h = 0;
+    return h * 60 + min;
+  };
+
+  const getTimingState = (timing) => {
+    const parts = timing.split(" - ");
+    if (parts.length !== 2) return "upcoming";
+    const s = parseTimeToMinutes(parts[0]);
+    let e = parseTimeToMinutes(parts[1]);
+    if (s == null || e == null) return "upcoming";
+    if (e <= s) e += 1440;
+    const n = istNowMinutes;
+    if (n >= s && n < e) return "ongoing";
+    if (n >= e) return "past";
+    return "upcoming";
+  };
+
+  const isTimingOngoing = (timing) => getTimingState(timing) === "ongoing";
+
+  const classesListRef = useRef(null);
+  const activeTimingRef = useRef(null);
+  const didScrollToActiveRef = useRef(false);
+
+  useEffect(() => {
+    if (didScrollToActiveRef.current) return;
+    if (loading) return;
+    const list = classesListRef.current;
+    const active = activeTimingRef.current;
+    if (!list || !active) return;
+    list.scrollTop = active.offsetTop - list.offsetTop;
+    didScrollToActiveRef.current = true;
+  }, [loading, todaysClasses, istNowMinutes]);
   const [credentials, setCredentials] = useState({
     studentName: "",
     studentPhone: "",
@@ -283,14 +336,23 @@ export default function Admin() {
             <i className="fas fa-clock"></i> Today's Classes
           </h3>
           <div className="sidebar-section">
-            <div className="classes-container">
+            <div className="classes-container" ref={classesListRef}>
               {Object.keys(groupedClasses).length === 0 ? (
                 <p className="no-classes">No classes scheduled today.</p>
               ) : (
                 <div className="classes-list">
-                  {Object.entries(groupedClasses).map(([timing, classes]) => (
-                    <div key={timing} className="timing-item">
-                      <div className="timing-header">{timing}</div>
+                  {Object.entries(groupedClasses).map(([timing, classes]) => {
+                    const state = getTimingState(timing);
+                    return (
+                    <div
+                      key={timing}
+                      ref={state === "ongoing" ? activeTimingRef : null}
+                      className={`timing-item${state === "ongoing" ? " active" : ""}${state === "past" ? " past" : ""}`}
+                    >
+                      <div className="timing-header">
+                        {timing}
+                        {state === "ongoing" && <span className="ongoing-badge">LIVE</span>}
+                      </div>
                       <div className="timing-classes">
                         {classes.map((entry, index) => (
                           <Link key={entry.batch.id || index} to={`/batch/${entry.batch.id}`} className="class-link">
@@ -304,7 +366,8 @@ export default function Admin() {
                         ))}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -316,7 +379,7 @@ export default function Admin() {
           <div className="dashboard-grid">
             <Link to='/all-batches' className="dashboard-card all-batches">
               <div className="card-icon">
-                <i className="fa-solid fa-book-open"></i>
+                <i className="fa-solid fa-layer-group"></i>
               </div>
               <h3>All Batches</h3>
             </Link>
@@ -330,21 +393,21 @@ export default function Admin() {
 
             <Link to='/all-teachers' className="dashboard-card all-teachers">
               <div className="card-icon">
-                <i className="fas fa-chalkboard-teacher"></i>
+                <i className="fas fa-chalkboard-user"></i>
               </div>
               <h3>All Teachers</h3>
             </Link>
 
             <Link to='/fee-tracking' className="dashboard-card fee-tracking">
               <div className="card-icon">
-                <i className="fas fa-money-bill-wave"></i>
+                <i className="fas fa-indian-rupee-sign"></i>
               </div>
               <h3>Fee Tracking</h3>
             </Link>
 
             <button className="dashboard-card add-batch" onClick={() => setOpenModalOne(true)}>
               <div className="card-icon">
-                <i className="fas fa-plus-circle"></i>
+                <i className="fas fa-folder-plus"></i>
               </div>
               <h3>Add a Batch</h3>
             </button>
@@ -358,7 +421,7 @@ export default function Admin() {
 
             <button className="dashboard-card add-teacher" onClick={() => setOpenModalThree(true)}>
               <div className="card-icon">
-                <i className="fas fa-user-tie"></i>
+                <i className="fas fa-person-chalkboard"></i>
               </div>
               <h3>Add a Teacher</h3>
             </button>
@@ -379,21 +442,21 @@ export default function Admin() {
 
             <Link to='/all-archived-batches' className="dashboard-card archived-batches">
               <div className="card-icon">
-                <i className="fas fa-archive"></i>
+                <i className="fas fa-box-archive"></i>
               </div>
               <h3>Archived Batches</h3>
             </Link>
 
             <Link to='/todaysBirthdays' className="dashboard-card todaysBirthdays">
               <div className="card-icon">
-                <i className="bi bi-cake-fill"></i>
+                <i className="fas fa-cake-candles"></i>
               </div>
               <h3>Birthday Alerts</h3>
             </Link>
 
             <Link to='/all-enquiries' className="dashboard-card all-enquiries">
               <div className="card-icon">
-                <i className="fas fa-question-circle"></i>
+                <i className="fas fa-comments"></i>
               </div>
               <h3>All Enquiries</h3>
             </Link>

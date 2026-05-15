@@ -183,6 +183,7 @@ export default function BatchControls() {
 
   const showStudentAttendance = async (student) => {
     setActiveStudent(student);
+    setAttendanceMap({});
     setModalThree(true);
 
     try {
@@ -199,7 +200,7 @@ export default function BatchControls() {
         newMap[key] = record.status;
       });
 
-      setAttendanceMap((prev) => ({ ...prev, ...newMap }));
+      setAttendanceMap(newMap);
     } catch (err) {
       console.error("Failed to fetch student attendance:", err);
       alert("Error fetching attendance");
@@ -208,6 +209,7 @@ export default function BatchControls() {
 
   const showStudentAllTests = async (student) => {
     setActiveStudent(student);
+    setStudentTests([]);
     setModalSix(true);
 
     try {
@@ -1393,7 +1395,7 @@ export default function BatchControls() {
         >
           {activeStudent && (<>
             <h3 className="modal-title mb-0">Attendance of {activeStudent.name}</h3>
-            <div id={`carousel-${activeStudent._id}`} className="carousel slide p-1 mt-2" style={{ backgroundColor: "#d4d4d4ff" }}>
+            <div id={`carousel-${activeStudent._id}`} className="carousel calendar-carousel slide mt-2">
               <div className="carousel-inner">
                 {allMonths.map((month, monthIdx) => {
                   let calendarMonth, calendarYear;
@@ -1406,6 +1408,10 @@ export default function BatchControls() {
                   }
 
                   const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                  const firstDayOffset = new Date(calendarYear, calendarMonth, 1).getDay();
+                  const today = new Date();
+                  const isCurrentMonth =
+                    today.getFullYear() === calendarYear && today.getMonth() === calendarMonth;
 
                   return (
                     <div
@@ -1413,12 +1419,21 @@ export default function BatchControls() {
                       className={`carousel-item ${monthIdx === activeMonthIndex ? "active" : ""}`}
                     >
                       <h6 className="month-title">{month} {calendarYear}</h6>
+                      <div className="weekday-header">
+                        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                          <span key={d}>{d}</span>
+                        ))}
+                      </div>
                       <div className="calendar-grid">
+                        {[...Array(firstDayOffset)].map((_, i) => (
+                          <div key={`empty-${i}`} className="date-box empty" />
+                        ))}
                         {[...Array(daysInMonth)].map((_, d) => {
                           const date = new Date(calendarYear, calendarMonth, d + 1);
                           const formatted = date.toISOString().split("T")[0];
                           const key = `${batchId}_${formatted}`;
                           const status = attendanceMap[key];
+                          const isToday = isCurrentMonth && today.getDate() === d + 1;
 
                           return (
                             <div
@@ -1428,7 +1443,7 @@ export default function BatchControls() {
                                 : status === "absent"
                                   ? "absent"
                                   : ""
-                                }`}
+                                } ${isToday ? "today" : ""}`}
                               title={`${month} ${d + 1}, ${calendarYear} - ${status || "No record"}`}
                             >
                               {d + 1}
@@ -1442,7 +1457,7 @@ export default function BatchControls() {
               </div>
               <div className="calendar-controls">
                 <button
-                  className="calendar-button ms-1 mb-1"
+                  className="calendar-button"
                   onClick={() =>
                     setActiveMonthIndex((prev) => (prev - 1 + 12) % 12)
                   }
@@ -1450,7 +1465,7 @@ export default function BatchControls() {
                   ‹ Previous
                 </button>
                 <button
-                  className="calendar-button mb-1 me-1"
+                  className="calendar-button"
                   onClick={() =>
                     setActiveMonthIndex((prev) => (prev + 1) % 12)
                   }

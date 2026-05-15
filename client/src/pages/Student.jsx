@@ -500,7 +500,7 @@ export default function Student() {
         >
             {showModalOne && (<>
                 <h3 className="modal-title mb-0">{batchesRecords.find((b) => b.batchId === showModalOne)?.batchName}</h3>
-                <div id={`carousel-${showModalOne}`} className="carousel slide p-1 mt-2" style={{ backgroundColor: "#d4d4d4ff" }}>
+                <div id={`carousel-${showModalOne}`} className="carousel calendar-carousel slide mt-2">
                     <div className="carousel-inner">
                         {allMonths.map((month, idx) => {
                             let calendarMonth, calendarYear;
@@ -512,6 +512,10 @@ export default function Student() {
                                 calendarYear = academicYearStart + 1;
                             }
                             const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                            const firstDayOffset = new Date(calendarYear, calendarMonth, 1).getDay();
+                            const today = new Date();
+                            const isCurrentMonth =
+                                today.getFullYear() === calendarYear && today.getMonth() === calendarMonth;
 
                             return (
                                 <div
@@ -519,12 +523,21 @@ export default function Student() {
                                     key={month}
                                 >
                                     <h6 className="month-title">{month} {calendarYear}</h6>
+                                    <div className="weekday-header">
+                                        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                                            <span key={d}>{d}</span>
+                                        ))}
+                                    </div>
                                     <div className="calendar-grid">
+                                        {[...Array(firstDayOffset)].map((_, i) => (
+                                            <div key={`empty-${i}`} className="date-box empty" />
+                                        ))}
                                         {[...Array(daysInMonth)].map((_, dateIdx) => {
                                             const date = new Date(calendarYear, calendarMonth, dateIdx + 1);
                                             const fullDate = date.toISOString().split('T')[0];
                                             const key = `${showModalOne}_${fullDate}`;
                                             const status = attendanceMap[key];
+                                            const isToday = isCurrentMonth && today.getDate() === dateIdx + 1;
 
                                             return (
                                                 <div
@@ -534,7 +547,7 @@ export default function Student() {
                                                         : status === "absent"
                                                             ? "absent"
                                                             : ""
-                                                        }`}
+                                                        } ${isToday ? "today" : ""}`}
                                                     title={`${month} ${dateIdx + 1}, ${calendarYear} - ${status || 'No record'}`}
                                                 >
                                                     {dateIdx + 1}
@@ -549,7 +562,7 @@ export default function Student() {
 
                     <div className="calendar-controls">
                         <button
-                            className="calendar-button ms-1 mb-1"
+                            className="calendar-button"
                             type="button"
                             data-bs-target={`#carousel-${showModalOne}`}
                             data-bs-slide="prev"
@@ -557,7 +570,7 @@ export default function Student() {
                             ‹ Previous
                         </button>
                         <button
-                            className="calendar-button mb-1 me-1"
+                            className="calendar-button"
                             type="button"
                             data-bs-target={`#carousel-${showModalOne}`}
                             data-bs-slide="next"
@@ -672,19 +685,17 @@ export default function Student() {
                         const isPaid = !!record.paidDate;
 
                         return (
-                            <div className="batch-card h-100 p-3 mb-3" style={{ minWidth: "300px" }}>
+                            <div className={`batch-card installment-card ${isPaid ? "paid" : "due"} h-100 p-3 mb-3`} style={{ minWidth: "300px" }}>
+                                <span className={`installment-status ${isPaid ? "paid" : "due"}`}>{status}</span>
                                 <div className="batch-header ps-0 pt-0">
                                     <h5 className="batch-name">Installment {record.installmentNo}</h5>
                                 </div>
-                                <p className="mb-1">Amount: ₹ {record.amount || "--"}</p>
-                                <p className="mb-1">Due Date: {formatDate(record.dueDate)}</p>
-                                <p className="mb-1">Paid Date: {formatDate(record.paidDate) || "--"}</p>
-                                <p className="mb-1">Method: {record.method || "--"}</p>
+                                <div className="ic-row"><span className="ic-label">Amount:</span><span className="ic-value">₹ {record.amount || "--"}</span></div>
+                                <div className="ic-row"><span className="ic-label">Due Date:</span><span className="ic-value">{formatDate(record.dueDate)}</span></div>
+                                <div className="ic-row"><span className="ic-label">Paid Date:</span><span className="ic-value">{formatDate(record.paidDate) || "--"}</span></div>
+                                <div className="ic-row"><span className="ic-label">Method:</span><span className="ic-value">{record.method || "--"}</span></div>
 
-                                <div className="d-flex mt-3 align-items-center justify-content-between">
-                                    <p className={`fw-bold m-0 ${isPaid ? "text-success" : "text-warning"}`}>
-                                        {status}
-                                    </p>
+                                <div className="d-flex mt-3 align-items-center justify-content-end">
                                     <button
                                         className="btn btn-outline-primary btn-sm"
                                         onClick={() => generatePDFReceipt(student, record)}

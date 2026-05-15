@@ -365,37 +365,7 @@ body {
   margin-bottom: 1rem;
 }
 
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-}
-
-.date-box {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: default;
-  background: #ffffff!important;
-  color: #374151;
-  border: 2px solid transparent;
-}
-
-.date-box.present {
-  background: #dcfce7;
-  color: #166534;
-  border-color: #22c55e;
-}
-
-.date-box.absent {
-  background: #fee2e2;
-  color: #dc2626;
-  border-color: #ef4444;
-}
+/* Calendar styles are defined in css/student.css (shared across pages). */
 
 .student-list {
   border-radius: 12px;

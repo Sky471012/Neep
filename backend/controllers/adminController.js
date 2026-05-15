@@ -1268,9 +1268,83 @@ exports.updateInstallment = async (req, res) => {
       return res.status(404).json({ message: "Installment not found" });
     }
 
-    // Build update object
+    // Validate new amount if provided
+    if (amount !== undefined) {
+      const n = Number(amount);
+      if (!Number.isFinite(n) || n <= 0) {
+        await session.abortTransaction();
+        session.endSession();
+        return res
+          .status(400)
+          .json({ message: "Amount must be a positive number." });
+      }
+    }
+
+    // 2) If amount changed, redistribute the delta across the OTHER unpaid
+    //    installments so that Fee.totalAmount stays unchanged.
+    let redistributed = [];
+    if (amount !== undefined) {
+      const oldAmt = Number(existing.amount || 0);
+      const newAmt = Number(amount);
+      const delta = newAmt - oldAmt; // +ve: current went up; others must go down
+
+      if (delta !== 0) {
+        const others = await Installment.find({
+          studentId: existing.studentId,
+          _id: { $ne: existing._id },
+          $or: [{ paidDate: null }, { paidDate: { $exists: false } }],
+        }).session(session);
+
+        if (others.length === 0) {
+          await session.abortTransaction();
+          session.endSession();
+          return res.status(400).json({
+            message:
+              "Cannot change amount — there are no other unpaid installments to absorb the difference.",
+          });
+        }
+
+        // Distribute -delta across `others` using integer rupee math.
+        const toDistribute = -delta;
+        const n = others.length;
+        const base = Math.trunc(toDistribute / n);
+        let remainder = toDistribute - base * n;
+        const step = remainder >= 0 ? 1 : -1;
+        remainder = Math.abs(remainder);
+
+        const planned = others.map((inst, idx) => {
+          const add = base + (idx < remainder ? step : 0);
+          return { inst, newAmount: Number(inst.amount || 0) + add };
+        });
+
+        // Edge case: redistribution would push some installment to <= 0
+        const bad = planned.find((p) => p.newAmount <= 0);
+        if (bad) {
+          await session.abortTransaction();
+          session.endSession();
+          return res.status(400).json({
+            message:
+              "Cannot apply this amount — redistribution would leave another unpaid installment at ₹0 or less. Choose a smaller amount or edit a different installment.",
+          });
+        }
+
+        for (const p of planned) {
+          await Installment.updateOne(
+            { _id: p.inst._id },
+            { $set: { amount: p.newAmount } },
+            { session }
+          );
+        }
+        redistributed = planned.map((p) => ({
+          _id: p.inst._id,
+          amount: p.newAmount,
+        }));
+      }
+    }
+
+    // 3) Build update object for the targeted installment
     const updateFields = {};
-    if (amount !== undefined) updateFields.amount = amount;
+    if (amount !== undefined) updateFields.amount = Number(amount);
     if (dueDate !== undefined) updateFields.dueDate = dueDate;
 
     if (paidDate === null || paidDate === "") {
@@ -1281,25 +1355,12 @@ exports.updateInstallment = async (req, res) => {
       if (method) updateFields.method = method;
     }
 
-    // 2) Apply installment update
     const updated = await Installment.findByIdAndUpdate(id, updateFields, {
       new: true,
       session,
     });
 
-    // 3) If amount changed, adjust Fee.totalAmount
-    if (amount !== undefined) {
-      const oldAmt = Number(existing.amount || 0);
-      const newAmt = Number(updated.amount || 0);
-      const delta = newAmt - oldAmt;
-
-      // Assumes Installment has studentId to link to Fee(studentId)
-      await Fee.findOneAndUpdate(
-        { studentId: updated.studentId },
-        { $inc: { totalAmount: delta } },
-        { session }
-      );
-    }
+    // Fee.totalAmount intentionally NOT changed — redistribution keeps it constant.
 
     await session.commitTransaction();
     session.endSession();
@@ -1307,6 +1368,7 @@ exports.updateInstallment = async (req, res) => {
     return res.json({
       message: "Installment updated successfully",
       installment: updated,
+      redistributed,
     });
   } catch (error) {
     await session.abortTransaction();

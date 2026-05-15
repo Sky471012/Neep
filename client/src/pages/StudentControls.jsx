@@ -1336,58 +1336,51 @@ export default function StudentControls() {
 
                                 return (
                                     <div className="col" key={record._id}>
-                                        <div className="batch-card ps-3 pe-3 pb-3">
+                                        <div className={`batch-card installment-card ${record.paidDate ? "paid" : "due"} ps-3 pe-3 pb-3`}>
+                                            <span className={`installment-status ${record.paidDate ? "paid" : "due"}`}>{status}</span>
                                             <div className="batch-header ps-0">
                                                 <h5 className="batch-name">Installment {record.installmentNo}</h5>
                                             </div>
 
                                             {/* Amount Field */}
-                                            <div className="mb-1 d-flex align-items-center">
-                                                Amount: ₹
+                                            <div className="ic-row">
+                                                <span className="ic-label">Amount:</span>
                                                 {isEditing ? (
                                                     <input
                                                         type="number"
                                                         value={editedAmount}
                                                         onChange={(e) => setEditedAmount(Number(e.target.value))}
-                                                        className="form-control d-inline-block ms-2"
-                                                        style={{
-                                                            width: '100px',
-                                                            fontSize: 'inherit',
-                                                            fontWeight: 'inherit',
-                                                            background: 'transparent',
-                                                            padding: "0px 8px",
-                                                            boxShadow: "none",
-                                                            color: "inherit"
-                                                        }}
+                                                        className="form-control"
+                                                        style={{ width: '140px' }}
                                                     />
                                                 ) : (
-                                                    ` ${record.amount || "--"}`
+                                                    <span className="ic-value">₹ {record.amount || "--"}</span>
                                                 )}
                                             </div>
 
                                             {/* Due Date Field */}
-                                            <div className="mb-1 d-flex align-items-center flex-nowrap">
-                                                <label className="me-2 mb-0 white-space-nowrap">Due Date:</label>
+                                            <div className="ic-row">
+                                                <span className="ic-label">Due Date:</span>
                                                 {isEditing ? (
                                                     <DatePicker
                                                         scrollableYearDropdown
                                                         selected={editedDueDate}
                                                         onChange={(date) => setEditedDueDate(date)}
                                                         dateFormat="dd-MM-yyyy"
-                                                        className="form-control d-inline-block ms-2"
+                                                        className="form-control"
                                                         showYearDropdown
                                                         yearDropdownItemNumber={10}
                                                         dropdownMode="select"
                                                     />
                                                 ) : (
-                                                    ` ${formatDateToDDMMYYYY(record.dueDate) || "--"}`
+                                                    <span className="ic-value">{formatDateToDDMMYYYY(record.dueDate) || "--"}</span>
                                                 )}
                                             </div>
 
                                             {/* Paid Date Field */}
                                             {isMarkingPaid ? (
-                                                <div className="mb-1 d-flex align-items-center flex-nowrap">
-                                                    <label className="me-2 mb-0 white-space-nowrap">Paid Date:</label>
+                                                <div className="ic-row">
+                                                    <span className="ic-label">Paid Date:</span>
                                                     <DatePicker
                                                         scrollableYearDropdown
                                                         selected={paidDateInput}
@@ -1401,78 +1394,60 @@ export default function StudentControls() {
                                                     />
                                                 </div>
                                             ) : (
-                                                <div className="mb-1 d-flex align-items-center flex-nowrap">
-                                                    <label className="me-2 mb-0 white-space-nowrap">Paid Date:</label>
+                                                <div className="ic-row">
+                                                    <span className="ic-label">Paid Date:</span>
                                                     {isEditing ? (
                                                         <DatePicker
                                                             selected={editedPaidDate}
                                                             onChange={(date) => setEditedPaidDate(date)}
                                                             dateFormat="dd-MM-yyyy"
-                                                            className="form-control d-inline-block ms-2"
+                                                            className="form-control"
                                                             placeholderText="Select date"
                                                             yearDropdownItemNumber={10}
                                                             showYearDropdown
                                                             dropdownMode="select"
                                                         />
                                                     ) : (
-                                                        ` ${formatDateToDDMMYYYY(record.paidDate) || "--"}`
+                                                        <span className="ic-value">{formatDateToDDMMYYYY(record.paidDate) || "--"}</span>
                                                     )}
                                                 </div>
                                             )}
 
                                             {/* Method Field */}
                                             {isMarkingPaid ? (
-                                                <div className="mb-1">
-                                                    Method:
+                                                <div className="ic-row">
+                                                    <span className="ic-label">Method:</span>
                                                     <select
-                                                        className="form-select d-inline-block ms-2 w-auto"
+                                                        className="form-select"
                                                         value={methodInput}
                                                         onChange={(e) => setMethodInput(e.target.value)}
-                                                        style={{
-                                                            width: '103%',
-                                                            fontSize: 'inherit',
-                                                            fontWeight: 'inherit',
-                                                            background: 'transparent',
-                                                            padding: "0px 8px",
-                                                            boxShadow: "none",
-                                                            color: "inherit"
-                                                        }}
+                                                        style={{ width: '150px' }}
                                                     >
                                                         <option value="Cash">Cash</option>
                                                         <option value="Online">Online</option>
                                                     </select>
                                                 </div>
                                             ) : (
-                                                <p className="mb-1">
-                                                    Method:
+                                                <div className="ic-row">
+                                                    <span className="ic-label">Method:</span>
                                                     {isEditing ? (
                                                         <select
-                                                            className="form-select d-inline-block ms-2 w-auto"
+                                                            className="form-select"
                                                             value={editedMethod}
                                                             onChange={(e) => setEditedMethod(e.target.value)}
                                                             disabled={!editedPaidDate}
-                                                            style={{
-                                                                width: '103%',
-                                                                fontSize: 'inherit',
-                                                                fontWeight: 'inherit',
-                                                                background: 'transparent',
-                                                                padding: "0px 8px",
-                                                                boxShadow: "none",
-                                                                color: "inherit"
-                                                            }}
+                                                            style={{ width: '150px' }}
                                                         >
                                                             <option value="Cash">Cash</option>
                                                             <option value="Online">Online</option>
                                                         </select>
                                                     ) : (
-                                                        ` ${record.method || "--"}`
+                                                        <span className="ic-value">{record.method || "--"}</span>
                                                     )}
-                                                </p>
+                                                </div>
                                             )}
 
-                                            <div className="d-flex justify-content-between align-items-center mt-3">
-                                                <span className={`fw-bold ${statusClass}`}>{status}</span>
-
+                                            <div className="d-flex justify-content-end align-items-center mt-3">
                                                 <div className="d-flex gap-2">
                                                     {isEditing ? (
                                                         // Edit mode buttons
