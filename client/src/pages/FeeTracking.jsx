@@ -240,18 +240,6 @@ export default function FeeTracking() {
         method: newPaidDateStr ? editedMethod : null,
       };
 
-      // Apply redistribution returned by the server to keep other unpaid
-      // installments in sync without a refetch.
-      const redistributedMap = new Map(
-        (data.redistributed || []).map((r) => [String(r._id), r.amount])
-      );
-      const applyRedistribution = (list) =>
-        list.map((i) =>
-          redistributedMap.has(String(i._id))
-            ? { ...i, amount: redistributedMap.get(String(i._id)) }
-            : i
-        );
-
       const removeFrom = (list, id) => list.filter((i) => i._id !== id);
       const today = startOfDay(new Date());
       const isPaid = !!newPaidDateStr;
@@ -259,12 +247,12 @@ export default function FeeTracking() {
       const destination = isPaid ? "paid" : isOverdue ? "unpaid" : "upcoming";
 
       setUnpaidInstallments((prev) => {
-        let next = applyRedistribution(removeFrom(prev, updated._id));
+        let next = removeFrom(prev, updated._id);
         if (destination === "unpaid") next = sortInstallments([...next, updated], unpaidSortOrder);
         return next;
       });
       setUpcomingInstallments((prev) => {
-        let next = applyRedistribution(removeFrom(prev, updated._id));
+        let next = removeFrom(prev, updated._id);
         if (destination === "upcoming") next = sortInstallments([...next, updated], upcomingSortOrder);
         return next;
       });
