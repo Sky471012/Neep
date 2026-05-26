@@ -166,14 +166,14 @@ const ToppersList = () => {
     <div className="toppers-section">
       <h2 className="section-title">Meet Our Academic Toppers</h2>
 
-      <h3 className="class-title">Class 12<sup>th</sup></h3>
+      <h3 className="class-title">Class 12</h3>
       <div className="toppers-grid">
         {class12Toppers.map((topper) => (
           <TopperCard topper={topper} key={topper.id} />
         ))}
 
       </div>
-      <h3 className="class-title">Class 10<sup>th</sup></h3>
+      <h3 className="class-title">Class 10</h3>
       <div className="toppers-grid">
         {class10Toppers.map((topper) => (
           <TopperCard topper={topper} key={topper.id} />
