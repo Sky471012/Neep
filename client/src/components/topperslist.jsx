@@ -1,103 +1,182 @@
 import React from "react";
 
-const toppers = [
+const class12Toppers = [
   {
     id: 1,
-    name: "Nidhi",
-    subject: "Business Studies",
-    marks: "100",
-    image: "/toppers/Nidhi.webp",
-  },
-  {
-    id: 2,
     name: "Prince",
     subject: "Chemistry",
     marks: "100",
-    image: "/toppers/Prince.webp",
+    image: "/toppers/Prince_Chemistry.webp",
+  },
+  {
+    id: 2,
+    name: "Kunal",
+    subject: "Political Science",
+    marks: "100",
+    image: "/toppers/Kunal_PoliticalScience.webp",
   },
   {
     id: 3,
-    name: "Nidhi",
-    subject: "Economics",
-    marks: "99",
-    image: "/toppers/Nidhi.webp",
+    name: "Tanisha",
+    subject: "History",
+    marks: "100",
+    image: "/toppers/Tanisha_History.webp",
   },
   {
     id: 4,
-    name: "Megha",
-    subject: "Accountancy",
-    marks: "99",
-    image: "/toppers/Megha.webp",
+    name: "Nidhi",
+    subject: "Business Studies",
+    marks: "100",
+    image: "/toppers/Nidhi_BusinessStudies.webp",
   },
   {
     id: 5,
-    name: "Neha",
-    subject: "Mathematics",
-    marks: "98",
-    image: "/toppers/Neha.webp",
+    name: "Aradhya",
+    subject: "Computer Science",
+    marks: "100",
+    image: "/toppers/Aradhya_ComputerScience.webp",
   },
   {
     id: 6,
-    name: "Amit",
-    subject: "Biology",
-    marks: "98",
-    image: "/toppers/Amit.webp",
+    name: "Nidhi",
+    subject: "Accountancy",
+    marks: "99",
+    image: "/toppers/Nidhi_Accountancy.webp",
   },
   {
     id: 7,
-    name: "Ayush",
-    subject: "Physics",
-    marks: "95",
-    image: "/toppers/Ayush.webp",
+    name: "Vrisha",
+    subject: "Economics",
+    marks: "99",
+    image: "/toppers/Vrisha_Economics.webp",
   },
   {
     id: 8,
-    name: "Soniya",
-    subject: "Political Science",
+    name: "Neha",
+    subject: "Mathematics",
+    marks: "98",
+    image: "/toppers/Neha_Mathematics.webp",
+  },
+  {
+    id: 9,
+    name: "Anmol",
+    subject: "Physics",
+    marks: "98",
+    image: "/toppers/Anmol_Physics.webp",
+  },
+  {
+    id: 10,
+    name: "Amit",
+    subject: "Biology",
+    marks: "98",
+    image: "/toppers/Amit_Biology.webp",
+  },
+  {
+    id: 11,
+    name: "Piyush",
+    subject: "English",
+    marks: "98",
+    image: "/toppers/Piyush_English.webp",
+  },
+  {
+    id: 12,
+    name: "Kunal",
+    subject: "Geography",
     marks: "95",
-    image: "/toppers/Soniya.webp",
+    image: "/toppers/Kunal_Geography.webp",
   },
 ];
+
+const class10Toppers = [
+  {
+    id: 1,
+    name: "Kanika",
+    subject: "Mathematics",
+    marks: "100",
+    image: "/toppers/Kanika_Mathematics.webp",
+  },
+  {
+    id: 2,
+    name: "Shikhar",
+    subject: "Science",
+    marks: "100",
+    image: "/toppers/Shikhar_Science.webp",
+  },
+  {
+    id: 3,
+    name: "Disha",
+    subject: "English",
+    marks: "99",
+    image: "/toppers/Disha_English.webp",
+  },
+  {
+    id: 4,
+    name: "Ankit",
+    subject: "Social Science",
+    marks: "99",
+    image: "/toppers/Ankit_SocialScience.webp",
+  },
+  {
+    id: 5,
+    name: "Nita",
+    subject: "Hindi",
+    marks: "99",
+    image: "/toppers/Nita_Hindi.webp",
+  }
+];
+
+const TopperCard = ({ topper }) => (
+  <div className="topper-card" key={topper.id}>
+    <div className="card-decoration">
+      <div className="decoration-dot top-left"></div>
+      <div className="decoration-dot top-right"></div>
+      <div className="decoration-line"></div>
+    </div>
+
+    <div className="topper-image-container">
+      <div className="image-frame">
+        <img src={topper.image} alt={topper.name} className="topper-image" />
+      </div>
+      <div className="achievement-badge">
+        <span className="star">★</span>
+      </div>
+    </div>
+
+    <div className="topper-info">
+      <h3 className="topper-name">{topper.name}</h3>
+      <div className="subject-container">
+        <div className="subject-line"></div>
+        <p className="topper-subject">{topper.subject}</p>
+        <div className="subject-line"></div>
+      </div>
+      <div className="marks-container">
+        <span className="marks-label">Score</span>
+        <p className="topper-marks">{topper.marks}%</p>
+      </div>
+    </div>
+
+    <div className="card-footer">
+      <div className="footer-decoration"></div>
+    </div>
+  </div>
+);
 
 const ToppersList = () => {
   return (
     <div className="toppers-section">
       <h2 className="section-title">Meet Our Academic Toppers</h2>
-      <div className="toppers-grid">
-        {toppers.map((topper) => (
-          <div className="topper-card" key={topper.id}>
-            <div className="card-decoration">
-              <div className="decoration-dot top-left"></div>
-              <div className="decoration-dot top-right"></div>
-              <div className="decoration-line"></div>
-            </div>
-            
-            <div className="topper-image-container">
-              <div className="image-frame">
-                <img src={topper.image} alt={topper.name} className="topper-image" />
-              </div>
-              <div className="achievement-badge">
-                <span className="star">★</span>
-              </div>
-            </div>
-            
-            <div className="topper-info">
-              <h3 className="topper-name">{topper.name}</h3>
-              <div className="subject-container">
-                <div className="subject-line"></div>
-                <p className="topper-subject">{topper.subject}</p>
-                <div className="subject-line"></div>
-              </div>
-              <div className="marks-container">
-                <span className="marks-label">Score</span>
-                <p className="topper-marks">{topper.marks}%</p>
-              </div>
-            </div>
 
-            <div className="card-footer">
-              <div className="footer-decoration"></div>
-            </div>
-          </div>
+      <h3 className="class-title">Class 12<sup>th</sup></h3>
+      <div className="toppers-grid">
+        {class12Toppers.map((topper) => (
+          <TopperCard topper={topper} key={topper.id} />
+        ))}
+
+      </div>
+      <h3 className="class-title">Class 10<sup>th</sup></h3>
+      <div className="toppers-grid">
+        {class10Toppers.map((topper) => (
+          <TopperCard topper={topper} key={topper.id} />
         ))}
       </div>
 
@@ -116,7 +195,7 @@ const ToppersList = () => {
 
       <style>{`
         .toppers-section {
-          padding: 5rem 2rem;
+          padding: 5rem 2rem 2rem;
           background: #f2f4f8;
           text-align: center;
           position: relative;
@@ -159,6 +238,37 @@ const ToppersList = () => {
           background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
           border-radius: 2px;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .class-title {
+          font-size: 2rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, #0b3d91 0%, #4a90e2 100%);
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          margin: 2rem 0 2rem;
+          position: relative;
+          display: inline-block;
+        }
+
+        .class-title sup {
+          font-size: 1rem;
+          margin-left: 2px;
+        }
+
+        .class-title::after {
+          content: '';
+          position: absolute;
+          bottom: -8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 50px;
+          height: 3px;
+          background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+          border-radius: 2px;
         }
 
         .toppers-grid {
