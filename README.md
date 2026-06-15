@@ -60,8 +60,8 @@ A full-stack educational institute management system built with the MERN stack. 
 
 ## Tech Stack
 
-| Layer        | Technology                                                  |
-| ------------ | ----------------------------------------------------------- |
+| Layer        | Technology                                                 |
+| ------------ | -----------------------------------------------------------|
 | **Frontend** | React 19, React Router 7, Vite 7, Bootstrap 5              |
 | **Backend**  | Node.js, Express 5                                         |
 | **Database** | MongoDB Atlas, Mongoose 8                                  |
@@ -76,16 +76,16 @@ A full-stack educational institute management system built with the MERN stack. 
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Client (React/Vite)                   │
+│                    Client (React/Vite)                  │
 │   Pages ─── Components ─── Modals ─── CSS/Assets        │
 └──────────────────────┬──────────────────────────────────┘
                        │  Axios HTTP (JWT in headers)
                        ▼
 ┌─────────────────────────────────────────────────────────┐
-│                  Backend (Express API)                   │
+│                  Backend (Express API)                  │
 │                                                         │
-│   Routes ──► Middleware ──► Controllers ──► Models       │
-│              (auth, branch)                              │
+│   Routes ──► Middleware ──► Controllers ──► Models      │
+│              (auth, branch)                             │
 │                                                         │
 │   Utilities: sendMail, file upload (Multer)             │
 └──────────────────────┬──────────────────────────────────┘
@@ -94,8 +94,8 @@ A full-stack educational institute management system built with the MERN stack. 
 ┌─────────────────────────────────────────────────────────┐
 │               MongoDB Atlas (Multi-Tenant)              │
 │                                                         │
-│   realDataBase │ realDataBaseOne │ realDataBaseTwo │ ... │
-│   (Branch A)   │ (Branch B)     │ (Branch C)     │     │
+│   realDataBase │ realDataBaseOne │ realDataBaseTwo │ ...│
+│   (Branch A)   │ (Branch B)     │ (Branch C)     │      │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -245,12 +245,12 @@ All protected endpoints require a `Authorization: Bearer <token>` header.
 
 ### Authentication
 
-| Method | Endpoint                            | Description                       | Auth     |
-| ------ | ----------------------------------- | --------------------------------- | -------- |
-| POST   | `/auth/login/student`               | Student login (phone + DOB)       | Public   |
-| POST   | `/auth/login/admin-teacher/send-otp`| Send OTP to admin/teacher email   | Public   |
-| POST   | `/auth/login/admin-teacher/verify-otp`| Verify OTP, receive JWT         | Public   |
-| POST   | `/auth/switch-branch`               | Switch active branch              | Token    |
+| Method | Endpoint                              | Description                       | Auth     |
+| ------ | ------------------------------------- | --------------------------------- | -------- |
+| POST   | `/auth/login/student`                 | Student login (phone + DOB)       | Public   |
+| POST   | `/auth/login/admin-teacher/send-otp`  | Send OTP to admin/teacher email   | Public   |
+| POST   | `/auth/login/admin-teacher/verify-otp`| Verify OTP, receive JWT           | Public   |
+| POST   | `/auth/switch-branch`                 | Switch active branch              | Token    |
 
 ### Student Endpoints
 
@@ -330,18 +330,18 @@ All protected endpoints require a `Authorization: Bearer <token>` header.
 <details>
 <summary><strong>Fee Management</strong></summary>
 
-| Method | Endpoint                                    | Description                     |
-| ------ | ------------------------------------------- | ------------------------------- |
-| GET    | `/admin/fee/:studentId`                     | Get fee record                  |
-| GET    | `/admin/installments/:studentId`            | Get student's installments      |
-| PATCH  | `/admin/fee/update-fee/:studentId`          | Update total fee amount         |
-| POST   | `/admin/fee/addInstallment`                 | Add an installment              |
-| DELETE | `/admin/fee/removeInstallment/:installmentId`| Remove an installment          |
-| PATCH  | `/admin/fee/mark-paid/:id`                  | Mark installment as paid        |
-| POST   | `/admin/fee/createFeeWithInstallments`      | Create fee + installments       |
-| GET    | `/admin/fee/installments/unpaid`            | List unpaid installments        |
-| GET    | `/admin/fee/installments/upcoming`          | List upcoming due dates         |
-| GET    | `/admin/fee/installments/paid`              | List paid installments          |
+| Method | Endpoint                                     | Description                     |
+| ------ | -------------------------------------------- | ------------------------------- |
+| GET    | `/admin/fee/:studentId`                      | Get fee record                  |
+| GET    | `/admin/installments/:studentId`             | Get student's installments      |
+| PATCH  | `/admin/fee/update-fee/:studentId`           | Update total fee amount         |
+| POST   | `/admin/fee/addInstallment`                  | Add an installment              |
+| DELETE | `/admin/fee/removeInstallment/:installmentId`| Remove an installment           |
+| PATCH  | `/admin/fee/mark-paid/:id`                   | Mark installment as paid        |
+| POST   | `/admin/fee/createFeeWithInstallments`       | Create fee + installments       |
+| GET    | `/admin/fee/installments/unpaid`             | List unpaid installments        |
+| GET    | `/admin/fee/installments/upcoming`           | List upcoming due dates         |
+| GET    | `/admin/fee/installments/paid`               | List paid installments          |
 
 </details>
 
@@ -453,15 +453,15 @@ Other standalone collections:
 
 ```
 Students:                          Admins / Teachers:
-┌────────────┐                     ┌─────────────────┐
-│ Phone + DOB│                     │ Email + Send OTP │
-└─────┬──────┘                     └────────┬────────┘
+┌─────────────┐                     ┌──────────────────┐
+│ Phone + DOB │                     │ Email + Send OTP │
+└─────┬───────┘                     └────────┬─────────┘
       │                                     │
       ▼                                     ▼
-┌────────────┐                     ┌─────────────────┐
-│ Verify in  │                     │ OTP stored in DB│
-│ Student DB │                     │ (1hr TTL)       │
-└─────┬──────┘                     └────────┬────────┘
+┌────────────┐                     ┌──────────────────┐
+│ Verify in  │                     │ OTP stored in DB │
+│ Student DB │                     │ (1hr TTL)        │
+└─────┬──────┘                     └────────┬─────────┘
       │                                     │
       ▼                                     ▼
 ┌────────────────────────────────────────────────────┐
@@ -471,11 +471,11 @@ Students:                          Admins / Teachers:
 
 ### Role-Based Access Control
 
-| Role        | Access Level                                        |
-| ----------- | --------------------------------------------------- |
-| **Admin**   | Full access to all endpoints                        |
+| Role        | Access Level                                         |
+| ----------- | ---------------------------------------------------- |
+| **Admin**   | Full access to all endpoints                         |
 | **Teacher** | Access to teacher endpoints + some admin-level reads |
-| **Student** | Read-only access to own data                        |
+| **Student** | Read-only access to own data                         |
 
 ### Middleware Chain
 
@@ -492,7 +492,7 @@ NEEP supports multiple institute branches, each with its own isolated database:
 
 ```
 JWT payload: { id: "...", role: "Admin", branch: "realDataBase" }
-                                              │
+                                               │
                   branchMiddleware extracts ───┘
                               │
         ┌─────────────────────┼─────────────────────┐
