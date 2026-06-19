@@ -196,6 +196,25 @@ exports.markAttendance = async (req, res) => {
   }
 };
 
+exports.removeAttendance = async (req, res) => {
+  const { Attendance } = getModels(req);
+  const { batchId, date } = req.body;
+  try {
+    const d = new Date(date);
+    const start = new Date(d.getTime() - 12 * 60 * 60 * 1000);
+    const end = new Date(d.getTime() + 12 * 60 * 60 * 1000);
+
+    const result = await Attendance.deleteMany({
+      batchId,
+      date: { $gte: start, $lte: end },
+    });
+
+    res.json({ message: "Attendance removed", deletedCount: result.deletedCount });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.addTest = async (req, res) => {
   const { Test } = getModels(req);
   const {
@@ -1548,6 +1567,26 @@ exports.markTeacherAttendance = async (req, res) => {
       { upsert: true, new: true }
     );
     res.json(record);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.removeTeacherAttendance = async (req, res) => {
+  const { AttendanceTeacher } = getModels(req);
+  const { teacherId, batchId, date } = req.body;
+  try {
+    const d = new Date(date);
+    const start = new Date(d.getTime() - 12 * 60 * 60 * 1000);
+    const end = new Date(d.getTime() + 12 * 60 * 60 * 1000);
+
+    const result = await AttendanceTeacher.deleteMany({
+      teacherId,
+      batchId,
+      date: { $gte: start, $lte: end },
+    });
+
+    res.json({ message: "Attendance removed", deletedCount: result.deletedCount });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

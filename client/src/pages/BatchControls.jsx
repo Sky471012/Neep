@@ -41,6 +41,8 @@ export default function BatchControls() {
   const [allStudents, setAllStudents] = useState({});
   const [markedStatus, setMarkedStatus] = useState({});
   const [attendanceDraft, setAttendanceDraft] = useState({});
+  const [attendanceExists, setAttendanceExists] = useState(false);
+  const [teacherAttendanceExists, setTeacherAttendanceExists] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState({});
   const [attendanceMap, setAttendanceMap] = useState({});
   const [activeStudent, setActiveStudent] = useState(null);
@@ -372,8 +374,42 @@ export default function BatchControls() {
         }
         return next;
       });
+
+      // Track whether any saved record exists for this date (to enable removal)
+      setAttendanceExists(
+        results.some(([, status]) => status === "present" || status === "absent")
+      );
     } catch (err) {
       console.error("Preload attendance error:", err);
+    }
+  };
+
+  const removeAttendanceForBatch = async (dateObj) => {
+    if (!dateObj) {
+      alert("Please select a date first.");
+      return;
+    }
+    if (!window.confirm("Remove attendance for all students on this date?")) return;
+
+    const token = localStorage.getItem("authToken");
+    const dateOnly = new Date(dateObj.toDateString());
+    const dateISO = dateOnly.toISOString();
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/remove`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ batchId, date: dateISO }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to remove attendance");
+
+      setAttendanceDraft({});
+      setAttendanceExists(false);
+      closeAttendanceModalHandler();
+    } catch (err) {
+      console.error("Remove attendance error:", err);
+      alert("Failed to remove attendance.");
     }
   };
 
@@ -433,6 +469,7 @@ export default function BatchControls() {
 
   const closeAttendanceModalHandler = () => {
     setOpenModalOne(false);
+    setAttendanceExists(false);
   };
 
   const preloadTeacherAttendanceForDate = async (dateObj) => {
@@ -461,8 +498,41 @@ export default function BatchControls() {
       });
 
       setTeacherAttendanceDraft(rec?.status || undefined);
+      setTeacherAttendanceExists(rec?.status === "present" || rec?.status === "absent");
     } catch (err) {
       console.error("Preload teacher attendance error:", err);
+    }
+  };
+
+  const removeTeacherAttendance = async (dateObj) => {
+    if (!dateObj) {
+      alert("Please select a date first.");
+      return;
+    }
+    if (!teacher?._id) {
+      alert("No teacher assigned to this batch.");
+      return;
+    }
+    if (!window.confirm("Remove teacher attendance on this date?")) return;
+
+    const token = localStorage.getItem("authToken");
+    const dateOnly = new Date(dateObj.toDateString());
+    const dateISO = dateOnly.toISOString();
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendanceTeacher/remove`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ teacherId: teacher._id, batchId, date: dateISO }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to remove attendance");
+
+      setTeacherAttendanceExists(false);
+      closeTeacherAttendanceModalHandler();
+    } catch (err) {
+      console.error("Remove teacher attendance error:", err);
+      alert("Failed to remove attendance.");
     }
   };
 
@@ -480,6 +550,7 @@ export default function BatchControls() {
   const closeTeacherAttendanceModalHandler = () => {
     setModalNine(false);
     setTeacherAttendanceDraft(undefined);
+    setTeacherAttendanceExists(false);
   };
 
   const saveTeacherAttendance = async (dateObj) => {
@@ -1327,14 +1398,25 @@ export default function BatchControls() {
             </div>
 
             <div className="d-flex justify-content-between align-items-center mt-2">
-              <small className="text-muted">
-                {(() => {
-                  const total = students.length || 0;
-                  const absentCount = Object.values(attendanceDraft || {}).filter(v => v === "absent").length;
-                  const presentCount = total - absentCount; // default present
-                  return `Selected: ${presentCount} Present, ${absentCount} Absent`;
-                })()}
-              </small>
+              <div className="d-flex align-items-center gap-3">
+                {attendanceExists && (
+                  <button
+                    className="btn btn-outline-danger"
+                    disabled={!selectedDate}
+                    onClick={() => removeAttendanceForBatch(selectedDate)}
+                  >
+                    Remove Attendance
+                  </button>
+                )}
+                <small className="text-muted">
+                  {(() => {
+                    const total = students.length || 0;
+                    const absentCount = Object.values(attendanceDraft || {}).filter(v => v === "absent").length;
+                    const presentCount = total - absentCount; // default present
+                    return `Selected: ${presentCount} Present, ${absentCount} Absent`;
+                  })()}
+                </small>
+              </div>
 
               <button
                 className="btn btn-primary"
@@ -2069,8 +2151,19 @@ export default function BatchControls() {
             </div>
 
             <div className="d-flex justify-content-between align-items-center mt-2">
+              {teacherAttendanceExists ? (
+                <button
+                  className="btn btn-outline-danger"
+                  disabled={!selectedDate || !teacher?._id}
+                  onClick={() => removeTeacherAttendance(selectedDate)}
+                >
+                  Remove Attendance
+                </button>
+              ) : (
+                <span />
+              )}
               <button
-                className="btn btn-primary m-auto"
+                className="btn btn-primary"
                 disabled={!selectedDate || !teacher?._id}
                 onClick={() => saveTeacherAttendance(selectedDate)}
               >

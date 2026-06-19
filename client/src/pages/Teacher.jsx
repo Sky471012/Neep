@@ -39,6 +39,7 @@ export default function Teacher() {
     const [todaysClasses, setTodaysClasses] = useState([]);
     const [selectedTest, setSelectedTest] = useState(null);
     const [attendanceDraft, setAttendanceDraft] = useState({});
+    const [attendanceExists, setAttendanceExists] = useState({});
     const [editingMarks, setEditingMarks] = useState({});
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [testSearchQuery, setTestSearchQuery] = useState("");
@@ -348,8 +349,45 @@ export default function Teacher() {
                 next[batchId] = batchDraft;
                 return next;
             });
+
+            // Track whether any saved record exists for this date (to enable removal)
+            const exists = results.some(([, status]) => status === "present" || status === "absent");
+            setAttendanceExists((prev) => ({ ...prev, [batchId]: exists }));
         } catch (err) {
             console.error("Preload attendance error:", err);
+        }
+    };
+
+    const removeAttendanceForBatch = async (batchId, dateObj) => {
+        if (!dateObj) {
+            alert("Please select a date first.");
+            return;
+        }
+        if (!window.confirm("Remove attendance for all students on this date?")) return;
+
+        const token = localStorage.getItem("authToken");
+        const dateOnly = new Date(dateObj.toDateString());
+        const dateISO = dateOnly.toISOString();
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/remove`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ batchId, date: dateISO }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to remove attendance");
+
+            setAttendanceDraft((prev) => {
+                const copy = { ...prev };
+                delete copy[batchId];
+                return copy;
+            });
+            setAttendanceExists((prev) => ({ ...prev, [batchId]: false }));
+            closeAttendanceModal(batchId);
+        } catch (err) {
+            console.error("Remove attendance error:", err);
+            alert("Failed to remove attendance.");
         }
     };
 
@@ -835,14 +873,25 @@ export default function Teacher() {
 
                                                             {/* Summary & single submit button */}
                                                             <div className="d-flex justify-content-between align-items-center mt-3">
-                                                                <small className="text-muted">
-                                                                    {(() => {
-                                                                        const total = students[batchId]?.length || 0;
-                                                                        const absentCount = Object.values(attendanceDraft[batchId] || {}).filter(v => v === "absent").length;
-                                                                        const presentCount = total - absentCount; // default present
-                                                                        return `Selected: ${presentCount} Present, ${absentCount} Absent`;
-                                                                    })()}
-                                                                </small>
+                                                                <div className="d-flex align-items-center gap-3">
+                                                                    {attendanceExists[batchId] && (
+                                                                        <button
+                                                                            className="btn btn-outline-danger"
+                                                                            disabled={!selectedDate}
+                                                                            onClick={() => removeAttendanceForBatch(batchId, selectedDate)}
+                                                                        >
+                                                                            Remove Attendance
+                                                                        </button>
+                                                                    )}
+                                                                    <small className="text-muted">
+                                                                        {(() => {
+                                                                            const total = students[batchId]?.length || 0;
+                                                                            const absentCount = Object.values(attendanceDraft[batchId] || {}).filter(v => v === "absent").length;
+                                                                            const presentCount = total - absentCount; // default present
+                                                                            return `Selected: ${presentCount} Present, ${absentCount} Absent`;
+                                                                        })()}
+                                                                    </small>
+                                                                </div>
 
                                                                 <button
                                                                     className="btn btn-primary"
