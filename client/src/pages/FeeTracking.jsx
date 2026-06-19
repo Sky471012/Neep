@@ -143,6 +143,16 @@ export default function FeeTracking() {
     x.setHours(0, 0, 0, 0);
     return x;
   };
+  // Format a Date as YYYY-MM-DD using local time (avoids the UTC shift that
+  // toISOString() introduces for timezones ahead of UTC, e.g. IST).
+  const toLocalDateStr = (d) => {
+    if (!d) return null;
+    const x = new Date(d);
+    const y = x.getFullYear();
+    const m = String(x.getMonth() + 1).padStart(2, "0");
+    const day = String(x.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
   const endOfDay = (d) => {
     const x = new Date(d);
     x.setHours(23, 59, 59, 999);
@@ -218,8 +228,8 @@ export default function FeeTracking() {
           },
           body: JSON.stringify({
             amount: editedAmount,
-            dueDate: editedDueDate?.toISOString().split("T")[0],
-            paidDate: editedPaidDate?.toISOString().split("T")[0] || null,
+            dueDate: toLocalDateStr(editedDueDate),
+            paidDate: toLocalDateStr(editedPaidDate) || null,
             method: editedPaidDate ? editedMethod : null,
           }),
         }
@@ -230,8 +240,8 @@ export default function FeeTracking() {
         return;
       }
 
-      const newDueDateStr = editedDueDate?.toISOString().split("T")[0];
-      const newPaidDateStr = editedPaidDate?.toISOString().split("T")[0] || null;
+      const newDueDateStr = toLocalDateStr(editedDueDate);
+      const newPaidDateStr = toLocalDateStr(editedPaidDate) || null;
       const updated = {
         ...editingInst,
         amount: editedAmount,

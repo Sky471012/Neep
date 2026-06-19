@@ -81,6 +81,18 @@ export default function StudentControls() {
         return `${day}-${month}-${year}`;
     }
 
+    // Format a Date as YYYY-MM-DD using local time (avoids the UTC shift that
+    // toISOString() introduces for timezones ahead of UTC, e.g. IST).
+    const toLocalDateStr = (d) => {
+        if (!d) return null;
+        const x = new Date(d);
+        if (isNaN(x.getTime())) return null;
+        const y = x.getFullYear();
+        const m = String(x.getMonth() + 1).padStart(2, "0");
+        const day = String(x.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+    };
+
     // Robust parser for dd-MM-yyyy and ISO-like date strings. Returns timestamp or Infinity.
     function parseDateToTime(dateStr) {
         if (!dateStr) return Infinity;
@@ -439,7 +451,7 @@ export default function StudentControls() {
             feeId: fee._id,
             studentId: student._id,
             installmentNo: installments.length + 1,
-            dueDate: new Date().toISOString().split("T")[0],
+            dueDate: toLocalDateStr(new Date()),
             amount: 0
         };
 
@@ -641,7 +653,7 @@ export default function StudentControls() {
                     "Authorization": `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    paidDate: paidDateInput?.toISOString().split("T")[0],
+                    paidDate: toLocalDateStr(paidDateInput),
                     method: methodInput,
                 }),
             });
@@ -652,7 +664,7 @@ export default function StudentControls() {
                     inst._id === installmentId
                         ? {
                             ...inst,
-                            paidDate: paidDateInput ? paidDateInput.toISOString().split("T")[0] : null,
+                            paidDate: toLocalDateStr(paidDateInput),
                             method: methodInput
                         }
                         : inst
@@ -695,8 +707,8 @@ export default function StudentControls() {
                 },
                 body: JSON.stringify({
                     amount: editedAmount,
-                    dueDate: editedDueDate?.toISOString().split("T")[0],
-                    paidDate: editedPaidDate?.toISOString().split("T")[0] || null,
+                    dueDate: toLocalDateStr(editedDueDate),
+                    paidDate: toLocalDateStr(editedPaidDate) || null,
                     method: editedPaidDate ? editedMethod : null,
                 }),
             });
@@ -713,8 +725,8 @@ export default function StudentControls() {
                     ? {
                         ...inst,
                         amount: editedAmount,
-                        dueDate: editedDueDate?.toISOString().split("T")[0],
-                        paidDate: editedPaidDate?.toISOString().split("T")[0] || null,
+                        dueDate: toLocalDateStr(editedDueDate),
+                        paidDate: toLocalDateStr(editedPaidDate) || null,
                         method: editedPaidDate ? editedMethod : null,
                     }
                     : inst
