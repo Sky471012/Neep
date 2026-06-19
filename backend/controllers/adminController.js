@@ -1772,7 +1772,7 @@ exports.getUnpaidInstallments = async (req, res) => {
     today.setHours(0, 0, 0, 0);
 
     const installments = await Installment.find({
-      dueDate: { $lte: new Date() },
+      dueDate: { $lt: today }, // strictly before today (yesterday and earlier)
       $or: [{ paidDate: { $exists: false } }, { paidDate: null }],
     })
       .populate("studentId")
@@ -1788,12 +1788,11 @@ exports.getUnpaidInstallments = async (req, res) => {
 exports.getUpcomingInstallments = async (req, res) => {
   const { Installment } = getModels(req);
   try {
-    const tomorrow = new Date();
-    tomorrow.setHours(0, 0, 0, 0); // Set to start of today
-    tomorrow.setDate(tomorrow.getDate() + 1); // Move to tomorrow
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
 
     const upcomingInstallments = await Installment.find({
-      dueDate: { $gte: tomorrow },
+      dueDate: { $gte: today }, // today and future
       $or: [{ paidDate: { $exists: false } }, { paidDate: null }],
     })
       .populate("studentId")
