@@ -2155,8 +2155,8 @@ export default function BatchControls() {
               </table>
             </div>
 
-            <div className="d-flex justify-content-between align-items-center mt-2">
-              {teacherAttendanceExists ? (
+            <div className={`d-flex align-items-center mt-2 ${teacherAttendanceExists ? "justify-content-between" : "justify-content-center"}`}>
+              {teacherAttendanceExists && (
                 <button
                   className="btn btn-outline-danger"
                   disabled={!selectedDate || !teacher?._id}
@@ -2164,8 +2164,6 @@ export default function BatchControls() {
                 >
                   Remove Attendance
                 </button>
-              ) : (
-                <span />
               )}
               <button
                 className="btn btn-primary"
