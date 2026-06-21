@@ -4,11 +4,13 @@ import axios from "axios";
 const ExcelUpload = () => {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
   const [dragging, setDragging] = useState(false);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     setMessage(""); // Clear message when a new file is selected
+    setIsError(false);
   };
 
   const handleDrop = (e) => {
@@ -23,14 +25,19 @@ const ExcelUpload = () => {
     ) {
       setFile(droppedFile);
       setMessage("");
+      setIsError(false);
     } else {
+      setIsError(true);
       setMessage("Please drop a valid Excel file.");
     }
   };
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file) return setMessage("Please select a file.");
+    if (!file) {
+      setIsError(true);
+      return setMessage("Please select a file.");
+    }
 
     const formData = new FormData();
     formData.append("file", file);
@@ -49,10 +56,12 @@ const ExcelUpload = () => {
         }
       );
 
+      setIsError(false);
       setMessage(res.data.message);
     } catch (err) {
       const errorMessage =
         err.response?.data?.message || "Upload failed.";
+      setIsError(true);
       setMessage(errorMessage);
       console.error(err.response?.data || err.message);
     }
@@ -61,6 +70,7 @@ const ExcelUpload = () => {
   const handleClear = () => {
     setFile(null);
     setMessage("");
+    setIsError(false);
   };
 
   return (
@@ -122,7 +132,12 @@ const ExcelUpload = () => {
       </form>
 
       {message && (
-        <div className="mt-2 text-info text-center">{message}</div>
+        <div
+          className={`mt-2 text-center ${isError ? "text-danger" : "text-success"}`}
+          style={{ whiteSpace: "pre-line" }}
+        >
+          {message}
+        </div>
       )}
     </>
   );

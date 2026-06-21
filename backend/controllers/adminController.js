@@ -1925,21 +1925,96 @@ exports.getTodaysClasses = async (req, res) => {
 exports.uploadExcelSheet = async (req, res) => {
   const { Student } = getModels(req);
   try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded." });
+    }
+
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-    // Normalize: trim and lowercase name + string phone
-    const uploadedStudents = data.map((row) => ({
-      name: row.name?.trim(),
-      phone: row.phone?.toString().trim(),
-      dob: row.dob?.trim(),
-      address: row.address?.trim(),
-      class: row.class?.trim(),
-      dateOfJoining: row.dateOfJoining?.trim(),
-      guardianName: row.guardianName?.toString().trim() || "",
-      guardianPhone: row.guardianPhone?.toString().trim() || "",
-    }));
+    if (!Array.isArray(data) || data.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "The uploaded sheet has no data rows." });
+    }
+
+    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
+    const allowedClasses = [
+      "Kids",
+      "English Spoken",
+      "9",
+      "10",
+      "11",
+      "12",
+      "Entrance Exams",
+      "Graduation",
+    ];
+    const requiredFields = [
+      "name",
+      "phone",
+      "dob",
+      "address",
+      "class",
+      "dateOfJoining",
+    ];
+
+    // Validate + normalize every row. Required fields must be present and
+    // dates/class must be valid; guardianName, guardianPhone, schoolType are optional.
+    const errors = [];
+    const uploadedStudents = [];
+
+    data.forEach((row, idx) => {
+      const rowNum = idx + 2; // +1 for header row, +1 for 1-based numbering
+      const val = (key) =>
+        row[key] === undefined || row[key] === null
+          ? ""
+          : row[key].toString().trim();
+
+      const schoolTypeRaw = val("schoolType");
+      const student = {
+        name: val("name"),
+        phone: val("phone"),
+        dob: val("dob"),
+        address: val("address"),
+        class: val("class"),
+        dateOfJoining: val("dateOfJoining"),
+        guardianName: val("guardianName"),
+        guardianPhone: val("guardianPhone"),
+        schoolType: ["Government", "Private"].includes(schoolTypeRaw)
+          ? schoolTypeRaw
+          : "NA",
+      };
+
+      const missing = requiredFields.filter((f) => !student[f]);
+      if (missing.length > 0) {
+        errors.push(`Row ${rowNum}: missing required field(s): ${missing.join(", ")}`);
+        return;
+      }
+
+      if (!dateRegex.test(student.dob)) {
+        errors.push(`Row ${rowNum}: dob must be in DD-MM-YYYY format`);
+      }
+      if (!dateRegex.test(student.dateOfJoining)) {
+        errors.push(`Row ${rowNum}: dateOfJoining must be in DD-MM-YYYY format`);
+      }
+      if (!allowedClasses.includes(student.class)) {
+        errors.push(`Row ${rowNum}: invalid class "${student.class}"`);
+      }
+
+      uploadedStudents.push(student);
+    });
+
+    if (errors.length > 0) {
+      const shown = errors.slice(0, 15);
+      const extra =
+        errors.length > shown.length
+          ? `\n...and ${errors.length - shown.length} more issue(s)`
+          : "";
+      return res.status(400).json({
+        message: `Upload failed. Please fix these and re-upload:\n${shown.join("\n")}${extra}`,
+      });
+    }
 
     // Step 1: Remove duplicates within uploaded sheet
     const uniqueBySheet = [];
