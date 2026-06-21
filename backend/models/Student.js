@@ -37,6 +37,10 @@ const studentSchema = new Schema({
     type: String,
     required: false,
   },
+  guardianPhone: {
+    type: String,
+    required: false,
+  },
   schoolType: {
     type: String,
     enum: ["Government", "Private", "NA"],

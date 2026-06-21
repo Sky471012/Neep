@@ -89,6 +89,7 @@ export default function Admin() {
     studentAddress: "",
     studentClass: "",
     studentGuardian: "",
+    studentGuardianPhone: "",
     studentSchoolType: "",
     teacherName: "",
     teacherEmail: "",
@@ -173,7 +174,7 @@ export default function Admin() {
     }
   }
 
-  const createStudent = async (name, phone, dob, address, className, dateOfJoining, guardianName, schoolType) => {
+  const createStudent = async (name, phone, dob, address, className, dateOfJoining, guardianName, guardianPhone, schoolType) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentCreate`, {
         method: "POST",
@@ -189,6 +190,7 @@ export default function Admin() {
           class: className,
           dateOfJoining,
           guardianName,
+          guardianPhone,
           schoolType
         }),
       })
@@ -204,6 +206,7 @@ export default function Admin() {
         studentAddress: "",
         studentClass: "",
         studentGuardian: "",
+        studentGuardianPhone: "",
         studentSchoolType: "",
       })
       setDob(new Date())
@@ -303,6 +306,7 @@ export default function Admin() {
       credentials.studentClass,
       formattedJoining,
       credentials.studentGuardian,
+      credentials.studentGuardianPhone,
       credentials.studentSchoolType
     )
   }
@@ -560,6 +564,17 @@ export default function Admin() {
                 name="studentGuardian"
                 placeholder="Write Guardian's Name..."
                 value={credentials.studentGuardian || ""}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Guardian Phone</label>
+              <input
+                type="tel"
+                className="form-control"
+                name="studentGuardianPhone"
+                placeholder="Write Guardian's Phone..."
+                value={credentials.studentGuardianPhone || ""}
                 onChange={handleInputChange}
               />
             </div>

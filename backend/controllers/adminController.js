@@ -523,6 +523,7 @@ exports.addStudentByCreating = async (req, res) => {
       class: req.body.class.trim(),
       dateOfJoining: req.body.dateOfJoining.trim(), // must be DD-MM-YYYY
       guardianName: req.body.guardianName?.trim() || "", // optional
+      guardianPhone: req.body.guardianPhone?.trim() || "", // optional
       schoolType: req.body.schoolType || "NA",
     });
 
@@ -843,6 +844,7 @@ exports.createStudent = async (req, res) => {
       class: studentClass,
       dateOfJoining,
       guardianName,
+      guardianPhone,
       schoolType,
     } = req.body;
 
@@ -897,6 +899,7 @@ exports.createStudent = async (req, res) => {
       class: studentClass,
       dateOfJoining: dateOfJoining.trim(),
       guardianName: guardianName ? guardianName.trim() : "",
+      guardianPhone: guardianPhone ? guardianPhone.trim() : "",
       schoolType: schoolType || "NA",
     });
 
@@ -1399,6 +1402,7 @@ exports.editStudent = async (req, res) => {
       class: studentClass,
       dateOfJoining,
       guardianName,
+      guardianPhone,
       schoolType,
     } = req.body;
 
@@ -1465,6 +1469,7 @@ exports.editStudent = async (req, res) => {
         class: studentClass,
         dateOfJoining: dateOfJoining.trim(),
         guardianName: guardianName?.trim() || "",
+        guardianPhone: guardianPhone?.trim() || "",
         schoolType: schoolType || "NA",
       },
       {
@@ -1932,6 +1937,8 @@ exports.uploadExcelSheet = async (req, res) => {
       address: row.address?.trim(),
       class: row.class?.trim(),
       dateOfJoining: row.dateOfJoining?.trim(),
+      guardianName: row.guardianName?.toString().trim() || "",
+      guardianPhone: row.guardianPhone?.toString().trim() || "",
     }));
 
     // Step 1: Remove duplicates within uploaded sheet

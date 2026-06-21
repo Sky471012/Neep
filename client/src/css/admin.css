@@ -1217,10 +1217,6 @@ select {
   height: 18px !important;
 }
 
-/* Reserve space on the right of the input so the × never sits flush with the border */
-.react-datepicker__input-container input {
-  padding-right: 34px !important;
-}
 
 /* Scrollbar styling */
 .classes-container::-webkit-scrollbar,

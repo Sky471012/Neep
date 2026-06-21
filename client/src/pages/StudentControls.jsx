@@ -54,6 +54,7 @@ export default function StudentControls() {
         class: '',
         dateOfJoining: '',
         guardianName: '',
+        guardianPhone: '',
         schoolType: ''
     });
 
@@ -172,6 +173,7 @@ export default function StudentControls() {
                 class: student.class || '',
                 dateOfJoining: student.dateOfJoining || '',
                 guardianName: student.guardianName || '',
+                guardianPhone: student.guardianPhone || '',
                 schoolType: student.schoolType || 'NA'
             });
         }
@@ -771,6 +773,7 @@ export default function StudentControls() {
             class: student.class || '',
             dateOfJoining: student.dateOfJoining || '',
             guardianName: student.guardianName || '',
+            guardianPhone: student.guardianPhone || '',
             schoolType: student.schoolType || 'NA'
         });
     };
@@ -1081,6 +1084,31 @@ export default function StudentControls() {
                                 </div>
 
                                 <div className="detail-item">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    <div className="detail-label">
+                                        Guardian Phone:
+                                        <input
+                                            type="text"
+                                            className="form-control d-inline-block ms-2"
+                                            name="guardianPhone"
+                                            value={editForm.guardianPhone || ''}
+                                            onChange={handleInputChange}
+                                            style={{
+                                                width: '52%',
+                                                fontSize: 'inherit',
+                                                fontWeight: 'inherit',
+                                                background: 'transparent',
+                                                padding: "0px 8px",
+                                                boxShadow: "none",
+                                                color: "inherit"
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="detail-item">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor" className="w-4 h-4">
                                         <path d="M32 256C32 220.7 60.7 192 96 192L160 192L287.9 76.9C306.2 60.5 333.9 60.5 352.1 76.9L480 192L544 192C579.3 192 608 220.7 608 256L608 512C608 547.3 579.3 576 544 576L96 576C60.7 576 32 547.3 32 512L32 256zM256 440L256 528L384 528L384 440C384 417.9 366.1 400 344 400L296 400C273.9 400 256 417.9 256 440zM144 448C152.8 448 160 440.8 160 432L160 400C160 391.2 152.8 384 144 384L112 384C103.2 384 96 391.2 96 400L96 432C96 440.8 103.2 448 112 448L144 448zM160 304L160 272C160 263.2 152.8 256 144 256L112 256C103.2 256 96 263.2 96 272L96 304C96 312.8 103.2 320 112 320L144 320C152.8 320 160 312.8 160 304zM528 448C536.8 448 544 440.8 544 432L544 400C544 391.2 536.8 384 528 384L496 384C487.2 384 480 391.2 480 400L480 432C480 440.8 487.2 448 496 448L528 448zM544 304L544 272C544 263.2 536.8 256 528 256L496 256C487.2 256 480 263.2 480 272L480 304C480 312.8 487.2 320 496 320L528 320C536.8 320 544 312.8 544 304zM320 320C355.3 320 384 291.3 384 256C384 220.7 355.3 192 320 192C284.7 192 256 220.7 256 256C256 291.3 284.7 320 320 320z" />
                                     </svg>
@@ -1208,6 +1236,35 @@ export default function StudentControls() {
                                         <path d="M320 32C342.1 32 360 49.9 360 72C360 94.1 342.1 112 320 112C297.9 112 280 94.1 280 72C280 49.9 297.9 32 320 32zM40 128C62.1 128 80 145.9 80 168L80 328.2C80 345.2 86.7 361.5 98.7 373.5L149.8 424.6C158.1 432.9 171.1 434.2 180.8 427.7C193.7 419.1 195.5 400.8 184.5 389.9C177.2 382.6 161.4 366.8 137.3 342.7C124.8 330.2 124.8 309.9 137.3 297.4C149.8 284.9 170.1 284.9 182.6 297.4C206.7 321.5 222.5 337.3 229.8 344.6L229.8 344.6L255.1 369.9C276.1 390.9 287.9 419.4 287.9 449.1L287.9 528C287.9 554.5 266.4 576 239.9 576L173.2 576C156.2 576 139.9 569.3 127.9 557.3L28.1 457.4C10.1 439.4 0 415 0 389.5L0 168C0 145.9 17.9 128 40 128zM600 128C622.1 128 640 145.9 640 168L640 389.5C640 415 629.9 439.4 611.9 457.4L512 557.3C500 569.3 483.7 576 466.7 576L400 576C373.5 576 352 554.5 352 528L352 449.1C352 419.4 363.8 390.9 384.8 369.9L410.1 344.6L410.1 344.6C417.4 337.3 433.2 321.5 457.3 297.4C469.8 284.9 490.1 284.9 502.6 297.4C515.1 309.9 515.1 330.2 502.6 342.7C478.5 366.8 462.7 382.6 455.4 389.9C444.4 400.9 446.2 419.1 459.1 427.7C468.8 434.2 481.8 432.9 490.1 424.6L541.2 373.5C553.2 361.5 559.9 345.2 559.9 328.2L560 168C560 145.9 577.9 128 600 128zM384.5 213L364.7 196.3L375.8 285.1C377.4 298.3 368.1 310.2 355 311.9C341.9 313.6 329.9 304.2 328.2 291.1L323.8 256.1L316.2 256.1L311.8 291.1C310.2 304.3 298.2 313.6 285 311.9C271.8 310.2 262.5 298.3 264.2 285.1L275.3 196.3L255.5 213C245.4 221.6 230.2 220.3 221.7 210.2C213.2 200.1 214.4 184.9 224.5 176.4L252.4 152.8C271.3 136.8 295.3 128 320 128C344.7 128 368.7 136.8 387.6 152.7L415.5 176.3C425.6 184.9 426.9 200 418.3 210.1C409.7 220.2 394.6 221.5 384.5 212.9z" />
                                     </svg>
                                     <div className="detail-label">Guardian: {student.guardianName || "NA"}</div>
+                                </div>
+
+                                <div className="detail-item p-1">
+                                    <svg className="w-4 h-4" fill="none" strokeWidth={2} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    <div className="detail-label" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                        <span style={{ whiteSpace: "nowrap" }}>Guardian Phone: <br/>{student.guardianPhone || "NA"}</span>
+                                        {student.guardianPhone && (
+                                            <span style={{ display: "inline-flex", gap: "0.4rem", flexShrink: 0 }}>
+                                                <a
+                                                    title="Call"
+                                                    href={`tel:+91${student.guardianPhone}`}
+                                                    className="phone-action-btn"
+                                                >
+                                                    <i className="bi bi-telephone-outbound"></i>
+                                                </a>
+                                                <a
+                                                    title="WhatsApp"
+                                                    href={`https://wa.me/91${student.guardianPhone}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="phone-action-btn phone-action-btn-wa"
+                                                >
+                                                    <i className="bi bi-whatsapp"></i>
+                                                </a>
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="detail-item p-1">

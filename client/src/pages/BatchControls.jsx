@@ -1667,6 +1667,12 @@ export default function BatchControls() {
                   value={newStudentData.guardianName || ""}
                   onChange={(e) => setNewStudentData({ ...newStudentData, guardianName: e.target.value })}
                 />
+                <input
+                  className="form-control mb-2"
+                  placeholder="Guardian's Phone..."
+                  value={newStudentData.guardianPhone || ""}
+                  onChange={(e) => setNewStudentData({ ...newStudentData, guardianPhone: e.target.value })}
+                />
                 <select
                   className="form-select mb-2"
                   value={newStudentData.class}

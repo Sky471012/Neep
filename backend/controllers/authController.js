@@ -56,6 +56,7 @@ exports.loginStudent = async (req, res) => {
           fee: student.fee,
           dateOfJoining: student.dateOfJoining,
           guardianName: student.guardianName,
+          guardianPhone: student.guardianPhone,
           schoolType: student.schoolType,
         },
       });
@@ -95,6 +96,7 @@ exports.loginStudent = async (req, res) => {
         fee: student.fee,
         dateOfJoining: student.dateOfJoining,
         guardianName: student.guardianName || "N/A",
+        guardianPhone: student.guardianPhone || "N/A",
         schoolType: student.schoolType || "N/A",
       },
     });
