@@ -1354,7 +1354,16 @@ export default function BatchControls() {
               minDate={new Date("1995-01-01")}
             />
 
-            <div style={{ maxHeight: "55vh", overflowY: "auto", margin: "10px 0" }}>
+            <small className="text-muted d-block text-center">
+              {(() => {
+                const total = students.length || 0;
+                const absentCount = Object.values(attendanceDraft || {}).filter(v => v === "absent").length;
+                const presentCount = total - absentCount; // default present
+                return `Selected: ${presentCount} Present, ${absentCount} Absent`;
+              })()}
+            </small>
+
+            <div style={{ maxHeight: "50vh", overflowY: "auto", margin: "15px 0" }}>
               <table className="table table-bordered mt-3">
                 <thead>
                   <tr>
@@ -1397,26 +1406,16 @@ export default function BatchControls() {
               </table>
             </div>
 
-            <div className="d-flex justify-content-between align-items-center mt-2">
-              <div className="d-flex align-items-center gap-3">
-                {attendanceExists && (
-                  <button
-                    className="btn btn-outline-danger"
-                    disabled={!selectedDate}
-                    onClick={() => removeAttendanceForBatch(selectedDate)}
-                  >
-                    Remove Attendance
-                  </button>
-                )}
-                <small className="text-muted">
-                  {(() => {
-                    const total = students.length || 0;
-                    const absentCount = Object.values(attendanceDraft || {}).filter(v => v === "absent").length;
-                    const presentCount = total - absentCount; // default present
-                    return `Selected: ${presentCount} Present, ${absentCount} Absent`;
-                  })()}
-                </small>
-              </div>
+            <div className={`d-flex align-items-center mt-2 ${attendanceExists ? "justify-content-between" : "justify-content-center"}`}>
+              {attendanceExists && (
+                <button
+                  className="btn btn-outline-danger"
+                  disabled={!selectedDate}
+                  onClick={() => removeAttendanceForBatch(selectedDate)}
+                >
+                  Remove Attendance
+                </button>
+              )}
 
               <button
                 className="btn btn-primary"

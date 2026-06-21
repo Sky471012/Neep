@@ -816,6 +816,16 @@ export default function Teacher() {
                                                                 openToDate={new Date()}
                                                                 minDate={new Date("1995-01-01")}
                                                             />
+
+                                                            <small className="text-muted d-block text-center">
+                                                                {(() => {
+                                                                    const total = students[batchId]?.length || 0;
+                                                                    const absentCount = Object.values(attendanceDraft[batchId] || {}).filter(v => v === "absent").length;
+                                                                    const presentCount = total - absentCount; // default present
+                                                                    return `Selected: ${presentCount} Present, ${absentCount} Absent`;
+                                                                })()}
+                                                            </small>
+
                                                             <div style={{ maxHeight: "55vh", overflowY: "auto", margin: "10px 0" }}>
                                                                 <table className="table table-bordered mt-2">
                                                                     <thead>
@@ -872,26 +882,16 @@ export default function Teacher() {
                                                             </div>
 
                                                             {/* Summary & single submit button */}
-                                                            <div className="d-flex justify-content-between align-items-center mt-3">
-                                                                <div className="d-flex align-items-center gap-3">
-                                                                    {attendanceExists[batchId] && (
-                                                                        <button
-                                                                            className="btn btn-outline-danger"
-                                                                            disabled={!selectedDate}
-                                                                            onClick={() => removeAttendanceForBatch(batchId, selectedDate)}
-                                                                        >
-                                                                            Remove Attendance
-                                                                        </button>
-                                                                    )}
-                                                                    <small className="text-muted">
-                                                                        {(() => {
-                                                                            const total = students[batchId]?.length || 0;
-                                                                            const absentCount = Object.values(attendanceDraft[batchId] || {}).filter(v => v === "absent").length;
-                                                                            const presentCount = total - absentCount; // default present
-                                                                            return `Selected: ${presentCount} Present, ${absentCount} Absent`;
-                                                                        })()}
-                                                                    </small>
-                                                                </div>
+                                                            <div className={`d-flex align-items-center mt-3 ${attendanceExists[batchId] ? "justify-content-between" : "justify-content-center"}`}>
+                                                                {attendanceExists[batchId] && (
+                                                                    <button
+                                                                        className="btn btn-outline-danger"
+                                                                        disabled={!selectedDate}
+                                                                        onClick={() => removeAttendanceForBatch(batchId, selectedDate)}
+                                                                    >
+                                                                        Remove Attendance
+                                                                    </button>
+                                                                )}
 
                                                                 <button
                                                                     className="btn btn-primary"
