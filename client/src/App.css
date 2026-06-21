@@ -149,7 +149,7 @@ ul, li {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #07135d; /* or any background */
+  background-color: #011159; /* or any background */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -176,8 +176,8 @@ ul, li {
 
 /* Optional: Add fade-in animation */
 @keyframes fadeIn {
-  0% { opacity: 0; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
+  0% { opacity: 0;}
+  100% { opacity: 1;}
 }
 
 
