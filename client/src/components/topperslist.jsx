@@ -82,7 +82,7 @@ const class12Toppers = [
     id: 12,
     name: "Kunal",
     subject: "Geography",
-    marks: "95",
+    marks: "96",
     image: "/toppers/Kunal_Geography.webp",
   },
 ];
