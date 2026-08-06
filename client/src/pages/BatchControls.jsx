@@ -67,6 +67,7 @@ export default function BatchControls() {
   const [testFormData, setTestFormData] = useState({});
   const [tests, setTests] = useState({});
   const [alltests, setAllTests] = useState({});
+  const [isAddingTests, setIsAddingTests] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
@@ -1834,6 +1835,8 @@ export default function BatchControls() {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
+                if (isAddingTests) return;
+
                 const { testName, maxMarks, testDate } = testDetails;
                 if (!testName || !maxMarks || !testDate) {
                   return alert("Please fill test name, max marks, and date.");
@@ -1841,22 +1844,28 @@ export default function BatchControls() {
 
                 const date = new Date(testDate);
 
-                // ✅ Call for every student; pass raw value (can be "", undefined, or "0")
-                for (const student of students || []) {
-                  const ms = testFormData[student._id]; // raw input
-                  await addTest(
-                    student._id,
-                    batch._id,
-                    testName,
-                    Number(maxMarks),
-                    ms,          // leave as-is; addTest will infer absent if empty
-                    date
-                  );
-                }
+                setIsAddingTests(true);
 
-                setTestDetails({ testName: "", maxMarks: "", testDate: null });
-                setTestFormData({});
-                closeTestModal(batch.batchId);
+                try {
+                  // ✅ Call for every student; pass raw value (can be "", undefined, or "0")
+                  for (const student of students || []) {
+                    const ms = testFormData[student._id]; // raw input
+                    await addTest(
+                      student._id,
+                      batch._id,
+                      testName,
+                      Number(maxMarks),
+                      ms,          // leave as-is; addTest will infer absent if empty
+                      date
+                    );
+                  }
+
+                  setTestDetails({ testName: "", maxMarks: "", testDate: null });
+                  setTestFormData({});
+                  closeTestModal(batch.batchId);
+                } finally {
+                  setIsAddingTests(false);
+                }
               }}
             >
               <div className="mb-2">
@@ -1932,8 +1941,13 @@ export default function BatchControls() {
                   </tbody>
                 </table>
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>
-                Add
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{ width: "100%" }}
+                disabled={isAddingTests}
+              >
+                {isAddingTests ? "Adding..." : "Add"}
               </button>
             </form>
           </div>

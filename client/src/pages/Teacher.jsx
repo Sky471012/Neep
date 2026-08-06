@@ -32,6 +32,7 @@ export default function Teacher() {
         maxMarks: "",
         testDate: null
     });
+    const [isAddingTests, setIsAddingTests] = useState(false);
     const [attendanceMap, setAttendanceMap] = useState({});
     const [attendanceMap1, setAttendanceMap1] = useState({});
     const [activeStudentAttendance, setActiveStudentAttendance] = useState(null);
@@ -945,26 +946,36 @@ export default function Teacher() {
                                                             <form
                                                                 onSubmit={async (e) => {
                                                                     e.preventDefault();
+                                                                    if (isAddingTests) return;
+
                                                                     const { testName, maxMarks, testDate } = testDetails;
                                                                     if (!testName || !maxMarks || !testDate) { return alert("Please fill test name, max marks, and date."); }
                                                                     const date = new Date(testDate);
-                                                                    for (const student of students[batch.batchId] || []) {
-                                                                        const ms = testFormData[student._id];
-                                                                        const absent = ms === undefined || ms === "";
 
-                                                                        await addTest(
-                                                                            student._id,
-                                                                            batch.batchId,
-                                                                            testName,
-                                                                            Number(maxMarks),
-                                                                            absent ? null : Number(ms), // << send null if absent
-                                                                            date,
-                                                                            absent
-                                                                        );
+                                                                    setIsAddingTests(true);
+
+                                                                    try {
+                                                                        for (const student of students[batch.batchId] || []) {
+                                                                            const ms = testFormData[student._id];
+                                                                            const absent = ms === undefined || ms === "";
+
+                                                                            await addTest(
+                                                                                student._id,
+                                                                                batch.batchId,
+                                                                                testName,
+                                                                                Number(maxMarks),
+                                                                                absent ? null : Number(ms), // << send null if absent
+                                                                                date,
+                                                                                absent
+                                                                            );
+                                                                        }
+
+                                                                        setTestDetails({ testName: "", maxMarks: "", testDate: null });
+                                                                        setTestFormData({});
+                                                                        closeTestModal(batch.batchId);
+                                                                    } finally {
+                                                                        setIsAddingTests(false);
                                                                     }
-                                                                    setTestDetails({ testName: "", maxMarks: "", testDate: null });
-                                                                    setTestFormData({});
-                                                                    closeTestModal(batch.batchId);
                                                                 }}>
                                                                 <div className="mb-2">
                                                                     <DatePicker
@@ -1008,7 +1019,9 @@ export default function Teacher() {
                                                                         </tbody>
                                                                     </table>
                                                                 </div>
-                                                                <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>Add Test</button>
+                                                                <button type="submit" className="btn btn-primary" style={{ width: "100%" }} disabled={isAddingTests}>
+                                                                    {isAddingTests ? "Adding..." : "Add Test"}
+                                                                </button>
                                                             </form>
                                                         </div>
                                                     </ModalFour>
