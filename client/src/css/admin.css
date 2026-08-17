@@ -844,6 +844,23 @@ select {
   margin-bottom: 10px !important;
 }
 
+.editTestBox input, select {
+  border: 1px solid #cce3f8 !important;
+  background: #f8fbfe !important;
+  border-radius: 10px !important;
+  font-size: 1rem !important;
+  color: #1a365d !important;
+  outline: none !important;
+  transition: all 0.25s ease !important;
+  padding: 3px 10px;
+  font-family: "Inter", sans-serif !important;
+  box-shadow: none !important;
+}
+
+.editTestBox .react-datepicker-wrapper{
+  width: 50% !important;
+}
+
 .selectTeacherBox input:focus {
   background: #f1f8ff !important;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2) !important;

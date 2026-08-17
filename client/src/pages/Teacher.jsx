@@ -1027,7 +1027,7 @@ export default function Teacher() {
                                                     </ModalFour>
 
                                                     <ModalFive isOpen={showModalFiveFor === batchId} onClose={() => setShowModalFiveFor(null)}>
-                                                        <div className="selectTeacherBox" style={{ minWidth: "300px" }}>
+                                                        <div className="editTestBox" style={{ minWidth: "300px" }}>
                                                             {students[batchId] && tests[batchId] ? (
                                                                 tests[batchId].length === 0 ? (
                                                                     <div className="p-4 text-center text-muted">No tests found for this batch.</div>

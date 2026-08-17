@@ -30,6 +30,7 @@ router.put('/:batchId/archive', adminController.toggleArchiveStatus);
 router.put('/editBatchProfile/:batchId', adminController.editBatch);
 router.get('/getTest/:batchId', adminController.getTest);
 router.patch('/editMarks/:testId', adminController.editMarks );
+router.patch('/editTestGroup/:batchId', adminController.editTestGroup);
 
 // Student Management
 router.get('/students', adminController.getStudents);
