@@ -1072,7 +1072,7 @@ export default function Teacher() {
                                                                                 </ul>
                                                                             </div>
                                                                         ) : (
-                                                                            <div style={{ height: "85vh", overflowY: "auto" }}>
+                                                                            <div>
                                                                                 <h3 className="modal-title" style={{ textAlign: "left", textWrap: "wrap" }}><button style={{ border: "none", background: "transparent" }} onClick={() => setSelectedTest(null)}><i className="fas fa-arrow-left"></i></button>{selectedTest.name}</h3>
                                                                                 <button className="btn btn-outline-danger" onClick={() => handleDeleteTestGroup(batchId, selectedTest)} style={{ position: "absolute", right: "45px" }}><i className="bi bi-trash"></i></button>
                                                                                 <span style={{ textAlign: "left", marginBottom: "1rem" }}>Date :- {selectedTest.date} <br /> Maximum Marks :- {selectedTest.maxMarks}</span>

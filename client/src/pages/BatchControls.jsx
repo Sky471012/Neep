@@ -2011,7 +2011,7 @@ export default function BatchControls() {
                       </ul>
                     </div>
                   ) : (
-                    <div style={{ height: "85vh", overflowY: "auto" }}>
+                    <div>
                       <h3 className="modal-title" style={{ textAlign: "left" }}>
                         <button
                           style={{ border: "none", background: "transparent" }}
