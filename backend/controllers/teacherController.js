@@ -363,6 +363,96 @@ exports.editMarks = async (req, res) => {
   }
 };
 
+exports.editTestGroup = async (req, res) => {
+  try {
+    const { batchId } = req.params;
+    const { oldName, oldDate, name, date, maxMarks } = req.body;
+
+    if (!batchId || !oldName || !oldDate || !name || !date || maxMarks === undefined) {
+      return res.status(400).json({ message: "Batch, test name, date, and max marks are required" });
+    }
+
+    const trimmedOldName = String(oldName).trim();
+    const trimmedOldDate = String(oldDate).trim();
+    const trimmedName = String(name).trim();
+    const trimmedDate = String(date).trim();
+    const numericMaxMarks = Number(maxMarks);
+
+    if (!trimmedOldName || !trimmedOldDate || !trimmedName || !trimmedDate) {
+      return res.status(400).json({ message: "Batch, test name, date, and max marks are required" });
+    }
+
+    if (Number.isNaN(numericMaxMarks) || numericMaxMarks <= 0) {
+      return res.status(400).json({ message: "Max marks must be a positive number" });
+    }
+
+    const testDateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d{2}$/;
+    if (!testDateRegex.test(trimmedDate)) {
+      return res.status(400).json({ message: "Date must be in DD-MM-YYYY format" });
+    }
+
+    const Test = req.db.model("Test", TestModel.schema);
+
+    const existingGroup = await Test.findOne({
+      batchId,
+      name: trimmedName,
+      date: trimmedDate,
+    });
+
+    if (existingGroup && (trimmedName !== trimmedOldName || trimmedDate !== trimmedOldDate)) {
+      return res.status(409).json({ message: "A test with the same name and date already exists for this batch" });
+    }
+
+    const currentGroup = await Test.find({
+      batchId,
+      name: trimmedOldName,
+      date: trimmedOldDate,
+    });
+
+    if (!currentGroup.length) {
+      return res.status(404).json({ message: "Test group not found" });
+    }
+
+    const invalidMark = currentGroup.find(
+      (test) => !test.absent && test.marksScored !== null && Number(test.marksScored) > numericMaxMarks
+    );
+
+    if (invalidMark) {
+      return res.status(400).json({
+        message: "Max marks cannot be less than an already saved score in this test group",
+      });
+    }
+
+    await Test.updateMany(
+      {
+        batchId,
+        name: trimmedOldName,
+        date: trimmedOldDate,
+      },
+      {
+        $set: {
+          name: trimmedName,
+          date: trimmedDate,
+          maxMarks: numericMaxMarks,
+        },
+      }
+    );
+
+    return res.json({
+      message: "Test group updated successfully",
+      testGroup: {
+        batchId,
+        name: trimmedName,
+        date: trimmedDate,
+        maxMarks: numericMaxMarks,
+      },
+    });
+  } catch (err) {
+    console.error("Edit test group error:", err);
+    return res.status(500).json({ message: "Failed to update test group" });
+  }
+};
+
 exports.deleteTest = async (req, res) => {
   try {
     const { batchId, name, date } = req.body;

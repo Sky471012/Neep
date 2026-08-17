@@ -42,6 +42,12 @@ export default function Teacher() {
     const [attendanceDraft, setAttendanceDraft] = useState({});
     const [attendanceExists, setAttendanceExists] = useState({});
     const [editingMarks, setEditingMarks] = useState({});
+    const [isEditingTestGroup, setIsEditingTestGroup] = useState(false);
+    const [testGroupEditForm, setTestGroupEditForm] = useState({
+        name: "",
+        date: null,
+        maxMarks: "",
+    });
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [testSearchQuery, setTestSearchQuery] = useState("");
     const [studentSearchQuery, setStudentSearchQuery] = useState("");
@@ -462,9 +468,93 @@ export default function Teacher() {
             });
 
             setSelectedTest(null);
+            cancelEditTestGroup();
         } catch (err) {
             console.error('Delete test group error:', err);
             alert(err.message || 'Failed to delete test');
+        }
+    };
+
+    const startEditTestGroup = (test) => {
+        setTestGroupEditForm({
+            name: test.name || "",
+            date: test.date ? new Date(test.date.split('-').reverse().join('-')) : null,
+            maxMarks: test.maxMarks !== undefined && test.maxMarks !== null ? String(test.maxMarks) : "",
+        });
+        setIsEditingTestGroup(true);
+    };
+
+    const cancelEditTestGroup = () => {
+        setIsEditingTestGroup(false);
+        setTestGroupEditForm({
+            name: "",
+            date: null,
+            maxMarks: "",
+        });
+    };
+
+    const saveEditTestGroup = async (batchId, currentTest) => {
+        const token = localStorage.getItem("authToken");
+        const trimmedName = testGroupEditForm.name.trim();
+
+        if (!trimmedName || !testGroupEditForm.date || testGroupEditForm.maxMarks === "") {
+            alert("All test fields are required");
+            return;
+        }
+
+        const formattedDate = new Date(testGroupEditForm.date).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        }).replace(/\//g, "-");
+
+        const numericMaxMarks = Number(testGroupEditForm.maxMarks);
+
+        if (Number.isNaN(numericMaxMarks) || numericMaxMarks <= 0) {
+            alert("Max marks must be a positive number");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/editTestGroup/${batchId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    oldName: currentTest.name,
+                    oldDate: currentTest.date,
+                    name: trimmedName,
+                    date: formattedDate,
+                    maxMarks: numericMaxMarks,
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to update test group");
+
+            setTests(prev => {
+                const list = prev[batchId] || [];
+                const updated = list.map((t) => {
+                    if (t.name === currentTest.name && t.date === currentTest.date) {
+                        return { ...t, name: trimmedName, date: formattedDate, maxMarks: numericMaxMarks };
+                    }
+                    return t;
+                });
+                return { ...prev, [batchId]: updated };
+            });
+
+            setSelectedTest({
+                ...currentTest,
+                name: trimmedName,
+                date: formattedDate,
+                maxMarks: numericMaxMarks,
+            });
+            cancelEditTestGroup();
+        } catch (err) {
+            console.error("Edit test group error:", err);
+            alert(err.message || "Failed to update test group.");
         }
     };
 
@@ -1035,13 +1125,18 @@ export default function Teacher() {
                                                                     <div>
                                                                         {!selectedTest ? (
                                                                             <div>
-                                                                                <h3 className="modal-title">Tests for {batch.batchName}</h3>
+                                                                                <h5 className="mb-3 text-center">Tests for {batch.batchName}</h5>
                                                                                 <input
                                                                                     type="search"
                                                                                     placeholder="Search tests with name..."
                                                                                     className="search-input"
                                                                                     value={testSearchQuery}
                                                                                     onChange={(e) => setTestSearchQuery(e.target.value)}
+                                                                                    style={{
+                                                                                        width:"100%",
+                                                                                        marginBottom: "10px",
+                                                                                        padding: "0.5rem 1rem",
+                                                                                    }}
                                                                                 />
                                                                                 <ul className="list-group">
                                                                                     {Array.from(
@@ -1073,9 +1168,108 @@ export default function Teacher() {
                                                                             </div>
                                                                         ) : (
                                                                             <div>
-                                                                                <h3 className="modal-title" style={{ textAlign: "left", textWrap: "wrap" }}><button style={{ border: "none", background: "transparent" }} onClick={() => setSelectedTest(null)}><i className="fas fa-arrow-left"></i></button>{selectedTest.name}</h3>
-                                                                                <button className="btn btn-outline-danger" onClick={() => handleDeleteTestGroup(batchId, selectedTest)} style={{ position: "absolute", right: "45px" }}><i className="bi bi-trash"></i></button>
-                                                                                <span style={{ textAlign: "left", marginBottom: "1rem" }}>Date :- {selectedTest.date} <br /> Maximum Marks :- {selectedTest.maxMarks}</span>
+                                                                                <h3 className="modal-title" style={{ textAlign: "left", textWrap: "wrap" }}>
+                                                                                    <button
+                                                                                        style={{ border: "none", background: "transparent", marginRight:"5px" }}
+                                                                                        onClick={() => {
+                                                                                            if (isEditingTestGroup) {
+                                                                                                cancelEditTestGroup();
+                                                                                                return;
+                                                                                            }
+                                                                                            setSelectedTest(null);
+                                                                                        }}
+                                                                                    >
+                                                                                        <i className="fas fa-arrow-left"></i>
+                                                                                    </button>
+                                                                                    {isEditingTestGroup ? (
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            className="form-control d-inline-block ms-2"
+                                                                                            value={testGroupEditForm.name}
+                                                                                            onChange={(e) => setTestGroupEditForm(prev => ({ ...prev, name: e.target.value }))}
+                                                                                            style={{
+                                                                                                fontSize: 'inherit !important',
+                                                                                                fontWeight: 'inherit !important',
+                                                                                                color: "inherit !important",
+                                                                                                width:"80%"
+                                                                                            }}
+                                                                                            placeholder="Test name"
+                                                                                        />
+                                                                                    ) : (
+                                                                                        selectedTest.name
+                                                                                    )}
+                                                                                </h3>
+                                                                                {!isEditingTestGroup ? (
+                                                                                    <>
+                                                                                        <button
+                                                                                            className="btn btn-link btn-lg"
+                                                                                            onClick={() => startEditTestGroup(selectedTest)}
+                                                                                            style={{ position: "absolute", right: "60px", padding:"0"}}
+                                                                                            title="Edit test group"
+                                                                                        >
+                                                                                            <i className="bi bi-pencil-square"></i>
+                                                                                        </button>
+                                                                                        <button className="btn btn-lg" onClick={() => handleDeleteTestGroup(batchId, selectedTest)} style={{ position: "absolute", right: "25px", color:"#dc3545",  padding:"0"}} title="Delete test group"><i className="bi bi-trash"></i></button>
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <div className="d-flex gap-3" style={{ position: "absolute", right: "25px" }}>
+                                                                                        <button
+                                                                                            className="btn btn-lg"
+                                                                                            onClick={() => saveEditTestGroup(batchId, selectedTest)}
+                                                                                            title="Save changes"
+                                                                                            style={{color:"#198754", padding:"0"}}
+                                                                                        >
+                                                                                            <i className="bi bi-check-lg"></i>
+                                                                                        </button>
+                                                                                        <button
+                                                                                            className="btn btn-lg"
+                                                                                            onClick={cancelEditTestGroup}
+                                                                                            title="Cancel editing"
+                                                                                            style={{color:"#6c757d", padding:"0"}}
+                                                                                        >
+                                                                                            <i className="bi bi-x-lg"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                )}
+                                                                                <span style={{ textAlign: "left", marginBottom: "1rem" }}>
+                                                                                    {isEditingTestGroup ? (
+                                                                                        <>
+                                                                                            <div className="d-flex align-items-center gap-2 mb-2">
+                                                                                                <span style={{ minWidth: "70px" }}>Date :</span>
+                                                                                                <DatePicker
+                                                                                                    selected={testGroupEditForm.date}
+                                                                                                    onChange={(date) => setTestGroupEditForm(prev => ({ ...prev, date }))}
+                                                                                                    dateFormat="dd-MM-yyyy"
+                                                                                                    className="form-control"
+                                                                                                    placeholderText="Select date"
+                                                                                                    showYearDropdown
+                                                                                                    dropdownMode="select"
+                                                                                                    yearDropdownItemNumber={10}
+                                                                                                    scrollableYearDropdown
+                                                                                                    maxDate={new Date()}
+                                                                                                    openToDate={new Date()}
+                                                                                                    minDate={new Date("1995-01-01")}
+                                                                                                />
+                                                                                            </div>
+                                                                                            <div className="d-flex align-items-center gap-2">
+                                                                                                <span style={{ minWidth: "70px" }}>Max Marks :</span>
+                                                                                                <input
+                                                                                                    type="number"
+                                                                                                    className="form-control"
+                                                                                                    value={testGroupEditForm.maxMarks}
+                                                                                                    onChange={(e) => setTestGroupEditForm(prev => ({ ...prev, maxMarks: e.target.value }))}
+                                                                                                    placeholder="Max marks"
+                                                                                                    min="1"
+                                                                                                    style={{ width: "30%" }}
+                                                                                                />
+                                                                                            </div>
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            Date : {selectedTest.date} <br /> Maximum Marks : {selectedTest.maxMarks}
+                                                                                        </>
+                                                                                    )}
+                                                                                </span>
                                                                                 <table className="table table-colored">
                                                                                     <thead>
                                                                                         <tr>

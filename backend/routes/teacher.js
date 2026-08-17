@@ -16,6 +16,7 @@ router.post('/test/add', teacherController.addTest);
 router.get('/getTest/:batchId', teacherController.getTest);
 router.get('/today/timetable', teacherController.getTodaysClassesForTeacher);
 router.patch('/editMarks/:testId', teacherController.editMarks);
+router.patch('/editTestGroup/:batchId', teacherController.editTestGroup);
 router.get('/attendance', teacherController.getAttendance);
 router.delete('/deleteTest', teacherController.deleteTest);
 

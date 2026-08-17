@@ -2093,7 +2093,7 @@ export default function BatchControls() {
                     </div>
                   ) : (
                     <div>
-                      <h3 className="modal-title" style={{ textAlign: "left" }}>
+                      <h3 className="modal-title" style={{ textAlign: "left", textWrap: "wrap" }}>
                         <button
                           style={{ border: "none", background: "transparent", marginRight:"5px" }}
                           onClick={() => {
