@@ -13,6 +13,10 @@ app.use(compression());
 
 app.use(express.json());
 
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'online', message: 'NEEP backend is online' });
+});
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
