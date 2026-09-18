@@ -1,3 +1,4 @@
+import { apiFetch } from "../api";
 "use client"
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
@@ -106,11 +107,10 @@ export default function FeeTracking() {
 
   useEffect(() => {
     const storedAdmin = localStorage.getItem("user");
-    const token = localStorage.getItem("authToken")
-    const headers = { Authorization: `Bearer ${token}` }
+    const headers = {}
 
     Promise.all([
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/unpaid`, { headers })
+      apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/unpaid`, { headers })
         .then((res) => res.json())
         .then((data) => {
           const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
@@ -118,7 +118,7 @@ export default function FeeTracking() {
         })
         .catch((err) => console.error("Error loading unpaid installments:", err)),
 
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/upcoming`, { headers })
+      apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/upcoming`, { headers })
         .then((res) => res.json())
         .then((data) => {
           const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
@@ -126,7 +126,7 @@ export default function FeeTracking() {
         })
         .catch((err) => console.error("Error loading upcoming installments:", err)),
 
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/paid`, { headers })
+      apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/paid`, { headers })
         .then((res) => res.json())
         .then((data) => {
           const sorted = data.installments.sort((a, b) => new Date(b.paidDate) - new Date(a.paidDate))
@@ -216,15 +216,13 @@ export default function FeeTracking() {
 
   const handleSaveEditedInstallment = async () => {
     if (!editingInst) return;
-    const token = localStorage.getItem("authToken");
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/updateInstallment/${editingInst._id}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             amount: editedAmount,

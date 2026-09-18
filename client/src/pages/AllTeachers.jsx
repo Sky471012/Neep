@@ -1,3 +1,4 @@
+import { apiFetch } from "../api";
 "use client"
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
@@ -15,9 +16,8 @@ export default function AllTeachers() {
     useEffect(() => {
 
         const storedAdmin = localStorage.getItem("user");
-        const token = localStorage.getItem("authToken");
 
-        if (storedAdmin && token && storedAdmin !== "undefined") {
+        if (storedAdmin && storedAdmin !== "undefined") {
             try {
                 setAdmin(JSON.parse(storedAdmin))
             } catch (err) {
@@ -26,9 +26,9 @@ export default function AllTeachers() {
                 setLoading(false);
                 return
             }
-            const headers = { Authorization: `Bearer ${token}` }
+            const headers = {}
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, { headers })
+            apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, { headers })
                 .then((res) => {
                     if (!res.ok) throw new Error("Failed to fetch all teachers")
                     return res.json()

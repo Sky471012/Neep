@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, matchPath } from "react-router-dom";
 import logo from "/logo_rectangle-1.png";
 import BranchSelectModal from "../modals/BranchSelectModal";
+import { apiFetch } from "../api";
 
 export default function Navbar() {
-  const authToken = localStorage.getItem("authToken");
-  const role = localStorage.getItem("role");
+  const [session, setSession] = useState(null);
+  const role = session?.user?.role?.toLowerCase();
   const [scrolled, setScrolled] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
@@ -13,6 +14,13 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [showBranchModal, setShowBranchModal] = useState(false);
   const [hasMultipleBranches, setHasMultipleBranches] = useState(false);
+
+  useEffect(() => {
+    apiFetch("/api/auth/me")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => setSession(data?.success ? data : null))
+      .catch(() => setSession(null));
+  }, [location.pathname]);
 
   // 🔹 Recheck branches whenever the route changes
   useEffect(() => {
@@ -37,8 +45,13 @@ export default function Navbar() {
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.clear();
+  const handleLogout = async () => {
+    await apiFetch("/api/auth/logout", { method: "POST" });
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    localStorage.removeItem("branch");
+    localStorage.removeItem("branches");
+    setSession(null);
     navigate("/#home");
   };
 
@@ -119,21 +132,21 @@ export default function Navbar() {
           )}
 
 
-          {authToken && role === "student" && (
+          {session && role === "student" && (
             <>
               <li><Link to="/student" className={isRouteActive("/student") ? "active" : ""}><i className="bi bi-person-fill me-1"></i>Student Portal</Link></li>
               <li><Link to="/#home" className="login-button" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
-          {authToken && role === "teacher" && (
+          {session && role === "teacher" && (
             <>
               <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link></li>
               <li><Link to="/#home" className="login-button" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
-          {authToken && role === "admin" && (
+          {session && role === "admin" && (
             <>
               <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link></li>
               <li><Link to="/admin" className={isRouteActive("/admin") ? "active" : ""}><i className="bi bi-controller me-1"></i>Control Room</Link></li>
@@ -141,7 +154,7 @@ export default function Navbar() {
             </>
           )}
 
-          {!authToken && (
+          {!session && (
             <li><Link to="/login" className="login-button">Login</Link></li>
           )}
         </ul>
@@ -172,21 +185,21 @@ export default function Navbar() {
           </button>
         )}
 
-        {authToken && role === "student" && (
+        {session && role === "student" && (
           <>
             <Link to="/student" className={isRouteActive("/student") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Student Portal</Link>
             <Link to="/" className="login-button mt-3" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
-        {authToken && role === "teacher" && (
+        {session && role === "teacher" && (
           <>
             <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link>
             <Link to="/" className="login-button mt-3" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
-        {authToken && role === "admin" && (
+        {session && role === "admin" && (
           <>
             <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link>
             <Link to="/admin" className={isRouteActive("/admin") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-controller me-1"></i>Control Room</Link>
@@ -194,7 +207,7 @@ export default function Navbar() {
           </>
         )}
 
-        {!authToken && (
+        {!session && (
           <Link to="/login" className="login-button mt-3" onClick={() => setSidebarOpen(false)}>Login</Link>
         )}
       </div>
@@ -209,14 +222,8 @@ export default function Navbar() {
           branches={JSON.parse(localStorage.getItem("branches") || "[]")}
           onSelect={async (branch) => {
             try {
-              const authToken = localStorage.getItem("authToken");
-
-              const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/switch-branch`, {
+              const res = await apiFetch("/api/auth/switch-branch", {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${authToken}`,
-                },
                 body: JSON.stringify({ branch }),
               });
 
@@ -227,15 +234,11 @@ export default function Navbar() {
                 return;
               }
 
-              localStorage.setItem("authToken", data.authToken);
               localStorage.setItem("branch", data.branch);
 
               // ✅ Fetch latest student data for this branch before reload
               if (localStorage.getItem("role") === "student") {
-                const token = data.authToken;
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/profile`, {
-                  headers: { Authorization: `Bearer ${token}` },
-                })
+                apiFetch("/api/student/profile")
                   .then(res => res.json())
                   .then(profile => {
                     if (profile.success) {

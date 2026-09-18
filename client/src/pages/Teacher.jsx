@@ -1,3 +1,4 @@
+import { apiFetch } from "../api";
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import DatePicker from "react-datepicker";
@@ -89,9 +90,8 @@ export default function Teacher() {
     // --- All your useEffect and handler functions remain exactly the same ---
     useEffect(() => {
         const storedTeacher = localStorage.getItem("user");
-        const token = localStorage.getItem("authToken");
 
-        if (storedTeacher && token && storedTeacher !== "undefined") {
+        if (storedTeacher && storedTeacher !== "undefined") {
             try {
                 setTeacher(JSON.parse(storedTeacher));
             } catch (err) {
@@ -101,8 +101,8 @@ export default function Teacher() {
             }
 
             Promise.all([
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/batches`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/batches`, {
+                    headers: {},
                 })
                     .then((res) => {
                         if (!res.ok) throw new Error("Failed to fetch batches");
@@ -111,8 +111,8 @@ export default function Teacher() {
                     .then(setBatchesRecords)
                     .catch((err) => console.error("Batches fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/today/timetable`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/today/timetable`, {
+                    headers: {},
                 })
                     .then((res) => {
                         if (!res.ok) throw new Error("Failed to fetch schedule");
@@ -121,8 +121,8 @@ export default function Teacher() {
                     .then((data) => setTodaysClasses(Array.isArray(data.classes) ? data.classes : []))
                     .catch((err) => console.error("Schedule fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance`, {
+                    headers: {}
                 })
                     .then(res => res.json())
                     .then(data => {
@@ -144,12 +144,11 @@ export default function Teacher() {
     }, []);
 
     useEffect(() => {
-        const token = localStorage.getItem("authToken");
-        if (!batchesRecords || batchesRecords.length === 0 || !token) return;
+        if (!batchesRecords || batchesRecords.length === 0) return;
 
         const fetchStudents = async (batchId) => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/batchStudents/${batchId}`, { headers: { Authorization: `Bearer ${token}` } });
+                const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/batchStudents/${batchId}`, { headers: {} });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || "Error fetching students");
                 setStudents((prev) => ({ ...prev, [batchId]: data.students }));
@@ -160,7 +159,7 @@ export default function Teacher() {
 
         const fetchAllTests = async (batchId) => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/getTest/${batchId}`, { headers: { Authorization: `Bearer ${token}` } });
+                const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/getTest/${batchId}`, { headers: {} });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || "Error fetching tests");
                 setTests((prev) => ({ ...prev, [batchId]: data.test }));
@@ -178,9 +177,8 @@ export default function Teacher() {
     }, [batchesRecords]);
 
     const fetchTimetable = async (batchId) => {
-        const token = localStorage.getItem("authToken");
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/timetable/${batchId}`, { headers: { Authorization: `Bearer ${token}` } });
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/timetable/${batchId}`, { headers: {} });
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || "Error fetching timetable");
             setTimetable((prev) => ({ ...prev, [batchId]: data.timetable || [] }));
@@ -215,8 +213,6 @@ export default function Teacher() {
             alert("No students found for this batch.");
             return;
         }
-
-        const token = localStorage.getItem("authToken");
         const dateOnly = new Date(dateObj.toDateString());
         const dateISO = dateOnly.toISOString();
 
@@ -230,9 +226,9 @@ export default function Teacher() {
 
         try {
             await Promise.all(finalEntries.map(async ([studentId, status]) => {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/mark`, {
+                const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/mark`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ studentId, batchId, date: dateISO, status }),
                 });
                 const data = await res.json();
@@ -260,17 +256,15 @@ export default function Teacher() {
     };
 
     const addTest = async (studentId, batchId, name, maxMarks, marksScored, date) => {
-
-        const token = localStorage.getItem("authToken");
         const dd = ("0" + date.getDate()).slice(-2);
         const mm = ("0" + (date.getMonth() + 1)).slice(-2);
         const yyyy = date.getFullYear();
         const formattedDate = `${dd}-${mm}-${yyyy}`;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/test/add`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/test/add`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ studentId, batchId, name, maxMarks, marksScored, date: formattedDate }),
             });
             const data = await res.json();
@@ -287,10 +281,9 @@ export default function Teacher() {
 
     const showStudentAttendance = async (studentId, batchId) => {
         if (activeStudentAttendance === studentId) return;
-        const token = localStorage.getItem("authToken");
         setAttendanceMap({});
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/${studentId}`, { headers: { Authorization: `Bearer ${token}` } });
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/${studentId}`, { headers: {} });
             const data = await res.json();
             const attendanceArray = data.attendance;
             if (!Array.isArray(attendanceArray)) {
@@ -313,18 +306,17 @@ export default function Teacher() {
     };
 
     const preloadAttendanceForBatchDate = async (batchId, dateObj) => {
-        const token = localStorage.getItem("authToken");
         const list = students[batchId] || [];
-        if (!token || list.length === 0 || !dateObj) return;
+        if (list.length === 0 || !dateObj) return;
 
         const dateOnly = new Date(dateObj.toDateString());
 
         try {
             const results = await Promise.all(
                 list.map(async (s) => {
-                    const res = await fetch(
+                    const res = await apiFetch(
                         `${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/${s._id}`,
-                        { headers: { Authorization: `Bearer ${token}` } }
+                        { headers: {} }
                     );
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.message || "Failed to fetch attendance");
@@ -371,15 +363,13 @@ export default function Teacher() {
             return;
         }
         if (!window.confirm("Remove attendance for all students on this date?")) return;
-
-        const token = localStorage.getItem("authToken");
         const dateOnly = new Date(dateObj.toDateString());
         const dateISO = dateOnly.toISOString();
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/remove`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance/remove`, {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ batchId, date: dateISO }),
             });
             const data = await res.json();
@@ -418,7 +408,6 @@ export default function Teacher() {
     };
 
     const saveEditMarks = async (batchId, testObj) => {
-        const token = localStorage.getItem("authToken");
         const draft = editingMarks[testObj._id];
         if (!draft) return;
 
@@ -426,9 +415,9 @@ export default function Teacher() {
         const payload = { marksScored: draft.value === "" ? "" : draft.value };
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/editMarks/${testObj._id}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/editMarks/${testObj._id}`, {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
             const data = await res.json();
@@ -450,11 +439,10 @@ export default function Teacher() {
 
     const handleDeleteTestGroup = async (batchId, test) => {
         if (!window.confirm(`Are you sure you want to delete the test "${test.name}" dated ${test.date} for the whole batch? This cannot be undone.`)) return;
-        const token = localStorage.getItem('authToken');
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/deleteTest`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/deleteTest`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ batchId, name: test.name, date: test.date }),
             });
             const data = await res.json();
@@ -494,7 +482,6 @@ export default function Teacher() {
     };
 
     const saveEditTestGroup = async (batchId, currentTest) => {
-        const token = localStorage.getItem("authToken");
         const trimmedName = testGroupEditForm.name.trim();
 
         if (!trimmedName || !testGroupEditForm.date || testGroupEditForm.maxMarks === "") {
@@ -516,11 +503,10 @@ export default function Teacher() {
         }
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/editTestGroup/${batchId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/editTestGroup/${batchId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     oldName: currentTest.name,

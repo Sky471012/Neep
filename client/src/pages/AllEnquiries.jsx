@@ -1,3 +1,4 @@
+import { apiFetch } from "../api";
 "use client"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -20,9 +21,8 @@ export default function AllEnquiries() {
     useEffect(() => {
 
         const storedAdmin = localStorage.getItem("user");
-        const token = localStorage.getItem("authToken");
 
-        if (storedAdmin && token && storedAdmin !== "undefined") {
+        if (storedAdmin && storedAdmin !== "undefined") {
             try {
                 setAdmin(JSON.parse(storedAdmin))
             } catch (err) {
@@ -31,9 +31,9 @@ export default function AllEnquiries() {
                 setLoading(false);
                 return
             }
-            const headers = { Authorization: `Bearer ${token}` }
+            const headers = {}
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/allEnquiries`, { headers })
+            apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/allEnquiries`, { headers })
                 .then((res) => {
                     if (!res.ok) throw new Error("Failed to fetch enquiries")
                     return res.json()
@@ -114,11 +114,10 @@ export default function AllEnquiries() {
         };
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/enquiryCreate`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/enquiryCreate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
                 body: JSON.stringify(payload),
             });
