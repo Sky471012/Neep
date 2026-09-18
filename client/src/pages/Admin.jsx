@@ -124,6 +124,7 @@ export default function Admin() {
       } catch (err) {
         console.error("Failed to parse admin JSON:", err)
         localStorage.removeItem("admin")
+        navigate("/login");
         return
       }
       const headers = {}
@@ -139,9 +140,9 @@ export default function Admin() {
         .finally(() => setLoading(false))
 
     } else {
-      setLoading(false);
+      navigate("/login");
     }
-  }, [])
+  }, [navigate])
 
   const createBatch = async (batchName, batchClass, batchStartDate) => {
     if (!batchName.trim()) {
