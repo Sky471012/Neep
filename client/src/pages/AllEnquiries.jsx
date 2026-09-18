@@ -28,7 +28,7 @@ export default function AllEnquiries() {
             } catch (err) {
                 console.error("Failed to parse admin JSON:", err)
                 localStorage.removeItem("admin")
-                setLoading(false);
+                navigate("/login");
                 return
             }
             const headers = {}
@@ -42,9 +42,9 @@ export default function AllEnquiries() {
                 .catch((err) => console.error("Enquiries fetch error:", err))
                 .finally(() => setLoading(false))
         } else {
-            setLoading(false);
+            navigate("/login");
         }
-    }, [])
+    }, [navigate])
 
         const [enquiryForm, setEnquiryForm] = useState({
         studentName: "",

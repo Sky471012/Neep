@@ -23,7 +23,7 @@ export default function AllStudents() {
             } catch (err) {
                 console.error("Failed to parse admin JSON:", err)
                 localStorage.removeItem("admin")
-                setLoading(false);
+                navigate("/login");
                 return
             }
             const headers = {}
@@ -37,9 +37,9 @@ export default function AllStudents() {
                 .catch((err) => console.error("Students fetch error:", err))
                 .finally(() => setLoading(false))
         } else {
-            setLoading(false);
+            navigate("/login");
         }
-    }, [])
+    }, [navigate])
 
 
     if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading students...</p></div></div>);

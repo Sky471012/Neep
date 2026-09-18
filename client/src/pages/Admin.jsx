@@ -123,7 +123,7 @@ export default function Admin() {
         setAdmin(JSON.parse(storedAdmin))
       } catch (err) {
         console.error("Failed to parse admin JSON:", err)
-        localStorage.removeItem("admin")
+        localStorage.removeItem("user")
         navigate("/login");
         return
       }

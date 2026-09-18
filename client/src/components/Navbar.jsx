@@ -122,7 +122,7 @@ export default function Navbar() {
           <li><Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link></li>
           <li><Link to="/contactus" className={isRouteActive("/contactus") ? "active" : ""}>Contact Us</Link></li>
 
-          {hasMultipleBranches && (
+          {session && hasMultipleBranches && (
             <li><button
               className="switch-branch-btn"
               onClick={() => setShowBranchModal(true)}
@@ -176,7 +176,7 @@ export default function Navbar() {
         <Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link>
         <Link to="/contactus" className={isRouteActive("/contactus") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Contact Us</Link>
 
-        {hasMultipleBranches && (
+        {session && hasMultipleBranches && (
           <button
             className={`switch-branch-btn ${isAnchorActive("home") ? "active" : ""}`}
             onClick={() => { setSidebarOpen(false); setShowBranchModal(true); }}
