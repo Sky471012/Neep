@@ -16,18 +16,22 @@ export const apiFetch = async (path, options = {}) => {
     credentials: "include",
   });
 
-  // Don't redirect for authentication/login APIs.
-  // 401 from these endpoints means invalid credentials/OTP,
-  // not an expired logged-in session.
-  const isAuthRequest = new URL(url).pathname.startsWith("/api/auth/");
+  // Don't redirect for login/authentication requests.
+  // 401 is a normal response here when credentials are invalid.
+  const isLoginRequest = url.includes("/api/auth/login/");
 
-  if (response.status === 401 && !isAuthRequest) {
+  // Redirect only when an already-authenticated page
+  // makes a protected request and its session is invalid.
+  if (
+    response.status === 401 &&
+    !isLoginRequest &&
+    window.location.pathname !== "/login"
+  ) {
     localStorage.removeItem("user");
     localStorage.removeItem("role");
     localStorage.removeItem("branch");
 
     window.location.href = "/login";
-    return response;
   }
 
   return response;
