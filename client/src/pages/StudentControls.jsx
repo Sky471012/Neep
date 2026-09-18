@@ -113,7 +113,7 @@ export default function StudentControls() {
         const storedUser = localStorage.getItem("user");
 
         if (!storedUser || storedUser === "undefined") {
-            navigate("/login");
+            navigate("/");
             return;
         }
 
@@ -121,7 +121,7 @@ export default function StudentControls() {
             JSON.parse(storedUser);
         } catch (err) {
             localStorage.removeItem("user");
-            navigate("/login");
+            navigate("/");
         }
     }, [navigate]);
 

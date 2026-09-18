@@ -130,7 +130,7 @@ export default function BatchControls() {
     const storedAdmin = localStorage.getItem("user");
 
     if (!storedAdmin || storedAdmin === "undefined") {
-      navigate("/login");
+      navigate("/");
       return;
     }
 
@@ -139,7 +139,7 @@ export default function BatchControls() {
     } catch (err) {
       console.error("Invalid user data");
       localStorage.removeItem("user");
-      navigate("/login");
+      navigate("/");
     }
   }, [navigate]);
 

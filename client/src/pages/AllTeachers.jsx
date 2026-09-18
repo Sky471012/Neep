@@ -23,7 +23,7 @@ export default function AllTeachers() {
             } catch (err) {
                 console.error("Failed to parse admin JSON:", err)
                 localStorage.removeItem("user")
-                navigate("/login");
+                navigate("/");
                 return
             }
             const headers = {}
@@ -37,7 +37,7 @@ export default function AllTeachers() {
                 .catch((err) => console.error("Teachers fetch error:", err))
                 .finally(() => setLoading(false))
         } else {
-            navigate("/login");
+            navigate("/");
         }
     }, [navigate])
 

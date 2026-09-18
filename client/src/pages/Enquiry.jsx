@@ -26,7 +26,7 @@ export default function Enquiry() {
         const storedUser = localStorage.getItem("user");
 
         if (!storedUser || storedUser === "undefined") {
-            navigate("/login");
+            navigate("/");
             return;
         }
 
@@ -34,7 +34,7 @@ export default function Enquiry() {
             JSON.parse(storedUser);
         } catch (err) {
             localStorage.removeItem("user");
-            navigate("/login");
+            navigate("/");
         }
     }, [navigate]);
 

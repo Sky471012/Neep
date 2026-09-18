@@ -110,7 +110,7 @@ export default function FeeTracking() {
     const storedAdmin = localStorage.getItem("user");
 
     if (!storedAdmin || storedAdmin === "undefined") {
-        navigate("/login");
+        navigate("/");
         return;
     }
 
@@ -118,7 +118,7 @@ export default function FeeTracking() {
         JSON.parse(storedAdmin);
     } catch (err) {
         localStorage.removeItem("user");
-        navigate("/login");
+        navigate("/");
     }
   }, [navigate]);
 

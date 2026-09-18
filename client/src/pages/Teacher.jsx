@@ -93,7 +93,7 @@ export default function Teacher() {
         const storedTeacher = localStorage.getItem("user");
 
         if (!storedTeacher || storedTeacher === "undefined") {
-            navigate("/login");
+            navigate("/");
             return;
         }
 
@@ -102,7 +102,7 @@ export default function Teacher() {
         } catch (err) {
             console.error("Invalid user data");
             localStorage.removeItem("user");
-            navigate("/login");
+            navigate("/");
             return;
         }
         

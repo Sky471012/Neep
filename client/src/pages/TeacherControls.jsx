@@ -54,7 +54,7 @@ export default function TeacherControls() {
         const storedUser = localStorage.getItem("user");
 
         if (!storedUser || storedUser === "undefined") {
-            navigate("/login");
+            navigate("/");
             return;
         }
 
@@ -62,7 +62,7 @@ export default function TeacherControls() {
             JSON.parse(storedUser);
         } catch (err) {
             localStorage.removeItem("user");
-            navigate("/login");
+            navigate("/");
         }
     }, [navigate]);
 

@@ -88,7 +88,7 @@ export default function Student() {
         const storedStudent = localStorage.getItem("user");
 
         if (!storedStudent || storedStudent === "undefined") {
-            navigate("/login");
+            navigate("/");
             return;
         }
 
@@ -96,7 +96,7 @@ export default function Student() {
             JSON.parse(storedStudent);
         } catch (err) {
             localStorage.removeItem("user");
-            navigate("/login");
+            navigate("/");
         }
     }, [navigate]);
 

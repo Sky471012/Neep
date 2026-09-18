@@ -124,7 +124,7 @@ export default function Admin() {
       } catch (err) {
         console.error("Failed to parse admin JSON:", err)
         localStorage.removeItem("user")
-        navigate("/login");
+        navigate("/");
         return
       }
       const headers = {}
@@ -140,7 +140,7 @@ export default function Admin() {
         .finally(() => setLoading(false))
 
     } else {
-      navigate("/login");
+      navigate("/");
     }
   }, [navigate])
 
