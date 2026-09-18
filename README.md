@@ -65,7 +65,7 @@ A full-stack educational institute management system built with the MERN stack. 
 | **Frontend** | React 19, React Router 7, Vite 7, Bootstrap 5              |
 | **Backend**  | Node.js, Express 5                                         |
 | **Database** | MongoDB Atlas, Mongoose 8                                  |
-| **Auth**     | JWT (JSON Web Tokens), OTP via email                       |
+| **Auth**     | JWT in HttpOnly cookies, OTP via email                     |
 | **Email**    | Brevo SMTP (via Nodemailer)                                |
 | **File I/O** | Multer (uploads), XLSX (Excel parsing), jsPDF (PDF export) |
 | **Hosting**  | Vercel (frontend), Render (backend)                        |
