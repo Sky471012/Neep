@@ -17,7 +17,6 @@ export default function StudentControls() {
 
     const { studentId } = useParams();
     const navigate = useNavigate();
-
     const [student, setStudent] = useState({});
     const [batches, setBatches] = useState([]);
     const [installments, setInstallments] = useState([]);
@@ -110,6 +109,21 @@ export default function StudentControls() {
         return isNaN(parsed) ? Infinity : parsed;
     }
 
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+
+        if (!storedUser || storedUser === "undefined") {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            JSON.parse(storedUser);
+        } catch (err) {
+            localStorage.removeItem("user");
+            navigate("/login");
+        }
+    }, [navigate]);
 
     useEffect(() => {
 

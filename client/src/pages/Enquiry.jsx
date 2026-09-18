@@ -23,6 +23,22 @@ export default function Enquiry() {
     const [timelineForm, setTimelineForm] = useState({ enquiryDate: null, followupDate: null, followupType: 'demo' });
 
     useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+
+        if (!storedUser || storedUser === "undefined") {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            JSON.parse(storedUser);
+        } catch (err) {
+            localStorage.removeItem("user");
+            navigate("/login");
+        }
+    }, [navigate]);
+
+    useEffect(() => {
         const enquiryId = localStorage.getItem("enquiryId");
 
         apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getEnquiry/${enquiryId}`, {

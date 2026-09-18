@@ -7,6 +7,7 @@ import "@fortawesome/fontawesome-free/css/all.css"
 import "../css/admin.css"
 
 export default function TodaysBirthdays() {
+    const navigate = useNavigate();
     const [birthdays, setBirthdays] = useState([]);
     const [totalBirthdays, setTotalBirthdays] = useState(0);
     const [teachersBirthdays, setTeachersBirthdays] = useState([]);
@@ -16,6 +17,22 @@ export default function TodaysBirthdays() {
     const [activeTab, setActiveTab] = useState("students");
     const [subTab, setSubTab] = useState("today");
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const storedAdmin = localStorage.getItem("user");
+
+        if (!storedAdmin || storedAdmin === "undefined") {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            JSON.parse(storedAdmin);
+        } catch (err) {
+            localStorage.removeItem("user");
+            navigate("/login");
+        }
+    }, [navigate]);
 
     useEffect(() => {
 

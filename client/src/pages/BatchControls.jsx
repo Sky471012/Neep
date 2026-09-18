@@ -19,7 +19,6 @@ import ModalNine from "../modals/ModalNine";
 export default function BatchControls() {
   const { batchId } = useParams();
   const navigate = useNavigate();
-
   const [batch, setBatch] = useState({});
   const [students, setStudents] = useState([]);
   const [teacher, setTeacher] = useState(null);
@@ -126,6 +125,23 @@ export default function BatchControls() {
     const parsed = Date.parse(dateStr);
     return isNaN(parsed) ? Infinity : parsed;
   }
+
+  useEffect(() => {
+    const storedAdmin = localStorage.getItem("user");
+
+    if (!storedAdmin || storedAdmin === "undefined") {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      JSON.parse(storedAdmin);
+    } catch (err) {
+      console.error("Invalid user data");
+      localStorage.removeItem("user");
+      navigate("/login");
+    }
+  }, [navigate]);
 
 
   useEffect(() => {

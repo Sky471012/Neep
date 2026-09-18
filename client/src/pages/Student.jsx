@@ -1,5 +1,6 @@
 import { apiFetch } from "../api";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Inter28ptRegular } from "../assets/fonts/Inter_28pt-Regular";
@@ -12,7 +13,7 @@ import ModalFour from "../modals/ModalFour";
 import '../css/student.css';
 
 export default function Student() {
-
+    const navigate = useNavigate();
     const [student, setStudent] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
     const [timetableRecords, setTimetableRecords] = useState({});
@@ -82,6 +83,22 @@ export default function Student() {
         const parsed = Date.parse(dateStr);
         return isNaN(parsed) ? Infinity : parsed;
     }
+
+    useEffect(() => {
+        const storedStudent = localStorage.getItem("user");
+
+        if (!storedStudent || storedStudent === "undefined") {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            JSON.parse(storedStudent);
+        } catch (err) {
+            localStorage.removeItem("user");
+            navigate("/login");
+        }
+    }, [navigate]);
 
     useEffect(() => {
         const storedStudent = localStorage.getItem("user");

@@ -14,6 +14,7 @@ import '../css/teacher.css';
 
 
 export default function Teacher() {
+    const navigate = useNavigate();
     const [teacher, setTeacher] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
     const [students, setStudents] = useState({});
@@ -91,57 +92,60 @@ export default function Teacher() {
     useEffect(() => {
         const storedTeacher = localStorage.getItem("user");
 
-        if (storedTeacher && storedTeacher !== "undefined") {
-            try {
-                setTeacher(JSON.parse(storedTeacher));
-            } catch (err) {
-                console.error("Failed to parse teacher JSON:", err);
-                setLoading(false);
-                return;
-            }
-
-            Promise.all([
-                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/batches`, {
-                    headers: {},
-                })
-                    .then((res) => {
-                        if (!res.ok) throw new Error("Failed to fetch batches");
-                        return res.json();
-                    })
-                    .then(setBatchesRecords)
-                    .catch((err) => console.error("Batches fetch error:", err)),
-
-                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/today/timetable`, {
-                    headers: {},
-                })
-                    .then((res) => {
-                        if (!res.ok) throw new Error("Failed to fetch schedule");
-                        return res.json();
-                    })
-                    .then((data) => setTodaysClasses(Array.isArray(data.classes) ? data.classes : []))
-                    .catch((err) => console.error("Schedule fetch error:", err)),
-
-                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance`, {
-                    headers: {}
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        setAttendanceRecords(data);
-                        const newMap = {};
-                        data.forEach((record) => {
-                            const date = new Date(record.date);
-                            const formattedDate = date.toISOString().split('T')[0];
-                            const key = `${record.batchId}_${formattedDate}`;
-                            newMap[key] = record.status;
-                        });
-                        setAttendanceMap1(newMap);
-                    })
-                    .catch(err => console.error("Attendance fetch error:", err)),
-            ]).finally(() => setLoading(false));
-        } else {
-            setLoading(false);
+        if (!storedTeacher || storedTeacher === "undefined") {
+            navigate("/login");
+            return;
         }
-    }, []);
+
+        try {
+            setTeacher(JSON.parse(storedTeacher));
+        } catch (err) {
+            console.error("Invalid user data");
+            localStorage.removeItem("user");
+            navigate("/login");
+            return;
+        }
+        
+        Promise.all([
+            apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/batches`, {
+                headers: {},
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Failed to fetch batches");
+                    return res.json();
+                })
+                .then(setBatchesRecords)
+                .catch((err) => console.error("Batches fetch error:", err)),
+
+            apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/today/timetable`, {
+                headers: {},
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Failed to fetch schedule");
+                    return res.json();
+                })
+                .then((data) => setTodaysClasses(Array.isArray(data.classes) ? data.classes : []))
+                .catch((err) => console.error("Schedule fetch error:", err)),
+
+            apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/attendance`, {
+                headers: {}
+            })
+                .then(res => res.json())
+                .then(data => {
+                    setAttendanceRecords(data);
+                    const newMap = {};
+                    data.forEach((record) => {
+                        const date = new Date(record.date);
+                        const formattedDate = date.toISOString().split('T')[0];
+                        const key = `${record.batchId}_${formattedDate}`;
+                        newMap[key] = record.status;
+                    });
+                    setAttendanceMap1(newMap);
+                })
+                .catch(err => console.error("Attendance fetch error:", err)),
+        ]).finally(() => setLoading(false));
+        
+    }, [navigate]);
 
     useEffect(() => {
         if (!batchesRecords || batchesRecords.length === 0) return;

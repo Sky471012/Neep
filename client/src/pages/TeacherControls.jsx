@@ -50,6 +50,21 @@ export default function TeacherControls() {
     const today = new Date();
     const [activeMonthIndex, setActiveMonthIndex] = useState(getAcademicMonthIndex(today.getMonth()));
 
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+
+        if (!storedUser || storedUser === "undefined") {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            JSON.parse(storedUser);
+        } catch (err) {
+            localStorage.removeItem("user");
+            navigate("/login");
+        }
+    }, [navigate]);
 
     useEffect(() => {
         const storedTeacher = localStorage.getItem("user");

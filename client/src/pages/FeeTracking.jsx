@@ -14,6 +14,7 @@ import DatePicker from "react-datepicker";
 export default function FeeTracking() {
 
   const [admin, setAdmin] = useState(null);
+  const navigate = useNavigate();
   const [unpaidInstallments, setUnpaidInstallments] = useState([])
   const [upcomingInstallments, setUpcomingInstallments] = useState([])
   const [paidInstallments, setPaidInstallments] = useState([])
@@ -104,6 +105,22 @@ export default function FeeTracking() {
   const handleToggleMedium = (m) => () => {
     setMedium((prev) => (prev === m ? null : m));
   };
+
+  useEffect(() => {
+    const storedAdmin = localStorage.getItem("user");
+
+    if (!storedAdmin || storedAdmin === "undefined") {
+        navigate("/login");
+        return;
+    }
+
+    try {
+        JSON.parse(storedAdmin);
+    } catch (err) {
+        localStorage.removeItem("user");
+        navigate("/login");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const storedAdmin = localStorage.getItem("user");
@@ -392,12 +409,12 @@ export default function FeeTracking() {
                               )
                             )}
                           </ul>
-                            <button
-                              className="btn btn-sm text-start text-danger w-100"
-                              onClick={() => { setSelectedUnpaidClass(null); setFromDateUnpaid(null); setToDateUnpaid(null); setDraftFromDateUnpaid(null); setDraftToDateUnpaid(null); }}
-                            >
-                              Clear Filters
-                            </button>
+                          <button
+                            className="btn btn-sm text-start text-danger w-100"
+                            onClick={() => { setSelectedUnpaidClass(null); setFromDateUnpaid(null); setToDateUnpaid(null); setDraftFromDateUnpaid(null); setDraftToDateUnpaid(null); }}
+                          >
+                            Clear Filters
+                          </button>
                         </div>
                       </li>
                     </ul>
@@ -529,12 +546,12 @@ export default function FeeTracking() {
                               )
                             )}
                           </ul>
-                            <button
-                              className="btn btn-sm text-start text-danger w-100"
-                              onClick={() => { setSelectedUpcomingClass(null); setFromDateUpcoming(null); setToDateUpcoming(null); setDraftFromDateUpcoming(null); setDraftToDateUpcoming(null); }}
-                            >
-                              Clear Filter
-                            </button>
+                          <button
+                            className="btn btn-sm text-start text-danger w-100"
+                            onClick={() => { setSelectedUpcomingClass(null); setFromDateUpcoming(null); setToDateUpcoming(null); setDraftFromDateUpcoming(null); setDraftToDateUpcoming(null); }}
+                          >
+                            Clear Filter
+                          </button>
                         </div>
                       </li>
                     </ul>
@@ -683,12 +700,12 @@ export default function FeeTracking() {
                               )
                             )}
                           </ul>
-                            <button
-                              className="btn btn-sm text-start text-danger w-100"
-                              onClick={() => { setSelectedPaidClass(null); setFromDatePaid(null); setToDatePaid(null); setDraftFromDatePaid(null); setDraftToDatePaid(null); }}
-                            >
-                              Clear Filter
-                            </button>
+                          <button
+                            className="btn btn-sm text-start text-danger w-100"
+                            onClick={() => { setSelectedPaidClass(null); setFromDatePaid(null); setToDatePaid(null); setDraftFromDatePaid(null); setDraftToDatePaid(null); }}
+                          >
+                            Clear Filter
+                          </button>
                         </div>
                       </li>
                     </ul>
