@@ -1,3 +1,5 @@
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 export const apiFetch = (path, options = {}) => {
   const headers = new Headers(options.headers || {});
   const bodyIsFormData = options.body instanceof FormData;
@@ -6,7 +8,9 @@ export const apiFetch = (path, options = {}) => {
     headers.set("Content-Type", "application/json");
   }
 
-  const url = path.startsWith("http") ? path : `${backendUrl}${path}`;
+  const url = path.startsWith("http")
+    ? path
+    : `${backendUrl}${path}`;
 
   return fetch(url, {
     ...options,
