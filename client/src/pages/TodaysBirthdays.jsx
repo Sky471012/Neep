@@ -60,7 +60,7 @@ export default function TodaysBirthdays() {
             const message = "🎉 Happy Birthday *" + name + "*! 🎂\n\n" +
                 "*New Era Education Point (NEEP)* wishes you a day full of joy, success, and wonderful memories! 🎈✨🎊\n\n" +
                 "Regards,\n" +
-                "*MOHAN VERMA\n*" +
+                "*MOHAN VERMA*\n" +
                 "(DIRECTOR)\n" +
                 "NEEP";
 
@@ -104,7 +104,7 @@ export default function TodaysBirthdays() {
             const message = "🎉 Happy Birthday *" + name + "*! 🎂\n\n" +
                 "*New Era Education Point (NEEP)* wishes you a day full of joy, success, and wonderful memories! 🎈✨🎊\n\n" +
                 "Regards,\n" +
-                "*MOHAN VERMA\n*" +
+                "*MOHAN VERMA*\n" +
                 "(DIRECTOR)\n" +
                 "NEEP";
             const encodedMessage = encodeURIComponent(message).replace(/[!'()*]/g, escape);
