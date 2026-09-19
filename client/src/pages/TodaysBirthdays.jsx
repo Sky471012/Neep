@@ -57,8 +57,13 @@ export default function TodaysBirthdays() {
     // Mark a Student birthday as wished
     const sendWish = async (studentId, phone, name) => {
         try {
-            const message = "🎉 Happy Birthday " + name + "! 🎂\n\n" +
-                "*New Era Education Point (NEEP)* wishes you a day full of joy, success, and wonderful memories! 🎈✨🎊";
+            const message = "🎉 Happy Birthday *" + name + "*! 🎂\n\n" +
+                "*New Era Education Point (NEEP)* wishes you a day full of joy, success, and wonderful memories! 🎈✨🎊\n\n" +
+                "Regards,\n" +
+                "*MOHAN VERMA\n*" +
+                "(DIRECTOR)\n" +
+                "NEEP";
+
             const encodedMessage = encodeURIComponent(message).replace(/[!'()*]/g, escape);
             const waURL = `https://api.whatsapp.com/send?phone=91${phone}&text=${encodedMessage}`;
             window.open(waURL, "_blank");
@@ -96,8 +101,12 @@ export default function TodaysBirthdays() {
     // Mark a Teacher birthday as wished
     const sendTeacherWish = async (teacherId, phone, name) => {
         try {
-            const message = "🎉 Happy Birthday " + name + "! 🎂\n\n" +
-                "*New Era Education Point (NEEP)* wishes you a day full of joy, success, and wonderful memories! 🎈✨🎊";
+            const message = "🎉 Happy Birthday *" + name + "*! 🎂\n\n" +
+                "*New Era Education Point (NEEP)* wishes you a day full of joy, success, and wonderful memories! 🎈✨🎊\n\n" +
+                "Regards,\n" +
+                "*MOHAN VERMA\n*" +
+                "(DIRECTOR)\n" +
+                "NEEP";
             const encodedMessage = encodeURIComponent(message).replace(/[!'()*]/g, escape);
             const waURL = `https://api.whatsapp.com/send?phone=91${phone}&text=${encodedMessage}`;
             window.open(waURL, "_blank");
