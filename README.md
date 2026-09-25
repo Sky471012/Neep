@@ -207,6 +207,17 @@ DB_DEFAULT=userDataBase
 # Authentication
 JWT_SECRET=<your-jwt-secret>
 
+# Session lifetime (both must match; default 7 days)
+# JWT_EXPIRES_IN: jsonwebtoken timespan, e.g. 7d, 12h, 30m
+# AUTH_COOKIE_MAX_AGE_MS: same lifetime in milliseconds (7d = 604800000)
+JWT_EXPIRES_IN=7d
+AUTH_COOKIE_MAX_AGE_MS=604800000
+
+# Auth cookie (cross-site deployments need secure=true + sameSite=none)
+AUTH_COOKIE_SECURE=true
+AUTH_COOKIE_SAME_SITE=none
+AUTH_COOKIE_NAME=neep_auth
+
 # Email (Brevo SMTP)
 EMAIL_HOST=smtp-relay.brevo.com
 EMAIL_PORT=587
@@ -241,7 +252,7 @@ npm run dev
 
 Base URL: `http://localhost:5000/api`
 
-All protected endpoints require a `Authorization: Bearer <token>` header.
+All protected endpoints require the httpOnly `neep_auth` auth cookie (set automatically by login/OTP verification); requests must be sent with `credentials: 'include'`. Sessions last 7 days by default and slide forward while the user stays active.
 
 ### Authentication
 
@@ -480,7 +491,7 @@ Students:                          Admins / Teachers:
 ### Middleware Chain
 
 Every protected request passes through:
-1. **`verifyToken`** - Validates JWT from `Authorization: Bearer <token>` header
+1. **`verifyToken`** - Validates the JWT carried by the `neep_auth` httpOnly cookie (and re-issues it once half its lifetime has passed)
 2. **Role guard** (`isAdmin`, `isTeacher`, `isStudent`) - Checks `req.user.role`
 3. **`branchMiddleware`** - Extracts branch from JWT, attaches correct DB connection
 

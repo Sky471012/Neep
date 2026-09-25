@@ -4,6 +4,12 @@ import logo from "/logo_rectangle-1.png";
 import BranchSelectModal from "../modals/BranchSelectModal";
 import { apiFetch } from "../api";
 
+const clearLocalSession = () => {
+  ["role", "user", "branch", "branches"].forEach((key) =>
+    localStorage.removeItem(key)
+  );
+};
+
 export default function Navbar() {
   const [session, setSession] = useState(null);
   const role = session?.user?.role?.toLowerCase();
@@ -17,9 +23,23 @@ export default function Navbar() {
 
   useEffect(() => {
     apiFetch("/api/auth/me")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => setSession(data?.success ? data : null))
-      .catch(() => setSession(null));
+      .then((response) => {
+        if (response.status === 401) return { unauthorized: true };
+        if (!response.ok) return { transient: true };
+        return response.json();
+      })
+      .then((result) => {
+        // A failed request (offline, cold server) is not a logout.
+        if (result?.transient) return;
+        // Only a real 401 means the session is gone.
+        if (result?.unauthorized) {
+          clearLocalSession();
+          setSession(null);
+          return;
+        }
+        setSession(result?.success ? result : null);
+      })
+      .catch(() => {});
   }, [location.pathname]);
 
   // 🔹 Recheck branches whenever the route changes
@@ -47,10 +67,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await apiFetch("/api/auth/logout", { method: "POST" });
-    localStorage.removeItem("role");
-    localStorage.removeItem("user");
-    localStorage.removeItem("branch");
-    localStorage.removeItem("branches");
+    clearLocalSession();
     setSession(null);
     navigate("/#home");
   };

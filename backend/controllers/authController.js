@@ -13,6 +13,8 @@ const {
   clearAuthCookie,
 } = require("../config/authCookie");
 
+const jwtOptions = { expiresIn: process.env.JWT_EXPIRES_IN || "7d" };
+
 // Login Student
 exports.loginStudent = async (req, res) => {
   const { phone, dob, selectedBranch } = req.body;
@@ -39,7 +41,8 @@ exports.loginStudent = async (req, res) => {
       const { branch, student } = match;
       const token = jwt.sign(
         { id: student._id, role: "student", branch },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        jwtOptions
       );
       setAuthCookie(res, token);
 
@@ -83,7 +86,8 @@ exports.loginStudent = async (req, res) => {
     const { branch, student } = matches[0];
     const token = jwt.sign(
       { id: student._id, role: "student", branch },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      jwtOptions
     );
     setAuthCookie(res, token);
 
@@ -220,7 +224,8 @@ exports.verifyOtp = async (req, res) => {
       // ✅ Issue JWT
       const token = jwt.sign(
         { id: user._id, role: user.role, branch: chosenBranch },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        jwtOptions
       );
       setAuthCookie(res, token);
 
@@ -303,7 +308,8 @@ exports.verifyOtp = async (req, res) => {
     const { branch, user } = validBranches[0];
     const token = jwt.sign(
       { id: user._id, role: user.role, branch },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      jwtOptions
     );
     setAuthCookie(res, token);
 
@@ -409,7 +415,8 @@ exports.switchBranch = async (req, res) => {
     // ✅ Issue a new token with branch-specific id
     const newToken = jwt.sign(
       { id: idForBranch, role: user.role, branch },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      jwtOptions
     );
     setAuthCookie(res, newToken);
 
