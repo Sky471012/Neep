@@ -7,6 +7,11 @@ const path = require('path');
 const mongoDB = require("./db")
 require('dotenv').config();
 
+// JSON/API bodies get no ETag: with a validator attached, browsers send
+// conditional requests and /api/auth/me answers 304 with a stale session.
+// (express.static under /uploads keeps its own ETag.)
+app.set('etag', false);
+
 mongoDB();
 
 const allowedOrigins = (process.env.CLIENT_ORIGINS || 'http://localhost:5173')
@@ -44,6 +49,14 @@ app.use(compression());
 
 app.use(express.json());
 app.use(cookieParser());
+
+// API responses must never be cached (browser or Cloudflare): a stored
+// /api/auth/me hands the client a stale session state and shows up as
+// mysterious 304s / phantom logouts.
+app.use("/api", (req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'online', message: 'NEEP backend is online' });
