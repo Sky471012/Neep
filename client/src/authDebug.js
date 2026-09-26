@@ -30,6 +30,11 @@ export const logAuth = (event, details = {}) => {
     } else {
       list.push({
         t: now,
+        // Which site is running (Vercel preview vs custom domain) and which
+        // backend it was built against (VITE_BACKEND_URL is baked in at build
+        // time, and Preview/Production scopes can differ).
+        page: window.location.host,
+        api: import.meta.env.VITE_BACKEND_URL || "(same-origin)",
         path: window.location.pathname,
         online: navigator.onLine,
         vis: document.visibilityState,

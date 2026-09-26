@@ -7,6 +7,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import App from './App.jsx'
 import '@fortawesome/fontawesome-free/css/all.css'
 import { logAuth, readAuthLog, clearAuthLog } from './authDebug'
+import { apiFetch } from './api'
 
 axios.defaults.withCredentials = true;
 
@@ -45,6 +46,23 @@ window.addEventListener("focus", () => logAuth("focus", {}));
 
 // Heartbeat: if it stops, the tab/app was frozen or killed.
 setInterval(() => logAuth("heartbeat", {}), 30 * 60 * 1000);
+
+// Session probe: ask the server every 5 minutes whether the cookie still
+// arrives, so an overnight loss is pinned to an exact time (and to whether
+// the client still believes it is logged in).
+const probeSession = () => {
+  apiFetch("/api/auth/me")
+    .then((res) =>
+      logAuth("session_probe", {
+        status: res.status,
+        local: Boolean(localStorage.getItem("user")),
+      })
+    )
+    .catch((err) => logAuth("session_probe", { error: String(err) }));
+};
+
+probeSession();
+setInterval(probeSession, 5 * 60 * 1000);
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
