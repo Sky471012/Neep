@@ -310,7 +310,7 @@ export default function FeeTracking() {
           const paidMessage = newPaidDateStr
             ? remainingInstallments > 0
               ? `A fee payment of *₹${Number(editedAmount || 0).toLocaleString("en-IN")}* has been successfully received for the *installment number ${editingInst.installmentNo || "N/A"} of toatl ${totalInstallments} installments*. The installment was due on *${formatWhatsAppDate(newDueDateStr)}* and is paid on *${formatWhatsAppDate(newPaidDateStr)}*.The next installment is due on *${formatWhatsAppDate(nextInstallment?.dueDate)}*.`
-              : `A fee payment of *₹${Number(editedAmount || 0).toLocaleString("en-IN")}* has been successfully received for the *final installment of total ${totalInstallments} installments*. The installment was due on *${formatWhatsAppDate(newDueDateStr)}* and was paid on *${formatWhatsAppDate(newPaidDateStr)}*. All scheduled installments have now been paid.`
+              : `A fee payment of *₹${Number(editedAmount || 0).toLocaleString("en-IN")}* has been successfully received for the *final installment of total ${totalInstallments} installments*. The installment was due on *${formatWhatsAppDate(newDueDateStr)}* and is paid on *${formatWhatsAppDate(newPaidDateStr)}*. All scheduled installments have now been paid.`
             : `Your installment details have been updated successfully. The *due date* is *${formatWhatsAppDate(newDueDateStr)}*, and the current *status* is *${status}*.`;
           const message = [
             `Dear *${editingInst.studentId?.name || "Student"}*,\n`,
