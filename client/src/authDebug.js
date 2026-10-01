@@ -30,11 +30,13 @@ export const logAuth = (event, details = {}) => {
     } else {
       list.push({
         t: now,
-        // Which site is running (Vercel preview vs custom domain) and which
-        // backend it was built against (VITE_BACKEND_URL is baked in at build
-        // time, and Preview/Production scopes can differ).
+        // Which site is running (Vercel preview vs custom domain) and how API
+        // calls are routed: production always calls this same origin (Vercel
+        // proxies /api and /uploads to Render), local dev uses VITE_BACKEND_URL.
         page: window.location.host,
-        api: import.meta.env.VITE_BACKEND_URL || "(same-origin)",
+        api: import.meta.env.DEV
+            ? (import.meta.env.VITE_BACKEND_URL || "(same-origin)")
+            : "(same-origin via Vercel proxy)",
         path: window.location.pathname,
         online: navigator.onLine,
         vis: document.visibilityState,

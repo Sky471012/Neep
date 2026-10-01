@@ -213,7 +213,9 @@ JWT_SECRET=<your-jwt-secret>
 JWT_EXPIRES_IN=7d
 AUTH_COOKIE_MAX_AGE_MS=604800000
 
-# Auth cookie (cross-site deployments need secure=true + sameSite=none)
+# Auth cookie. Production traffic is proxied by Vercel onto this origin
+# (same-site), while local dev calls Render directly (cross-site), so keep
+# secure=true + sameSite=none.
 AUTH_COOKIE_SECURE=true
 AUTH_COOKIE_SAME_SITE=none
 AUTH_COOKIE_NAME=neep_auth
@@ -236,6 +238,13 @@ BREVO_API_KEY=<brevo-api-key>
 ```env
 VITE_BACKEND_URL=http://localhost:5000
 ```
+
+Local dev only. Production builds ignore it: `apiUrl`/`apiFetch`
+(`client/src/api.js`) resolve every API URL to the current origin and Vercel
+forwards `/api` and `/uploads` to Render, so a `VITE_BACKEND_URL` value in the
+Vercel dashboard has no effect on production - the auth cookie always stays
+first-party. `client/.env.production` pins the value to an empty string so the
+baked-in template never becomes `undefined/api/...`.
 
 ### Running Locally
 
@@ -527,19 +536,46 @@ JWT payload: { id: "...", role: "Admin", branch: "realDataBase" }
 
 ### Frontend (Vercel)
 
-The frontend is configured for Vercel with SPA routing via `vercel.json`:
+The frontend is configured for Vercel in `client/vercel.json`. It does two
+things:
+
+1. **SPA routing** - any path that is not an API path falls back to the app.
+2. **API proxy** - `/api/*` and `/uploads/*` are forwarded to the Render
+   backend, so the browser only ever talks to one origin.
 
 ```json
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://neep-dev.onrender.com/api/:path*" },
+    { "source": "/uploads/:path*", "destination": "https://neep-dev.onrender.com/uploads/:path*" },
+    { "source": "/(.*)", "destination": "/" }
+  ]
 }
 ```
+
+> **Why the proxy:** the auth cookie (`neep_auth`) has to be **first-party**.
+> When the page lived on `www.dev.neep.in` but the cookie belonged to
+> `neep-dev.onrender.com`, browsers (Brave, Chrome, Safari) treated it as a
+> third-party cookie and deleted it, which logged users out after a restart.
+> With the proxy the cookie is set and read on the site's own origin, so it
+> survives. `client/src/api.js` additionally resolves every API URL to the
+> current origin in production builds, and `client/.env.production` pins
+> `VITE_BACKEND_URL=` (empty), so no dashboard variable can send the cookie
+> cross-site again. On the `main` branch, point the rewrite destinations at
+> `https://neep.onrender.com`.
+
+Vercel's proxy timeout for external rewrites is short (10s by default on the
+Hobby plan), while a free Render instance sleeps after ~15 minutes idle. The
+first request after idle can therefore fail with `ROUTER_EXTERNAL_TARGET_ERROR`;
+retrying once usually succeeds as Render wakes up. Keeping Render awake (a
+scheduled hit on `/api/health`) or using a paid Render instance removes this.
 
 ```bash
 # Build for production
 cd client
 npm run build    # Output: client/dist/
 ```
+
 
 ### Backend (Render)
 

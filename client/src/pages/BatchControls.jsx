@@ -1,4 +1,4 @@
-import { apiFetch } from "../api";
+import { apiFetch, apiUrl } from "../api";
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
@@ -677,7 +677,7 @@ export default function BatchControls() {
   const handleArchiveToggle = async (batchId, newArchiveStatus) => {
     try {
       const res = await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/${batchId}/archive`,
+        apiUrl(`/api/admin/${batchId}/archive`),
         { archive: newArchiveStatus },
         {
           headers: {

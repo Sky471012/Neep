@@ -1,4 +1,4 @@
-import { apiFetch } from "../api";
+import { apiFetch, apiUrl } from "../api";
 "use client"
 import { useEffect, useRef, useState } from "react"
 import { format } from "date-fns"
@@ -264,7 +264,7 @@ export default function Admin() {
     formData.append("description", description)
     formData.append("image", image)
     try {
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/uploadPopup`, formData, {
+      const res = await axios.post(apiUrl("/api/uploadPopup"), formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

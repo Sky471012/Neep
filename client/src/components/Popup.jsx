@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import { apiUrl } from "../api";
 
 export default function Popup() {
     const [visible, setVisible] = useState(false);
@@ -11,11 +12,11 @@ export default function Popup() {
         const popupShown = sessionStorage.getItem("popupShown");
         if (popupShown) return; // Skip if already shown this session
 
-        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/getPopup`)
+        axios.get(apiUrl("/api/getPopup"))
             .then((res) => {
                 if (res.data != null) {
                     const img = new Image();
-                    img.src = `${import.meta.env.VITE_BACKEND_URL}${res.data.imageUrl}`;
+                    img.src = apiUrl(res.data.imageUrl);
                     img.onload = () => {
                         setPopup(res.data);
                         setTimeout(() => {
@@ -42,7 +43,7 @@ export default function Popup() {
                 <button className="popup-close" onClick={() => setVisible(false)}>
                     &times;
                 </button>
-                <img src={`${import.meta.env.VITE_BACKEND_URL}${popup.imageUrl}`} alt="Popup" className="popup-img" />
+                <img src={apiUrl(popup.imageUrl)} alt="Popup" className="popup-img" />
                 <div className="popup-text">
                     <p style={{ width: "90%", overflowWrap: "break-word" }}><strong>{popup.description}</strong></p>
                     <a

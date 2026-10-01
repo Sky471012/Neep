@@ -1,4 +1,4 @@
-import { apiFetch } from "../api";
+import { apiUrl } from "../api";
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -46,7 +46,7 @@ const ExcelUpload = () => {
     try {
 
       const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/upload`,
+        apiUrl("/api/admin/upload"),
         formData,
         {
           headers: {
