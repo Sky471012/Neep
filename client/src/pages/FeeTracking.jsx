@@ -153,6 +153,15 @@ export default function FeeTracking() {
     const day = String(x.getDate()).padStart(2, "0");
     return `${y}-${m}-${day}`;
   };
+  const formatWhatsAppDate = (value) => {
+    if (!value) return "N/A";
+    const date = new Date(value);
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
   const endOfDay = (d) => {
     const x = new Date(d);
     x.setHours(23, 59, 59, 999);
@@ -214,9 +223,10 @@ export default function FeeTracking() {
     setEditedMethod("Cash");
   };
 
-  const handleSaveEditedInstallment = async () => {
+  const handleSaveEditedInstallment = async (sendWhatsApp = false) => {
     if (!editingInst) return;
     const token = localStorage.getItem("authToken");
+    const whatsappWindow = sendWhatsApp ? window.open("about:blank", "_blank") : null;
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/updateInstallment/${editingInst._id}`,
@@ -271,6 +281,49 @@ export default function FeeTracking() {
         if (destination === "paid") next = sortInstallments([...next, updated], paidSortOrder, "paidDate");
         return next;
       });
+
+      if (sendWhatsApp) {
+        const getId = (value) => String(value?._id || value || "");
+        const studentId = getId(editingInst.studentId);
+        const feeId = getId(editingInst.feeId);
+        const remainingItems = [
+          ...unpaidInstallments,
+          ...upcomingInstallments,
+        ].filter((installment) => {
+          if (installment._id === updated._id || installment.paidDate) return false;
+          const sameFee = feeId && getId(installment.feeId) === feeId;
+          const sameStudent = !feeId && getId(installment.studentId) === studentId;
+          return sameFee || sameStudent;
+        });
+        const remainingInstallments = remainingItems.length + (newPaidDateStr ? 0 : 1);
+        const totalInstallments = Number(editingInst.installmentNo || 0) + remainingInstallments;
+        const nextInstallment = remainingItems
+          .filter((installment) => !installment.paidDate)
+          .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
+        const phone = String(editingInst.studentId?.phone || "").replace(/\D/g, "");
+        if (!phone) {
+          whatsappWindow?.close();
+          alert("This student does not have a phone number for WhatsApp.");
+        } else {
+          const whatsappPhone = phone.length === 10 ? `91${phone}` : phone;
+          const status = newPaidDateStr ? "Paid" : "Due";
+          const paidMessage = newPaidDateStr
+            ? remainingInstallments > 0
+              ? `A fee payment of *₹${Number(editedAmount || 0).toLocaleString("en-IN")}* has been successfully received for the *installment number ${editingInst.installmentNo || "N/A"} of ${totalInstallments} installments*. The installment was due on *${formatWhatsAppDate(newDueDateStr)}* and is paid on *${formatWhatsAppDate(newPaidDateStr)}*.The next installment is due on *${formatWhatsAppDate(nextInstallment?.dueDate)}*.`
+              : `A fee payment of *₹${Number(editedAmount || 0).toLocaleString("en-IN")}* has been successfully received for the *final installment of total ${totalInstallments} installments*. The installment was due on *${formatWhatsAppDate(newDueDateStr)}* and is paid on *${formatWhatsAppDate(newPaidDateStr)}*. All scheduled installments have now been paid.`
+            : `Your installment details have been updated successfully. The *due date* is *${formatWhatsAppDate(newDueDateStr)}*, and the current *status* is *${status}*.`;
+          const message = [
+            `Dear *${editingInst.studentId?.name || "Student"}*,\n`,
+            paidMessage,
+            newPaidDateStr && remainingInstallments === 0 ? "Thank you." : null,
+            "Your payment receipt is available on the NEEP website. Please visit *www.neep.in*, log in to your account and download the receipt.\n",
+            "*NEEP – New Era Education Point*",
+          ].filter((line) => line !== null).join("\n");
+          const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
+          if (whatsappWindow) whatsappWindow.location.href = whatsappUrl;
+          else window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+        }
+      }
 
       closeEditModal();
     } catch (err) {
@@ -1043,10 +1096,10 @@ export default function FeeTracking() {
               </button>
               <button
                 type="button"
-                className="btn btn-outline-secondary btn-sm"
-                onClick={closeEditModal}
+                className="btn btn-primary btn-sm"
+                onClick={() => handleSaveEditedInstallment(true)}
               >
-                Cancel
+                Save & send
               </button>
             </div>
           </div>
