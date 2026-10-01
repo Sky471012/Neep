@@ -10,8 +10,16 @@ const clearLocalSession = () => {
   );
 };
 
+// Paint the role-gated links (Control Room, Student, ...) at mount instead of
+// waiting for /api/auth/me; every login writes localStorage.role before
+// navigate(), and the check below still corrects this state (401 clears it).
+const seedSession = () => {
+  const role = localStorage.getItem("role");
+  return role ? { success: true, user: { role } } : null;
+};
+
 export default function Navbar() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState(seedSession);
   const role = session?.user?.role?.toLowerCase();
   const [scrolled, setScrolled] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
