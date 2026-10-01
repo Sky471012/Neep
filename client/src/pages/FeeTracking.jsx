@@ -315,7 +315,6 @@ export default function FeeTracking() {
           const message = [
             `Dear *${editingInst.studentId?.name || "Student"}*,\n`,
             paidMessage,
-            newPaidDateStr && remainingInstallments === 0 ? "Thank you." : null,
             "Your payment receipt is available on the NEEP website. Please visit *www.neep.in*, log in to your account and download the receipt.\n",
             "*NEEP – New Era Education Point*",
           ].filter((line) => line !== null).join("\n");
