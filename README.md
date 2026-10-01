@@ -221,7 +221,7 @@ AUTH_COOKIE_SAME_SITE=none
 AUTH_COOKIE_NAME=neep_auth
 
 # Auth diagnostics: JSON lines prefixed with [auth] in the server log
-# (cookie issued, token rejected + reason, session slide, CORS rejects).
+# (cookie issued/cleared, token rejected + reason, CORS rejects).
 # Set to false to silence them.
 AUTH_LOG=true
 

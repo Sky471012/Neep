@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation, matchPath } from "react-router-dom";
 import logo from "/logo_rectangle-1.png";
 import BranchSelectModal from "../modals/BranchSelectModal";
 import { apiFetch } from "../api";
-import { logAuth } from "../authDebug";
 
 const clearLocalSession = () => {
   ["role", "user", "branch", "branches"].forEach((key) =>
@@ -30,32 +29,19 @@ export default function Navbar() {
         return response.json();
       })
       .then((result) => {
-        const hasLocalUser = Boolean(localStorage.getItem("user"));
-
         // A failed request (offline, cold server) is not a logout.
-        if (result?.transient) {
-          logAuth("me_transient_error", { status: result.status, hasLocalUser });
-          return;
-        }
+        if (result?.transient) return;
         // Only a real 401 means the session is gone.
         if (result?.unauthorized) {
-          logAuth("me_401_cleared", { hadLocalUser: hasLocalUser });
           clearLocalSession();
           setSession(null);
           return;
         }
-        logAuth("me_ok", {
-          success: Boolean(result?.success),
-          role: result?.user?.role,
-          hasLocalUser,
-        });
         setSession(result?.success ? result : null);
       })
-      .catch((err) => {
-        logAuth("me_network_error", {
-          error: String(err),
-          hasLocalUser: Boolean(localStorage.getItem("user")),
-        });
+      .catch(() => {
+        // Network or cold-server errors are not logouts: keep the session
+        // state we already have instead of clearing it.
       });
   }, [location.pathname]);
 
@@ -83,7 +69,6 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    logAuth("logout_clicked", {});
     await apiFetch("/api/auth/logout", { method: "POST" });
     clearLocalSession();
     setSession(null);

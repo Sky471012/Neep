@@ -6,29 +6,7 @@ const JWT_OPTIONS = { expiresIn: process.env.JWT_EXPIRES_IN || "7d" };
 
 const signToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, JWT_OPTIONS);
 
-// The server-side "the cookie arrived" marker: logged once per session and
-// re-logged after any failure, so the log shows exactly which device lost
-// its cookie and when (pair with the UA on verify_fail no_cookie lines).
-let lastSessionKey = null;
-let failureSinceSession = false;
-
-const logSessionSeen = (req, decoded) => {
-  const key = `${decoded.id}:${decoded.exp || "legacy"}`;
-  if (key === lastSessionKey && !failureSinceSession) return;
-
-  lastSessionKey = key;
-  failureSinceSession = false;
-
-  authLog("verify_ok", {
-    session: key,
-    role: decoded.role,
-    branch: decoded.branch,
-    ...requestMeta(req),
-  });
-};
-
 const logVerifyFail = (req, details) => {
-  failureSinceSession = true;
   authLog("verify_fail", { ...details, ...requestMeta(req) });
 };
 
@@ -43,10 +21,6 @@ const slideSession = (res, req, decoded) => {
   if (exp - now > (exp - iat) / 2) return;
 
   setAuthCookie(res, signToken(claims));
-  authLog("session_slide", {
-    ttlLeftSec: exp - now,
-    ...requestMeta(req),
-  });
 };
 
 exports.verifyToken = (req, res, next) => {
@@ -66,7 +40,6 @@ exports.verifyToken = (req, res, next) => {
       return res.status(401).json({ message: "Invalid token" });
     }
     req.user = decoded;
-    logSessionSeen(req, decoded);
     slideSession(res, req, decoded);
     next();
   });
