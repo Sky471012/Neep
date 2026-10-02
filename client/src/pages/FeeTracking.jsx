@@ -823,6 +823,8 @@ export default function FeeTracking() {
               yearDropdownItemNumber={10}
               dropdownMode="select"
               placeholderText="DD-MM-YYYY"
+              portalId="datepicker-portal"
+              popperProps={{ strategy: "fixed" }}
             />
           </div>
 
@@ -838,6 +840,8 @@ export default function FeeTracking() {
               yearDropdownItemNumber={10}
               dropdownMode="select"
               placeholderText="DD-MM-YYYY"
+              portalId="datepicker-portal"
+              popperProps={{ strategy: "fixed" }}
             />
           </div>
 
@@ -877,6 +881,8 @@ export default function FeeTracking() {
               yearDropdownItemNumber={10}
               dropdownMode="select"
               placeholderText="DD-MM-YYYY"
+              portalId="datepicker-portal"
+              popperProps={{ strategy: "fixed" }}
             />
           </div>
 
@@ -892,6 +898,8 @@ export default function FeeTracking() {
               yearDropdownItemNumber={10}
               dropdownMode="select"
               placeholderText="DD-MM-YYYY"
+              portalId="datepicker-portal"
+              popperProps={{ strategy: "fixed" }}
             />
           </div>
 
@@ -957,6 +965,8 @@ export default function FeeTracking() {
               yearDropdownItemNumber={10}
               dropdownMode="select"
               placeholderText="DD-MM-YYYY"
+              portalId="datepicker-portal"
+              popperProps={{ strategy: "fixed" }}
             />
           </div>
 
@@ -972,6 +982,8 @@ export default function FeeTracking() {
               yearDropdownItemNumber={10}
               dropdownMode="select"
               placeholderText="DD-MM-YYYY"
+              portalId="datepicker-portal"
+              popperProps={{ strategy: "fixed" }}
             />
           </div>
 
