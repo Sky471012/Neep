@@ -7,7 +7,20 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import App from './App.jsx'
 import '@fortawesome/fontawesome-free/css/all.css'
 
+import { noteAuthFailure } from './api'
+
 axios.defaults.withCredentials = true;
+
+// Pages that call axios directly must also flip the UI when the token dies.
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      noteAuthFailure(error.response.status, error.response.data);
+    }
+    throw error;
+  }
+);
 
 localStorage.removeItem("authToken");
 

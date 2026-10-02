@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate, useLocation, matchPath } from "react-router-dom";
 import logo from "/logo_rectangle-1.png";
 import BranchSelectModal from "../modals/BranchSelectModal";
-import { apiFetch } from "../api";
+import { apiFetch, clearStoredSession } from "../api";
 
-const clearLocalSession = () => {
-  ["role", "user", "branch", "branches"].forEach((key) =>
-    localStorage.removeItem(key)
-  );
-};
+// Routes that stay reachable when the session dies; anything else is left
+// from the authExpired listener below.
+const PUBLIC_PATHS = ["/", "/login", "/all-courses", "/contactus"];
 
 // Paint the role-gated links (Control Room, Student, ...) at mount instead of
 // waiting for /api/auth/me; every login writes localStorage.role before
@@ -28,8 +26,14 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [showBranchModal, setShowBranchModal] = useState(false);
   const [hasMultipleBranches, setHasMultipleBranches] = useState(false);
+  // Bumped on logout and on every new check so a reply arriving after either
+  // event can no longer resurrect a dead session.
+  const epochRef = useRef(0);
 
-  useEffect(() => {
+  const checkSession = useCallback(() => {
+    // Signed out locally → nothing to validate.
+    if (!localStorage.getItem("role")) return;
+    const epoch = ++epochRef.current;
     apiFetch("/api/auth/me")
       .then((response) => {
         if (response.status === 401) return { unauthorized: true };
@@ -37,21 +41,57 @@ export default function Navbar() {
         return response.json();
       })
       .then((result) => {
+        if (epoch !== epochRef.current) return;
         // A failed request (offline, cold server) is not a logout.
         if (result?.transient) return;
         // Only a real 401 means the session is gone.
         if (result?.unauthorized) {
-          clearLocalSession();
+          clearStoredSession();
           setSession(null);
           return;
         }
-        setSession(result?.success ? result : null);
+        // A success that raced with a logout (role already cleared) is stale.
+        setSession(result?.success && localStorage.getItem("role") ? result : null);
       })
       .catch(() => {
         // Network or cold-server errors are not logouts: keep the session
         // state we already have instead of clearing it.
       });
-  }, [location.pathname]);
+  }, []);
+
+  useEffect(() => {
+    checkSession();
+  }, [location.pathname, checkSession]);
+
+  // Expired token anywhere: api.js clears storage and fires authExpired, so
+  // drop the UI session and leave protected pages. Also revalidate when the
+  // tab comes back so an idle expiry is caught without waiting for a click.
+  useEffect(() => {
+    const onAuthExpired = () => {
+      epochRef.current += 1;
+      setSession(null);
+      if (!PUBLIC_PATHS.includes(location.pathname)) {
+        navigate("/", { replace: true });
+      }
+    };
+    window.addEventListener("authExpired", onAuthExpired);
+
+    let lastCheckedAt = Date.now();
+    const revalidate = () => {
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - lastCheckedAt < 60 * 1000) return;
+      lastCheckedAt = Date.now();
+      checkSession();
+    };
+    document.addEventListener("visibilitychange", revalidate);
+    window.addEventListener("focus", revalidate);
+
+    return () => {
+      window.removeEventListener("authExpired", onAuthExpired);
+      document.removeEventListener("visibilitychange", revalidate);
+      window.removeEventListener("focus", revalidate);
+    };
+  }, [checkSession, location.pathname, navigate]);
 
   // 🔹 Recheck branches whenever the route changes
   useEffect(() => {
@@ -76,11 +116,18 @@ export default function Navbar() {
     };
   }, []);
 
-  const handleLogout = async () => {
-    await apiFetch("/api/auth/logout", { method: "POST" });
-    clearLocalSession();
+  const handleLogout = () => {
+    // Sign out locally before anything else: this handler sits on a <Link>,
+    // so the router navigates on this same click while the POST below is
+    // still in flight. If storage still said "logged in" at that point, the
+    // next page's navbar would re-seed a live session.
+    epochRef.current += 1;
+    clearStoredSession();
     setSession(null);
-    navigate("/#home");
+    apiFetch("/api/auth/logout", { method: "POST" }).catch(() => {
+      // Best-effort: if this fails the cookie stays until it expires, but
+      // this device is already signed out locally.
+    });
   };
 
   useEffect(() => {
