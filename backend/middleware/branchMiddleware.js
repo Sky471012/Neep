@@ -1,13 +1,16 @@
 const jwt = require("jsonwebtoken");
 const { getDBConnection } = require("../config/dbManager");
+const { getTokenFromRequest } = require("../config/authCookie");
+const { authLog, requestMeta } = require("../utils/authLog");
 
 module.exports = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader)
-      return res.status(401).json({ message: "Authorization header missing" });
+    const token = getTokenFromRequest(req);
+    if (!token) {
+      authLog("branch_verify_fail", { reason: "no_cookie", ...requestMeta(req) });
+      return res.status(401).json({ message: "Authentication cookie missing" });
+    }
 
-    const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const branch = decoded.branch;
@@ -21,6 +24,11 @@ module.exports = async (req, res, next) => {
 
     next();
   } catch (err) {
+    authLog("branch_verify_fail", {
+      reason: err.name || "error",
+      message: err.message,
+      ...requestMeta(req),
+    });
     console.error("Branch middleware error:", err.message);
     return res.status(401).json({ message: "Invalid or expired token" });
   }

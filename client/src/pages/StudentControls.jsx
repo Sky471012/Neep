@@ -1,3 +1,4 @@
+import { apiFetch } from "../api";
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
@@ -16,8 +17,6 @@ export default function StudentControls() {
 
     const { studentId } = useParams();
     const navigate = useNavigate();
-    const token = localStorage.getItem("authToken");
-
     const [student, setStudent] = useState({});
     const [batches, setBatches] = useState([]);
     const [installments, setInstallments] = useState([]);
@@ -110,49 +109,63 @@ export default function StudentControls() {
         return isNaN(parsed) ? Infinity : parsed;
     }
 
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+
+        if (!storedUser || storedUser === "undefined") {
+            navigate("/");
+            return;
+        }
+
+        try {
+            JSON.parse(storedUser);
+        } catch (err) {
+            localStorage.removeItem("user");
+            navigate("/");
+        }
+    }, [navigate]);
 
     useEffect(() => {
-        const token = localStorage.getItem("authToken");
 
-        if (token && studentId) {
+        if (studentId) {
             Promise.all([
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getStudentDetails/${studentId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getStudentDetails/${studentId}`, {
+                    headers: {},
                 })
                     .then(res => res.json())
                     .then(data => setStudent(data || {}))
                     .catch(err => console.error("Student details fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentBatches/${studentId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentBatches/${studentId}`, {
+                    headers: {},
                 })
                     .then(res => res.json())
                     .then(data => setBatches(data.batches || []))
                     .catch(err => console.error("Student batches fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/${studentId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/${studentId}`, {
+                    headers: {},
                 })
                     .then(res => res.json())
                     .then(data => setFee(Array.isArray(data.fee) ? data.fee[0] : {}))
                     .catch(err => console.error("Fee fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batches`, {
+                    headers: {},
                 })
                     .then(res => res.json())
                     .then(data => setAllBatches(data || {}))
                     .catch(err => console.error("All batches fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/installments/${studentId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/installments/${studentId}`, {
+                    headers: {},
                 })
                     .then(res => res.json())
                     .then(data => setInstallments(Array.isArray(data) ? data : data.installments || []))
                     .catch(err => console.error("Installments fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/allTests/${studentId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/allTests/${studentId}`, {
+                    headers: {},
                 })
                     .then(res => res.json())
                     .then(data => setTests(Array.isArray(data) ? data : data.tests || []))
@@ -184,8 +197,8 @@ export default function StudentControls() {
     }, [fee]);
 
     const refetchFee = async () => {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/${studentId}`, {
-            headers: { Authorization: `Bearer ${token}` },
+        const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/${studentId}`, {
+            headers: {},
         });
         const data = await res.json();
         setFee(Array.isArray(data.fee) ? data.fee[0] : data.fee || {});
@@ -351,11 +364,10 @@ export default function StudentControls() {
         if (!confirmDelete) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/removeStudent`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/removeStudent`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ batchId, studentId }),
             });
@@ -379,9 +391,9 @@ export default function StudentControls() {
         if (!confirmDelete) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentDelete/${studentId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentDelete/${studentId}`, {
                 method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {},
             });
 
             const data = await res.json();
@@ -400,11 +412,10 @@ export default function StudentControls() {
         }
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addBatches`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addBatches`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     studentId,
@@ -457,13 +468,12 @@ export default function StudentControls() {
             amount: 0
         };
 
-        const response = await fetch(
+        const response = await apiFetch(
             `${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/addInstallment`,
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(newInstallment),
             }
@@ -483,11 +493,10 @@ export default function StudentControls() {
         if (!confirm) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/removeInstallment/${record._id}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/removeInstallment/${record._id}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
                 },
             });
 
@@ -499,8 +508,8 @@ export default function StudentControls() {
             }
 
             // 🟢 Fetch updated installments after backend redistribution & renumbering
-            const refreshed = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/installments/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
+            const refreshed = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/installments/${studentId}`, {
+                headers: {},
             });
 
             const updatedList = await refreshed.json();
@@ -517,11 +526,10 @@ export default function StudentControls() {
     const editTotalAmount = async (newAmount) => {
         try {
             // 1. Update fee total amount
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/update-fee/${studentId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/update-fee/${studentId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ amount: newAmount }),
             });
@@ -550,13 +558,12 @@ export default function StudentControls() {
 
                 const updated = await Promise.all(
                     unpaid.map(async (i, index) => {
-                        const res = await fetch(
+                        const res = await apiFetch(
                             `${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/redistributeInstallment/${i._id}`,
                             {
                                 method: "PATCH",
                                 headers: {
                                     "Content-Type": "application/json",
-                                    Authorization: `Bearer ${token}`,
                                 },
                                 body: JSON.stringify({
                                     amount: index === 0 ? equalShare + remainder : equalShare, // distribute remainder to first
@@ -589,11 +596,10 @@ export default function StudentControls() {
         }
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/createFeeWithInstallments`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/createFeeWithInstallments`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     studentId,
@@ -623,10 +629,9 @@ export default function StudentControls() {
         if (!confirm) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/deleteFeeStructure/${studentId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/deleteFeeStructure/${studentId}`, {
                 method: "DELETE",
                 headers: {
-                    Authorization: `Bearer ${token}`,
                 },
             });
 
@@ -648,11 +653,10 @@ export default function StudentControls() {
 
     const handleMarkPaid = async (installmentId) => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/mark-paid/${installmentId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/mark-paid/${installmentId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     paidDate: toLocalDateStr(paidDateInput),
@@ -701,11 +705,10 @@ export default function StudentControls() {
     // Add this function to handle saving edited installment
     const handleSaveEditedInstallment = async (installmentId) => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/updateInstallment/${installmentId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/updateInstallment/${installmentId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     amount: editedAmount,
@@ -806,11 +809,10 @@ export default function StudentControls() {
         if (!validateForm()) return;
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editStudntProfile/${studentId}`, {
+            const response = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editStudntProfile/${studentId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(editForm)
             });

@@ -8,6 +8,12 @@ const branchList = [
   "userDataBase",
 ];
 const { sendMail } = require("../utils/sendMail");
+const {
+  setAuthCookie,
+  clearAuthCookie,
+} = require("../config/authCookie");
+
+const jwtOptions = { expiresIn: process.env.JWT_EXPIRES_IN || "7d" };
 
 // Login Student
 exports.loginStudent = async (req, res) => {
@@ -35,12 +41,13 @@ exports.loginStudent = async (req, res) => {
       const { branch, student } = match;
       const token = jwt.sign(
         { id: student._id, role: "student", branch },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        jwtOptions
       );
+      setAuthCookie(res, token);
 
       return res.json({
         success: true,
-        authToken: token,
         branch,
         branches: matches.map(({ branch }) => ({
           key: branch,
@@ -79,12 +86,13 @@ exports.loginStudent = async (req, res) => {
     const { branch, student } = matches[0];
     const token = jwt.sign(
       { id: student._id, role: "student", branch },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      jwtOptions
     );
+    setAuthCookie(res, token);
 
     res.json({
       success: true,
-      authToken: token,
       branch,
       student: {
         id: student._id,
@@ -216,8 +224,10 @@ exports.verifyOtp = async (req, res) => {
       // ✅ Issue JWT
       const token = jwt.sign(
         { id: user._id, role: user.role, branch: chosenBranch },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        jwtOptions
       );
+      setAuthCookie(res, token);
 
       // ✅ Delete OTPs *after* successful login
       await Otp.deleteMany({ email });
@@ -225,7 +235,6 @@ exports.verifyOtp = async (req, res) => {
       // ✅ Send only branches user actually belongs to
       return res.json({
         success: true,
-        authToken: token,
         branch: chosenBranch,
         branches: userBranches, // ✅ send only user's branches
         user: {
@@ -299,8 +308,10 @@ exports.verifyOtp = async (req, res) => {
     const { branch, user } = validBranches[0];
     const token = jwt.sign(
       { id: user._id, role: user.role, branch },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      jwtOptions
     );
+    setAuthCookie(res, token);
 
     // ✅ Delete OTPs only now
     const db = await getDBConnection(branch);
@@ -309,7 +320,6 @@ exports.verifyOtp = async (req, res) => {
 
     return res.json({
       success: true,
-      authToken: token,
       branch,
       user,
     });
@@ -405,16 +415,26 @@ exports.switchBranch = async (req, res) => {
     // ✅ Issue a new token with branch-specific id
     const newToken = jwt.sign(
       { id: idForBranch, role: user.role, branch },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      jwtOptions
     );
+    setAuthCookie(res, newToken);
 
     return res.json({
       success: true,
-      authToken: newToken,
       branch,
     });
   } catch (err) {
     console.error("Switch branch error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
+};
+
+exports.getSession = (req, res) => {
+  res.json({ success: true, user: req.user });
+};
+
+exports.logout = (req, res) => {
+  clearAuthCookie(res);
+  res.json({ success: true });
 };

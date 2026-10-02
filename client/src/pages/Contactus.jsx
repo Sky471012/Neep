@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import Call from "../components/Call";
 import Instagram from "../components/Instagram";
 import axios from "axios";
+import { apiUrl } from "../api";
 import { toast } from 'react-toastify';
 
 export default function Contactus() {
@@ -25,7 +26,7 @@ export default function Contactus() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/contactus`, formData);
+      const res = await axios.post(apiUrl("/api/contactus"), formData);
       toast.success("Message sent successfully!");
       setFormData({ name: "", phone: "", email: "", message: "" });
     } catch (err) {

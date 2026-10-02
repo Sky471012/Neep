@@ -1,3 +1,4 @@
+import { apiFetch } from "../api";
 "use client"
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
@@ -13,6 +14,7 @@ import DatePicker from "react-datepicker";
 export default function FeeTracking() {
 
   const [admin, setAdmin] = useState(null);
+  const navigate = useNavigate();
   const [unpaidInstallments, setUnpaidInstallments] = useState([])
   const [upcomingInstallments, setUpcomingInstallments] = useState([])
   const [paidInstallments, setPaidInstallments] = useState([])
@@ -106,11 +108,26 @@ export default function FeeTracking() {
 
   useEffect(() => {
     const storedAdmin = localStorage.getItem("user");
-    const token = localStorage.getItem("authToken")
-    const headers = { Authorization: `Bearer ${token}` }
+
+    if (!storedAdmin || storedAdmin === "undefined") {
+        navigate("/");
+        return;
+    }
+
+    try {
+        JSON.parse(storedAdmin);
+    } catch (err) {
+        localStorage.removeItem("user");
+        navigate("/");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    const storedAdmin = localStorage.getItem("user");
+    const headers = {}
 
     Promise.all([
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/unpaid`, { headers })
+      apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/unpaid`, { headers })
         .then((res) => res.json())
         .then((data) => {
           const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
@@ -118,7 +135,7 @@ export default function FeeTracking() {
         })
         .catch((err) => console.error("Error loading unpaid installments:", err)),
 
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/upcoming`, { headers })
+      apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/upcoming`, { headers })
         .then((res) => res.json())
         .then((data) => {
           const sorted = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
@@ -126,7 +143,7 @@ export default function FeeTracking() {
         })
         .catch((err) => console.error("Error loading upcoming installments:", err)),
 
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/paid`, { headers })
+      apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/installments/paid`, { headers })
         .then((res) => res.json())
         .then((data) => {
           const sorted = data.installments.sort((a, b) => new Date(b.paidDate) - new Date(a.paidDate))
@@ -225,16 +242,14 @@ export default function FeeTracking() {
 
   const handleSaveEditedInstallment = async (sendWhatsApp = false) => {
     if (!editingInst) return;
-    const token = localStorage.getItem("authToken");
     const whatsappWindow = sendWhatsApp ? window.open("about:blank", "_blank") : null;
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/fee/updateInstallment/${editingInst._id}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             amount: editedAmount,
@@ -446,12 +461,12 @@ export default function FeeTracking() {
                               )
                             )}
                           </ul>
-                            <button
-                              className="btn btn-sm text-start text-danger w-100"
-                              onClick={() => { setSelectedUnpaidClass(null); setFromDateUnpaid(null); setToDateUnpaid(null); setDraftFromDateUnpaid(null); setDraftToDateUnpaid(null); }}
-                            >
-                              Clear Filters
-                            </button>
+                          <button
+                            className="btn btn-sm text-start text-danger w-100"
+                            onClick={() => { setSelectedUnpaidClass(null); setFromDateUnpaid(null); setToDateUnpaid(null); setDraftFromDateUnpaid(null); setDraftToDateUnpaid(null); }}
+                          >
+                            Clear Filters
+                          </button>
                         </div>
                       </li>
                     </ul>
@@ -583,12 +598,12 @@ export default function FeeTracking() {
                               )
                             )}
                           </ul>
-                            <button
-                              className="btn btn-sm text-start text-danger w-100"
-                              onClick={() => { setSelectedUpcomingClass(null); setFromDateUpcoming(null); setToDateUpcoming(null); setDraftFromDateUpcoming(null); setDraftToDateUpcoming(null); }}
-                            >
-                              Clear Filter
-                            </button>
+                          <button
+                            className="btn btn-sm text-start text-danger w-100"
+                            onClick={() => { setSelectedUpcomingClass(null); setFromDateUpcoming(null); setToDateUpcoming(null); setDraftFromDateUpcoming(null); setDraftToDateUpcoming(null); }}
+                          >
+                            Clear Filter
+                          </button>
                         </div>
                       </li>
                     </ul>
@@ -737,12 +752,12 @@ export default function FeeTracking() {
                               )
                             )}
                           </ul>
-                            <button
-                              className="btn btn-sm text-start text-danger w-100"
-                              onClick={() => { setSelectedPaidClass(null); setFromDatePaid(null); setToDatePaid(null); setDraftFromDatePaid(null); setDraftToDatePaid(null); }}
-                            >
-                              Clear Filter
-                            </button>
+                          <button
+                            className="btn btn-sm text-start text-danger w-100"
+                            onClick={() => { setSelectedPaidClass(null); setFromDatePaid(null); setToDatePaid(null); setDraftFromDatePaid(null); setDraftToDatePaid(null); }}
+                          >
+                            Clear Filter
+                          </button>
                         </div>
                       </li>
                     </ul>

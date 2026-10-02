@@ -1,3 +1,4 @@
+import { apiFetch, apiUrl } from "../api";
 "use client"
 import { useEffect, useRef, useState } from "react"
 import { format } from "date-fns"
@@ -116,20 +117,20 @@ export default function Admin() {
 
   useEffect(() => {
     const storedAdmin = localStorage.getItem("user");
-    const token = localStorage.getItem("authToken");
 
-    if (storedAdmin && token && storedAdmin !== "undefined") {
+    if (storedAdmin && storedAdmin !== "undefined") {
       try {
         setAdmin(JSON.parse(storedAdmin))
       } catch (err) {
         console.error("Failed to parse admin JSON:", err)
-        localStorage.removeItem("admin")
+        localStorage.removeItem("user")
+        navigate("/");
         return
       }
-      const headers = { Authorization: `Bearer ${token}` }
+      const headers = {}
 
       // Fetch today's classes
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/today/timetable`, { headers })
+      apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/today/timetable`, { headers })
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch timetable")
           return res.json()
@@ -139,9 +140,9 @@ export default function Admin() {
         .finally(() => setLoading(false))
 
     } else {
-      setLoading(false);
+      navigate("/");
     }
-  }, [])
+  }, [navigate])
 
   const createBatch = async (batchName, batchClass, batchStartDate) => {
     if (!batchName.trim()) {
@@ -151,11 +152,10 @@ export default function Admin() {
     const formattedDate = format(batchStartDate, "dd-MM-yyyy")
     const code = `B-${Date.now().toString().slice(-6)}`
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchCreate`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchCreate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         body: JSON.stringify({ name: batchName, code, batchClass, startDate: formattedDate }),
       })
@@ -176,11 +176,10 @@ export default function Admin() {
 
   const createStudent = async (name, phone, dob, address, className, dateOfJoining, guardianName, guardianPhone, schoolType) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentCreate`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/studentCreate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         body: JSON.stringify({
           name,
@@ -220,11 +219,10 @@ export default function Admin() {
 
   const createTeacher = async (teacherName, teacherEmail, teacherPhone, teacherDob, teacherAddress, teacherQualification, teacherAadhar, teacherExperience) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherCreate`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherCreate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         body: JSON.stringify({
           name: teacherName,
@@ -266,9 +264,8 @@ export default function Admin() {
     formData.append("description", description)
     formData.append("image", image)
     try {
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/uploadPopup`, formData, {
+      const res = await axios.post(apiUrl("/api/uploadPopup"), formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           "Content-Type": "multipart/form-data",
         },
       })

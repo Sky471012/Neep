@@ -1,3 +1,4 @@
+import { apiFetch, apiUrl } from "../api";
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
@@ -18,8 +19,6 @@ import ModalNine from "../modals/ModalNine";
 export default function BatchControls() {
   const { batchId } = useParams();
   const navigate = useNavigate();
-  const token = localStorage.getItem("authToken");
-
   const [batch, setBatch] = useState({});
   const [students, setStudents] = useState([]);
   const [teacher, setTeacher] = useState(null);
@@ -127,57 +126,69 @@ export default function BatchControls() {
     return isNaN(parsed) ? Infinity : parsed;
   }
 
+  useEffect(() => {
+    const storedAdmin = localStorage.getItem("user");
+
+    if (!storedAdmin || storedAdmin === "undefined") {
+      navigate("/");
+      return;
+    }
+
+    try {
+      JSON.parse(storedAdmin);
+    } catch (err) {
+      console.error("Invalid user data");
+      localStorage.removeItem("user");
+      navigate("/");
+    }
+  }, [navigate]);
+
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
 
-    if (token) {
-      Promise.all([
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getBatchDetails/${batchId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+    Promise.all([
+        apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getBatchDetails/${batchId}`, {
+          headers: {},
         })
           .then(res => res.json())
           .then(data => setBatch(data || {}))
           .catch(err => console.error("Batch fetch error:", err)),
 
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchStudents/${batchId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchStudents/${batchId}`, {
+          headers: {},
         })
           .then(res => res.json())
           .then(data => setStudents(data.students || []))
           .catch(err => console.error("Batch students fetch error:", err)),
 
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/findTeacher/${batchId}`, {
+          headers: {},
         })
           .then(res => res.json())
           .then(data => setTeacher(data.teacher?.[0] || null))
           .catch(err => console.error("Assigned teacher fetch error:", err)),
 
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, {
-          headers: { Authorization: `Bearer ${token}` },
+        apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/teachers`, {
+          headers: {},
         })
           .then(res => res.json())
           .then(data => setTeachersList(data || []))
           .catch(err => console.error("Teachers list fetch error:", err)),
 
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchTimetable/${batchId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/batchTimetable/${batchId}`, {
+          headers: {},
         })
           .then(res => res.json())
           .then(data => setTimetable(data.timetable || []))
           .catch(err => console.error("Timetable fetch error:", err)),
 
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, {
-          headers: { Authorization: `Bearer ${token}` },
+        apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/students`, {
+          headers: {},
         })
           .then(res => res.json())
           .then(data => setAllStudents(data || {}))
           .catch(err => console.error("All students fetch error:", err)),
-      ]).finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    ]).finally(() => setLoading(false));
   }, [batchId]);
 
   useEffect(() => {
@@ -196,8 +207,8 @@ export default function BatchControls() {
     setModalThree(true);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/${student._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/${student._id}`, {
+        headers: {},
       });
       const data = await res.json();
 
@@ -222,8 +233,8 @@ export default function BatchControls() {
     setModalSix(true);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/tests/${student._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/tests/${student._id}`, {
+        headers: {},
       });
       const data = await res.json();
 
@@ -241,7 +252,7 @@ export default function BatchControls() {
 
   const fetchAllTests = async (batchId) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getTest/${batchId}`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getTest/${batchId}`, { headers: {} });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error fetching tests");
       setAllTests((prev) => ({ ...prev, [batchId]: data.test }));
@@ -255,12 +266,11 @@ export default function BatchControls() {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/batchDelete/${batchId}`,
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -284,11 +294,10 @@ export default function BatchControls() {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/removeStudent`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/removeStudent`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ batchId, studentId }),
       });
@@ -311,11 +320,10 @@ export default function BatchControls() {
     if (!teacherId) return alert("Please select a teacher first.");
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/assignTeacher/${batchId}/${teacherId}`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/assignTeacher/${batchId}/${teacherId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -343,8 +351,7 @@ export default function BatchControls() {
   };
 
   const preloadAttendanceForDate = async (dateObj) => {
-    const token = localStorage.getItem("authToken");
-    if (!token || !dateObj || !Array.isArray(students) || students.length === 0) return;
+    if (!dateObj || !Array.isArray(students) || students.length === 0) return;
 
     const dateOnly = new Date(dateObj.toDateString());
 
@@ -352,9 +359,9 @@ export default function BatchControls() {
       // Fetch each student's attendance then find the record for this batch & date
       const results = await Promise.all(
         students.map(async (s) => {
-          const res = await fetch(
+          const res = await apiFetch(
             `${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/${s._id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: {} }
           );
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Failed to fetch attendance");
@@ -397,15 +404,13 @@ export default function BatchControls() {
       return;
     }
     if (!window.confirm("Remove attendance for all students on this date?")) return;
-
-    const token = localStorage.getItem("authToken");
     const dateOnly = new Date(dateObj.toDateString());
     const dateISO = dateOnly.toISOString();
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/remove`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/remove`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ batchId, date: dateISO }),
       });
       const data = await res.json();
@@ -430,8 +435,6 @@ export default function BatchControls() {
       alert("No students found for this batch.");
       return;
     }
-
-    const token = localStorage.getItem("authToken");
     const dateOnly = new Date(dateObj.toDateString());
     const dateISO = dateOnly.toISOString();
 
@@ -443,9 +446,9 @@ export default function BatchControls() {
 
     try {
       await Promise.all(finalEntries.map(async ([studentId, status]) => {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/mark`, {
+        const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance/mark`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ studentId, batchId, date: dateISO, status }),
         });
         const data = await res.json();
@@ -480,15 +483,14 @@ export default function BatchControls() {
   };
 
   const preloadTeacherAttendanceForDate = async (dateObj) => {
-    const token = localStorage.getItem("authToken");
-    if (!token || !dateObj || !teacher?._id) return;
+    if (!dateObj || !teacher?._id) return;
 
     const dateOnly = new Date(dateObj.toDateString());
 
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/teacherAttendance/${batchId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: {} }
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to fetch attendance");
@@ -521,15 +523,13 @@ export default function BatchControls() {
       return;
     }
     if (!window.confirm("Remove teacher attendance on this date?")) return;
-
-    const token = localStorage.getItem("authToken");
     const dateOnly = new Date(dateObj.toDateString());
     const dateISO = dateOnly.toISOString();
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendanceTeacher/remove`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendanceTeacher/remove`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ teacherId: teacher._id, batchId, date: dateISO }),
       });
       const data = await res.json();
@@ -569,16 +569,14 @@ export default function BatchControls() {
       alert("No teacher assigned to this batch.");
       return;
     }
-
-    const token = localStorage.getItem("authToken");
     const dateOnly = new Date(dateObj.toDateString());
     const dateISO = dateOnly.toISOString();
     const status = teacherAttendanceDraft ?? "present";
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendanceTeacher/mark`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/attendanceTeacher/mark`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           teacherId: teacher._id,
           batchId,
@@ -603,11 +601,10 @@ export default function BatchControls() {
         (entry) => entry.classTimings && entry.classTimings.length > 0
       );
 
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/updateTimetable/${batchId}`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/updateTimetable/${batchId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ timetable: cleanedTimetable }),
       });
@@ -633,11 +630,10 @@ export default function BatchControls() {
     );
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudents`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudents`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           batchId,
@@ -681,11 +677,10 @@ export default function BatchControls() {
   const handleArchiveToggle = async (batchId, newArchiveStatus) => {
     try {
       const res = await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/${batchId}/archive`,
+        apiUrl(`/api/admin/${batchId}/archive`),
         { archive: newArchiveStatus },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -708,8 +703,6 @@ export default function BatchControls() {
       return alert("All fields are required (marks can be blank for absent).");
     }
 
-    const token = localStorage.getItem("authToken");
-
     // dd-mm-yyyy
     const dd = ("0" + date.getDate()).slice(-2);
     const mm = ("0" + (date.getMonth() + 1)).slice(-2);
@@ -722,11 +715,10 @@ export default function BatchControls() {
     const payloadMarks = absent ? null : Number(marksScored);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/test/addEdit`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/test/addEdit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           studentId,
@@ -849,11 +841,10 @@ export default function BatchControls() {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editBatchProfile/${batchId}`, {
+      const response = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editBatchProfile/${batchId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(editForm)
       });
@@ -887,7 +878,6 @@ export default function BatchControls() {
 
   // persist the edit, then refresh local UI lists
   const saveEditMarks = async (batchIdForList, testObj) => {
-    const token = localStorage.getItem("authToken");
     const draft = editingMarks[testObj._id];
     if (!draft) return;
 
@@ -896,9 +886,9 @@ export default function BatchControls() {
 
     try {
       // If your admin route differs, adjust below (Teacher uses /api/teacher/editMarks/:id)
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editMarks/${testObj._id}`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editMarks/${testObj._id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -926,11 +916,10 @@ export default function BatchControls() {
 
   const handleDeleteTestGroup = async (batchId, test) => {
     if (!window.confirm(`Are you sure you want to delete the test "${test.name}" dated ${test.date} for the whole batch? This cannot be undone.`)) return;
-    const token = localStorage.getItem('authToken');
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/deleteTest`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/deleteTest`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ batchId, name: test.name, date: test.date }),
       });
       const data = await res.json();
@@ -976,7 +965,6 @@ export default function BatchControls() {
   };
 
   const saveEditTestGroup = async (batchId, currentTest) => {
-    const token = localStorage.getItem("authToken");
     const trimmedName = testGroupEditForm.name.trim();
 
     if (!trimmedName || !testGroupEditForm.date || testGroupEditForm.maxMarks === "") {
@@ -993,11 +981,10 @@ export default function BatchControls() {
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editTestGroup/${batchId}`, {
+      const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editTestGroup/${batchId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           oldName: currentTest.name,
@@ -1835,11 +1822,10 @@ export default function BatchControls() {
                 </div>
                 <button className="btn btn-primary" style={{ width: "100%" }} onClick={async () => {
                   try {
-                    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudentByCreating/${batchId}`, {
+                    const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/addStudentByCreating/${batchId}`, {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                       },
                       body: JSON.stringify({ ...newStudentData, batchName: batch.name }),
                     });

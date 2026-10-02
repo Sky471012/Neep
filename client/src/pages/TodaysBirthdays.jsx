@@ -1,3 +1,4 @@
+import { apiFetch } from "../api";
 "use client"
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
@@ -6,7 +7,7 @@ import "@fortawesome/fontawesome-free/css/all.css"
 import "../css/admin.css"
 
 export default function TodaysBirthdays() {
-    const token = localStorage.getItem("authToken");
+    const navigate = useNavigate();
     const [birthdays, setBirthdays] = useState([]);
     const [totalBirthdays, setTotalBirthdays] = useState(0);
     const [teachersBirthdays, setTeachersBirthdays] = useState([]);
@@ -18,13 +19,28 @@ export default function TodaysBirthdays() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const storedAdmin = localStorage.getItem("user");
+
+        if (!storedAdmin || storedAdmin === "undefined") {
+            navigate("/");
+            return;
+        }
+
+        try {
+            JSON.parse(storedAdmin);
+        } catch (err) {
+            localStorage.removeItem("user");
+            navigate("/");
+        }
+    }, [navigate]);
+
+    useEffect(() => {
 
         const storedAdmin = localStorage.getItem("user");
-        const token = localStorage.getItem("authToken")
-        const headers = { Authorization: `Bearer ${token}` }
+        const headers = {}
 
         Promise.all([
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthday/today`, { headers })
+            apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthday/today`, { headers })
                 .then((res) => res.json())
                 .then((data) => {
                     setBirthdays(data.students);
@@ -32,7 +48,7 @@ export default function TodaysBirthdays() {
                 })
                 .catch((err) => console.error("Error fetching birthdays", err)),
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthdayTeacher/today`, { headers })
+            apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthdayTeacher/today`, { headers })
                 .then((res) => res.json())
                 .then((data) => {
                     setTeachersBirthdays(data.teachers);
@@ -40,12 +56,12 @@ export default function TodaysBirthdays() {
                 })
                 .catch((err) => console.error("Error fetching birthdays", err)),
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthday/upcoming`, { headers })
+            apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthday/upcoming`, { headers })
                 .then((res) => res.json())
                 .then((data) => setUpcomingStudents(data.students || []))
                 .catch((err) => console.error("Error fetching upcoming student birthdays", err)),
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthdayTeacher/upcoming`, { headers })
+            apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/birthdayTeacher/upcoming`, { headers })
                 .then((res) => res.json())
                 .then((data) => setUpcomingTeachers(data.teachers || []))
                 .catch((err) => console.error("Error fetching upcoming teacher birthdays", err)),
@@ -68,13 +84,12 @@ export default function TodaysBirthdays() {
             const waURL = `https://api.whatsapp.com/send?phone=91${phone}&text=${encodedMessage}`;
             window.open(waURL, "_blank");
 
-            const res = await fetch(
+            const res = await apiFetch(
                 `${import.meta.env.VITE_BACKEND_URL}/api/admin/birthday/wish`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({ studentId }),
                 }
@@ -111,13 +126,12 @@ export default function TodaysBirthdays() {
             const waURL = `https://api.whatsapp.com/send?phone=91${phone}&text=${encodedMessage}`;
             window.open(waURL, "_blank");
 
-            const res = await fetch(
+            const res = await apiFetch(
                 `${import.meta.env.VITE_BACKEND_URL}/api/admin/birthdayTeacher/wish`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({ teacherId }),
                 }

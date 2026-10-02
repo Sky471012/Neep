@@ -1,11 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate, useLocation, matchPath } from "react-router-dom";
 import logo from "/logo_rectangle-1.png";
 import BranchSelectModal from "../modals/BranchSelectModal";
+import { apiFetch, clearStoredSession } from "../api";
+
+// Routes that stay reachable when the session dies; anything else is left
+// from the authExpired listener below.
+const PUBLIC_PATHS = ["/", "/login", "/all-courses", "/contactus"];
+
+// Paint the role-gated links (Control Room, Student, ...) at mount instead of
+// waiting for /api/auth/me; every login writes localStorage.role before
+// navigate(), and the check below still corrects this state (401 clears it).
+const seedSession = () => {
+  const role = localStorage.getItem("role");
+  return role ? { success: true, user: { role } } : null;
+};
 
 export default function Navbar() {
-  const authToken = localStorage.getItem("authToken");
-  const role = localStorage.getItem("role");
+  const [session, setSession] = useState(seedSession);
+  const role = session?.user?.role?.toLowerCase();
   const [scrolled, setScrolled] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
@@ -13,6 +26,72 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [showBranchModal, setShowBranchModal] = useState(false);
   const [hasMultipleBranches, setHasMultipleBranches] = useState(false);
+  // Bumped on logout and on every new check so a reply arriving after either
+  // event can no longer resurrect a dead session.
+  const epochRef = useRef(0);
+
+  const checkSession = useCallback(() => {
+    // Signed out locally → nothing to validate.
+    if (!localStorage.getItem("role")) return;
+    const epoch = ++epochRef.current;
+    apiFetch("/api/auth/me")
+      .then((response) => {
+        if (response.status === 401) return { unauthorized: true };
+        if (!response.ok) return { transient: true, status: response.status };
+        return response.json();
+      })
+      .then((result) => {
+        if (epoch !== epochRef.current) return;
+        // A failed request (offline, cold server) is not a logout.
+        if (result?.transient) return;
+        // Only a real 401 means the session is gone.
+        if (result?.unauthorized) {
+          clearStoredSession();
+          setSession(null);
+          return;
+        }
+        // A success that raced with a logout (role already cleared) is stale.
+        setSession(result?.success && localStorage.getItem("role") ? result : null);
+      })
+      .catch(() => {
+        // Network or cold-server errors are not logouts: keep the session
+        // state we already have instead of clearing it.
+      });
+  }, []);
+
+  useEffect(() => {
+    checkSession();
+  }, [location.pathname, checkSession]);
+
+  // Expired token anywhere: api.js clears storage and fires authExpired, so
+  // drop the UI session and leave protected pages. Also revalidate when the
+  // tab comes back so an idle expiry is caught without waiting for a click.
+  useEffect(() => {
+    const onAuthExpired = () => {
+      epochRef.current += 1;
+      setSession(null);
+      if (!PUBLIC_PATHS.includes(location.pathname)) {
+        navigate("/", { replace: true });
+      }
+    };
+    window.addEventListener("authExpired", onAuthExpired);
+
+    let lastCheckedAt = Date.now();
+    const revalidate = () => {
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - lastCheckedAt < 60 * 1000) return;
+      lastCheckedAt = Date.now();
+      checkSession();
+    };
+    document.addEventListener("visibilitychange", revalidate);
+    window.addEventListener("focus", revalidate);
+
+    return () => {
+      window.removeEventListener("authExpired", onAuthExpired);
+      document.removeEventListener("visibilitychange", revalidate);
+      window.removeEventListener("focus", revalidate);
+    };
+  }, [checkSession, location.pathname, navigate]);
 
   // 🔹 Recheck branches whenever the route changes
   useEffect(() => {
@@ -38,8 +117,17 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/#home");
+    // Sign out locally before anything else: this handler sits on a <Link>,
+    // so the router navigates on this same click while the POST below is
+    // still in flight. If storage still said "logged in" at that point, the
+    // next page's navbar would re-seed a live session.
+    epochRef.current += 1;
+    clearStoredSession();
+    setSession(null);
+    apiFetch("/api/auth/logout", { method: "POST" }).catch(() => {
+      // Best-effort: if this fails the cookie stays until it expires, but
+      // this device is already signed out locally.
+    });
   };
 
   useEffect(() => {
@@ -109,7 +197,7 @@ export default function Navbar() {
           <li><Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link></li>
           <li><Link to="/contactus" className={isRouteActive("/contactus") ? "active" : ""}>Contact Us</Link></li>
 
-          {hasMultipleBranches && (
+          {session && hasMultipleBranches && (
             <li><button
               className="switch-branch-btn"
               onClick={() => setShowBranchModal(true)}
@@ -119,21 +207,21 @@ export default function Navbar() {
           )}
 
 
-          {authToken && role === "student" && (
+          {session && role === "student" && (
             <>
               <li><Link to="/student" className={isRouteActive("/student") ? "active" : ""}><i className="bi bi-person-fill me-1"></i>Student Portal</Link></li>
               <li><Link to="/#home" className="login-button" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
-          {authToken && role === "teacher" && (
+          {session && role === "teacher" && (
             <>
               <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link></li>
               <li><Link to="/#home" className="login-button" onClick={handleLogout}>Logout</Link></li>
             </>
           )}
 
-          {authToken && role === "admin" && (
+          {session && role === "admin" && (
             <>
               <li><Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link></li>
               <li><Link to="/admin" className={isRouteActive("/admin") ? "active" : ""}><i className="bi bi-controller me-1"></i>Control Room</Link></li>
@@ -141,7 +229,7 @@ export default function Navbar() {
             </>
           )}
 
-          {!authToken && (
+          {!session && (
             <li><Link to="/login" className="login-button">Login</Link></li>
           )}
         </ul>
@@ -163,7 +251,7 @@ export default function Navbar() {
         <Link to="/#download" className={isAnchorActive("download") ? "active" : ""} onClick={() => handleAnchorClick("download")}>Download App</Link>
         <Link to="/contactus" className={isRouteActive("/contactus") ? "active" : ""} onClick={() => setSidebarOpen(false)}>Contact Us</Link>
 
-        {hasMultipleBranches && (
+        {session && hasMultipleBranches && (
           <button
             className={`switch-branch-btn ${isAnchorActive("home") ? "active" : ""}`}
             onClick={() => { setSidebarOpen(false); setShowBranchModal(true); }}
@@ -172,21 +260,21 @@ export default function Navbar() {
           </button>
         )}
 
-        {authToken && role === "student" && (
+        {session && role === "student" && (
           <>
             <Link to="/student" className={isRouteActive("/student") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Student Portal</Link>
             <Link to="/" className="login-button mt-3" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
-        {authToken && role === "teacher" && (
+        {session && role === "teacher" && (
           <>
             <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link>
             <Link to="/" className="login-button mt-3" onClick={handleLogout}>Logout</Link>
           </>
         )}
 
-        {authToken && role === "admin" && (
+        {session && role === "admin" && (
           <>
             <Link to="/teacher" className={isRouteActive("/teacher") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-person-fill me-1"></i>Faculty Panel</Link>
             <Link to="/admin" className={isRouteActive("/admin") ? "active" : ""} onClick={() => setSidebarOpen(false)}><i className="bi bi-controller me-1"></i>Control Room</Link>
@@ -194,7 +282,7 @@ export default function Navbar() {
           </>
         )}
 
-        {!authToken && (
+        {!session && (
           <Link to="/login" className="login-button mt-3" onClick={() => setSidebarOpen(false)}>Login</Link>
         )}
       </div>
@@ -209,14 +297,8 @@ export default function Navbar() {
           branches={JSON.parse(localStorage.getItem("branches") || "[]")}
           onSelect={async (branch) => {
             try {
-              const authToken = localStorage.getItem("authToken");
-
-              const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/switch-branch`, {
+              const res = await apiFetch("/api/auth/switch-branch", {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${authToken}`,
-                },
                 body: JSON.stringify({ branch }),
               });
 
@@ -227,15 +309,11 @@ export default function Navbar() {
                 return;
               }
 
-              localStorage.setItem("authToken", data.authToken);
               localStorage.setItem("branch", data.branch);
 
               // ✅ Fetch latest student data for this branch before reload
               if (localStorage.getItem("role") === "student") {
-                const token = data.authToken;
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/profile`, {
-                  headers: { Authorization: `Bearer ${token}` },
-                })
+                apiFetch("/api/student/profile")
                   .then(res => res.json())
                   .then(profile => {
                     if (profile.success) {

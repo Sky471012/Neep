@@ -2,11 +2,12 @@
 
 **Base URL**: `http://localhost:5000/api` (dev) | `https://neep.onrender.com/api` (prod)
 
-All protected endpoints require:
+All protected endpoints require the httpOnly `neep_auth` cookie issued at login:
 ```
-Authorization: Bearer <jwt_token>
+Cookie: neep_auth=<jwt_token>   (sent automatically with credentials: 'include')
 Content-Type: application/json
 ```
+Sessions last 7 days by default (`JWT_EXPIRES_IN` / `AUTH_COOKIE_MAX_AGE_MS`) and slide forward while the user stays active.
 
 ---
 
@@ -97,7 +98,7 @@ Verify the OTP and receive a JWT token.
 ### POST `/auth/switch-branch`
 Switch to a different institute branch. Returns a new JWT with the updated branch.
 
-**Headers:** `Authorization: Bearer <token>`
+**Auth:** httpOnly `neep_auth` cookie (set at login)
 
 **Request Body:**
 ```json

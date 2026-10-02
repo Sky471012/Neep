@@ -1,3 +1,4 @@
+import { apiFetch } from "../api";
 "use client"
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
@@ -6,6 +7,7 @@ import "@fortawesome/fontawesome-free/css/all.css"
 import "../css/admin.css"
 
 export default function AllArchivedBatches() {
+    const navigate = useNavigate()
     const [admin, setAdmin] = useState(null)
     const [archivedBatchesRecords, setArchivedBatchesRecords] = useState([])
     const [archivedBatchSearchQuery, setArchivedBatchSearchQuery] = useState("")
@@ -14,20 +16,19 @@ export default function AllArchivedBatches() {
     useEffect(() => {
 
         const storedAdmin = localStorage.getItem("user");
-        const token = localStorage.getItem("authToken");
 
-        if (storedAdmin && token && storedAdmin !== "undefined") {
+        if (storedAdmin && storedAdmin !== "undefined") {
             try {
                 setAdmin(JSON.parse(storedAdmin))
             } catch (err) {
                 console.error("Failed to parse admin JSON:", err)
-                localStorage.removeItem("admin")
-                setLoading(false);
+                localStorage.removeItem("user")
+                navigate("/");
                 return
             }
-            const headers = { Authorization: `Bearer ${token}` }
+            const headers = {}
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/archivedBatches`, { headers })
+            apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/archivedBatches`, { headers })
                 .then((res) => {
                     if (!res.ok) throw new Error("Failed to fetch all archived batches")
                     return res.json()
@@ -36,9 +37,9 @@ export default function AllArchivedBatches() {
                 .catch((err) => console.error("Archived Batches fetch error:", err))
                 .finally(() => setLoading(false))
         } else {
-            setLoading(false);
+            navigate("/");
         }
-    }, [])
+    }, [navigate])
 
 
     if (loading) return (<div className="loading-container"><div className="loading-content"><div className="loading-spinner"></div><p className="loading-text">Loading archived batches...</p></div></div>);

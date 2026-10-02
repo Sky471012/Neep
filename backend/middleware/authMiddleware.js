@@ -1,12 +1,46 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+const { getTokenFromRequest, setAuthCookie } = require("../config/authCookie");
+const { authLog, requestMeta } = require("../utils/authLog");
+
+const JWT_OPTIONS = { expiresIn: process.env.JWT_EXPIRES_IN || "7d" };
+
+const signToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, JWT_OPTIONS);
+
+const logVerifyFail = (req, details) => {
+  authLog("verify_fail", { ...details, ...requestMeta(req) });
+};
+
+// Sliding session: once a token has burned through half of its lifetime,
+// re-issue it (and re-set the cookie) so an active user is never logged out
+// while they are still using the app.
+const slideSession = (res, req, decoded) => {
+  const { iat, exp, ...claims } = decoded;
+  if (!iat || !exp) return;
+
+  const now = Math.floor(Date.now() / 1000);
+  if (exp - now > (exp - iat) / 2) return;
+
+  setAuthCookie(res, signToken(claims));
+};
 
 exports.verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "No token provided" });
+  const token = getTokenFromRequest(req);
+  if (!token) {
+    logVerifyFail(req, { reason: "no_cookie" });
+    return res.status(401).json({ message: "No token provided" });
+  }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(401).json({ message: "Invalid token" });
+    if (err) {
+      logVerifyFail(req, {
+        reason: "invalid_token",
+        code: err.name,
+        message: err.message,
+      });
+      return res.status(401).json({ message: "Invalid token" });
+    }
     req.user = decoded;
+    slideSession(res, req, decoded);
     next();
   });
 };

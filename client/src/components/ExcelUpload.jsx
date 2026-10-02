@@ -1,3 +1,4 @@
+import { apiUrl } from "../api";
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -43,15 +44,13 @@ const ExcelUpload = () => {
     formData.append("file", file);
 
     try {
-      const token = localStorage.getItem("authToken");
 
       const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/upload`,
+        apiUrl("/api/admin/upload"),
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
           },
         }
       );

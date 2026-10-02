@@ -10,6 +10,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import '../css/login.css';
 import logo from "/logo_rectangle.jpg";
 import BranchSelectModal from '../modals/BranchSelectModal.jsx';
+import { apiFetch } from '../api';
 
 export default function Login() {
   // Generic login management
@@ -77,8 +78,8 @@ export default function Login() {
 
     try {
       // Step 1: initial login request
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/student`,
+      const response = await apiFetch(
+        "/api/auth/login/student",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -104,7 +105,6 @@ export default function Login() {
 
       // Step 4: single branch → normal login
       localStorage.setItem("role", "student");
-      localStorage.setItem("authToken", data.authToken);
       localStorage.setItem("branch", data.branch);
       localStorage.setItem("user", JSON.stringify(data.student));
       if (data.branches && data.branches.length > 0) {
@@ -137,8 +137,8 @@ export default function Login() {
   const sendOtp = async (isResend = false) => {
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/send-otp`,
+      const response = await apiFetch(
+        "/api/auth/login/admin-teacher/send-otp",
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -189,8 +189,8 @@ export default function Login() {
       setIsLoading(true);
 
       // 🔹 First request — verify OTP across all branches
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/verify-otp`,
+      const response = await apiFetch(
+        "/api/auth/login/admin-teacher/verify-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -229,7 +229,6 @@ export default function Login() {
 
   // ✅ Helper function to store info and navigate
   const saveLogin = (data) => {
-    localStorage.setItem("authToken", data.authToken);
     localStorage.setItem("user", JSON.stringify(data.user));
     localStorage.setItem("branch", data.branch);
     localStorage.setItem("role", data.user.role.toLowerCase());
@@ -263,8 +262,8 @@ export default function Login() {
     setShowBranchModal(false);
 
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/admin-teacher/verify-otp`,
+      const res = await apiFetch(
+        "/api/auth/login/admin-teacher/verify-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -284,7 +283,6 @@ export default function Login() {
       }
 
       // ✅ Successful login
-      localStorage.setItem("authToken", data.authToken);
       localStorage.setItem("branch", data.branch);
       localStorage.setItem("role", data.user.role.toLowerCase());
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -314,8 +312,8 @@ export default function Login() {
       dob.getFullYear();
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login/student`,
+      const response = await apiFetch(
+        "/api/auth/login/student",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -335,7 +333,6 @@ export default function Login() {
 
       // ✅ Successful login
       localStorage.setItem("role", "student");
-      localStorage.setItem("authToken", data.authToken);
       localStorage.setItem("branch", data.branch);
       localStorage.setItem("user", JSON.stringify(data.student));
       if (data.branches && data.branches.length > 0) {

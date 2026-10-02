@@ -1,3 +1,4 @@
+import { apiFetch } from "../api";
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -22,12 +23,26 @@ export default function Enquiry() {
     const [timelineForm, setTimelineForm] = useState({ enquiryDate: null, followupDate: null, followupType: 'demo' });
 
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        if (!token) return navigate('/login');
+        const storedUser = localStorage.getItem("user");
+
+        if (!storedUser || storedUser === "undefined") {
+            navigate("/");
+            return;
+        }
+
+        try {
+            JSON.parse(storedUser);
+        } catch (err) {
+            localStorage.removeItem("user");
+            navigate("/");
+        }
+    }, [navigate]);
+
+    useEffect(() => {
         const enquiryId = localStorage.getItem("enquiryId");
 
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getEnquiry/${enquiryId}`, {
-            headers: { Authorization: `Bearer ${token}` },
+        apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/getEnquiry/${enquiryId}`, {
+            headers: {},
         })
             .then((res) => {
                 if (!res.ok) throw new Error('Failed to fetch enquiry');
@@ -84,12 +99,11 @@ export default function Enquiry() {
 
         setUpdating(true);
         try {
-            const token = localStorage.getItem('authToken');
             const enquiryId = localStorage.getItem("enquiryId");
 
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/enquiryStatus/${enquiryId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/enquiryStatus/${enquiryId}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),
             });
             const data = await res.json();
@@ -119,11 +133,10 @@ export default function Enquiry() {
         if (!window.confirm('Are you sure you want to delete this enquiry? This action cannot be undone.')) return;
         setDeleting(true);
         try {
-            const token = localStorage.getItem('authToken');
             const enquiryId = id || localStorage.getItem('enquiryId');
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/enquiryDelete/${enquiryId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/enquiryDelete/${enquiryId}`, {
                 method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {},
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.message || 'Failed to delete enquiry');
@@ -140,16 +153,15 @@ export default function Enquiry() {
     const saveInfo = async () => {
         setUpdating(true);
         try {
-            const token = localStorage.getItem('authToken');
             const enquiryId = id || localStorage.getItem('enquiryId');
             const payload = {
                 studentName: infoForm.studentName,
                 phone: infoForm.phone,
                 classSubject: infoForm.classSubject,
             };
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editEnquiry/${enquiryId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editEnquiry/${enquiryId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
             const data = await res.json();
@@ -167,12 +179,11 @@ export default function Enquiry() {
     const saveNotes = async () => {
         setUpdating(true);
         try {
-            const token = localStorage.getItem('authToken');
             const enquiryId = id || localStorage.getItem('enquiryId');
             const payload = { notes: notesForm.notes };
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editEnquiry/${enquiryId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editEnquiry/${enquiryId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
             const data = await res.json();
@@ -190,16 +201,15 @@ export default function Enquiry() {
     const saveTimeline = async () => {
         setUpdating(true);
         try {
-            const token = localStorage.getItem('authToken');
             const enquiryId = id || localStorage.getItem('enquiryId');
             const payload = {
                 enquiryDate: dateToDDMMYYYY(timelineForm.enquiryDate),
                 followupDate: dateToDDMMYYYY(timelineForm.followupDate),
                 followupType: timelineForm.followupType,
             };
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editEnquiry/${enquiryId}`, {
+            const res = await apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/editEnquiry/${enquiryId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
             const data = await res.json();

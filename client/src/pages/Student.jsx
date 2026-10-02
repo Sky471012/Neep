@@ -1,4 +1,6 @@
+import { apiFetch } from "../api";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Inter28ptRegular } from "../assets/fonts/Inter_28pt-Regular";
@@ -11,7 +13,7 @@ import ModalFour from "../modals/ModalFour";
 import '../css/student.css';
 
 export default function Student() {
-
+    const navigate = useNavigate();
     const [student, setStudent] = useState(null);
     const [batchesRecords, setBatchesRecords] = useState([]);
     const [timetableRecords, setTimetableRecords] = useState({});
@@ -84,22 +86,37 @@ export default function Student() {
 
     useEffect(() => {
         const storedStudent = localStorage.getItem("user");
-        const token = localStorage.getItem("authToken");
+
+        if (!storedStudent || storedStudent === "undefined") {
+            navigate("/");
+            return;
+        }
+
+        try {
+            JSON.parse(storedStudent);
+        } catch (err) {
+            localStorage.removeItem("user");
+            navigate("/");
+        }
+    }, [navigate]);
+
+    useEffect(() => {
+        const storedStudent = localStorage.getItem("user");
         const branch = localStorage.getItem("branch");
 
-        if (storedStudent && token) {
+        if (storedStudent) {
             setStudent(JSON.parse(storedStudent));
 
             Promise.all([
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/batches`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/batches`, {
+                    headers: {}
                 })
                     .then(res => res.json())
                     .then(setBatchesRecords)
                     .catch(err => console.error("Batches fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/attendance`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/attendance`, {
+                    headers: {}
                 })
                     .then(res => res.json())
                     .then(data => {
@@ -115,15 +132,15 @@ export default function Student() {
                     })
                     .catch(err => console.error("Attendance fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/test`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/test`, {
+                    headers: {}
                 })
                     .then(res => res.json())
                     .then(setTestRecords)
                     .catch(err => console.error("Test fetch error:", err)),
 
-                fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/fee-status`, {
-                    headers: { 'Authorization': `Bearer ${token}` },
+                apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/fee-status`, {
+                    headers: {},
                 })
                     .then(res => res.json())
                     .then(data => {
@@ -138,12 +155,10 @@ export default function Student() {
     }, [localStorage.getItem("branch")]);
 
     function fetchTimetable(batchId) {
-        const token = localStorage.getItem("authToken");
 
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/timetable`, {
+        apiFetch(`${import.meta.env.VITE_BACKEND_URL}/api/student/timetable`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ batchId })
